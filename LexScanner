@@ -1,0 +1,65 @@
+%{
+#include <stdio.h>
+/*defenitions*/
+// int lineno; tem de ser global?
+%}
+
+digit       [0-9]
+number      {digit}+
+letter      [a-zA-Z]
+identifier  [letter_][letter_0-9]*
+newline     \n
+whitespace  [ \t]+
+
+%%
+"if"            {return IF;}
+"else if"       {return ELSEIF;}
+"else"          {return ELSE;}
+"do"            {return DO;}
+"while"         {return WHILE;}
+"for"           {return FOR;}
+"switch"        {return SWITCH;}
+"case"          {return CASE;}
+"="             {return ASSIGN;}
+"<"             {return LT;}
+"<="            {return LEQ;}
+"=="            {return EQ;}
+">"             {return GT;}
+">="            {return GEQ;}
+"+"             {return PLUS;}
+"-"             {return MINUS;}
+"*"             {return TIMES;}
+"/"             {return OVER;}
+"("             {return LPAREN;}
+")"             {return RPAREN;}
+"{"             {return OSCOPE;}
+"}"             {return CSCOPE;}
+";"             {return SEMI;}
+{number}        {return NUM;}
+{identifier}    {return ID;}
+{newline}       {return EOL;}
+{whitespace}    {/*ignore*/}
+
+
+
+
+. {printf("Error, [%s] is an invalid token",yytext);}
+%%
+
+yywrap() {}
+
+int main(){
+    FILE *input_file = fopen("test.txt", "r");
+    if (input_file == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+
+    yyin = input_file; // Redirect input to the file
+
+    printf("Reading from file: %s\n", "test.txt");
+    yylex();
+
+    fclose(input_file);
+    return 0;
+}
