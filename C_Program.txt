@@ -1,0 +1,5 @@
+/*
+int y;
+float z;
+*/
+double k;//int x;
