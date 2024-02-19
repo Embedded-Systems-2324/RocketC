@@ -37,7 +37,7 @@ typedef enum
     BITWISE_XOR_ASSIGN,
 
     /* preprocessor and functions */
-    PREPROCESSOR, ARROW, PRINTF, SCANF, DEFINE, EXIT,
+    PREPROCESSOR, ARROW, DEFINE, EXIT,
 
     /* additional tokens*/
     CONSTANT, POINTER, ADDRESS_OF, 
