@@ -39,10 +39,8 @@ typedef enum
     /* preprocessor and functions */
     PREPROCESSOR, ARROW, PRINTF, SCANF, DEFINE, EXIT,
 
-    /* additional tokens  (It is necessary to implement these?) */
-    STRING, CONSTANT, POINTER, ADDRESS_OF, LOGICAL_OR_EQ, LOGICAL_AND_EQ,
-    UNSIGNED_INT, LONG_INT, SHORT_INT, 
-
+    /* additional tokens*/
+    CONSTANT, POINTER, ADDRESS_OF, 
 } TokenType;
 
 
