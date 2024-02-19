@@ -65,8 +65,6 @@ whitespace  [ \t]+
 "?"             { printf("[TERNARY]: TERNARY\n");               return TERNARY; }
 "#"             { printf("[PREPROCESSOR]: PREPROCESSOR\n");     return PREPROCESSOR; }
 "->"            { printf("[OPERATOR]: ARROW\n");                return ARROW; }
-"printf"        { printf("[FUNCTION]: PRINTF\n");               return PRINTF; }
-"scanf"         { printf("[FUNCTION]: SCANF\n");                return SCANF; }
 "define"        { printf("[PREPROCESSOR]: DEFINE\n");           return DEFINE; }
 "exit"          { printf("[FUNCTION]: EXIT\n");                 return EXIT; }
 
