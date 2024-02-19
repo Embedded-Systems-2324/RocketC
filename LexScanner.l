@@ -28,6 +28,7 @@ whitespace  [ \t]+
 "else"          { printf("[KEYWORD]: ELSE\n");                  return ELSE; }
 "typedef"       { printf("[KEYWORD]: TYPEDEF\n");               return TYPEDEF; }
 "struct"        { printf("[KEYWORD]: STRUCT\n");                return STRUCT; }
+"const"         { printf("[KEYWORD]: CONST\n");                 return CONSTANT; }
 "+"             { printf("[OPERATOR]: PLUS\n");                 return PLUS; }
 "-"             { printf("[OPERATOR]: MINUS\n");                return MINUS; }
 "*"             { printf("[OPERATOR]: TIMES\n");                return TIMES; }
