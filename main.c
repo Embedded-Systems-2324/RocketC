@@ -30,7 +30,9 @@ int main(int argc, char * argv[]){
         exit(1);
     }
 
-    while (getToken() != ENDFILE);  //We use this for a scanner-only compiler because the Parser(using bison) autommaticly fetches the tokens whe he needs them
+    //while (getToken() != ENDFILE);  //We use this for a scanner-only compiler because the Parser(using bison) autommaticly fetches the tokens whe he needs them
+    parse();
     
+    fclose(sourceCode); 
     return 0;
 }
