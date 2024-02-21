@@ -1,10 +1,13 @@
-%option noyywrap 
+%option noyywrap
+
 %x INCOMMENT   
+
 %{
 #include "globals.h"
-/*defenitions*/
-
+/*definitions*/
 %}
+
+
 
 digit       [0-9]
 number      {digit}+
@@ -69,8 +72,8 @@ whitespace  [ \t]+
 "define"        { printf("[PREPROCESSOR]: DEFINE\n");           return DEFINE; }
 "exit"          { printf("[FUNCTION]: EXIT\n");                 return EXIT; }
 
-{number}        { printf("[NUM]: %s\n",yytext);                 return NUM;}
-{identifier}    { printf("[ID]:  %s\n",yytext);                 return ID;}
+{number}        { (yylval.intval=atoi(yytext)); return NUM; }
+{identifier}    { sscanf(yytext,"%s",yylval.identifier); return ID;}
 {newline}       { printf("[EOL]\n");}
 {whitespace}    { /*  ignore */}
 
@@ -93,9 +96,7 @@ whitespace  [ \t]+
 . {printf("Error, [%s] is an invalid token\n",yytext); return ERROR;}
 %%
 
-/*
- * Initializes the yyin with the source code file so the lexer know what is the input stream 
-*/
+
 void File_Init() {
   yyin = sourceCode;
 }
@@ -104,15 +105,3 @@ void File_Init() {
 *  Returns the next token from the input source code.
 *  Used only for tests because the parse automaticly calls the lexer when necessary.
 */
-TokenType getToken(void)
-{ 
-  static int firstTime = TRUE;
-  TokenType currentToken;
-  if (firstTime){ 
-    firstTime = FALSE;
-    yyin = sourceCode;
-  }
-  currentToken = yylex();
-  return currentToken;
-}
-
