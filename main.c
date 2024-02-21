@@ -1,4 +1,6 @@
 #include "globals.h"
+#include "scanner.h"
+#include "parser.h"
 
 FILE * sourceCode;
 
