@@ -69,8 +69,8 @@ whitespace  [ \t]+
 "define"        { printf("[PREPROCESSOR]: DEFINE\n");           return DEFINE; }
 "exit"          { printf("[FUNCTION]: EXIT\n");                 return EXIT; }
 
-{number}        { printf("[NUM]: %s\n",yytext); }
-{identifier}    { printf("[ID]:  %s\n",yytext); }
+{number}        { printf("[NUM]: %s\n",yytext);                 return NUM;}
+{identifier}    { printf("[ID]:  %s\n",yytext);                 return ID;}
 {newline}       { printf("[EOL]\n");}
 {whitespace}    { /*  ignore */}
 
@@ -92,6 +92,13 @@ whitespace  [ \t]+
 
 . {printf("Error, [%s] is an invalid token\n",yytext); return ERROR;}
 %%
+
+/*
+ * Initializes the yyin with the source code file so the lexer know what is the input stream 
+*/
+void File_Init() {
+  yyin = sourceCode;
+}
 
 /* function: getToken()
 *  Returns the next token from the input source code.
