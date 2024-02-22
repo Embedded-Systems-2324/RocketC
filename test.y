@@ -44,17 +44,21 @@ int yyerror(char *s);
 
 
 %%
+
+//program
 prog:
-  stmts endfile
+   stmts endfile
 ;
 
-
+//all possible statements
 stmts:
 		| stmt SEMI stmts
 		| stmt SEMI endofline stmts
 		| stmt SEMI EOL stmts
 		| stmts stmt SEMI
 		;
+
+//statement types
 stmt:
 		if_stmt
 		| while_stmt
@@ -64,6 +68,7 @@ stmt:
 		| endofline
 		| declaration_stmt
 		| compound_stmt
+		| expr
 		;
 
 		
@@ -73,23 +78,32 @@ declaration_stmt:
 		type ID{
 			printf("The type you entered is ");
 		}
-		| type ID ASSIGN expr
-		;
+		| type arith_expr
+		;		;
 
 compound_stmt:
 		LEFT_BRACE stmts RIGHT_BRACE
 		;
 
-expr_opt:
-		| expr
-		;
-
+//list of all expression types
 expr:
-	ID op ID
-	| NUM op NUM
-		/* math expression rules */
-		;
+	arith_expr
+	;
 
+
+arith_expr:
+		NUM op NUM{
+				printf("OP between %d and %d", $1, $3);
+			}
+		| ID op ID{
+				printf("OP between %s and %s", $1, $3);
+			}
+		| ID op NUM{
+				printf("OP between %s and %d", $1, $3);
+			}
+		| NUM op ID{
+				printf("OP between %d and %s", $1, $3);
+			}	
 
 op: PLUS 
 	| MINUS 
@@ -103,7 +117,7 @@ op: PLUS
 if_stmt: ;
 
 return_stmt:
-		RETURN expr_opt
+		RETURN expr
 		;
 
 while_stmt: ;
@@ -114,7 +128,7 @@ do_stmt:
 			;
 
 for_stmt:
-			FOR LPAREN expr_opt SEMI expr_opt SEMI expr_opt RPAREN stmt
+			FOR LPAREN expr SEMI expr SEMI expr RPAREN stmt
 			;
 
 endofline: EOL;
@@ -125,19 +139,7 @@ endfile: ENDFILE
 	printf("End of file\n");
 };
 
-//Mulop e Adop devem ser separados por causa das propriedades da matematica (Mult é prioritaria e deve aparecer nos ramos mais abaixo da árvore (Slides 32 a 39 - Parser))
 
-addop:      PLUS | MINUS ;
-
-mullop:     TIMES | OVER ;
-
-boolop:     EQUAL | NOT_EQUAL | LESS_THAN | GREATER_THAN | LESS_THAN_OR_EQUAL | GREATER_THAN_OR_EQUAL ;
-
-logicop:    LOGICAL_NOT | LOGICAL_AND | LOGICAL_OR ;
-
-bitlogicop: BITWISE_AND | BITWISE_OR | BITWISE_NOT | BITWISE_XOR ;
-
-assignop:   ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN ;
 
 type:
 		INT
