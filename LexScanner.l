@@ -7,14 +7,15 @@
 /*definitions*/
 %}
 
+digit       [0-9]
+number      {digit}+
+identifier  [a-zA-Z_][a-zA-Z0-9_]*
+newline     \n
+sign        ([-+])
+expo        [eE]{sign}?
+float_number  {digit}*"."{digit}+({expo}{digit}+)?
+whitespace  [ \t]+
 
-
-digit         [0-9]
-number        {digit}+
-float_number  {digit}+\.{digit}+
-identifier    [a-zA-Z_][a-zA-Z_0-9]*
-newline       \n
-whitespace    [ \t]+
 
 %%
 "auto"          { printf("[KEYWORD]: AUTO\n");                  return AUTO; }

@@ -78,7 +78,7 @@ declaration_stmt:
 			printf("The type you entered is ");
 		}
 		| type arith_expr
-		;		;
+		;		
 
 compound_stmt:
 		LEFT_BRACE stmts RIGHT_BRACE
