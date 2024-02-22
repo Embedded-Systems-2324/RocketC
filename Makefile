@@ -1,5 +1,5 @@
 default:
 	clear
 	flex -l LexScanner.l
-	bison -dv test.y 
-	gcc -o test test.tab.c lex.yy.c main.c -lfl
+	bison -dv Parser.y 
+	gcc -o test Parser.tab.c lex.yy.c main.c -lfl

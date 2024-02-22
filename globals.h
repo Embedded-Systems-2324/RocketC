@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "test.tab.h"
+#include "Parser.tab.h"
 
 #ifndef FALSE
 #define FALSE 0
