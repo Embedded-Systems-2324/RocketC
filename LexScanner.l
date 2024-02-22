@@ -9,29 +9,47 @@
 
 
 
-digit       [0-9]
-number      {digit}+
-identifier  [a-zA-Z_][a-zA-Z_0-9]*
-newline     \n
-whitespace  [ \t]+
+digit         [0-9]
+number        {digit}+
+float_number  {digit}+\.{digit}+
+identifier    [a-zA-Z_][a-zA-Z_0-9]*
+newline       \n
+whitespace    [ \t]+
 
 %%
-"void"          { printf("[KEYWORD]: VOID\n");                  return VOID; }
-"int"           { printf("[KEYWORD]: INT\n");                   return INT; }
-"char"          { printf("[KEYWORD]: CHAR\n");                  return CHAR; }
-"return"        { printf("[KEYWORD]: RETURN\n");                return RETURN; }
+"auto"          { printf("[KEYWORD]: AUTO\n");                  return AUTO; }
 "break"         { printf("[KEYWORD]: BREAK\n");                 return BREAK; }
-"switch"        { printf("[KEYWORD]: SWITCH\n");                return SWITCH; }
 "case"          { printf("[KEYWORD]: CASE\n");                  return CASE; }
-"default"       { printf("[KEYWORD]: DEFAULT\n");               return DEFAULT; }
-"do"            { printf("[KEYWORD]: DO\n");                    return DO; }
-"while"         { printf("[KEYWORD]: WHILE\n");                 return WHILE; }
-"for"           { printf("[KEYWORD]: FOR\n");                   return FOR; }
-"if"            { printf("[KEYWORD]: IF\n");                    return IF; }
-"else"          { printf("[KEYWORD]: ELSE\n");                  return ELSE; }
-"typedef"       { printf("[KEYWORD]: TYPEDEF\n");               return TYPEDEF; }
-"struct"        { printf("[KEYWORD]: STRUCT\n");                return STRUCT; }
+"char"          { printf("[KEYWORD]: CHAR\n");                  return CHAR; }
 "const"         { printf("[KEYWORD]: CONST\n");                 return CONSTANT; }
+"continue"      { printf("[KEYWORD]: CONTINUE\n");              return CONTINUE; }
+"default"       { printf("[KEYWORD]: DEFAULT\n");               return DEFAULT; }
+"do"            { printf("[KEYWORD]: DO\n");                    return DO; } 
+"double"        { printf("[KEYWORD]: DOUBLE\n");                return DOUBLE; }
+"else"          { printf("[KEYWORD]: ELSE\n");                  return ELSE; }
+"enum"          { printf("[KEYWORD]: ENUM\n");                  return ENUM; }
+"extern"        { printf("[KEYWORD]: EXTERN\n");                return EXTERN; }
+"float"         { printf("[KEYWORD]: FLOAT\n");                 return FLOAT; }
+"for"           { printf("[KEYWORD]: FOR\n");                   return FOR; }
+"goto"          { printf("[KEYWORD]: GOTO\n");                  return GOTO; }
+"if"            { printf("[KEYWORD]: IF\n");                    return IF; }
+"int"           { printf("[KEYWORD]: INT\n");                   return INT; }
+"long"          { printf("[KEYWORD]: LONG\n");                  return LONG; }
+"register"      { printf("[KEYWORD]: REGISTER\n");              return REGISTER; }
+"return"        { printf("[KEYWORD]: RETURN\n");                return RETURN; }
+"short"         { printf("[KEYWORD]: SHORT\n");                 return SHORT; }
+"signed"        { printf("[KEYWORD]: SIGNED\n");                return SIGNED; }
+"sizeof"        { printf("[KEYWORD]: SIZEOF\n");                return SIZEOF; }
+"static"        { printf("[KEYWORD]: STATIC\n");                return STATIC; }
+"struct"        { printf("[KEYWORD]: STRUCT\n");                return STRUCT; }
+"switch"        { printf("[KEYWORD]: SWITCH\n");                return SWITCH; }
+"typedef"       { printf("[KEYWORD]: TYPEDEF\n");               return TYPEDEF; }
+"union"         { printf("[KEYWORD]: UNION\n");                 return UNION; }
+"unsigned"      { printf("[KEYWORD]: UNSIGNED\n");              return UNSIGNED; }
+"void"          { printf("[KEYWORD]: VOID\n");                  return VOID; }
+"volatile"      { printf("[KEYWORD]: VOLATILE\n");              return VOLATILE; }
+"while"         { printf("[KEYWORD]: WHILE\n");                 return WHILE; }
+
 "+"             { printf("[OPERATOR]: PLUS\n");                 return PLUS; }
 "-"             { printf("[OPERATOR]: MINUS\n");                return MINUS; }
 "*"             { printf("[OPERATOR]: TIMES\n");                return TIMES; }
@@ -57,6 +75,9 @@ whitespace  [ \t]+
 "="             { printf("[OPERATOR]: ASSIGN\n");               return ASSIGN; }
 "+="            { printf("[OPERATOR]: PLUS_ASSIGN\n");          return PLUS_ASSIGN; }
 "-="            { printf("[OPERATOR]: MINUS_ASSIGN\n");         return MINUS_ASSIGN; }
+"*="            { printf("[OPERATOR]: MULTIPLY_ASSIGN\n");      return MULTIPLY_ASSIGN; }
+"/="            { printf("[OPERATOR]: DIVIDE_ASSIGN\n");        return DIVIDE_ASSIGN; }
+"%="            { printf("[OPERATOR]: MODULUS_ASSIGN\n");       return MODULUS_ASSIGN; }
 ";"             { printf("[DELIMITER]: SEMI\n");                return SEMI; }
 ","             { printf("[DELIMITER]: COMMA\n");               return COMMA; }
 ":"             { printf("[DELIMITER]: COLON\n");               return COLON; }
@@ -69,11 +90,13 @@ whitespace  [ \t]+
 "?"             { printf("[TERNARY]: TERNARY\n");               return TERNARY; }
 "#"             { printf("[PREPROCESSOR]: PREPROCESSOR\n");     return PREPROCESSOR; }
 "->"            { printf("[OPERATOR]: ARROW\n");                return ARROW; }
+
 "define"        { printf("[PREPROCESSOR]: DEFINE\n");           return DEFINE; }
 "exit"          { printf("[FUNCTION]: EXIT\n");                 return EXIT; }
 
 {number}        { (yylval.intval=atoi(yytext)); return NUM; }
 {identifier}    { sscanf(yytext,"%s",yylval.identifier); return ID;}
+{float_number}  { (yylval.floatval=atof(yytext)); return FNUM;}
 {newline}       { printf("[EOL]\n");}
 {whitespace}    { /*  ignore */}
 
