@@ -93,7 +93,6 @@ whitespace  [ \t]+
 "->"            { printf("[OPERATOR]: ARROW\n");                return ARROW; }
 
 "define"        { printf("[PREPROCESSOR]: DEFINE\n");           return DEFINE; }
-"exit"          { printf("[FUNCTION]: EXIT\n");                 return EXIT; }
 
 {number}        { (yylval.intval=atoi(yytext)); return NUM; }
 {identifier}    { sscanf(yytext,"%s",yylval.identifier); return ID;}

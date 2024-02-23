@@ -27,7 +27,7 @@ int yyerror(char *s);
 %token MULTIPLY_ASSIGN DIVIDE_ASSIGN MODULUS_ASSIGN
 
 /* additional tokens */
-%token PREPROCESSOR ARROW DEFINE EXIT
+%token PREPROCESSOR ARROW DEFINE
 %token CONSTANT POINTER ADDRESS_OF OTHER
 
 /* data types */
@@ -78,7 +78,7 @@ declaration_stmt:
 			printf("The type you entered is ");
 		}
 		| type arith_expr
-		;		
+		;		;
 
 compound_stmt:
 		LEFT_BRACE stmts RIGHT_BRACE
@@ -92,16 +92,16 @@ expr:
 
 arith_expr:
 		NUM op NUM{
-				printf("OP between %d and %d", $1, $3);
+				printf("OP between %d and %d\n", $1, $3);
 			}
 		| ID op ID{
-				printf("OP between %s and %s", $1, $3);
+				printf("OP between %s and %s\n", $1, $3);
 			}
 		| ID op NUM{
-				printf("OP between %s and %d", $1, $3);
+				printf("OP between %s and %d\n", $1, $3);
 			}
 		| NUM op ID{
-				printf("OP between %d and %s", $1, $3);
+				printf("OP between %d and %s\n", $1, $3);
 			}	
 
 op: PLUS 
@@ -111,9 +111,29 @@ op: PLUS
 	| PERCENT
 	;
 
-
 // to do later
-if_stmt: ;
+if_stmt:
+	;
+/* if_stmt: LPAREN cond_exp RPAREN stmts {pritf("IF statement: %s", $2);}
+		| LPAREN ID RPAREN stmts {pritf("IF statement: %s", $2);}
+		| LPAREN cond_exp RPAREN stmts ELSE stmts {pritf("IF statement: %s", $2);}
+		
+
+cond_exp: ID cond ID 
+		| ID cond NUM 
+		| NUM cond ID
+		| NUM cond NUM
+		| LOGICAL_NOT ID
+
+cond:GREATER_THAN 
+	 | LESS_THAN_OR_EQUAL 
+	 | GREATER_THAN_OR_EQUAL
+	 | LESS_THAN
+	 | LOGICAL_AND 
+	 | LOGICAL_OR 
+	 | EQUAL 
+	 | NOT_EQUAL
+	; */
 
 return_stmt:
 		RETURN expr

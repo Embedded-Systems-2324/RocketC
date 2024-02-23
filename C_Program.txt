@@ -1,2 +1,5 @@
-1 + 2;
-a = b;
+int alcool;
+char a - c;
+float i + 0;
+a + b;
+i + 0.879;

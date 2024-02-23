@@ -191,28 +191,27 @@ enum yysymbol_kind_t
   YYSYMBOL_PREPROCESSOR = 85,              /* PREPROCESSOR  */
   YYSYMBOL_ARROW = 86,                     /* ARROW  */
   YYSYMBOL_DEFINE = 87,                    /* DEFINE  */
-  YYSYMBOL_EXIT = 88,                      /* EXIT  */
-  YYSYMBOL_CONSTANT = 89,                  /* CONSTANT  */
-  YYSYMBOL_POINTER = 90,                   /* POINTER  */
-  YYSYMBOL_ADDRESS_OF = 91,                /* ADDRESS_OF  */
-  YYSYMBOL_OTHER = 92,                     /* OTHER  */
-  YYSYMBOL_YYACCEPT = 93,                  /* $accept  */
-  YYSYMBOL_prog = 94,                      /* prog  */
-  YYSYMBOL_stmts = 95,                     /* stmts  */
-  YYSYMBOL_stmt = 96,                      /* stmt  */
-  YYSYMBOL_declaration_stmt = 97,          /* declaration_stmt  */
-  YYSYMBOL_compound_stmt = 98,             /* compound_stmt  */
-  YYSYMBOL_expr = 99,                      /* expr  */
-  YYSYMBOL_arith_expr = 100,               /* arith_expr  */
-  YYSYMBOL_op = 101,                       /* op  */
-  YYSYMBOL_if_stmt = 102,                  /* if_stmt  */
-  YYSYMBOL_return_stmt = 103,              /* return_stmt  */
-  YYSYMBOL_while_stmt = 104,               /* while_stmt  */
-  YYSYMBOL_do_stmt = 105,                  /* do_stmt  */
-  YYSYMBOL_for_stmt = 106,                 /* for_stmt  */
-  YYSYMBOL_endofline = 107,                /* endofline  */
-  YYSYMBOL_endfile = 108,                  /* endfile  */
-  YYSYMBOL_type = 109                      /* type  */
+  YYSYMBOL_CONSTANT = 88,                  /* CONSTANT  */
+  YYSYMBOL_POINTER = 89,                   /* POINTER  */
+  YYSYMBOL_ADDRESS_OF = 90,                /* ADDRESS_OF  */
+  YYSYMBOL_OTHER = 91,                     /* OTHER  */
+  YYSYMBOL_YYACCEPT = 92,                  /* $accept  */
+  YYSYMBOL_prog = 93,                      /* prog  */
+  YYSYMBOL_stmts = 94,                     /* stmts  */
+  YYSYMBOL_stmt = 95,                      /* stmt  */
+  YYSYMBOL_declaration_stmt = 96,          /* declaration_stmt  */
+  YYSYMBOL_compound_stmt = 97,             /* compound_stmt  */
+  YYSYMBOL_expr = 98,                      /* expr  */
+  YYSYMBOL_arith_expr = 99,                /* arith_expr  */
+  YYSYMBOL_op = 100,                       /* op  */
+  YYSYMBOL_if_stmt = 101,                  /* if_stmt  */
+  YYSYMBOL_return_stmt = 102,              /* return_stmt  */
+  YYSYMBOL_while_stmt = 103,               /* while_stmt  */
+  YYSYMBOL_do_stmt = 104,                  /* do_stmt  */
+  YYSYMBOL_for_stmt = 105,                 /* for_stmt  */
+  YYSYMBOL_endofline = 106,                /* endofline  */
+  YYSYMBOL_endfile = 107,                  /* endfile  */
+  YYSYMBOL_type = 108                      /* type  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -543,7 +542,7 @@ union yyalloc
 #define YYLAST   135
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  93
+#define YYNTOKENS  92
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  17
 /* YYNRULES -- Number of rules.  */
@@ -552,7 +551,7 @@ union yyalloc
 #define YYNSTATES  69
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   347
+#define YYMAXUTOK   346
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -600,18 +599,18 @@ static const yytype_int8 yytranslate[] =
       55,    56,    57,    58,    59,    60,    61,    62,    63,    64,
       65,    66,    67,    68,    69,    70,    71,    72,    73,    74,
       75,    76,    77,    78,    79,    80,    81,    82,    83,    84,
-      85,    86,    87,    88,    89,    90,    91,    92
+      85,    86,    87,    88,    89,    90,    91
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    49,    49,    53,    54,    55,    56,    57,    62,    63,
-      64,    65,    66,    67,    68,    69,    70,    77,    80,    84,
-      89,    94,    97,   100,   103,   107,   108,   109,   110,   111,
-     116,   119,   122,   126,   130,   133,   136,   144,   145,   146,
-     147,   148,   149,   150
+       0,    49,    49,    55,    56,    57,    58,    59,    64,    65,
+      66,    67,    68,    69,    70,    71,    72,    79,    82,    86,
+      91,    96,    99,   102,   105,   109,   110,   111,   112,   113,
+     117,   141,   144,   148,   152,   155,   158,   166,   167,   168,
+     169,   170,   171,   172
 };
 #endif
 
@@ -642,7 +641,7 @@ static const char *const yytname[] =
   "MINUS_ASSIGN", "MODULO", "LEFT_SHIFT_ASSIGN", "RIGHT_SHIFT_ASSIGN",
   "BITWISE_AND_ASSIGN", "BITWISE_OR_ASSIGN", "BITWISE_XOR_ASSIGN",
   "MULTIPLY_ASSIGN", "DIVIDE_ASSIGN", "MODULUS_ASSIGN", "PREPROCESSOR",
-  "ARROW", "DEFINE", "EXIT", "CONSTANT", "POINTER", "ADDRESS_OF", "OTHER",
+  "ARROW", "DEFINE", "CONSTANT", "POINTER", "ADDRESS_OF", "OTHER",
   "$accept", "prog", "stmts", "stmt", "declaration_stmt", "compound_stmt",
   "expr", "arith_expr", "op", "if_stmt", "return_stmt", "while_stmt",
   "do_stmt", "for_stmt", "endofline", "endfile", "type", YY_NULLPTR
@@ -750,22 +749,22 @@ static const yytype_int8 yycheck[] =
 static const yytype_int8 yystos[] =
 {
        0,     5,     9,    11,    15,    17,    18,    19,    20,    21,
-      22,    23,    38,    39,    49,    94,    95,    96,    97,    98,
-      99,   100,   102,   103,   104,   105,   106,   107,   109,    96,
-      47,    99,    42,    43,    44,    45,    46,   101,   101,    95,
-       0,     3,    96,   108,    54,    39,   100,    10,    99,    38,
-      39,    38,    39,    50,    54,     5,    95,   107,    47,    54,
-      95,    95,    99,    99,    48,    54,    99,    48,    96
+      22,    23,    38,    39,    49,    93,    94,    95,    96,    97,
+      98,    99,   101,   102,   103,   104,   105,   106,   108,    95,
+      47,    98,    42,    43,    44,    45,    46,   100,   100,    94,
+       0,     3,    95,   107,    54,    39,    99,    10,    98,    38,
+      39,    38,    39,    50,    54,     5,    94,   106,    47,    54,
+      94,    94,    98,    98,    48,    54,    98,    48,    95
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    93,    94,    95,    95,    95,    95,    95,    96,    96,
-      96,    96,    96,    96,    96,    96,    96,    97,    97,    98,
-      99,   100,   100,   100,   100,   101,   101,   101,   101,   101,
-     102,   103,   104,   105,   106,   107,   108,   109,   109,   109,
-     109,   109,   109,   109
+       0,    92,    93,    94,    94,    94,    94,    94,    95,    95,
+      95,    95,    95,    95,    95,    95,    95,    96,    96,    97,
+      98,    99,    99,    99,    99,   100,   100,   100,   100,   100,
+     101,   102,   103,   104,   105,   106,   107,   108,   108,   108,
+     108,   108,   108,   108
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
@@ -1238,56 +1237,64 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
+  case 2: /* prog: stmts endfile  */
+#line 49 "Parser.y"
+                {
+	printf("End of file\n");
+   }
+#line 1246 "Parser.tab.c"
+    break;
+
   case 17: /* declaration_stmt: type ID  */
-#line 77 "Parser.y"
+#line 79 "Parser.y"
                        {
 			printf("The type you entered is ");
 		}
-#line 1247 "Parser.tab.c"
+#line 1254 "Parser.tab.c"
     break;
 
   case 21: /* arith_expr: NUM op NUM  */
-#line 94 "Parser.y"
+#line 96 "Parser.y"
                           {
-				printf("OP between %d and %d", (yyvsp[-2].intval), (yyvsp[0].intval));
+				printf("OP between %d and %d\n", (yyvsp[-2].intval), (yyvsp[0].intval));
 			}
-#line 1255 "Parser.tab.c"
+#line 1262 "Parser.tab.c"
     break;
 
   case 22: /* arith_expr: ID op ID  */
-#line 97 "Parser.y"
+#line 99 "Parser.y"
                           {
-				printf("OP between %s and %s", (yyvsp[-2].identifier), (yyvsp[0].identifier));
+				printf("OP between %s and %s\n", (yyvsp[-2].identifier), (yyvsp[0].identifier));
 			}
-#line 1263 "Parser.tab.c"
+#line 1270 "Parser.tab.c"
     break;
 
   case 23: /* arith_expr: ID op NUM  */
-#line 100 "Parser.y"
+#line 102 "Parser.y"
                            {
-				printf("OP between %s and %d", (yyvsp[-2].identifier), (yyvsp[0].intval));
+				printf("OP between %s and %d\n", (yyvsp[-2].identifier), (yyvsp[0].intval));
 			}
-#line 1271 "Parser.tab.c"
+#line 1278 "Parser.tab.c"
     break;
 
   case 24: /* arith_expr: NUM op ID  */
-#line 103 "Parser.y"
+#line 105 "Parser.y"
                            {
-				printf("OP between %d and %s", (yyvsp[-2].intval), (yyvsp[0].identifier));
+				printf("OP between %d and %s\n", (yyvsp[-2].intval), (yyvsp[0].identifier));
 			}
-#line 1279 "Parser.tab.c"
+#line 1286 "Parser.tab.c"
     break;
 
   case 36: /* endfile: ENDFILE  */
-#line 137 "Parser.y"
+#line 159 "Parser.y"
 {
 	printf("End of file\n");
 }
-#line 1287 "Parser.tab.c"
+#line 1294 "Parser.tab.c"
     break;
 
 
-#line 1291 "Parser.tab.c"
+#line 1298 "Parser.tab.c"
 
       default: break;
     }
@@ -1480,7 +1487,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 153 "Parser.y"
+#line 175 "Parser.y"
 
 
 int yyerror(char *s)

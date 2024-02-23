@@ -139,11 +139,10 @@ extern int yydebug;
     PREPROCESSOR = 340,            /* PREPROCESSOR  */
     ARROW = 341,                   /* ARROW  */
     DEFINE = 342,                  /* DEFINE  */
-    EXIT = 343,                    /* EXIT  */
-    CONSTANT = 344,                /* CONSTANT  */
-    POINTER = 345,                 /* POINTER  */
-    ADDRESS_OF = 346,              /* ADDRESS_OF  */
-    OTHER = 347                    /* OTHER  */
+    CONSTANT = 343,                /* CONSTANT  */
+    POINTER = 344,                 /* POINTER  */
+    ADDRESS_OF = 345,              /* ADDRESS_OF  */
+    OTHER = 346                    /* OTHER  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -160,7 +159,7 @@ union YYSTYPE
     char *strval;            // For string literals or identifiers
     char charval;            // For single character tokens
 
-#line 164 "Parser.tab.h"
+#line 163 "Parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
