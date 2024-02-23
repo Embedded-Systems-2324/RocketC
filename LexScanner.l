@@ -130,3 +130,14 @@ void File_Init() {
 *  Returns the next token from the input source code.
 *  Used only for tests because the parse automaticly calls the lexer when necessary.
 */
+TokenType getToken(void)
+{ 
+  static int firstTime = TRUE;
+  TokenType currentToken;
+  if (firstTime){ 
+    firstTime = FALSE;
+    yyin = sourceCode;
+  }
+  currentToken = yylex();
+  return currentToken;
+}
