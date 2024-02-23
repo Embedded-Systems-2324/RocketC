@@ -15,6 +15,7 @@ sign        ([-+])
 expo        [eE]{sign}?
 float_number  {digit}*"."{digit}+({expo}{digit}+)?
 whitespace  [ \t]+
+string      \"([^"\\]|\\.)*\"
 
 
 %%
@@ -98,6 +99,7 @@ whitespace  [ \t]+
 {identifier}    { sscanf(yytext,"%s",yylval.identifier); return ID;}
 {float_number}  { (yylval.floatval=atof(yytext)); return FNUM;}
 {newline}       { printf("[EOL]\n");}
+{string}        { printf("[STRING]: %s\n",yytext); return STRINGliteral; }
 {whitespace}    { /*  ignore */}
 
 "//".*          { /* When "//" is found, zero or more occurrences of any character are ignored */}
