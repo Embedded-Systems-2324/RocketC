@@ -606,11 +606,11 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    49,    49,    55,    56,    57,    58,    59,    64,    65,
-      66,    67,    68,    69,    70,    71,    72,    79,    82,    86,
-      91,    96,    99,   102,   105,   109,   110,   111,   112,   113,
-     117,   141,   144,   148,   152,   155,   158,   166,   167,   168,
-     169,   170,   171,   172
+       0,    49,    49,    53,    54,    55,    56,    57,    62,    63,
+      64,    65,    66,    67,    68,    69,    70,    77,    80,    84,
+      89,    94,    97,   100,   103,   107,   108,   109,   110,   111,
+     115,   139,   142,   146,   150,   153,   156,   164,   165,   166,
+     167,   168,   169,   170
 };
 #endif
 
@@ -1237,64 +1237,56 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 2: /* prog: stmts endfile  */
-#line 49 "Parser.y"
-                {
-	printf("End of file\n");
-   }
-#line 1246 "Parser.tab.c"
-    break;
-
   case 17: /* declaration_stmt: type ID  */
-#line 79 "Parser.y"
+#line 77 "Parser.y"
                        {
 			printf("The type you entered is ");
 		}
-#line 1254 "Parser.tab.c"
+#line 1246 "Parser.tab.c"
     break;
 
   case 21: /* arith_expr: NUM op NUM  */
-#line 96 "Parser.y"
+#line 94 "Parser.y"
                           {
 				printf("OP between %d and %d\n", (yyvsp[-2].intval), (yyvsp[0].intval));
+			}
+#line 1254 "Parser.tab.c"
+    break;
+
+  case 22: /* arith_expr: ID op ID  */
+#line 97 "Parser.y"
+                          {
+				printf("OP between %s and %s\n", (yyvsp[-2].identifier), (yyvsp[0].identifier));
 			}
 #line 1262 "Parser.tab.c"
     break;
 
-  case 22: /* arith_expr: ID op ID  */
-#line 99 "Parser.y"
-                          {
-				printf("OP between %s and %s\n", (yyvsp[-2].identifier), (yyvsp[0].identifier));
+  case 23: /* arith_expr: ID op NUM  */
+#line 100 "Parser.y"
+                           {
+				printf("OP between %s and %d\n", (yyvsp[-2].identifier), (yyvsp[0].intval));
 			}
 #line 1270 "Parser.tab.c"
     break;
 
-  case 23: /* arith_expr: ID op NUM  */
-#line 102 "Parser.y"
+  case 24: /* arith_expr: NUM op ID  */
+#line 103 "Parser.y"
                            {
-				printf("OP between %s and %d\n", (yyvsp[-2].identifier), (yyvsp[0].intval));
+				printf("OP between %d and %s\n", (yyvsp[-2].intval), (yyvsp[0].identifier));
 			}
 #line 1278 "Parser.tab.c"
     break;
 
-  case 24: /* arith_expr: NUM op ID  */
-#line 105 "Parser.y"
-                           {
-				printf("OP between %d and %s\n", (yyvsp[-2].intval), (yyvsp[0].identifier));
-			}
-#line 1286 "Parser.tab.c"
-    break;
-
   case 36: /* endfile: ENDFILE  */
-#line 159 "Parser.y"
+#line 157 "Parser.y"
 {
 	printf("End of file\n");
 }
-#line 1294 "Parser.tab.c"
+#line 1286 "Parser.tab.c"
     break;
 
 
-#line 1298 "Parser.tab.c"
+#line 1290 "Parser.tab.c"
 
       default: break;
     }
@@ -1487,7 +1479,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 175 "Parser.y"
+#line 173 "Parser.y"
 
 
 int yyerror(char *s)
