@@ -23,6 +23,7 @@ Terminals unused in grammar
     UNSIGNED
     VOLATILE
     FNUM
+    STRINGliteral
     ASSIGN
     LEFT_BRACKET
     RIGHT_BRACKET
@@ -190,109 +191,110 @@ Terminals, with rules where they appear
     NUM <intval> (293) 20 22 23
     ID <identifier> (294) 16 21 22 23
     FNUM <floatval> (295)
-    ASSIGN (296)
-    PLUS (297) 24
-    MINUS (298) 25
-    TIMES (299) 26
-    OVER (300) 27
-    PERCENT (301) 28
-    LPAREN (302) 32 33
-    RPAREN (303) 32 33
-    LEFT_BRACE (304) 18
-    RIGHT_BRACE (305) 18
-    LEFT_BRACKET (306)
-    RIGHT_BRACKET (307)
-    TERNARY (308)
-    SEMI (309) 3 4 5 6 33
-    COLON (310)
-    COMMA (311)
-    INCREMENT (312)
-    DECREMENT (313)
-    BITWISE_AND (314)
-    BITWISE_OR (315)
-    BITWISE_NOT (316)
-    BITWISE_XOR (317)
-    LOGICAL_NOT (318)
-    LOGICAL_AND (319)
-    LOGICAL_OR (320)
-    EQUAL (321)
-    NOT_EQUAL (322)
-    LESS_THAN (323)
-    GREATER_THAN (324)
-    LESS_THAN_OR_EQUAL (325)
-    GREATER_THAN_OR_EQUAL (326)
-    RIGHT_SHIFT (327)
-    LEFT_SHIFT (328)
-    PLUS_ASSIGN (329)
-    MINUS_ASSIGN (330)
-    MODULO (331)
-    LEFT_SHIFT_ASSIGN (332)
-    RIGHT_SHIFT_ASSIGN (333)
-    BITWISE_AND_ASSIGN (334)
-    BITWISE_OR_ASSIGN (335)
-    BITWISE_XOR_ASSIGN (336)
-    MULTIPLY_ASSIGN (337)
-    DIVIDE_ASSIGN (338)
-    MODULUS_ASSIGN (339)
-    PREPROCESSOR (340)
-    ARROW (341)
-    DEFINE (342)
-    CONSTANT (343)
-    POINTER (344)
-    ADDRESS_OF (345)
-    OTHER (346)
+    STRINGliteral <strval> (296)
+    ASSIGN (297)
+    PLUS (298) 24
+    MINUS (299) 25
+    TIMES (300) 26
+    OVER (301) 27
+    PERCENT (302) 28
+    LPAREN (303) 32 33
+    RPAREN (304) 32 33
+    LEFT_BRACE (305) 18
+    RIGHT_BRACE (306) 18
+    LEFT_BRACKET (307)
+    RIGHT_BRACKET (308)
+    TERNARY (309)
+    SEMI (310) 3 4 5 6 33
+    COLON (311)
+    COMMA (312)
+    INCREMENT (313)
+    DECREMENT (314)
+    BITWISE_AND (315)
+    BITWISE_OR (316)
+    BITWISE_NOT (317)
+    BITWISE_XOR (318)
+    LOGICAL_NOT (319)
+    LOGICAL_AND (320)
+    LOGICAL_OR (321)
+    EQUAL (322)
+    NOT_EQUAL (323)
+    LESS_THAN (324)
+    GREATER_THAN (325)
+    LESS_THAN_OR_EQUAL (326)
+    GREATER_THAN_OR_EQUAL (327)
+    RIGHT_SHIFT (328)
+    LEFT_SHIFT (329)
+    PLUS_ASSIGN (330)
+    MINUS_ASSIGN (331)
+    MODULO (332)
+    LEFT_SHIFT_ASSIGN (333)
+    RIGHT_SHIFT_ASSIGN (334)
+    BITWISE_AND_ASSIGN (335)
+    BITWISE_OR_ASSIGN (336)
+    BITWISE_XOR_ASSIGN (337)
+    MULTIPLY_ASSIGN (338)
+    DIVIDE_ASSIGN (339)
+    MODULUS_ASSIGN (340)
+    PREPROCESSOR (341)
+    ARROW (342)
+    DEFINE (343)
+    CONSTANT (344)
+    POINTER (345)
+    ADDRESS_OF (346)
+    OTHER (347)
 
 
 Nonterminals, with rules where they appear
 
-    $accept (92)
+    $accept (93)
         on left: 0
-    prog (93)
+    prog (94)
         on left: 1
         on right: 0
-    stmts (94)
+    stmts (95)
         on left: 2 3 4 5 6
         on right: 1 3 4 5 6 18
-    stmt (95)
+    stmt (96)
         on left: 7 8 9 10 11 12 13 14 15
         on right: 3 4 5 6 32 33
-    declaration_stmt (96)
+    declaration_stmt (97)
         on left: 16 17
         on right: 13
-    compound_stmt (97)
+    compound_stmt (98)
         on left: 18
         on right: 14
-    expr (98)
+    expr (99)
         on left: 19
         on right: 15 30 32 33
-    arith_expr (99)
+    arith_expr (100)
         on left: 20 21 22 23
         on right: 17 19
-    op (100)
+    op (101)
         on left: 24 25 26 27 28
         on right: 20 21 22 23
-    if_stmt (101)
+    if_stmt (102)
         on left: 29
         on right: 7
-    return_stmt (102)
+    return_stmt (103)
         on left: 30
         on right: 11
-    while_stmt (103)
+    while_stmt (104)
         on left: 31
         on right: 8
-    do_stmt (104)
+    do_stmt (105)
         on left: 32
         on right: 9
-    for_stmt (105)
+    for_stmt (106)
         on left: 33
         on right: 10
-    endofline (106)
+    endofline (107)
         on left: 34
         on right: 4 12
-    endfile (107)
+    endfile (108)
         on left: 35
         on right: 1
-    type (108)
+    type (109)
         on left: 36 37 38 39 40 41 42
         on right: 16 17
 

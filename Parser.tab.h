@@ -92,57 +92,58 @@ extern int yydebug;
     NUM = 293,                     /* NUM  */
     ID = 294,                      /* ID  */
     FNUM = 295,                    /* FNUM  */
-    ASSIGN = 296,                  /* ASSIGN  */
-    PLUS = 297,                    /* PLUS  */
-    MINUS = 298,                   /* MINUS  */
-    TIMES = 299,                   /* TIMES  */
-    OVER = 300,                    /* OVER  */
-    PERCENT = 301,                 /* PERCENT  */
-    LPAREN = 302,                  /* LPAREN  */
-    RPAREN = 303,                  /* RPAREN  */
-    LEFT_BRACE = 304,              /* LEFT_BRACE  */
-    RIGHT_BRACE = 305,             /* RIGHT_BRACE  */
-    LEFT_BRACKET = 306,            /* LEFT_BRACKET  */
-    RIGHT_BRACKET = 307,           /* RIGHT_BRACKET  */
-    TERNARY = 308,                 /* TERNARY  */
-    SEMI = 309,                    /* SEMI  */
-    COLON = 310,                   /* COLON  */
-    COMMA = 311,                   /* COMMA  */
-    INCREMENT = 312,               /* INCREMENT  */
-    DECREMENT = 313,               /* DECREMENT  */
-    BITWISE_AND = 314,             /* BITWISE_AND  */
-    BITWISE_OR = 315,              /* BITWISE_OR  */
-    BITWISE_NOT = 316,             /* BITWISE_NOT  */
-    BITWISE_XOR = 317,             /* BITWISE_XOR  */
-    LOGICAL_NOT = 318,             /* LOGICAL_NOT  */
-    LOGICAL_AND = 319,             /* LOGICAL_AND  */
-    LOGICAL_OR = 320,              /* LOGICAL_OR  */
-    EQUAL = 321,                   /* EQUAL  */
-    NOT_EQUAL = 322,               /* NOT_EQUAL  */
-    LESS_THAN = 323,               /* LESS_THAN  */
-    GREATER_THAN = 324,            /* GREATER_THAN  */
-    LESS_THAN_OR_EQUAL = 325,      /* LESS_THAN_OR_EQUAL  */
-    GREATER_THAN_OR_EQUAL = 326,   /* GREATER_THAN_OR_EQUAL  */
-    RIGHT_SHIFT = 327,             /* RIGHT_SHIFT  */
-    LEFT_SHIFT = 328,              /* LEFT_SHIFT  */
-    PLUS_ASSIGN = 329,             /* PLUS_ASSIGN  */
-    MINUS_ASSIGN = 330,            /* MINUS_ASSIGN  */
-    MODULO = 331,                  /* MODULO  */
-    LEFT_SHIFT_ASSIGN = 332,       /* LEFT_SHIFT_ASSIGN  */
-    RIGHT_SHIFT_ASSIGN = 333,      /* RIGHT_SHIFT_ASSIGN  */
-    BITWISE_AND_ASSIGN = 334,      /* BITWISE_AND_ASSIGN  */
-    BITWISE_OR_ASSIGN = 335,       /* BITWISE_OR_ASSIGN  */
-    BITWISE_XOR_ASSIGN = 336,      /* BITWISE_XOR_ASSIGN  */
-    MULTIPLY_ASSIGN = 337,         /* MULTIPLY_ASSIGN  */
-    DIVIDE_ASSIGN = 338,           /* DIVIDE_ASSIGN  */
-    MODULUS_ASSIGN = 339,          /* MODULUS_ASSIGN  */
-    PREPROCESSOR = 340,            /* PREPROCESSOR  */
-    ARROW = 341,                   /* ARROW  */
-    DEFINE = 342,                  /* DEFINE  */
-    CONSTANT = 343,                /* CONSTANT  */
-    POINTER = 344,                 /* POINTER  */
-    ADDRESS_OF = 345,              /* ADDRESS_OF  */
-    OTHER = 346                    /* OTHER  */
+    STRINGliteral = 296,           /* STRINGliteral  */
+    ASSIGN = 297,                  /* ASSIGN  */
+    PLUS = 298,                    /* PLUS  */
+    MINUS = 299,                   /* MINUS  */
+    TIMES = 300,                   /* TIMES  */
+    OVER = 301,                    /* OVER  */
+    PERCENT = 302,                 /* PERCENT  */
+    LPAREN = 303,                  /* LPAREN  */
+    RPAREN = 304,                  /* RPAREN  */
+    LEFT_BRACE = 305,              /* LEFT_BRACE  */
+    RIGHT_BRACE = 306,             /* RIGHT_BRACE  */
+    LEFT_BRACKET = 307,            /* LEFT_BRACKET  */
+    RIGHT_BRACKET = 308,           /* RIGHT_BRACKET  */
+    TERNARY = 309,                 /* TERNARY  */
+    SEMI = 310,                    /* SEMI  */
+    COLON = 311,                   /* COLON  */
+    COMMA = 312,                   /* COMMA  */
+    INCREMENT = 313,               /* INCREMENT  */
+    DECREMENT = 314,               /* DECREMENT  */
+    BITWISE_AND = 315,             /* BITWISE_AND  */
+    BITWISE_OR = 316,              /* BITWISE_OR  */
+    BITWISE_NOT = 317,             /* BITWISE_NOT  */
+    BITWISE_XOR = 318,             /* BITWISE_XOR  */
+    LOGICAL_NOT = 319,             /* LOGICAL_NOT  */
+    LOGICAL_AND = 320,             /* LOGICAL_AND  */
+    LOGICAL_OR = 321,              /* LOGICAL_OR  */
+    EQUAL = 322,                   /* EQUAL  */
+    NOT_EQUAL = 323,               /* NOT_EQUAL  */
+    LESS_THAN = 324,               /* LESS_THAN  */
+    GREATER_THAN = 325,            /* GREATER_THAN  */
+    LESS_THAN_OR_EQUAL = 326,      /* LESS_THAN_OR_EQUAL  */
+    GREATER_THAN_OR_EQUAL = 327,   /* GREATER_THAN_OR_EQUAL  */
+    RIGHT_SHIFT = 328,             /* RIGHT_SHIFT  */
+    LEFT_SHIFT = 329,              /* LEFT_SHIFT  */
+    PLUS_ASSIGN = 330,             /* PLUS_ASSIGN  */
+    MINUS_ASSIGN = 331,            /* MINUS_ASSIGN  */
+    MODULO = 332,                  /* MODULO  */
+    LEFT_SHIFT_ASSIGN = 333,       /* LEFT_SHIFT_ASSIGN  */
+    RIGHT_SHIFT_ASSIGN = 334,      /* RIGHT_SHIFT_ASSIGN  */
+    BITWISE_AND_ASSIGN = 335,      /* BITWISE_AND_ASSIGN  */
+    BITWISE_OR_ASSIGN = 336,       /* BITWISE_OR_ASSIGN  */
+    BITWISE_XOR_ASSIGN = 337,      /* BITWISE_XOR_ASSIGN  */
+    MULTIPLY_ASSIGN = 338,         /* MULTIPLY_ASSIGN  */
+    DIVIDE_ASSIGN = 339,           /* DIVIDE_ASSIGN  */
+    MODULUS_ASSIGN = 340,          /* MODULUS_ASSIGN  */
+    PREPROCESSOR = 341,            /* PREPROCESSOR  */
+    ARROW = 342,                   /* ARROW  */
+    DEFINE = 343,                  /* DEFINE  */
+    CONSTANT = 344,                /* CONSTANT  */
+    POINTER = 345,                 /* POINTER  */
+    ADDRESS_OF = 346,              /* ADDRESS_OF  */
+    OTHER = 347                    /* OTHER  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -151,7 +152,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 38 "Parser.y"
+#line 39 "Parser.y"
 
 	char identifier[20];
 	int intval;              // For integer literals
@@ -159,7 +160,7 @@ union YYSTYPE
     char *strval;            // For string literals or identifiers
     char charval;            // For single character tokens
 
-#line 163 "Parser.tab.h"
+#line 164 "Parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

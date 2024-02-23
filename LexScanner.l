@@ -1,10 +1,48 @@
 %option noyywrap
-
 %x INCOMMENT   
 
 %{
 #include "globals.h"
-/*definitions*/
+
+#define YY_BUFFER_SIZE 32                      // alter to define the value of the input buffer
+static char yy_buffer[YY_BUFFER_SIZE];
+static char* yy_buf_pos = yy_buffer;
+static size_t yy_buf_size = 0;
+static int endOfFileReached = 0;
+
+/*
+   1st IF: The macro checks if the current position (yy_buf_pos) in the buffer
+   has reached the end. If so, it refills the buffer by reading a block
+   of characters from the input file.
+
+   2nd IF: If the buffer is fully consumed and the file has no more characters,
+   it indicates end-of-file by setting 'result' to YY_NULL, and the
+   scanning loop is terminated.
+
+   3rd IF: Characters are then copied from the buffer to the provided 'buf' until
+   'max_size' is reached. The 'yy_buf_pos' is updated to point to the
+   next position in the buffer.
+*/
+#define YY_INPUT(buf,result,max_size) \
+{ \
+    if (!endOfFileReached && yy_buf_pos >= yy_buffer + yy_buf_size) { \
+        memset(yy_buffer, 0, YY_BUFFER_SIZE); \
+        yy_buf_size = fread(yy_buffer, 1, YY_BUFFER_SIZE, yyin); \
+        yy_buf_pos = yy_buffer; \
+        if (yy_buf_size <= 0) { \
+            endOfFileReached = 1; \
+            result = YY_NULL; \
+        } \
+    } \
+    size_t n = YY_BUFFER_SIZE - (yy_buf_pos - yy_buffer); \
+    if (n > max_size) n = max_size; \
+    memcpy(buf, yy_buf_pos, n); \
+    yy_buf_pos += n; \
+    result = n; \
+    /*printf("\n----[BUFFER] buf:\n%s\n", buf);*/ \
+    printf("\n----[BUFFER] result: %d\n", result); \
+}
+
 %}
 
 digit       [0-9]
@@ -19,88 +57,88 @@ string      \"([^"\\]|\\.)*\"
 
 
 %%
-"auto"          { printf("[KEYWORD]: AUTO\n");                  return AUTO; }
-"break"         { printf("[KEYWORD]: BREAK\n");                 return BREAK; }
-"case"          { printf("[KEYWORD]: CASE\n");                  return CASE; }
-"char"          { printf("[KEYWORD]: CHAR\n");                  return CHAR; }
-"const"         { printf("[KEYWORD]: CONST\n");                 return CONSTANT; }
-"continue"      { printf("[KEYWORD]: CONTINUE\n");              return CONTINUE; }
-"default"       { printf("[KEYWORD]: DEFAULT\n");               return DEFAULT; }
-"do"            { printf("[KEYWORD]: DO\n");                    return DO; } 
-"double"        { printf("[KEYWORD]: DOUBLE\n");                return DOUBLE; }
-"else"          { printf("[KEYWORD]: ELSE\n");                  return ELSE; }
-"enum"          { printf("[KEYWORD]: ENUM\n");                  return ENUM; }
-"extern"        { printf("[KEYWORD]: EXTERN\n");                return EXTERN; }
-"float"         { printf("[KEYWORD]: FLOAT\n");                 return FLOAT; }
-"for"           { printf("[KEYWORD]: FOR\n");                   return FOR; }
-"goto"          { printf("[KEYWORD]: GOTO\n");                  return GOTO; }
-"if"            { printf("[KEYWORD]: IF\n");                    return IF; }
-"int"           { printf("[KEYWORD]: INT\n");                   return INT; }
-"long"          { printf("[KEYWORD]: LONG\n");                  return LONG; }
-"register"      { printf("[KEYWORD]: REGISTER\n");              return REGISTER; }
-"return"        { printf("[KEYWORD]: RETURN\n");                return RETURN; }
-"short"         { printf("[KEYWORD]: SHORT\n");                 return SHORT; }
-"signed"        { printf("[KEYWORD]: SIGNED\n");                return SIGNED; }
-"sizeof"        { printf("[KEYWORD]: SIZEOF\n");                return SIZEOF; }
-"static"        { printf("[KEYWORD]: STATIC\n");                return STATIC; }
-"struct"        { printf("[KEYWORD]: STRUCT\n");                return STRUCT; }
-"switch"        { printf("[KEYWORD]: SWITCH\n");                return SWITCH; }
-"typedef"       { printf("[KEYWORD]: TYPEDEF\n");               return TYPEDEF; }
-"union"         { printf("[KEYWORD]: UNION\n");                 return UNION; }
-"unsigned"      { printf("[KEYWORD]: UNSIGNED\n");              return UNSIGNED; }
-"void"          { printf("[KEYWORD]: VOID\n");                  return VOID; }
-"volatile"      { printf("[KEYWORD]: VOLATILE\n");              return VOLATILE; }
-"while"         { printf("[KEYWORD]: WHILE\n");                 return WHILE; }
+"auto"          { printf(" AUTO");                  return AUTO;        }
+"break"         { printf(" BREAK");                 return BREAK;       }
+"case"          { printf(" CASE");                  return CASE;        }
+"char"          { printf(" CHAR");                  return CHAR;        }
+"const"         { printf(" CONST");                 return CONSTANT;    }
+"continue"      { printf(" CONTINUE");              return CONTINUE;    }
+"default"       { printf(" DEFAULT");               return DEFAULT;     }
+"do"            { printf(" DO");                    return DO;          } 
+"double"        { printf(" DOUBLE");                return DOUBLE;      }
+"else"          { printf(" ELSE");                  return ELSE;        }
+"enum"          { printf(" ENUM");                  return ENUM;        }
+"extern"        { printf(" EXTERN");                return EXTERN;      }
+"float"         { printf(" FLOAT");                 return FLOAT;       }
+"for"           { printf(" FOR");                   return FOR;         }
+"goto"          { printf(" GOTO");                  return GOTO;        }
+"if"            { printf(" IF");                    return IF;          }
+"int"           { printf(" INT");                   return INT;         }
+"long"          { printf(" LONG");                  return LONG;        }
+"register"      { printf(" REGISTER");              return REGISTER;    }
+"return"        { printf(" RETURN");                return RETURN;      }
+"short"         { printf(" SHORT");                 return SHORT;       }
+"signed"        { printf(" SIGNED");                return SIGNED;      }
+"sizeof"        { printf(" SIZEOF");                return SIZEOF;      }
+"static"        { printf(" STATIC");                return STATIC;      }
+"struct"        { printf(" STRUCT");                return STRUCT;      }
+"switch"        { printf(" SWITCH");                return SWITCH;      }
+"typedef"       { printf(" TYPEDEF");               return TYPEDEF;     }
+"union"         { printf(" UNION");                 return UNION;       }
+"unsigned"      { printf(" UNSIGNED");              return UNSIGNED;    }
+"void"          { printf(" VOID");                  return VOID;        }
+"volatile"      { printf(" VOLATILE");              return VOLATILE;    }
+"while"         { printf(" WHILE");                 return WHILE;       }
+"define"        { printf(" DEFINE");                return DEFINE;      }
 
-"+"             { printf("[OPERATOR]: PLUS\n");                 return PLUS; }
-"-"             { printf("[OPERATOR]: MINUS\n");                return MINUS; }
-"*"             { printf("[OPERATOR]: TIMES\n");                return TIMES; }
-"/"             { printf("[OPERATOR]: OVER\n");                 return OVER; }
-"%"             { printf("[OPERATOR]: PERCENT\n");              return PERCENT; }
-"++"            { printf("[OPERATOR]: INCREMENT\n");            return INCREMENT; }
-"--"            { printf("[OPERATOR]: DECREMENT\n");            return DECREMENT; }
-"&"             { printf("[OPERATOR]: BITWISE_AND\n");          return BITWISE_AND; }
-"|"             { printf("[OPERATOR]: BITWISE_OR\n");           return BITWISE_OR; }
-"~"             { printf("[OPERATOR]: BITWISE_NOT\n");          return BITWISE_NOT; }
-"^"             { printf("[OPERATOR]: BITWISE_XOR\n");          return BITWISE_XOR; }
-"!"             { printf("[OPERATOR]: LOGICAL_NOT\n");          return LOGICAL_NOT; }
-"&&"            { printf("[OPERATOR]: LOGICAL_AND\n");          return LOGICAL_AND; }
-"||"            { printf("[OPERATOR]: LOGICAL_OR\n");           return LOGICAL_OR; }
-"=="            { printf("[OPERATOR]: EQUAL\n");                return EQUAL; }
-"!="            { printf("[OPERATOR]: NOT_EQUAL\n");            return NOT_EQUAL; }
-"<"             { printf("[OPERATOR]: LESS_THAN\n");            return LESS_THAN; }
-">"             { printf("[OPERATOR]: GREATER_THAN\n");         return GREATER_THAN; }
-"<="            { printf("[OPERATOR]: LESS_THAN_OR_EQUAL\n");   return LESS_THAN_OR_EQUAL; }
-">="            { printf("[OPERATOR]: GREATER_THAN_OR_EQUAL\n");return GREATER_THAN_OR_EQUAL; }
-">>"            { printf("[OPERATOR]: RIGHT_SHIFT\n");          return RIGHT_SHIFT; }
-"<<"            { printf("[OPERATOR]: LEFT_SHIFT\n");           return LEFT_SHIFT; }
-"="             { printf("[OPERATOR]: ASSIGN\n");               return ASSIGN; }
-"+="            { printf("[OPERATOR]: PLUS_ASSIGN\n");          return PLUS_ASSIGN; }
-"-="            { printf("[OPERATOR]: MINUS_ASSIGN\n");         return MINUS_ASSIGN; }
-"*="            { printf("[OPERATOR]: MULTIPLY_ASSIGN\n");      return MULTIPLY_ASSIGN; }
-"/="            { printf("[OPERATOR]: DIVIDE_ASSIGN\n");        return DIVIDE_ASSIGN; }
-"%="            { printf("[OPERATOR]: MODULUS_ASSIGN\n");       return MODULUS_ASSIGN; }
-";"             { printf("[DELIMITER]: SEMI\n");                return SEMI; }
-","             { printf("[DELIMITER]: COMMA\n");               return COMMA; }
-":"             { printf("[DELIMITER]: COLON\n");               return COLON; }
-"("             { printf("[PAREN]: LEFT_PAREN\n");              return LPAREN; }
-")"             { printf("[PAREN]: RIGHT_PAREN\n");             return RPAREN; }
-"{"             { printf("[BRACE]: LEFT_BRACE\n");              return LEFT_BRACE; }
-"}"             { printf("[BRACE]: RIGHT_BRACE\n");             return RIGHT_BRACE; }
-"["             { printf("[BRACKET]: LEFT_BRACKET\n");          return LEFT_BRACKET; }
-"]"             { printf("[BRACKET]: RIGHT_BRACKET\n");         return RIGHT_BRACKET; }
-"?"             { printf("[TERNARY]: TERNARY\n");               return TERNARY; }
-"#"             { printf("[PREPROCESSOR]: PREPROCESSOR\n");     return PREPROCESSOR; }
-"->"            { printf("[OPERATOR]: ARROW\n");                return ARROW; }
+"+"             { printf(" PLUS");                  return PLUS;        }
+"-"             { printf(" MINUS");                 return MINUS;       }
+"*"             { printf(" TIMES");                 return TIMES;       }
+"/"             { printf(" OVER");                  return OVER;        }
+"%"             { printf(" PERCENT");               return PERCENT;     }
+"++"            { printf(" INCREMENT");             return INCREMENT;   }
+"--"            { printf(" DECREMENT");             return DECREMENT;   }
+"&"             { printf(" BITWISE_AND");           return BITWISE_AND; }
+"|"             { printf(" BITWISE_OR");            return BITWISE_OR;  }
+"~"             { printf(" BITWISE_NOT");           return BITWISE_NOT; }
+"^"             { printf(" BITWISE_XOR");           return BITWISE_XOR; }
+"!"             { printf(" LOGICAL_NOT");           return LOGICAL_NOT; }
+"&&"            { printf(" LOGICAL_AND");           return LOGICAL_AND; }
+"||"            { printf(" LOGICAL_OR");            return LOGICAL_OR;  }
+"=="            { printf(" EQUAL");                 return EQUAL;       }
+"!="            { printf(" NOT_EQUAL");             return NOT_EQUAL;   }
+"<"             { printf(" LESS_THAN");             return LESS_THAN;   }
+">"             { printf(" GREATER_THAN");          return GREATER_THAN;}
+"<="            { printf(" LESS_THAN_OR_EQUAL");    return LESS_THAN_OR_EQUAL;    }
+">="            { printf(" GREATER_THAN_OR_EQUAL"); return GREATER_THAN_OR_EQUAL; }
+">>"            { printf(" RIGHT_SHIFT");           return RIGHT_SHIFT;           }
+"<<"            { printf(" LEFT_SHIFT");            return LEFT_SHIFT;            }
+"="             { printf(" ASSIGN");                return ASSIGN;                }
+"+="            { printf(" PLUS_ASSIGN");           return PLUS_ASSIGN;           }
+"-="            { printf(" MINUS_ASSIGN");          return MINUS_ASSIGN;          }
+"*="            { printf(" MULTIPLY_ASSIGN");       return MULTIPLY_ASSIGN;       }
+"/="            { printf(" DIVIDE_ASSIGN");         return DIVIDE_ASSIGN;         }
+"%="            { printf(" MODULUS_ASSIGN");        return MODULUS_ASSIGN;        }
+";"             { printf(" SEMI");                  return SEMI;                  }
+","             { printf(" COMMA");                 return COMMA;                 }
+":"             { printf(" COLON");                 return COLON;                 }
+"("             { printf(" LEFT_PAREN");            return LPAREN;                }
+")"             { printf(" RIGHT_PAREN");           return RPAREN;                }
+"{"             { printf(" LEFT_BRACE");            return LEFT_BRACE;            }
+"}"             { printf(" RIGHT_BRACE");           return RIGHT_BRACE;           }
+"["             { printf(" LEFT_BRACKET");          return LEFT_BRACKET;          }
+"]"             { printf(" RIGHT_BRACKET");         return RIGHT_BRACKET;         }
+"?"             { printf(" TERNARY");               return TERNARY;               }
+"#"             { printf(" PREPROCESSOR");          return PREPROCESSOR;          }
+"->"            { printf(" ARROW");                 return ARROW;                 }
 
-"define"        { printf("[PREPROCESSOR]: DEFINE\n");           return DEFINE; }
 
-{number}        { (yylval.intval=atoi(yytext)); return NUM; }
-{identifier}    { sscanf(yytext,"%s",yylval.identifier); return ID;}
-{float_number}  { (yylval.floatval=atof(yytext)); return FNUM;}
-{newline}       { printf("[EOL]\n");}
-{string}        { printf("[STRING]: %s\n",yytext); return STRINGliteral; }
-{whitespace}    { /*  ignore */}
+{number}        { (yylval.intval=atoi(yytext));          printf(" %d", yylval.intval);    return NUM; }
+{identifier}    { sscanf(yytext,"%s",yylval.identifier); printf(" %s", yytext);           return ID;  }
+{float_number}  { (yylval.floatval=atof(yytext));        printf(" %f", yylval.floatval);  return FNUM;}
+{newline}       { printf(" [EOL]\n");               return EOL;}
+{string}        { sscanf(yytext,"%s",yylval.strval);     printf(" %s",yytext); return STRINGliteral; }
+{whitespace}    { /*  ignore */}  
 
 "//".*          { /* When "//" is found, zero or more occurrences of any character are ignored */}
 
@@ -116,9 +154,9 @@ string      \"([^"\\]|\\.)*\"
   [^*]+         ; // Consume characters within the comment block
 }
 
-<<EOF>>         { return ENDFILE; }
+<<EOF>>         {yyterminate(); return ENDFILE; }
 
-. {printf("Error, [%s] is an invalid token\n",yytext); return ERROR;}
+. {printf("Error, [%s] is an invalid token\n",yytext); YY_FATAL_ERROR("Unrecoverable error in lexer"); return ERROR;}
 %%
 
 

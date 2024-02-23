@@ -15,7 +15,7 @@ int yyerror(char *s);
 %token AUTO CONTINUE EXTERN GOTO LONG ENUM REGISTER SHORT SIZEOF STATIC SIGNED UNION UNSIGNED VOLATILE
 
 /* multicharacter tokens */
-%token NUM ID FNUM	
+%token NUM ID FNUM STRINGliteral
 
 /* special symbols */	
 %token ASSIGN PLUS MINUS TIMES OVER PERCENT LPAREN RPAREN LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET TERNARY SEMI COLON COMMA 
@@ -34,6 +34,7 @@ int yyerror(char *s);
 %type <identifier> ID
 %type <intval> NUM
 %type <floatval> FNUM
+%type <strval> STRINGliteral
 
 %union{
 	char identifier[20];
