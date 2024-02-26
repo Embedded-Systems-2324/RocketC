@@ -40,24 +40,25 @@ static int endOfFileReached = 0;
     yy_buf_pos += n; \
     result = n; \
     /*printf("\n----[BUFFER] buf:\n%s\n", buf);*/ \
-    printf("\n----[BUFFER] result: %d\n", result); \
 }
 
 %}
 
+
 digit       [0-9]
 number      {digit}+
+float_number  {digit}*"."{digit}+({expo}{digit}+)?
+
 identifier  [a-zA-Z_][a-zA-Z0-9_]*
+
+string      \"([^"\\]|\\.)*\"
+
 newline     \n
 sign        ([-+])
 expo        [eE]{sign}?
-float_number  {digit}*"."{digit}+({expo}{digit}+)?
 whitespace  [ \t]+
-string      \"([^"\\]|\\.)*\"
-
 
 %%
-"auto"          { printf(" AUTO");                  return AUTO;        }
 "break"         { printf(" BREAK");                 return BREAK;       }
 "case"          { printf(" CASE");                  return CASE;        }
 "char"          { printf(" CHAR");                  return CHAR;        }
@@ -122,6 +123,8 @@ string      \"([^"\\]|\\.)*\"
 ";"             { printf(" SEMI");                  return SEMI;                  }
 ","             { printf(" COMMA");                 return COMMA;                 }
 ":"             { printf(" COLON");                 return COLON;                 }
+"."             { printf(" DOT");                   return DOT;                   }
+
 "("             { printf(" LEFT_PAREN");            return LPAREN;                }
 ")"             { printf(" RIGHT_PAREN");           return RPAREN;                }
 "{"             { printf(" LEFT_BRACE");            return LEFT_BRACE;            }
@@ -131,28 +134,31 @@ string      \"([^"\\]|\\.)*\"
 "?"             { printf(" TERNARY");               return TERNARY;               }
 "#"             { printf(" PREPROCESSOR");          return PREPROCESSOR;          }
 "->"            { printf(" ARROW");                 return ARROW;                 }
+"\0"            {return ENDFILE;} 
 
 
 {number}        { (yylval.intval=atoi(yytext));          printf(" %d", yylval.intval);    return NUM; }
 {identifier}    { sscanf(yytext,"%s",yylval.identifier); printf(" %s", yytext);           return ID;  }
 {float_number}  { (yylval.floatval=atof(yytext));        printf(" %f", yylval.floatval);  return FNUM;}
-{newline}       { printf(" [EOL]\n");               return EOL;}
+{newline}       { printf(" \n");                         linenum++;}
 {string}        { sscanf(yytext,"%s",yylval.strval);     printf(" %s",yytext); return STRINGliteral; }
 {whitespace}    { /*  ignore */}  
 
 "//".*          { /* When "//" is found, zero or more occurrences of any character are ignored */}
 
 <INITIAL>{      // INITIAL Lexical state
-  "/*"          { printf("[In comment]\n");} BEGIN(INCOMMENT);      
+  "/*"          { printf(" [In comment]");} BEGIN(INCOMMENT);      
 }
 
 <INCOMMENT>{    // INCOMMENT Lexical state
-  <<EOF>>       { printf("Error: Unterminated comment\n");
+  <<EOF>>       { printf(" Error: Unterminated comment\n");
                   return ERROR; 
                 }
-  "*/"          { printf("[Out comment]\n");}BEGIN(INITIAL);
-  [^*]+         ; // Consume characters within the comment block
+  "*/"          { printf(" [Out comment]");}BEGIN(INITIAL);
+  "\n"          { ++linenum;}
+  [^*\n]+         ; // Consume characters within the comment block
 }
+
 
 <<EOF>>         {yyterminate(); return ENDFILE; }
 

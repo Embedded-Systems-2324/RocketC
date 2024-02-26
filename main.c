@@ -3,6 +3,7 @@
 #include "parser.h"
 
 FILE * sourceCode;
+int linenum = 1;    //Line number zero doesnt exist
 
 int main(int argc, char * argv[]){
     char* mode;     // --flex or --parse
@@ -31,7 +32,7 @@ int main(int argc, char * argv[]){
         fprintf(stderr,"File %s not found\n",pgm);
         exit(1);
     }
-    
+
     if (strcmp(mode, "--lex") == 0) {
         while (getToken() != ENDFILE);          //We use this for a scanner-only compiler because the Parser(using bison) autommaticly fetches the tokens whe he needs them
     } else if (strcmp(mode, "--parse") == 0) {
@@ -40,7 +41,7 @@ int main(int argc, char * argv[]){
         printf("Default Mode\n");               //No mode was selected
         return 0;
     }
-  
+    
     fclose(sourceCode); 
     return 0;
 }

@@ -8,14 +8,14 @@ int yyerror(char *s);
 
 
 /* book-keeping tokens */
-%token ENDFILE ERROR EOL
+%token ENDFILE ERROR
 
 /* Reserved Words */
 %token IF ELSEIF ELSE DO WHILE FOR SWITCH CASE DEFAULT RETURN BREAK INT FLOAT DOUBLE CHAR VOID STRUCT TYPEDEF 
-%token AUTO CONTINUE EXTERN GOTO LONG ENUM REGISTER SHORT SIZEOF STATIC SIGNED UNION UNSIGNED VOLATILE
+%token CONTINUE EXTERN GOTO LONG ENUM REGISTER SHORT SIZEOF STATIC SIGNED UNION UNSIGNED VOLATILE
 
 /* multicharacter tokens */
-%token NUM ID FNUM STRINGliteral
+%token NUM ID FNUM	
 
 /* special symbols */	
 %token ASSIGN PLUS MINUS TIMES OVER PERCENT LPAREN RPAREN LEFT_BRACE RIGHT_BRACE LEFT_BRACKET RIGHT_BRACKET TERNARY SEMI COLON COMMA 
@@ -30,153 +30,233 @@ int yyerror(char *s);
 %token PREPROCESSOR ARROW DEFINE
 %token CONSTANT POINTER ADDRESS_OF OTHER
 
-/* data types */
-%type <identifier> ID
-%type <intval> NUM
-%type <floatval> FNUM
-%type <strval> STRINGliteral
+%token AUTO
+%token DOT
+%token STRINGliteral
 
 %union{
-	char identifier[20];
-	int intval;              // For integer literals
+    char identifier[20];
+    int intval;              // For integer literals
     double floatval;         // For floating-point literals
     char *strval;            // For string literals or identifiers
     char charval;            // For single character tokens
 }
 
+/* data types */
+%type <identifier> ID
+%type <intval> NUM
+%type <floatval> FNUM
+
 %%
-//program
-prog:
-   stmts endfile
-;
+// Program
+prog:  stmts endfile
+    ;
 
 //all possible statements
 stmts:
-		| stmt SEMI stmts
-		| stmt SEMI endofline stmts
-		| stmt SEMI EOL stmts
-		| stmts stmt SEMI
-		;
+     |  stmt SEMI stmts
+     |  stmts stmt SEMI
+     ;
 
-//statement types
-stmt:
-		if_stmt
-		| while_stmt
-		| do_stmt
-		| for_stmt
-		| return_stmt
-		| endofline
-		| declaration_stmt
-		| compound_stmt
-		| expr
-		;
+// Statement Types
+stmt:  if_stmt
+    |  while_stmt
+    |  do_stmt
+    |  for_stmt
+    |  return_stmt
+    |  declaration_stmt
+    |  compound_stmt
+    |  expr
+    ;
 
-		
+// Verify and reorganize declaraction_stmt for either fit all types of declarations or completly remove it
+declaration_stmt:  type ID                          { printf("The type you entered is "); }
+                |  type ID ASSIGN expr
+                ;
 
-//remove the type declaration
-declaration_stmt:
-		type ID{
-			printf("The type you entered is ");
-		}
-		| type arith_expr
-		;		;
+compound_stmt:  LEFT_BRACE stmts RIGHT_BRACE
+		     ;
 
-compound_stmt:
-		LEFT_BRACE stmts RIGHT_BRACE
-		;
+// Functions
+function_declaration:  base_declaration LPAREN function_parameters RPAREN compound_stmt
+                    |  base_declaration LPAREN function_parameters RPAREN
+                    ;
 
-//list of all expression types
-expr:
-	arith_expr
+function_parameters:
+                   |  function_parameters COLON base_declaration
+                   |  base_declaration
+                   |  VOID
+                   ;
+
+base_declaration:  prefixes type ID ;
+
+// Instantiation
+
+function_inst:  ID LPAREN function_inst_parameters RPAREN ;
+
+function_inst_parameters:  function_inst_parameters COLON expr
+                        |  expr
+                        ;
+
+// Expressions
+expr:  arith_expr
+	|  cond_expr
 	;
 
+cond_expr:  cond_expr cond_op factor
+		 |  LOGICAL_NOT cond_expr
+		 |  factor
+		 ;
 
-arith_expr:
-		NUM op NUM{
-				printf("OP between %d and %d\n", $1, $3);
-			}
-		| ID op ID{
-				printf("OP between %s and %s\n", $1, $3);
-			}
-		| ID op NUM{
-				printf("OP between %s and %d\n", $1, $3);
-			}
-		| NUM op ID{
-				printf("OP between %d and %s\n", $1, $3);
-			}	
+arith_expr:  arith_expr op term
+          |  term
+          ;
 
-op: PLUS 
-	| MINUS 
-	| TIMES 
-	| OVER 
-	| PERCENT
-	;
+term:  term prio_op operand
+    |  operand
+    ;
 
-// to do later
-if_stmt:
-	;
-/* if_stmt: LPAREN cond_exp RPAREN stmts {pritf("IF statement: %s", $2);}
-		| LPAREN ID RPAREN stmts {pritf("IF statement: %s", $2);}
-		| LPAREN cond_exp RPAREN stmts ELSE stmts {pritf("IF statement: %s", $2);}
-		
+operand:  unary_op factor
+       |  factor unary_op
+       |  type_cast factor
+       |  factor
+       ;
 
-cond_exp: ID cond ID 
-		| ID cond NUM 
-		| NUM cond ID
-		| NUM cond NUM
-		| LOGICAL_NOT ID
+factor:  LPAREN arith_expr RPAREN
+      |  NUM
+      |  ID
+      |  FNUM
+      |  function_inst
+      ;
 
-cond:GREATER_THAN 
-	 | LESS_THAN_OR_EQUAL 
-	 | GREATER_THAN_OR_EQUAL
-	 | LESS_THAN
-	 | LOGICAL_AND 
-	 | LOGICAL_OR 
-	 | EQUAL 
-	 | NOT_EQUAL
-	; */
+// Operators
+op:  PLUS
+  |  MINUS
+  |  RIGHT_SHIFT
+  |  LEFT_SHIFT
+  ;
+  
+prio_op:  TIMES
+       |  OVER
+       |  PERCENT
+       ;
 
-return_stmt:
-		RETURN expr
-		;
+unary_op: INCREMENT
+        | DECREMENT
+        ;
 
-while_stmt: ;
+cond_op:  GREATER_THAN
+       |  LESS_THAN_OR_EQUAL
+       |  GREATER_THAN_OR_EQUAL
+       |  LESS_THAN
+       |  LOGICAL_AND
+       |  LOGICAL_OR
+       |  EQUAL
+       |  NOT_EQUAL
+       ;
+
+// Flow Control
+if_stmt:   IF LPAREN expr RPAREN compound_stmt                                   //{printf("IF statement: %s", $2);}
+		|  IF LPAREN expr RPAREN compound_stmt elseif_list                       //{printf("IF statement: %s", $2);}
+		|  IF LPAREN expr RPAREN compound_stmt ELSE compound_stmt                //{printf("IF statement: %s", $2);}
+        |  IF LPAREN expr RPAREN compound_stmt elseif_list ELSE compound_stmt    //{printf("IF statement: %s", $2);}
+        ;
+
+elseif_list:  elseif_list ELSEIF LPAREN expr RPAREN compound_stmt
+           |  ELSEIF LPAREN expr RPAREN compound_stmt
+           ;
+
+do_stmt:  DO compound_stmt WHILE expr
+       |  DO stmt WHILE expr
+       ;
+
+while_stmt:  WHILE LPAREN expr RPAREN compound_stmt
+          |  WHILE LPAREN expr RPAREN stmt
+          ;
+
+for_stmt:  FOR LPAREN expr SEMI expr SEMI expr RPAREN compound_stmt
+        |  FOR LPAREN expr SEMI expr SEMI expr RPAREN stmt
+        ;
+
+switch_case:  SWITCH LPAREN ID RPAREN LEFT_BRACE case_list RIGHT_BRACE
+           |  SWITCH LPAREN ID RPAREN LEFT_BRACE case_list case_default RIGHT_BRACE
+           |  SWITCH LPAREN expr RPAREN LEFT_BRACE case_list RIGHT_BRACE
+           |  SWITCH LPAREN expr RPAREN LEFT_BRACE case_list case_default RIGHT_BRACE
+           ;
+
+case_list:  case_list case
+         |  case
+         ;
+
+case:  CASE NUM COLON stmts BREAK ;
+
+case_default:  DEFAULT NUM COLON stmts BREAK ;
 
 
-do_stmt:
-			DO stmt WHILE LPAREN expr RPAREN
+struct_stmt: STRUCT ID LEFT_BRACE stmts RIGHT_BRACE SEMI
+		   ;
+
+enum_stmt: ENUM ID LEFT_BRACE stmts RIGHT_BRACE SEMI
+		 ;
+
+union_stmt: UNION ID LEFT_BRACE stmts RIGHT_BRACE SEMI
+		 ;
+
+goto_stmt: GOTO ID SEMI;
+
+typeDef_stmt: TYPEDEF enum_stmt ID SEMI
+			| TYPEDEF struct_stmt ID SEMI
+			;  
+
+size_of_stmt: SIZEOF LPAREN ID RPAREN
+			| SIZEOF LPAREN type RPAREN
+			| SIZEOF LPAREN special_type ID RPAREN
 			;
 
-for_stmt:
-			FOR LPAREN expr SEMI expr SEMI expr RPAREN stmt
+return_stmt:  RETURN expr
+		   ;
+
+endfile:  ENDFILE               { printf("\nEnd of file\n");   printf("Numero de Linhas: %d\n", linenum);     return 0;};
+
+// Types
+type:  INT
+    |  FLOAT
+    |  DOUBLE
+    |  CHAR
+    |  VOID
+    ;
+
+special_type: STRUCT
+			| TYPEDEF
+			| ENUM
+			| UNION
 			;
 
-endofline: EOL;
+prefixes:
+        |  prefixes prefix
+        |  prefix
+        ;
 
+prefix:  EXTERN
+      |  LONG
+      |  SHORT
+      |  STATIC
+      |  SIGNED
+      |  UNSIGNED
+      |  VOLATILE
+      |  REGISTER
+      |  CONSTANT
+      ;
 
-endfile: ENDFILE
-{
-	printf("End of file\n");
-};
-
-
-
-type:
-		INT
-		| FLOAT
-		| DOUBLE
-		| CHAR
-		| VOID
-		| STRUCT
-		| TYPEDEF
-		;
+type_cast: LPAREN type RPAREN ;
 
 %%
 
+// Parser Functions
 int yyerror(char *s)
 {
-  	fprintf (stderr, "%s\n", s);
-	return 0;
+  	fprintf (stderr, "%s in line number : %d\n", s, linenum);
+	return 1;
 }
 
 void parse(void){

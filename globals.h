@@ -15,6 +15,8 @@
 #endif
 
 extern FILE* sourceCode;  /* source code text file */
+extern int linenum;       /* line counter */
+
 typedef int TokenType; 
 
 #endif
