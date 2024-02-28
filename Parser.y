@@ -284,7 +284,7 @@ for_stmt:  FOR LPAREN condition SEMI condition SEMI condition RPAREN compound_st
         |  FOR LPAREN variable_declaration SEMI condition SEMI condition RPAREN compound_stmt
         |  FOR LPAREN variable_declaration SEMI condition SEMI condition RPAREN stmt 
         ;
-                |  variable_declaration
+               
 condition: expr
         |  assignment_stmt
          ;
