@@ -90,7 +90,7 @@ declaration_stmt:  variable_declaration
 
 assignment_stmt: 
                 ID assign_op expr   /*if(a<b) {b = 10;}*/ 
-               |ID DOT ID assign_op expr /*if(a<b) {b.c = 10;}*/
+               | ID DOT ID assign_op expr /*if(a<b) {b.c = 10;}*/
                | unary_op ID        //if(a<b) ++b;
                | ID unary_op        //if(a<b) b++;
                | array_declaration assign_op LEFT_BRACE expr RIGHT_BRACE
@@ -114,6 +114,10 @@ func_parameters_declaration:
 
 variable_declaration:  prefixes type ID 
                     |  prefixes type ID assign_op expr 
+                    |  prefixes type TIMES ID; // Pointer
+                    |  prefixes type TIMES ID assign_op expr; // Pointer 
+                    |  prefixes type TIMES TIMES ID; // Pointer to pointer
+                    |  prefixes type TIMES TIMES ID assign_op expr; // Pointer to pointer
                     ;
 
 

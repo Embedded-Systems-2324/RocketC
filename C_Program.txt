@@ -1,5 +1,4 @@
 
-int main() {
-    if (a>b) b=c;
-    a.a = b;
+int a (char* a){
+
 }
