@@ -44,7 +44,6 @@ static int endOfFileReached = 0;
 
 %}
 
-
 digit       [0-9]
 number      {digit}+
 float_number  {digit}*"."{digit}+({expo}{digit}+)?
@@ -67,13 +66,15 @@ whitespace  [ \t]+
 "default"       { printf(" DEFAULT");               return DEFAULT;     }
 "do"            { printf(" DO");                    return DO;          } 
 "double"        { printf(" DOUBLE");                return DOUBLE;      }
+"if"            { printf(" IF");                    return IF;          }
+"else if"       { printf(" ELSEIF");                return ELSEIF;      }
 "else"          { printf(" ELSE");                  return ELSE;        }
 "enum"          { printf(" ENUM");                  return ENUM;        }
 "extern"        { printf(" EXTERN");                return EXTERN;      }
 "float"         { printf(" FLOAT");                 return FLOAT;       }
 "for"           { printf(" FOR");                   return FOR;         }
 "goto"          { printf(" GOTO");                  return GOTO;        }
-"if"            { printf(" IF");                    return IF;          }
+
 "int"           { printf(" INT");                   return INT;         }
 "long"          { printf(" LONG");                  return LONG;        }
 "register"      { printf(" REGISTER");              return REGISTER;    }
@@ -120,10 +121,19 @@ whitespace  [ \t]+
 "*="            { printf(" MULTIPLY_ASSIGN");       return MULTIPLY_ASSIGN;       }
 "/="            { printf(" DIVIDE_ASSIGN");         return DIVIDE_ASSIGN;         }
 "%="            { printf(" MODULUS_ASSIGN");        return MODULUS_ASSIGN;        }
+"&="            { printf(" AND_ASSIGN");           return BITWISE_AND_ASSIGN;     }
+">>="           { printf(" RIGHT_SHIFT_ASSIGN");   return RIGHT_SHIFT_ASSIGN;    }
+"<<="           { printf(" LEFT_SHIFT_ASSIGN");    return LEFT_SHIFT_ASSIGN;     }
+"|="            { printf(" OR_ASSIGN");            return BITWISE_OR_ASSIGN;      }
+"^="            { printf(" XOR_ASSIGN");           return BITWISE_XOR_ASSIGN;     }
+
 ";"             { printf(" SEMI");                  return SEMI;                  }
 ","             { printf(" COMMA");                 return COMMA;                 }
 ":"             { printf(" COLON");                 return COLON;                 }
 "."             { printf(" DOT");                   return DOT;                   }
+
+
+
 
 "("             { printf(" LEFT_PAREN");            return LPAREN;                }
 ")"             { printf(" RIGHT_PAREN");           return RPAREN;                }
@@ -132,19 +142,19 @@ whitespace  [ \t]+
 "["             { printf(" LEFT_BRACKET");          return LEFT_BRACKET;          }
 "]"             { printf(" RIGHT_BRACKET");         return RIGHT_BRACKET;         }
 "?"             { printf(" TERNARY");               return TERNARY;               }
-"#"             { printf(" PREPROCESSOR");          return PREPROCESSOR;          }
+"#"             { printf(" CARDINAL");              return CARDINAL;              }
 "->"            { printf(" ARROW");                 return ARROW;                 }
 "\0"            {return ENDFILE;} 
 
 
-{number}        { (yylval.intval=atoi(yytext));          printf(" %d", yylval.intval);    return NUM; }
-{identifier}    { sscanf(yytext,"%s",yylval.identifier); printf(" %s", yytext);           return ID;  }
-{float_number}  { (yylval.floatval=atof(yytext));        printf(" %f", yylval.floatval);  return FNUM;}
-{newline}       { printf(" \n");                         linenum++;}
-{string}        { sscanf(yytext,"%s",yylval.strval);     printf(" %s",yytext); return STRINGliteral; }
+{number}        { (yylval.intval=atoi(yytext));          printf(" [NUM: %d]", yylval.intval);    return NUM; }
+{identifier}    { sscanf(yytext,"%s",yylval.identifier); printf(" [ID: %s]", yylval.identifier); return ID;  }
+{float_number}  { (yylval.floatval=atof(yytext));        printf(" [FNUM: %f]", yylval.floatval);  return FNUM;}
+{newline}       { printf(" \n");                         linenum++;                                   }
+{string}        { sscanf(yytext,"%s",yylval.strval);     printf(" %s",yytext); return STRINGliteral;  }
 {whitespace}    { /*  ignore */}  
 
-"//".*          { /* When "//" is found, zero or more occurrences of any character are ignored */}
+"//".*         { /* When "//" is found, zero or more occurrences of any character are ignored */}
 
 <INITIAL>{      // INITIAL Lexical state
   "/*"          { printf(" [In comment]");} BEGIN(INCOMMENT);      

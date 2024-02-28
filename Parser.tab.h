@@ -125,25 +125,23 @@ extern int yydebug;
     LEFT_SHIFT = 326,              /* LEFT_SHIFT  */
     PLUS_ASSIGN = 327,             /* PLUS_ASSIGN  */
     MINUS_ASSIGN = 328,            /* MINUS_ASSIGN  */
-    MODULO = 329,                  /* MODULO  */
-    LEFT_SHIFT_ASSIGN = 330,       /* LEFT_SHIFT_ASSIGN  */
-    RIGHT_SHIFT_ASSIGN = 331,      /* RIGHT_SHIFT_ASSIGN  */
-    BITWISE_AND_ASSIGN = 332,      /* BITWISE_AND_ASSIGN  */
-    BITWISE_OR_ASSIGN = 333,       /* BITWISE_OR_ASSIGN  */
-    BITWISE_XOR_ASSIGN = 334,      /* BITWISE_XOR_ASSIGN  */
-    MULTIPLY_ASSIGN = 335,         /* MULTIPLY_ASSIGN  */
-    DIVIDE_ASSIGN = 336,           /* DIVIDE_ASSIGN  */
-    MODULUS_ASSIGN = 337,          /* MODULUS_ASSIGN  */
-    PREPROCESSOR = 338,            /* PREPROCESSOR  */
-    ARROW = 339,                   /* ARROW  */
-    DEFINE = 340,                  /* DEFINE  */
-    CONSTANT = 341,                /* CONSTANT  */
-    POINTER = 342,                 /* POINTER  */
-    ADDRESS_OF = 343,              /* ADDRESS_OF  */
-    OTHER = 344,                   /* OTHER  */
-    AUTO = 345,                    /* AUTO  */
-    DOT = 346,                     /* DOT  */
-    STRINGliteral = 347            /* STRINGliteral  */
+    LEFT_SHIFT_ASSIGN = 329,       /* LEFT_SHIFT_ASSIGN  */
+    RIGHT_SHIFT_ASSIGN = 330,      /* RIGHT_SHIFT_ASSIGN  */
+    BITWISE_AND_ASSIGN = 331,      /* BITWISE_AND_ASSIGN  */
+    BITWISE_OR_ASSIGN = 332,       /* BITWISE_OR_ASSIGN  */
+    BITWISE_XOR_ASSIGN = 333,      /* BITWISE_XOR_ASSIGN  */
+    MULTIPLY_ASSIGN = 334,         /* MULTIPLY_ASSIGN  */
+    DIVIDE_ASSIGN = 335,           /* DIVIDE_ASSIGN  */
+    MODULUS_ASSIGN = 336,          /* MODULUS_ASSIGN  */
+    CARDINAL = 337,                /* CARDINAL  */
+    ARROW = 338,                   /* ARROW  */
+    DEFINE = 339,                  /* DEFINE  */
+    CONSTANT = 340,                /* CONSTANT  */
+    POINTER = 341,                 /* POINTER  */
+    ADDRESS_OF = 342,              /* ADDRESS_OF  */
+    OTHER = 343,                   /* OTHER  */
+    DOT = 344,                     /* DOT  */
+    STRINGliteral = 345            /* STRINGliteral  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -152,7 +150,7 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 37 "Parser.y"
+#line 36 "Parser.y"
 
     char identifier[20];
     int intval;              // For integer literals
@@ -160,7 +158,7 @@ union YYSTYPE
     char *strval;            // For string literals or identifiers
     char charval;            // For single character tokens
 
-#line 164 "Parser.tab.h"
+#line 162 "Parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

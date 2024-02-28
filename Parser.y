@@ -22,15 +22,14 @@ int yyerror(char *s);
 
 /* operators*/
 %token INCREMENT DECREMENT BITWISE_AND BITWISE_OR BITWISE_NOT BITWISE_XOR LOGICAL_NOT LOGICAL_AND LOGICAL_OR EQUAL NOT_EQUAL LESS_THAN
-%token GREATER_THAN LESS_THAN_OR_EQUAL GREATER_THAN_OR_EQUAL RIGHT_SHIFT LEFT_SHIFT PLUS_ASSIGN MINUS_ASSIGN MODULO LEFT_SHIFT_ASSIGN 
+%token GREATER_THAN LESS_THAN_OR_EQUAL GREATER_THAN_OR_EQUAL RIGHT_SHIFT LEFT_SHIFT PLUS_ASSIGN MINUS_ASSIGN LEFT_SHIFT_ASSIGN 
 %token RIGHT_SHIFT_ASSIGN BITWISE_AND_ASSIGN BITWISE_OR_ASSIGN BITWISE_XOR_ASSIGN
 %token MULTIPLY_ASSIGN DIVIDE_ASSIGN MODULUS_ASSIGN
 
 /* additional tokens */
-%token PREPROCESSOR ARROW DEFINE
+%token CARDINAL ARROW DEFINE
 %token CONSTANT POINTER ADDRESS_OF OTHER
 
-%token AUTO
 %token DOT
 %token STRINGliteral
 
@@ -43,90 +42,155 @@ int yyerror(char *s);
 }
 
 /* data types */
+
 %type <identifier> ID
 %type <intval> NUM
 %type <floatval> FNUM
 
 %%
-// Program
-prog:  stmts endfile
+
+
+prog:  prog endfile
+    |  prog global_stmts
+    |  global_stmts
     ;
 
-//all possible statements
-stmts:
-     |  stmt SEMI stmts
-     |  stmts stmt SEMI
+global_stmts:  func_declaration
+            |  declaration_stmt SEMI
+            |  instantiation_stmt SEMI
+            ;
+
+stmts:  stmts stmt   
+     |  stmt          
      ;
 
 // Statement Types
-stmt:  if_stmt
-    |  while_stmt
-    |  do_stmt
+stmt:  goto_stmt
+    |  label
+    |  if_stmt
     |  for_stmt
-    |  return_stmt
-    |  declaration_stmt
-    |  compound_stmt
-    |  expr
+    |  while_stmt
+    |  do_while_stmt SEMI
+    |  return_stmt SEMI
+    |  declaration_stmt SEMI  
+    |  assignment_stmt SEMI   
+    |  instantiation_stmt SEMI
+    |  CONTINUE SEMI
+    |  BREAK SEMI
     ;
 
 // Verify and reorganize declaraction_stmt for either fit all types of declarations or completly remove it
-declaration_stmt:  type ID                          { printf("The type you entered is "); }
-                |  type ID ASSIGN expr
+declaration_stmt:  variable_declaration
+                |  array_declaration
+                |  struct_declaration
+                |  enum_declaration
+                |  union_declaration
+                |  typeDef_declaration
                 ;
 
-compound_stmt:  LEFT_BRACE stmts RIGHT_BRACE
-		     ;
+assignment_stmt: 
+                ID assign_op expr   /*if(a<b) {b = 10;}*/ 
+               |ID DOT ID assign_op expr /*if(a<b) {b.c = 10;}*/
+               | unary_op ID        //if(a<b) ++b;
+               | ID unary_op        //if(a<b) b++;
+               | array_declaration assign_op LEFT_BRACE expr RIGHT_BRACE
+               ;
 
-// Functions
-function_declaration:  base_declaration LPAREN function_parameters RPAREN compound_stmt
-                    |  base_declaration LPAREN function_parameters RPAREN
+// Array
+array_declaration: prefixes type ID LEFT_BRACKET expr RIGHT_BRACKET ;
+
+/*
+*   Functions
+*/ 
+func_declaration:  prefixes type ID LPAREN func_parameters_declaration RPAREN compound_stmt
+                    |  prefixes type ID LPAREN func_parameters_declaration RPAREN SEMI
                     ;
 
-function_parameters:
-                   |  function_parameters COLON base_declaration
-                   |  base_declaration
+func_parameters_declaration:
+                   |  func_parameters_declaration COMMA variable_declaration 
+                   |  variable_declaration
                    |  VOID
                    ;
 
-base_declaration:  prefixes type ID ;
+variable_declaration:  prefixes type ID 
+                    |  prefixes type ID assign_op expr 
+                    ;
 
+
+/*
+* STRUCT, UNION, ENUM 
+*/
+data_struct_stmts: 
+                 |  data_struct_stmts declaration_stmt SEMI
+                 |  data_struct_stmts func_declaration SEMI
+                 |  declaration_stmt SEMI
+                 |  func_declaration SEMI
+                 ;    
+
+enum_parameters:  
+               |  enum_parameters COMMA ID
+               |  ID
+               ;                                                                               
+
+struct_declaration:  STRUCT ID LEFT_BRACE data_struct_stmts RIGHT_BRACE
+		          ;
+
+union_declaration:  UNION ID LEFT_BRACE data_struct_stmts RIGHT_BRACE
+		         ;
+
+enum_declaration:  ENUM ID LEFT_BRACE enum_parameters RIGHT_BRACE
+		        ;
+
+typeDef_declaration: TYPEDEF enum_declaration ID 
+            | TYPEDEF ENUM LEFT_BRACE enum_parameters RIGHT_BRACE ID
+            | TYPEDEF union_declaration ID
+            | TYPEDEF UNION LEFT_BRACE data_struct_stmts RIGHT_BRACE ID
+			| TYPEDEF struct_declaration ID
+            | TYPEDEF STRUCT LEFT_BRACE data_struct_stmts RIGHT_BRACE ID
+            | TYPEDEF type ID
+			; 
+            
 // Instantiation
+instantiation_stmt:  struct_inst
+                  |  union_inst
+                  |  func_inst
+                  ;
 
-function_inst:  ID LPAREN function_inst_parameters RPAREN ;
+struct_inst: STRUCT ID ID ;
 
-function_inst_parameters:  function_inst_parameters COLON expr
-                        |  expr
-                        ;
+union_inst : UNION ID ID ;
 
+func_inst:  ID LPAREN func_inst_parameters RPAREN ;
+
+func_inst_parameters: 
+                    |  func_inst_parameters COMMA expr
+                    |  expr
+                    ;
 // Expressions
-expr:  arith_expr
-	|  cond_expr
-	;
 
-cond_expr:  cond_expr cond_op factor
-		 |  LOGICAL_NOT cond_expr
-		 |  factor
-		 ;
+expr:  expr op term     
+    |  expr cond_op term     
+    |  expr bitwise_op term
+    |  expr logical_op term     
+    |  term
+    ;
 
-arith_expr:  arith_expr op term
-          |  term
-          ;
-
-term:  term prio_op operand
+term:  term prio_op operand         
     |  operand
     ;
 
 operand:  unary_op factor
        |  factor unary_op
        |  type_cast factor
+       |  LOGICAL_NOT factor
        |  factor
        ;
 
-factor:  LPAREN arith_expr RPAREN
-      |  NUM
+factor:  LPAREN expr RPAREN
+      |  NUM 
       |  ID
       |  FNUM
-      |  function_inst
+      |  func_inst
       ;
 
 // Operators
@@ -137,7 +201,7 @@ op:  PLUS
   ;
   
 prio_op:  TIMES
-       |  OVER
+       |  OVER 
        |  PERCENT
        ;
 
@@ -149,34 +213,77 @@ cond_op:  GREATER_THAN
        |  LESS_THAN_OR_EQUAL
        |  GREATER_THAN_OR_EQUAL
        |  LESS_THAN
-       |  LOGICAL_AND
-       |  LOGICAL_OR
        |  EQUAL
        |  NOT_EQUAL
        ;
 
-// Flow Control
-if_stmt:   IF LPAREN expr RPAREN compound_stmt                                   //{printf("IF statement: %s", $2);}
-		|  IF LPAREN expr RPAREN compound_stmt elseif_list                       //{printf("IF statement: %s", $2);}
-		|  IF LPAREN expr RPAREN compound_stmt ELSE compound_stmt                //{printf("IF statement: %s", $2);}
-        |  IF LPAREN expr RPAREN compound_stmt elseif_list ELSE compound_stmt    //{printf("IF statement: %s", $2);}
-        ;
-
-elseif_list:  elseif_list ELSEIF LPAREN expr RPAREN compound_stmt
-           |  ELSEIF LPAREN expr RPAREN compound_stmt
-           ;
-
-do_stmt:  DO compound_stmt WHILE expr
-       |  DO stmt WHILE expr
-       ;
-
-while_stmt:  WHILE LPAREN expr RPAREN compound_stmt
-          |  WHILE LPAREN expr RPAREN stmt
+logical_op:  LOGICAL_AND
+          |  LOGICAL_OR
           ;
 
-for_stmt:  FOR LPAREN expr SEMI expr SEMI expr RPAREN compound_stmt
-        |  FOR LPAREN expr SEMI expr SEMI expr RPAREN stmt
+bitwise_op: BITWISE_AND
+          | BITWISE_NOT
+          | BITWISE_OR 
+          | BITWISE_XOR       
+          ;
+
+assign_op:  ASSIGN
+             |  PLUS_ASSIGN
+             |  MINUS_ASSIGN
+             |  MODULUS_ASSIGN
+             |  LEFT_SHIFT_ASSIGN
+             |  RIGHT_SHIFT_ASSIGN
+             |  BITWISE_AND_ASSIGN
+             |  BITWISE_OR_ASSIGN
+             |  BITWISE_XOR_ASSIGN
+             |  MULTIPLY_ASSIGN
+             |  DIVIDE_ASSIGN
+             ;
+             
+// Flow Control expr 
+compound_stmt:  LEFT_BRACE stmts RIGHT_BRACE
+             |  LEFT_BRACE RIGHT_BRACE 
+             ;
+
+if_stmt:   IF LPAREN condition RPAREN compound_stmt                           
+        |  IF LPAREN condition RPAREN compound_stmt elseif_stmt               
+        |  IF LPAREN condition RPAREN compound_stmt else_stmt                 
+        |  IF LPAREN condition RPAREN stmt  
+        |  IF LPAREN condition RPAREN stmt elseif_stmt                        
+        |  IF LPAREN condition RPAREN stmt else_stmt 
+        |  IF LPAREN condition RPAREN SEMI
         ;
+
+elseif_stmt:  elseif_stmt ELSEIF LPAREN condition RPAREN stmt                 
+           |  elseif_stmt ELSEIF LPAREN condition RPAREN compound_stmt 
+           |  ELSEIF LPAREN condition RPAREN stmt                             
+           |  ELSEIF LPAREN condition RPAREN stmt else_stmt
+           |  ELSEIF LPAREN condition RPAREN compound_stmt                    
+           |  ELSEIF LPAREN condition RPAREN compound_stmt else_stmt          
+           ; 
+
+else_stmt: ELSE stmt
+        |  ELSE compound_stmt
+        ;
+
+do_while_stmt:  DO compound_stmt WHILE LPAREN condition RPAREN
+       |  DO stmt WHILE LPAREN LPAREN condition RPAREN
+       ;
+
+while_stmt:  WHILE LPAREN condition RPAREN compound_stmt
+          |  WHILE LPAREN condition RPAREN stmt
+          |  WHILE LPAREN condition RPAREN SEMI
+          ;
+
+for_stmt:  FOR LPAREN condition SEMI condition SEMI condition RPAREN compound_stmt
+        |  FOR LPAREN condition SEMI condition SEMI condition RPAREN stmt       
+        |  FOR LPAREN variable_declaration SEMI condition SEMI condition RPAREN compound_stmt
+        |  FOR LPAREN variable_declaration SEMI condition SEMI condition RPAREN stmt 
+        ;
+                |  variable_declaration
+condition: expr
+        |  assignment_stmt
+         ;
 
 switch_case:  SWITCH LPAREN ID RPAREN LEFT_BRACE case_list RIGHT_BRACE
            |  SWITCH LPAREN ID RPAREN LEFT_BRACE case_list case_default RIGHT_BRACE
@@ -191,22 +298,10 @@ case_list:  case_list case
 case:  CASE NUM COLON stmts BREAK ;
 
 case_default:  DEFAULT NUM COLON stmts BREAK ;
+ 
+label: ID COLON ;
 
-
-struct_stmt: STRUCT ID LEFT_BRACE stmts RIGHT_BRACE SEMI
-		   ;
-
-enum_stmt: ENUM ID LEFT_BRACE stmts RIGHT_BRACE SEMI
-		 ;
-
-union_stmt: UNION ID LEFT_BRACE stmts RIGHT_BRACE SEMI
-		 ;
-
-goto_stmt: GOTO ID SEMI;
-
-typeDef_stmt: TYPEDEF enum_stmt ID SEMI
-			| TYPEDEF struct_stmt ID SEMI
-			;  
+goto_stmt: GOTO ID SEMI ;
 
 size_of_stmt: SIZEOF LPAREN ID RPAREN
 			| SIZEOF LPAREN type RPAREN
@@ -247,6 +342,8 @@ prefix:  EXTERN
       |  REGISTER
       |  CONSTANT
       ;
+
+
 
 type_cast: LPAREN type RPAREN ;
 
