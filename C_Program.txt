@@ -1,4 +1,5 @@
 
-int a (char* a){
-
+int main(){
+    
+    int a = sizeof(int);
 }

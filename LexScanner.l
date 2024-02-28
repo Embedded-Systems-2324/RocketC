@@ -64,6 +64,7 @@ whitespace  [ \t]+
 "const"         { printf(" CONST");                 return CONSTANT;    }
 "continue"      { printf(" CONTINUE");              return CONTINUE;    }
 "default"       { printf(" DEFAULT");               return DEFAULT;     }
+"define"        { printf(" DEFINE");                return DEFINE;      }
 "do"            { printf(" DO");                    return DO;          } 
 "double"        { printf(" DOUBLE");                return DOUBLE;      }
 "if"            { printf(" IF");                    return IF;          }
@@ -91,7 +92,6 @@ whitespace  [ \t]+
 "void"          { printf(" VOID");                  return VOID;        }
 "volatile"      { printf(" VOLATILE");              return VOLATILE;    }
 "while"         { printf(" WHILE");                 return WHILE;       }
-"define"        { printf(" DEFINE");                return DEFINE;      }
 
 "+"             { printf(" PLUS");                  return PLUS;        }
 "-"             { printf(" MINUS");                 return MINUS;       }

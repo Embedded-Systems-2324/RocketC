@@ -69,6 +69,7 @@ stmt:  goto_stmt
     |  label
     |  if_stmt
     |  for_stmt
+    |  switch_case
     |  while_stmt
     |  do_while_stmt SEMI
     |  return_stmt SEMI
@@ -195,6 +196,7 @@ factor:  LPAREN expr RPAREN
       |  ID
       |  FNUM
       |  func_inst
+      |  size_of_stmt
       ;
 
 // Operators
@@ -289,9 +291,7 @@ condition: expr
         |  assignment_stmt
          ;
 
-switch_case:  SWITCH LPAREN ID RPAREN LEFT_BRACE case_list RIGHT_BRACE
-           |  SWITCH LPAREN ID RPAREN LEFT_BRACE case_list case_default RIGHT_BRACE
-           |  SWITCH LPAREN expr RPAREN LEFT_BRACE case_list RIGHT_BRACE
+switch_case:  SWITCH LPAREN expr RPAREN LEFT_BRACE case_list RIGHT_BRACE
            |  SWITCH LPAREN expr RPAREN LEFT_BRACE case_list case_default RIGHT_BRACE
            ;
 
@@ -299,9 +299,13 @@ case_list:  case_list case
          |  case
          ;
 
-case:  CASE NUM COLON stmts BREAK ;
+case:  CASE case_args COLON stmts BREAK SEMI;
 
-case_default:  DEFAULT NUM COLON stmts BREAK ;
+case_args: NUM      // Semanthic analysis must suport only integers,
+        |  ID       // ENUM constants and signle chars 
+        ;
+
+case_default:  DEFAULT COLON stmts BREAK SEMI;
  
 label: ID COLON ;
 
