@@ -30,8 +30,7 @@ int yyerror(char *s);
 %token CARDINAL ARROW DEFINE
 %token CONSTANT POINTER ADDRESS_OF OTHER
 
-%token DOT
-%token STRINGliteral
+%token DOT QUOTE
 
 %union{
     char identifier[20];
