@@ -49,9 +49,6 @@ number      {digit}+
 float_number  {digit}*"."{digit}+({expo}{digit}+)?
 
 identifier  [a-zA-Z_][a-zA-Z0-9_]*
-
-string      \"([^"\\]|\\.)*\"
-
 newline     \n
 sign        ([-+])
 expo        [eE]{sign}?
@@ -131,8 +128,7 @@ whitespace  [ \t]+
 ","             { printf(" COMMA");                 return COMMA;                 }
 ":"             { printf(" COLON");                 return COLON;                 }
 "."             { printf(" DOT");                   return DOT;                   }
-
-
+"\""            { printf(" QUOTE");                 return QUOTE;                 }
 
 
 "("             { printf(" LEFT_PAREN");            return LPAREN;                }
