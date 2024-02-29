@@ -330,10 +330,9 @@ type:  INT
     ;
 
 special_type: STRUCT
-			| TYPEDEF
-			| ENUM
-			| UNION
-			;
+	| ENUM
+	| UNION
+	;
 
 prefixes:
         |  prefixes prefix
