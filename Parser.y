@@ -75,6 +75,7 @@ stmt:  goto_stmt
     |  if_stmt
     |  for_stmt
     |  while_stmt
+    |  switch_case
     |  do_while_stmt SEMI
     |  return_stmt SEMI
     |  declaration_stmt SEMI  
@@ -208,6 +209,7 @@ factor:  LPAREN expr RPAREN     // (a)
       |  ID                     // a
       |  FNUM                   // 1.5
       |  func_inst              // func(...);
+      |  size_of_stmt           // sizeof(...)
       ;
 
 /*
