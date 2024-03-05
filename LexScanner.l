@@ -147,7 +147,6 @@ whitespace  [ \t]+
 {identifier}    { sscanf(yytext,"%s",yylval.identifier); printf(" [ID: %s]", yylval.identifier); return ID;  }
 {float_number}  { (yylval.floatval=atof(yytext));        printf(" [FNUM: %f]", yylval.floatval);  return FNUM;}
 {newline}       { printf(" \n");                         linenum++;                                   }
-{string}        { sscanf(yytext,"%s",yylval.strval);     printf(" %s",yytext); return STRINGliteral;  }
 {whitespace}    { /*  ignore */}  
 
 "//".*         { /* When "//" is found, zero or more occurrences of any character are ignored */}

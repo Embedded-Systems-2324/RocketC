@@ -1,0 +1,4996 @@
+Nonterminals useless in grammar
+
+    switch_case
+    case_list
+    case
+    case_default
+    size_of_stmt
+    special_type
+
+
+Terminals unused in grammar
+
+    ERROR
+    SWITCH
+    CASE
+    DEFAULT
+    SIZEOF
+    TERNARY
+    CARDINAL
+    ARROW
+    DEFINE
+    POINTER
+    ADDRESS_OF
+    OTHER
+    DOT
+    QUOTE
+
+
+Rules useless in grammar
+
+  169 switch_case: SWITCH LPAREN ID RPAREN LEFT_BRACE case_list RIGHT_BRACE
+  170            | SWITCH LPAREN ID RPAREN LEFT_BRACE case_list case_default RIGHT_BRACE
+  171            | SWITCH LPAREN expr RPAREN LEFT_BRACE case_list RIGHT_BRACE
+  172            | SWITCH LPAREN expr RPAREN LEFT_BRACE case_list case_default RIGHT_BRACE
+
+  173 case_list: case_list case
+  174          | case
+
+  175 case: CASE NUM COLON stmts BREAK
+  176     | CASE NUM COLON stmt
+
+  177 case_default: DEFAULT COLON stmts BREAK
+  178             | DEFAULT COLON stmt
+
+  179 size_of_stmt: SIZEOF LPAREN ID RPAREN
+  180             | SIZEOF LPAREN type RPAREN
+  181             | SIZEOF LPAREN special_type ID RPAREN
+
+  182 special_type: STRUCT
+  183             | TYPEDEF
+  184             | ENUM
+  185             | UNION
+
+
+State 0 conflicts: 9 shift/reduce
+State 15 conflicts: 9 shift/reduce
+State 56 conflicts: 13 shift/reduce, 14 reduce/reduce
+State 58 conflicts: 13 shift/reduce, 14 reduce/reduce
+State 61 conflicts: 13 shift/reduce, 14 reduce/reduce
+State 68 conflicts: 13 shift/reduce, 14 reduce/reduce
+State 90 conflicts: 9 shift/reduce
+State 91 conflicts: 9 shift/reduce
+State 94 conflicts: 9 shift/reduce
+State 96 conflicts: 9 shift/reduce
+State 131 conflicts: 10 shift/reduce
+State 176 conflicts: 9 shift/reduce
+State 179 conflicts: 9 shift/reduce
+State 186 conflicts: 9 shift/reduce
+State 195 conflicts: 9 shift/reduce
+State 214 conflicts: 9 shift/reduce
+State 233 conflicts: 2 shift/reduce
+State 249 conflicts: 2 reduce/reduce
+State 250 conflicts: 9 shift/reduce
+State 253 conflicts: 9 shift/reduce
+State 259 conflicts: 2 shift/reduce
+State 260 conflicts: 2 shift/reduce
+State 271 conflicts: 9 shift/reduce
+State 272 conflicts: 1 shift/reduce
+State 274 conflicts: 1 shift/reduce
+State 290 conflicts: 9 shift/reduce
+State 291 conflicts: 9 shift/reduce
+State 292 conflicts: 9 shift/reduce
+State 298 conflicts: 1 shift/reduce
+State 299 conflicts: 1 shift/reduce
+State 300 conflicts: 9 shift/reduce
+
+
+Grammar
+
+    0 $accept: prog $end
+
+    1 prog: prog endfile
+    2     | prog global_stmt
+    3     | global_stmt
+
+    4 global_stmt: func_declaration
+    5            | declaration_stmt SEMI
+    6            | instantiation_stmt SEMI
+
+    7 stmts: stmts stmt
+    8      | stmt
+
+    9 stmt: goto_stmt
+   10     | label
+   11     | if_stmt
+   12     | for_stmt
+   13     | while_stmt
+   14     | do_while_stmt SEMI
+   15     | return_stmt SEMI
+   16     | declaration_stmt SEMI
+   17     | assignment_stmt SEMI
+   18     | instantiation_stmt SEMI
+   19     | CONTINUE SEMI
+   20     | BREAK SEMI
+
+   21 assignment_stmt: ID assign_op expr
+   22                | unary_op ID
+   23                | ID unary_op
+   24                | ID assign_op LEFT_BRACE expr RIGHT_BRACE
+   25                | ID LEFT_BRACKET expr RIGHT_BRACKET assign_op expr
+
+   26 declaration_stmt: variable_declaration
+   27                 | array_declaration
+   28                 | struct_declaration
+   29                 | enum_declaration
+   30                 | union_declaration
+   31                 | typeDef_declaration
+
+   32 variable_declaration: prefixes type ID
+   33                     | prefixes type ID assign_op expr
+
+   34 array_declaration: prefixes type ID LEFT_BRACKET expr RIGHT_BRACKET
+   35                  | prefixes type ID LEFT_BRACKET expr RIGHT_BRACKET assign_op LEFT_BRACE expr RIGHT_BRACE
+
+   36 func_declaration: prefixes type ID LPAREN func_parameters_declaration RPAREN compound_stmt
+   37                 | prefixes type ID LPAREN func_parameters_declaration RPAREN SEMI
+
+   38 func_parameters_declaration: ε
+   39                            | func_parameters_declaration COMMA variable_declaration
+   40                            | variable_declaration
+   41                            | VOID
+
+   42 data_struct_stmts: ε
+   43                  | data_struct_stmts declaration_stmt SEMI
+   44                  | data_struct_stmts func_declaration SEMI
+   45                  | declaration_stmt SEMI
+   46                  | func_declaration SEMI
+
+   47 struct_declaration: STRUCT ID LEFT_BRACE data_struct_stmts RIGHT_BRACE
+
+   48 union_declaration: UNION ID LEFT_BRACE data_struct_stmts RIGHT_BRACE
+
+   49 enum_declaration: ENUM ID LEFT_BRACE enum_parameters RIGHT_BRACE
+
+   50 enum_parameters: ε
+   51                | enum_parameters COMMA ID
+   52                | ID
+
+   53 typeDef_declaration: TYPEDEF enum_declaration ID
+   54                    | TYPEDEF ENUM LEFT_BRACE enum_parameters RIGHT_BRACE ID
+   55                    | TYPEDEF union_declaration ID
+   56                    | TYPEDEF UNION LEFT_BRACE data_struct_stmts RIGHT_BRACE ID
+   57                    | TYPEDEF struct_declaration ID
+   58                    | TYPEDEF STRUCT LEFT_BRACE data_struct_stmts RIGHT_BRACE ID
+   59                    | TYPEDEF type ID
+
+   60 instantiation_stmt: struct_inst
+   61                   | union_inst
+   62                   | func_inst
+
+   63 struct_inst: STRUCT ID ID
+
+   64 union_inst: UNION ID ID
+
+   65 func_inst: ID LPAREN func_inst_parameters RPAREN
+
+   66 func_inst_parameters: ε
+   67                     | func_inst_parameters COMMA expr
+   68                     | expr
+   69                     | VOID
+
+   70 expr: expr op term
+   71     | expr comp_op term
+   72     | expr bitwise_op term
+   73     | expr logical_op term
+   74     | term
+
+   75 term: term prio_op operand
+   76     | operand
+
+   77 operand: unary_op factor
+   78        | factor unary_op
+   79        | type_cast factor
+   80        | LOGICAL_NOT factor
+   81        | factor
+
+   82 factor: LPAREN expr RPAREN
+   83       | NUM
+   84       | ID
+   85       | FNUM
+   86       | func_inst
+
+   87 op: PLUS
+   88   | MINUS
+   89   | RIGHT_SHIFT
+   90   | LEFT_SHIFT
+
+   91 prio_op: TIMES
+   92        | OVER
+   93        | PERCENT
+
+   94 unary_op: INCREMENT
+   95         | DECREMENT
+
+   96 comp_op: GREATER_THAN
+   97        | LESS_THAN_OR_EQUAL
+   98        | GREATER_THAN_OR_EQUAL
+   99        | LESS_THAN
+  100        | EQUAL
+  101        | NOT_EQUAL
+
+  102 logical_op: LOGICAL_AND
+  103           | LOGICAL_OR
+
+  104 bitwise_op: BITWISE_AND
+  105           | BITWISE_NOT
+  106           | BITWISE_OR
+  107           | BITWISE_XOR
+
+  108 assign_op: ASSIGN
+  109          | PLUS_ASSIGN
+  110          | MINUS_ASSIGN
+  111          | MODULUS_ASSIGN
+  112          | LEFT_SHIFT_ASSIGN
+  113          | RIGHT_SHIFT_ASSIGN
+  114          | BITWISE_AND_ASSIGN
+  115          | BITWISE_OR_ASSIGN
+  116          | BITWISE_XOR_ASSIGN
+  117          | MULTIPLY_ASSIGN
+  118          | DIVIDE_ASSIGN
+
+  119 compound_stmt: LEFT_BRACE stmts RIGHT_BRACE
+  120              | LEFT_BRACE RIGHT_BRACE
+
+  121 if_stmt: IF LPAREN condition RPAREN compound_stmt
+  122        | IF LPAREN condition RPAREN compound_stmt elseif_stmt
+  123        | IF LPAREN condition RPAREN compound_stmt else_stmt
+  124        | IF LPAREN condition RPAREN stmt
+  125        | IF LPAREN condition RPAREN stmt elseif_stmt
+  126        | IF LPAREN condition RPAREN stmt else_stmt
+  127        | IF LPAREN condition RPAREN SEMI
+
+  128 elseif_stmt: elseif_stmt ELSEIF LPAREN condition RPAREN stmt
+  129            | elseif_stmt ELSEIF LPAREN condition RPAREN compound_stmt
+  130            | ELSEIF LPAREN condition RPAREN stmt
+  131            | ELSEIF LPAREN condition RPAREN stmt else_stmt
+  132            | ELSEIF LPAREN condition RPAREN compound_stmt
+  133            | ELSEIF LPAREN condition RPAREN compound_stmt else_stmt
+
+  134 else_stmt: ELSE stmt
+  135          | ELSE compound_stmt
+
+  136 do_while_stmt: DO compound_stmt WHILE LPAREN condition RPAREN
+  137              | DO stmt WHILE LPAREN LPAREN condition RPAREN
+
+  138 while_stmt: WHILE LPAREN condition RPAREN compound_stmt
+  139           | WHILE LPAREN condition RPAREN stmt
+  140           | WHILE LPAREN condition RPAREN SEMI
+
+  141 for_stmt: FOR LPAREN condition SEMI condition SEMI condition RPAREN compound_stmt
+  142         | FOR LPAREN condition SEMI condition SEMI condition RPAREN stmt
+  143         | FOR LPAREN variable_declaration SEMI condition SEMI condition RPAREN compound_stmt
+  144         | FOR LPAREN variable_declaration SEMI condition SEMI condition RPAREN stmt
+
+  145 condition: expr
+  146          | assignment_stmt
+
+  147 return_stmt: RETURN expr
+
+  148 goto_stmt: GOTO ID SEMI
+
+  149 label: ID COLON
+
+  150 endfile: ENDFILE
+
+  151 type: INT
+  152     | FLOAT
+  153     | DOUBLE
+  154     | CHAR
+  155     | VOID
+
+  156 prefixes: ε
+  157         | prefixes prefix
+  158         | prefix
+
+  159 prefix: EXTERN
+  160       | LONG
+  161       | SHORT
+  162       | STATIC
+  163       | SIGNED
+  164       | UNSIGNED
+  165       | VOLATILE
+  166       | REGISTER
+  167       | CONSTANT
+
+  168 type_cast: LPAREN type RPAREN
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256)
+    ENDFILE (258) 150
+    ERROR (259)
+    IF (260) 121 122 123 124 125 126 127
+    ELSEIF (261) 128 129 130 131 132 133
+    ELSE (262) 134 135
+    DO (263) 136 137
+    WHILE (264) 136 137 138 139 140
+    FOR (265) 141 142 143 144
+    SWITCH (266)
+    CASE (267)
+    DEFAULT (268)
+    RETURN (269) 147
+    BREAK (270) 20
+    INT (271) 151
+    FLOAT (272) 152
+    DOUBLE (273) 153
+    CHAR (274) 154
+    VOID (275) 41 69 155
+    STRUCT (276) 47 58 63
+    TYPEDEF (277) 53 54 55 56 57 58 59
+    CONTINUE (278) 19
+    EXTERN (279) 159
+    GOTO (280) 148
+    LONG (281) 160
+    ENUM (282) 49 54
+    REGISTER (283) 166
+    SHORT (284) 161
+    SIZEOF (285)
+    STATIC (286) 162
+    SIGNED (287) 163
+    UNION (288) 48 56 64
+    UNSIGNED (289) 164
+    VOLATILE (290) 165
+    NUM <intval> (291) 83
+    ID <identifier> (292) 21 22 23 24 25 32 33 34 35 36 37 47 48 49 51 52 53 54 55 56 57 58 59 63 64 65 84 148 149
+    FNUM <floatval> (293) 85
+    ASSIGN (294) 108
+    PLUS (295) 87
+    MINUS (296) 88
+    TIMES (297) 91
+    OVER (298) 92
+    PERCENT (299) 93
+    LPAREN (300) 36 37 65 82 121 122 123 124 125 126 127 128 129 130 131 132 133 136 137 138 139 140 141 142 143 144 168
+    RPAREN (301) 36 37 65 82 121 122 123 124 125 126 127 128 129 130 131 132 133 136 137 138 139 140 141 142 143 144 168
+    LEFT_BRACE (302) 24 35 47 48 49 54 56 58 119 120
+    RIGHT_BRACE (303) 24 35 47 48 49 54 56 58 119 120
+    LEFT_BRACKET (304) 25 34 35
+    RIGHT_BRACKET (305) 25 34 35
+    TERNARY (306)
+    SEMI (307) 5 6 14 15 16 17 18 19 20 37 43 44 45 46 127 140 141 142 143 144 148
+    COLON (308) 149
+    COMMA (309) 39 51 67
+    INCREMENT (310) 94
+    DECREMENT (311) 95
+    BITWISE_AND (312) 104
+    BITWISE_OR (313) 106
+    BITWISE_NOT (314) 105
+    BITWISE_XOR (315) 107
+    LOGICAL_NOT (316) 80
+    LOGICAL_AND (317) 102
+    LOGICAL_OR (318) 103
+    EQUAL (319) 100
+    NOT_EQUAL (320) 101
+    LESS_THAN (321) 99
+    GREATER_THAN (322) 96
+    LESS_THAN_OR_EQUAL (323) 97
+    GREATER_THAN_OR_EQUAL (324) 98
+    RIGHT_SHIFT (325) 89
+    LEFT_SHIFT (326) 90
+    PLUS_ASSIGN (327) 109
+    MINUS_ASSIGN (328) 110
+    LEFT_SHIFT_ASSIGN (329) 112
+    RIGHT_SHIFT_ASSIGN (330) 113
+    BITWISE_AND_ASSIGN (331) 114
+    BITWISE_OR_ASSIGN (332) 115
+    BITWISE_XOR_ASSIGN (333) 116
+    MULTIPLY_ASSIGN (334) 117
+    DIVIDE_ASSIGN (335) 118
+    MODULUS_ASSIGN (336) 111
+    CARDINAL (337)
+    ARROW (338)
+    DEFINE (339)
+    CONSTANT (340) 167
+    POINTER (341)
+    ADDRESS_OF (342)
+    OTHER (343)
+    DOT (344)
+    QUOTE (345)
+
+
+Nonterminals, with rules where they appear
+
+    $accept (91)
+        on left: 0
+    prog (92)
+        on left: 1 2 3
+        on right: 0 1 2
+    global_stmt (93)
+        on left: 4 5 6
+        on right: 2 3
+    stmts (94)
+        on left: 7 8
+        on right: 7 119
+    stmt (95)
+        on left: 9 10 11 12 13 14 15 16 17 18 19 20
+        on right: 7 8 124 125 126 128 130 131 134 137 139 142 144
+    assignment_stmt (96)
+        on left: 21 22 23 24 25
+        on right: 17 146
+    declaration_stmt (97)
+        on left: 26 27 28 29 30 31
+        on right: 5 16 43 45
+    variable_declaration (98)
+        on left: 32 33
+        on right: 26 39 40 143 144
+    array_declaration (99)
+        on left: 34 35
+        on right: 27
+    func_declaration (100)
+        on left: 36 37
+        on right: 4 44 46
+    func_parameters_declaration (101)
+        on left: 38 39 40 41
+        on right: 36 37 39
+    data_struct_stmts (102)
+        on left: 42 43 44 45 46
+        on right: 43 44 47 48 56 58
+    struct_declaration (103)
+        on left: 47
+        on right: 28 57
+    union_declaration (104)
+        on left: 48
+        on right: 30 55
+    enum_declaration (105)
+        on left: 49
+        on right: 29 53
+    enum_parameters (106)
+        on left: 50 51 52
+        on right: 49 51 54
+    typeDef_declaration (107)
+        on left: 53 54 55 56 57 58 59
+        on right: 31
+    instantiation_stmt (108)
+        on left: 60 61 62
+        on right: 6 18
+    struct_inst (109)
+        on left: 63
+        on right: 60
+    union_inst (110)
+        on left: 64
+        on right: 61
+    func_inst (111)
+        on left: 65
+        on right: 62 86
+    func_inst_parameters (112)
+        on left: 66 67 68 69
+        on right: 65 67
+    expr (113)
+        on left: 70 71 72 73 74
+        on right: 21 24 25 33 34 35 67 68 70 71 72 73 82 145 147
+    term (114)
+        on left: 75 76
+        on right: 70 71 72 73 74 75
+    operand (115)
+        on left: 77 78 79 80 81
+        on right: 75 76
+    factor (116)
+        on left: 82 83 84 85 86
+        on right: 77 78 79 80 81
+    op (117)
+        on left: 87 88 89 90
+        on right: 70
+    prio_op (118)
+        on left: 91 92 93
+        on right: 75
+    unary_op (119)
+        on left: 94 95
+        on right: 22 23 77 78
+    comp_op (120)
+        on left: 96 97 98 99 100 101
+        on right: 71
+    logical_op (121)
+        on left: 102 103
+        on right: 73
+    bitwise_op (122)
+        on left: 104 105 106 107
+        on right: 72
+    assign_op (123)
+        on left: 108 109 110 111 112 113 114 115 116 117 118
+        on right: 21 24 25 33 35
+    compound_stmt (124)
+        on left: 119 120
+        on right: 36 121 122 123 129 132 133 135 136 138 141 143
+    if_stmt (125)
+        on left: 121 122 123 124 125 126 127
+        on right: 11
+    elseif_stmt (126)
+        on left: 128 129 130 131 132 133
+        on right: 122 125 128 129
+    else_stmt (127)
+        on left: 134 135
+        on right: 123 126 131 133
+    do_while_stmt (128)
+        on left: 136 137
+        on right: 14
+    while_stmt (129)
+        on left: 138 139 140
+        on right: 13
+    for_stmt (130)
+        on left: 141 142 143 144
+        on right: 12
+    condition (131)
+        on left: 145 146
+        on right: 121 122 123 124 125 126 127 128 129 130 131 132 133 136 137 138 139 140 141 142 143 144
+    return_stmt (132)
+        on left: 147
+        on right: 15
+    goto_stmt (133)
+        on left: 148
+        on right: 9
+    label (134)
+        on left: 149
+        on right: 10
+    endfile (135)
+        on left: 150
+        on right: 1
+    type (136)
+        on left: 151 152 153 154 155
+        on right: 32 33 34 35 36 37 59 168
+    prefixes (137)
+        on left: 156 157 158
+        on right: 32 33 34 35 36 37 157
+    prefix (138)
+        on left: 159 160 161 162 163 164 165 166 167
+        on right: 157 158
+    type_cast (139)
+        on left: 168
+        on right: 79
+
+
+State 0
+
+    0 $accept: • prog $end
+
+    STRUCT    shift, and go to state 1
+    TYPEDEF   shift, and go to state 2
+    EXTERN    shift, and go to state 3
+    LONG      shift, and go to state 4
+    ENUM      shift, and go to state 5
+    REGISTER  shift, and go to state 6
+    SHORT     shift, and go to state 7
+    STATIC    shift, and go to state 8
+    SIGNED    shift, and go to state 9
+    UNION     shift, and go to state 10
+    UNSIGNED  shift, and go to state 11
+    VOLATILE  shift, and go to state 12
+    ID        shift, and go to state 13
+    CONSTANT  shift, and go to state 14
+
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 156 (prefixes)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 156 (prefixes)
+
+    prog                  go to state 15
+    global_stmt           go to state 16
+    declaration_stmt      go to state 17
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    func_declaration      go to state 20
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    instantiation_stmt    go to state 25
+    struct_inst           go to state 26
+    union_inst            go to state 27
+    func_inst             go to state 28
+    prefixes              go to state 29
+    prefix                go to state 30
+
+
+State 1
+
+   47 struct_declaration: STRUCT • ID LEFT_BRACE data_struct_stmts RIGHT_BRACE
+   63 struct_inst: STRUCT • ID ID
+
+    ID  shift, and go to state 31
+
+
+State 2
+
+   53 typeDef_declaration: TYPEDEF • enum_declaration ID
+   54                    | TYPEDEF • ENUM LEFT_BRACE enum_parameters RIGHT_BRACE ID
+   55                    | TYPEDEF • union_declaration ID
+   56                    | TYPEDEF • UNION LEFT_BRACE data_struct_stmts RIGHT_BRACE ID
+   57                    | TYPEDEF • struct_declaration ID
+   58                    | TYPEDEF • STRUCT LEFT_BRACE data_struct_stmts RIGHT_BRACE ID
+   59                    | TYPEDEF • type ID
+
+    INT     shift, and go to state 32
+    FLOAT   shift, and go to state 33
+    DOUBLE  shift, and go to state 34
+    CHAR    shift, and go to state 35
+    VOID    shift, and go to state 36
+    STRUCT  shift, and go to state 37
+    ENUM    shift, and go to state 38
+    UNION   shift, and go to state 39
+
+    struct_declaration  go to state 40
+    union_declaration   go to state 41
+    enum_declaration    go to state 42
+    type                go to state 43
+
+
+State 3
+
+  159 prefix: EXTERN •
+
+    $default  reduce using rule 159 (prefix)
+
+
+State 4
+
+  160 prefix: LONG •
+
+    $default  reduce using rule 160 (prefix)
+
+
+State 5
+
+   49 enum_declaration: ENUM • ID LEFT_BRACE enum_parameters RIGHT_BRACE
+
+    ID  shift, and go to state 44
+
+
+State 6
+
+  166 prefix: REGISTER •
+
+    $default  reduce using rule 166 (prefix)
+
+
+State 7
+
+  161 prefix: SHORT •
+
+    $default  reduce using rule 161 (prefix)
+
+
+State 8
+
+  162 prefix: STATIC •
+
+    $default  reduce using rule 162 (prefix)
+
+
+State 9
+
+  163 prefix: SIGNED •
+
+    $default  reduce using rule 163 (prefix)
+
+
+State 10
+
+   48 union_declaration: UNION • ID LEFT_BRACE data_struct_stmts RIGHT_BRACE
+   64 union_inst: UNION • ID ID
+
+    ID  shift, and go to state 45
+
+
+State 11
+
+  164 prefix: UNSIGNED •
+
+    $default  reduce using rule 164 (prefix)
+
+
+State 12
+
+  165 prefix: VOLATILE •
+
+    $default  reduce using rule 165 (prefix)
+
+
+State 13
+
+   65 func_inst: ID • LPAREN func_inst_parameters RPAREN
+
+    LPAREN  shift, and go to state 46
+
+
+State 14
+
+  167 prefix: CONSTANT •
+
+    $default  reduce using rule 167 (prefix)
+
+
+State 15
+
+    0 $accept: prog • $end
+    1 prog: prog • endfile
+    2     | prog • global_stmt
+
+    $end      shift, and go to state 47
+    ENDFILE   shift, and go to state 48
+    STRUCT    shift, and go to state 1
+    TYPEDEF   shift, and go to state 2
+    EXTERN    shift, and go to state 3
+    LONG      shift, and go to state 4
+    ENUM      shift, and go to state 5
+    REGISTER  shift, and go to state 6
+    SHORT     shift, and go to state 7
+    STATIC    shift, and go to state 8
+    SIGNED    shift, and go to state 9
+    UNION     shift, and go to state 10
+    UNSIGNED  shift, and go to state 11
+    VOLATILE  shift, and go to state 12
+    ID        shift, and go to state 13
+    CONSTANT  shift, and go to state 14
+
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 156 (prefixes)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 156 (prefixes)
+
+    global_stmt           go to state 49
+    declaration_stmt      go to state 17
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    func_declaration      go to state 20
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    instantiation_stmt    go to state 25
+    struct_inst           go to state 26
+    union_inst            go to state 27
+    func_inst             go to state 28
+    endfile               go to state 50
+    prefixes              go to state 29
+    prefix                go to state 30
+
+
+State 16
+
+    3 prog: global_stmt •
+
+    $default  reduce using rule 3 (prog)
+
+
+State 17
+
+    5 global_stmt: declaration_stmt • SEMI
+
+    SEMI  shift, and go to state 51
+
+
+State 18
+
+   26 declaration_stmt: variable_declaration •
+
+    $default  reduce using rule 26 (declaration_stmt)
+
+
+State 19
+
+   27 declaration_stmt: array_declaration •
+
+    $default  reduce using rule 27 (declaration_stmt)
+
+
+State 20
+
+    4 global_stmt: func_declaration •
+
+    $default  reduce using rule 4 (global_stmt)
+
+
+State 21
+
+   28 declaration_stmt: struct_declaration •
+
+    $default  reduce using rule 28 (declaration_stmt)
+
+
+State 22
+
+   30 declaration_stmt: union_declaration •
+
+    $default  reduce using rule 30 (declaration_stmt)
+
+
+State 23
+
+   29 declaration_stmt: enum_declaration •
+
+    $default  reduce using rule 29 (declaration_stmt)
+
+
+State 24
+
+   31 declaration_stmt: typeDef_declaration •
+
+    $default  reduce using rule 31 (declaration_stmt)
+
+
+State 25
+
+    6 global_stmt: instantiation_stmt • SEMI
+
+    SEMI  shift, and go to state 52
+
+
+State 26
+
+   60 instantiation_stmt: struct_inst •
+
+    $default  reduce using rule 60 (instantiation_stmt)
+
+
+State 27
+
+   61 instantiation_stmt: union_inst •
+
+    $default  reduce using rule 61 (instantiation_stmt)
+
+
+State 28
+
+   62 instantiation_stmt: func_inst •
+
+    $default  reduce using rule 62 (instantiation_stmt)
+
+
+State 29
+
+   32 variable_declaration: prefixes • type ID
+   33                     | prefixes • type ID assign_op expr
+   34 array_declaration: prefixes • type ID LEFT_BRACKET expr RIGHT_BRACKET
+   35                  | prefixes • type ID LEFT_BRACKET expr RIGHT_BRACKET assign_op LEFT_BRACE expr RIGHT_BRACE
+   36 func_declaration: prefixes • type ID LPAREN func_parameters_declaration RPAREN compound_stmt
+   37                 | prefixes • type ID LPAREN func_parameters_declaration RPAREN SEMI
+  157 prefixes: prefixes • prefix
+
+    INT       shift, and go to state 32
+    FLOAT     shift, and go to state 33
+    DOUBLE    shift, and go to state 34
+    CHAR      shift, and go to state 35
+    VOID      shift, and go to state 36
+    EXTERN    shift, and go to state 3
+    LONG      shift, and go to state 4
+    REGISTER  shift, and go to state 6
+    SHORT     shift, and go to state 7
+    STATIC    shift, and go to state 8
+    SIGNED    shift, and go to state 9
+    UNSIGNED  shift, and go to state 11
+    VOLATILE  shift, and go to state 12
+    CONSTANT  shift, and go to state 14
+
+    type    go to state 53
+    prefix  go to state 54
+
+
+State 30
+
+  158 prefixes: prefix •
+
+    $default  reduce using rule 158 (prefixes)
+
+
+State 31
+
+   47 struct_declaration: STRUCT ID • LEFT_BRACE data_struct_stmts RIGHT_BRACE
+   63 struct_inst: STRUCT ID • ID
+
+    ID          shift, and go to state 55
+    LEFT_BRACE  shift, and go to state 56
+
+
+State 32
+
+  151 type: INT •
+
+    $default  reduce using rule 151 (type)
+
+
+State 33
+
+  152 type: FLOAT •
+
+    $default  reduce using rule 152 (type)
+
+
+State 34
+
+  153 type: DOUBLE •
+
+    $default  reduce using rule 153 (type)
+
+
+State 35
+
+  154 type: CHAR •
+
+    $default  reduce using rule 154 (type)
+
+
+State 36
+
+  155 type: VOID •
+
+    $default  reduce using rule 155 (type)
+
+
+State 37
+
+   47 struct_declaration: STRUCT • ID LEFT_BRACE data_struct_stmts RIGHT_BRACE
+   58 typeDef_declaration: TYPEDEF STRUCT • LEFT_BRACE data_struct_stmts RIGHT_BRACE ID
+
+    ID          shift, and go to state 57
+    LEFT_BRACE  shift, and go to state 58
+
+
+State 38
+
+   49 enum_declaration: ENUM • ID LEFT_BRACE enum_parameters RIGHT_BRACE
+   54 typeDef_declaration: TYPEDEF ENUM • LEFT_BRACE enum_parameters RIGHT_BRACE ID
+
+    ID          shift, and go to state 44
+    LEFT_BRACE  shift, and go to state 59
+
+
+State 39
+
+   48 union_declaration: UNION • ID LEFT_BRACE data_struct_stmts RIGHT_BRACE
+   56 typeDef_declaration: TYPEDEF UNION • LEFT_BRACE data_struct_stmts RIGHT_BRACE ID
+
+    ID          shift, and go to state 60
+    LEFT_BRACE  shift, and go to state 61
+
+
+State 40
+
+   57 typeDef_declaration: TYPEDEF struct_declaration • ID
+
+    ID  shift, and go to state 62
+
+
+State 41
+
+   55 typeDef_declaration: TYPEDEF union_declaration • ID
+
+    ID  shift, and go to state 63
+
+
+State 42
+
+   53 typeDef_declaration: TYPEDEF enum_declaration • ID
+
+    ID  shift, and go to state 64
+
+
+State 43
+
+   59 typeDef_declaration: TYPEDEF type • ID
+
+    ID  shift, and go to state 65
+
+
+State 44
+
+   49 enum_declaration: ENUM ID • LEFT_BRACE enum_parameters RIGHT_BRACE
+
+    LEFT_BRACE  shift, and go to state 66
+
+
+State 45
+
+   48 union_declaration: UNION ID • LEFT_BRACE data_struct_stmts RIGHT_BRACE
+   64 union_inst: UNION ID • ID
+
+    ID          shift, and go to state 67
+    LEFT_BRACE  shift, and go to state 68
+
+
+State 46
+
+   65 func_inst: ID LPAREN • func_inst_parameters RPAREN
+
+    VOID         shift, and go to state 69
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 71
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    $default  reduce using rule 66 (func_inst_parameters)
+
+    func_inst             go to state 77
+    func_inst_parameters  go to state 78
+    expr                  go to state 79
+    term                  go to state 80
+    operand               go to state 81
+    factor                go to state 82
+    unary_op              go to state 83
+    type_cast             go to state 84
+
+
+State 47
+
+    0 $accept: prog $end •
+
+    $default  accept
+
+
+State 48
+
+  150 endfile: ENDFILE •
+
+    $default  reduce using rule 150 (endfile)
+
+
+State 49
+
+    2 prog: prog global_stmt •
+
+    $default  reduce using rule 2 (prog)
+
+
+State 50
+
+    1 prog: prog endfile •
+
+    $default  reduce using rule 1 (prog)
+
+
+State 51
+
+    5 global_stmt: declaration_stmt SEMI •
+
+    $default  reduce using rule 5 (global_stmt)
+
+
+State 52
+
+    6 global_stmt: instantiation_stmt SEMI •
+
+    $default  reduce using rule 6 (global_stmt)
+
+
+State 53
+
+   32 variable_declaration: prefixes type • ID
+   33                     | prefixes type • ID assign_op expr
+   34 array_declaration: prefixes type • ID LEFT_BRACKET expr RIGHT_BRACKET
+   35                  | prefixes type • ID LEFT_BRACKET expr RIGHT_BRACKET assign_op LEFT_BRACE expr RIGHT_BRACE
+   36 func_declaration: prefixes type • ID LPAREN func_parameters_declaration RPAREN compound_stmt
+   37                 | prefixes type • ID LPAREN func_parameters_declaration RPAREN SEMI
+
+    ID  shift, and go to state 85
+
+
+State 54
+
+  157 prefixes: prefixes prefix •
+
+    $default  reduce using rule 157 (prefixes)
+
+
+State 55
+
+   63 struct_inst: STRUCT ID ID •
+
+    $default  reduce using rule 63 (struct_inst)
+
+
+State 56
+
+   47 struct_declaration: STRUCT ID LEFT_BRACE • data_struct_stmts RIGHT_BRACE
+
+    STRUCT    shift, and go to state 86
+    TYPEDEF   shift, and go to state 2
+    EXTERN    shift, and go to state 3
+    LONG      shift, and go to state 4
+    ENUM      shift, and go to state 5
+    REGISTER  shift, and go to state 6
+    SHORT     shift, and go to state 7
+    STATIC    shift, and go to state 8
+    SIGNED    shift, and go to state 9
+    UNION     shift, and go to state 87
+    UNSIGNED  shift, and go to state 11
+    VOLATILE  shift, and go to state 12
+    CONSTANT  shift, and go to state 14
+
+    INT       reduce using rule 42 (data_struct_stmts)
+    INT       [reduce using rule 156 (prefixes)]
+    FLOAT     reduce using rule 42 (data_struct_stmts)
+    FLOAT     [reduce using rule 156 (prefixes)]
+    DOUBLE    reduce using rule 42 (data_struct_stmts)
+    DOUBLE    [reduce using rule 156 (prefixes)]
+    CHAR      reduce using rule 42 (data_struct_stmts)
+    CHAR      [reduce using rule 156 (prefixes)]
+    VOID      reduce using rule 42 (data_struct_stmts)
+    VOID      [reduce using rule 156 (prefixes)]
+    STRUCT    [reduce using rule 42 (data_struct_stmts)]
+    TYPEDEF   [reduce using rule 42 (data_struct_stmts)]
+    EXTERN    [reduce using rule 42 (data_struct_stmts)]
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 42 (data_struct_stmts)]
+    LONG      [reduce using rule 156 (prefixes)]
+    ENUM      [reduce using rule 42 (data_struct_stmts)]
+    REGISTER  [reduce using rule 42 (data_struct_stmts)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 42 (data_struct_stmts)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 42 (data_struct_stmts)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 42 (data_struct_stmts)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNION     [reduce using rule 42 (data_struct_stmts)]
+    UNSIGNED  [reduce using rule 42 (data_struct_stmts)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 42 (data_struct_stmts)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 42 (data_struct_stmts)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 42 (data_struct_stmts)
+
+    declaration_stmt      go to state 88
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    func_declaration      go to state 89
+    data_struct_stmts     go to state 90
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    prefixes              go to state 29
+    prefix                go to state 30
+
+
+State 57
+
+   47 struct_declaration: STRUCT ID • LEFT_BRACE data_struct_stmts RIGHT_BRACE
+
+    LEFT_BRACE  shift, and go to state 56
+
+
+State 58
+
+   58 typeDef_declaration: TYPEDEF STRUCT LEFT_BRACE • data_struct_stmts RIGHT_BRACE ID
+
+    STRUCT    shift, and go to state 86
+    TYPEDEF   shift, and go to state 2
+    EXTERN    shift, and go to state 3
+    LONG      shift, and go to state 4
+    ENUM      shift, and go to state 5
+    REGISTER  shift, and go to state 6
+    SHORT     shift, and go to state 7
+    STATIC    shift, and go to state 8
+    SIGNED    shift, and go to state 9
+    UNION     shift, and go to state 87
+    UNSIGNED  shift, and go to state 11
+    VOLATILE  shift, and go to state 12
+    CONSTANT  shift, and go to state 14
+
+    INT       reduce using rule 42 (data_struct_stmts)
+    INT       [reduce using rule 156 (prefixes)]
+    FLOAT     reduce using rule 42 (data_struct_stmts)
+    FLOAT     [reduce using rule 156 (prefixes)]
+    DOUBLE    reduce using rule 42 (data_struct_stmts)
+    DOUBLE    [reduce using rule 156 (prefixes)]
+    CHAR      reduce using rule 42 (data_struct_stmts)
+    CHAR      [reduce using rule 156 (prefixes)]
+    VOID      reduce using rule 42 (data_struct_stmts)
+    VOID      [reduce using rule 156 (prefixes)]
+    STRUCT    [reduce using rule 42 (data_struct_stmts)]
+    TYPEDEF   [reduce using rule 42 (data_struct_stmts)]
+    EXTERN    [reduce using rule 42 (data_struct_stmts)]
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 42 (data_struct_stmts)]
+    LONG      [reduce using rule 156 (prefixes)]
+    ENUM      [reduce using rule 42 (data_struct_stmts)]
+    REGISTER  [reduce using rule 42 (data_struct_stmts)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 42 (data_struct_stmts)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 42 (data_struct_stmts)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 42 (data_struct_stmts)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNION     [reduce using rule 42 (data_struct_stmts)]
+    UNSIGNED  [reduce using rule 42 (data_struct_stmts)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 42 (data_struct_stmts)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 42 (data_struct_stmts)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 42 (data_struct_stmts)
+
+    declaration_stmt      go to state 88
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    func_declaration      go to state 89
+    data_struct_stmts     go to state 91
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    prefixes              go to state 29
+    prefix                go to state 30
+
+
+State 59
+
+   54 typeDef_declaration: TYPEDEF ENUM LEFT_BRACE • enum_parameters RIGHT_BRACE ID
+
+    ID  shift, and go to state 92
+
+    $default  reduce using rule 50 (enum_parameters)
+
+    enum_parameters  go to state 93
+
+
+State 60
+
+   48 union_declaration: UNION ID • LEFT_BRACE data_struct_stmts RIGHT_BRACE
+
+    LEFT_BRACE  shift, and go to state 68
+
+
+State 61
+
+   56 typeDef_declaration: TYPEDEF UNION LEFT_BRACE • data_struct_stmts RIGHT_BRACE ID
+
+    STRUCT    shift, and go to state 86
+    TYPEDEF   shift, and go to state 2
+    EXTERN    shift, and go to state 3
+    LONG      shift, and go to state 4
+    ENUM      shift, and go to state 5
+    REGISTER  shift, and go to state 6
+    SHORT     shift, and go to state 7
+    STATIC    shift, and go to state 8
+    SIGNED    shift, and go to state 9
+    UNION     shift, and go to state 87
+    UNSIGNED  shift, and go to state 11
+    VOLATILE  shift, and go to state 12
+    CONSTANT  shift, and go to state 14
+
+    INT       reduce using rule 42 (data_struct_stmts)
+    INT       [reduce using rule 156 (prefixes)]
+    FLOAT     reduce using rule 42 (data_struct_stmts)
+    FLOAT     [reduce using rule 156 (prefixes)]
+    DOUBLE    reduce using rule 42 (data_struct_stmts)
+    DOUBLE    [reduce using rule 156 (prefixes)]
+    CHAR      reduce using rule 42 (data_struct_stmts)
+    CHAR      [reduce using rule 156 (prefixes)]
+    VOID      reduce using rule 42 (data_struct_stmts)
+    VOID      [reduce using rule 156 (prefixes)]
+    STRUCT    [reduce using rule 42 (data_struct_stmts)]
+    TYPEDEF   [reduce using rule 42 (data_struct_stmts)]
+    EXTERN    [reduce using rule 42 (data_struct_stmts)]
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 42 (data_struct_stmts)]
+    LONG      [reduce using rule 156 (prefixes)]
+    ENUM      [reduce using rule 42 (data_struct_stmts)]
+    REGISTER  [reduce using rule 42 (data_struct_stmts)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 42 (data_struct_stmts)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 42 (data_struct_stmts)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 42 (data_struct_stmts)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNION     [reduce using rule 42 (data_struct_stmts)]
+    UNSIGNED  [reduce using rule 42 (data_struct_stmts)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 42 (data_struct_stmts)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 42 (data_struct_stmts)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 42 (data_struct_stmts)
+
+    declaration_stmt      go to state 88
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    func_declaration      go to state 89
+    data_struct_stmts     go to state 94
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    prefixes              go to state 29
+    prefix                go to state 30
+
+
+State 62
+
+   57 typeDef_declaration: TYPEDEF struct_declaration ID •
+
+    $default  reduce using rule 57 (typeDef_declaration)
+
+
+State 63
+
+   55 typeDef_declaration: TYPEDEF union_declaration ID •
+
+    $default  reduce using rule 55 (typeDef_declaration)
+
+
+State 64
+
+   53 typeDef_declaration: TYPEDEF enum_declaration ID •
+
+    $default  reduce using rule 53 (typeDef_declaration)
+
+
+State 65
+
+   59 typeDef_declaration: TYPEDEF type ID •
+
+    $default  reduce using rule 59 (typeDef_declaration)
+
+
+State 66
+
+   49 enum_declaration: ENUM ID LEFT_BRACE • enum_parameters RIGHT_BRACE
+
+    ID  shift, and go to state 92
+
+    $default  reduce using rule 50 (enum_parameters)
+
+    enum_parameters  go to state 95
+
+
+State 67
+
+   64 union_inst: UNION ID ID •
+
+    $default  reduce using rule 64 (union_inst)
+
+
+State 68
+
+   48 union_declaration: UNION ID LEFT_BRACE • data_struct_stmts RIGHT_BRACE
+
+    STRUCT    shift, and go to state 86
+    TYPEDEF   shift, and go to state 2
+    EXTERN    shift, and go to state 3
+    LONG      shift, and go to state 4
+    ENUM      shift, and go to state 5
+    REGISTER  shift, and go to state 6
+    SHORT     shift, and go to state 7
+    STATIC    shift, and go to state 8
+    SIGNED    shift, and go to state 9
+    UNION     shift, and go to state 87
+    UNSIGNED  shift, and go to state 11
+    VOLATILE  shift, and go to state 12
+    CONSTANT  shift, and go to state 14
+
+    INT       reduce using rule 42 (data_struct_stmts)
+    INT       [reduce using rule 156 (prefixes)]
+    FLOAT     reduce using rule 42 (data_struct_stmts)
+    FLOAT     [reduce using rule 156 (prefixes)]
+    DOUBLE    reduce using rule 42 (data_struct_stmts)
+    DOUBLE    [reduce using rule 156 (prefixes)]
+    CHAR      reduce using rule 42 (data_struct_stmts)
+    CHAR      [reduce using rule 156 (prefixes)]
+    VOID      reduce using rule 42 (data_struct_stmts)
+    VOID      [reduce using rule 156 (prefixes)]
+    STRUCT    [reduce using rule 42 (data_struct_stmts)]
+    TYPEDEF   [reduce using rule 42 (data_struct_stmts)]
+    EXTERN    [reduce using rule 42 (data_struct_stmts)]
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 42 (data_struct_stmts)]
+    LONG      [reduce using rule 156 (prefixes)]
+    ENUM      [reduce using rule 42 (data_struct_stmts)]
+    REGISTER  [reduce using rule 42 (data_struct_stmts)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 42 (data_struct_stmts)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 42 (data_struct_stmts)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 42 (data_struct_stmts)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNION     [reduce using rule 42 (data_struct_stmts)]
+    UNSIGNED  [reduce using rule 42 (data_struct_stmts)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 42 (data_struct_stmts)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 42 (data_struct_stmts)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 42 (data_struct_stmts)
+
+    declaration_stmt      go to state 88
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    func_declaration      go to state 89
+    data_struct_stmts     go to state 96
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    prefixes              go to state 29
+    prefix                go to state 30
+
+
+State 69
+
+   69 func_inst_parameters: VOID •
+
+    $default  reduce using rule 69 (func_inst_parameters)
+
+
+State 70
+
+   83 factor: NUM •
+
+    $default  reduce using rule 83 (factor)
+
+
+State 71
+
+   65 func_inst: ID • LPAREN func_inst_parameters RPAREN
+   84 factor: ID •
+
+    LPAREN  shift, and go to state 46
+
+    $default  reduce using rule 84 (factor)
+
+
+State 72
+
+   85 factor: FNUM •
+
+    $default  reduce using rule 85 (factor)
+
+
+State 73
+
+   82 factor: LPAREN • expr RPAREN
+  168 type_cast: LPAREN • type RPAREN
+
+    INT          shift, and go to state 32
+    FLOAT        shift, and go to state 33
+    DOUBLE       shift, and go to state 34
+    CHAR         shift, and go to state 35
+    VOID         shift, and go to state 36
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 71
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    func_inst  go to state 77
+    expr       go to state 97
+    term       go to state 80
+    operand    go to state 81
+    factor     go to state 82
+    unary_op   go to state 83
+    type       go to state 98
+    type_cast  go to state 84
+
+
+State 74
+
+   94 unary_op: INCREMENT •
+
+    $default  reduce using rule 94 (unary_op)
+
+
+State 75
+
+   95 unary_op: DECREMENT •
+
+    $default  reduce using rule 95 (unary_op)
+
+
+State 76
+
+   80 operand: LOGICAL_NOT • factor
+
+    NUM     shift, and go to state 70
+    ID      shift, and go to state 71
+    FNUM    shift, and go to state 72
+    LPAREN  shift, and go to state 99
+
+    func_inst  go to state 77
+    factor     go to state 100
+
+
+State 77
+
+   86 factor: func_inst •
+
+    $default  reduce using rule 86 (factor)
+
+
+State 78
+
+   65 func_inst: ID LPAREN func_inst_parameters • RPAREN
+   67 func_inst_parameters: func_inst_parameters • COMMA expr
+
+    RPAREN  shift, and go to state 101
+    COMMA   shift, and go to state 102
+
+
+State 79
+
+   68 func_inst_parameters: expr •
+   70 expr: expr • op term
+   71     | expr • comp_op term
+   72     | expr • bitwise_op term
+   73     | expr • logical_op term
+
+    PLUS                   shift, and go to state 103
+    MINUS                  shift, and go to state 104
+    BITWISE_AND            shift, and go to state 105
+    BITWISE_OR             shift, and go to state 106
+    BITWISE_NOT            shift, and go to state 107
+    BITWISE_XOR            shift, and go to state 108
+    LOGICAL_AND            shift, and go to state 109
+    LOGICAL_OR             shift, and go to state 110
+    EQUAL                  shift, and go to state 111
+    NOT_EQUAL              shift, and go to state 112
+    LESS_THAN              shift, and go to state 113
+    GREATER_THAN           shift, and go to state 114
+    LESS_THAN_OR_EQUAL     shift, and go to state 115
+    GREATER_THAN_OR_EQUAL  shift, and go to state 116
+    RIGHT_SHIFT            shift, and go to state 117
+    LEFT_SHIFT             shift, and go to state 118
+
+    $default  reduce using rule 68 (func_inst_parameters)
+
+    op          go to state 119
+    comp_op     go to state 120
+    logical_op  go to state 121
+    bitwise_op  go to state 122
+
+
+State 80
+
+   74 expr: term •
+   75 term: term • prio_op operand
+
+    TIMES    shift, and go to state 123
+    OVER     shift, and go to state 124
+    PERCENT  shift, and go to state 125
+
+    $default  reduce using rule 74 (expr)
+
+    prio_op  go to state 126
+
+
+State 81
+
+   76 term: operand •
+
+    $default  reduce using rule 76 (term)
+
+
+State 82
+
+   78 operand: factor • unary_op
+   81        | factor •
+
+    INCREMENT  shift, and go to state 74
+    DECREMENT  shift, and go to state 75
+
+    $default  reduce using rule 81 (operand)
+
+    unary_op  go to state 127
+
+
+State 83
+
+   77 operand: unary_op • factor
+
+    NUM     shift, and go to state 70
+    ID      shift, and go to state 71
+    FNUM    shift, and go to state 72
+    LPAREN  shift, and go to state 99
+
+    func_inst  go to state 77
+    factor     go to state 128
+
+
+State 84
+
+   79 operand: type_cast • factor
+
+    NUM     shift, and go to state 70
+    ID      shift, and go to state 71
+    FNUM    shift, and go to state 72
+    LPAREN  shift, and go to state 99
+
+    func_inst  go to state 77
+    factor     go to state 129
+
+
+State 85
+
+   32 variable_declaration: prefixes type ID •
+   33                     | prefixes type ID • assign_op expr
+   34 array_declaration: prefixes type ID • LEFT_BRACKET expr RIGHT_BRACKET
+   35                  | prefixes type ID • LEFT_BRACKET expr RIGHT_BRACKET assign_op LEFT_BRACE expr RIGHT_BRACE
+   36 func_declaration: prefixes type ID • LPAREN func_parameters_declaration RPAREN compound_stmt
+   37                 | prefixes type ID • LPAREN func_parameters_declaration RPAREN SEMI
+
+    ASSIGN              shift, and go to state 130
+    LPAREN              shift, and go to state 131
+    LEFT_BRACKET        shift, and go to state 132
+    PLUS_ASSIGN         shift, and go to state 133
+    MINUS_ASSIGN        shift, and go to state 134
+    LEFT_SHIFT_ASSIGN   shift, and go to state 135
+    RIGHT_SHIFT_ASSIGN  shift, and go to state 136
+    BITWISE_AND_ASSIGN  shift, and go to state 137
+    BITWISE_OR_ASSIGN   shift, and go to state 138
+    BITWISE_XOR_ASSIGN  shift, and go to state 139
+    MULTIPLY_ASSIGN     shift, and go to state 140
+    DIVIDE_ASSIGN       shift, and go to state 141
+    MODULUS_ASSIGN      shift, and go to state 142
+
+    $default  reduce using rule 32 (variable_declaration)
+
+    assign_op  go to state 143
+
+
+State 86
+
+   47 struct_declaration: STRUCT • ID LEFT_BRACE data_struct_stmts RIGHT_BRACE
+
+    ID  shift, and go to state 57
+
+
+State 87
+
+   48 union_declaration: UNION • ID LEFT_BRACE data_struct_stmts RIGHT_BRACE
+
+    ID  shift, and go to state 60
+
+
+State 88
+
+   45 data_struct_stmts: declaration_stmt • SEMI
+
+    SEMI  shift, and go to state 144
+
+
+State 89
+
+   46 data_struct_stmts: func_declaration • SEMI
+
+    SEMI  shift, and go to state 145
+
+
+State 90
+
+   43 data_struct_stmts: data_struct_stmts • declaration_stmt SEMI
+   44                  | data_struct_stmts • func_declaration SEMI
+   47 struct_declaration: STRUCT ID LEFT_BRACE data_struct_stmts • RIGHT_BRACE
+
+    STRUCT       shift, and go to state 86
+    TYPEDEF      shift, and go to state 2
+    EXTERN       shift, and go to state 3
+    LONG         shift, and go to state 4
+    ENUM         shift, and go to state 5
+    REGISTER     shift, and go to state 6
+    SHORT        shift, and go to state 7
+    STATIC       shift, and go to state 8
+    SIGNED       shift, and go to state 9
+    UNION        shift, and go to state 87
+    UNSIGNED     shift, and go to state 11
+    VOLATILE     shift, and go to state 12
+    RIGHT_BRACE  shift, and go to state 146
+    CONSTANT     shift, and go to state 14
+
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 156 (prefixes)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 156 (prefixes)
+
+    declaration_stmt      go to state 147
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    func_declaration      go to state 148
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    prefixes              go to state 29
+    prefix                go to state 30
+
+
+State 91
+
+   43 data_struct_stmts: data_struct_stmts • declaration_stmt SEMI
+   44                  | data_struct_stmts • func_declaration SEMI
+   58 typeDef_declaration: TYPEDEF STRUCT LEFT_BRACE data_struct_stmts • RIGHT_BRACE ID
+
+    STRUCT       shift, and go to state 86
+    TYPEDEF      shift, and go to state 2
+    EXTERN       shift, and go to state 3
+    LONG         shift, and go to state 4
+    ENUM         shift, and go to state 5
+    REGISTER     shift, and go to state 6
+    SHORT        shift, and go to state 7
+    STATIC       shift, and go to state 8
+    SIGNED       shift, and go to state 9
+    UNION        shift, and go to state 87
+    UNSIGNED     shift, and go to state 11
+    VOLATILE     shift, and go to state 12
+    RIGHT_BRACE  shift, and go to state 149
+    CONSTANT     shift, and go to state 14
+
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 156 (prefixes)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 156 (prefixes)
+
+    declaration_stmt      go to state 147
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    func_declaration      go to state 148
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    prefixes              go to state 29
+    prefix                go to state 30
+
+
+State 92
+
+   52 enum_parameters: ID •
+
+    $default  reduce using rule 52 (enum_parameters)
+
+
+State 93
+
+   51 enum_parameters: enum_parameters • COMMA ID
+   54 typeDef_declaration: TYPEDEF ENUM LEFT_BRACE enum_parameters • RIGHT_BRACE ID
+
+    RIGHT_BRACE  shift, and go to state 150
+    COMMA        shift, and go to state 151
+
+
+State 94
+
+   43 data_struct_stmts: data_struct_stmts • declaration_stmt SEMI
+   44                  | data_struct_stmts • func_declaration SEMI
+   56 typeDef_declaration: TYPEDEF UNION LEFT_BRACE data_struct_stmts • RIGHT_BRACE ID
+
+    STRUCT       shift, and go to state 86
+    TYPEDEF      shift, and go to state 2
+    EXTERN       shift, and go to state 3
+    LONG         shift, and go to state 4
+    ENUM         shift, and go to state 5
+    REGISTER     shift, and go to state 6
+    SHORT        shift, and go to state 7
+    STATIC       shift, and go to state 8
+    SIGNED       shift, and go to state 9
+    UNION        shift, and go to state 87
+    UNSIGNED     shift, and go to state 11
+    VOLATILE     shift, and go to state 12
+    RIGHT_BRACE  shift, and go to state 152
+    CONSTANT     shift, and go to state 14
+
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 156 (prefixes)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 156 (prefixes)
+
+    declaration_stmt      go to state 147
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    func_declaration      go to state 148
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    prefixes              go to state 29
+    prefix                go to state 30
+
+
+State 95
+
+   49 enum_declaration: ENUM ID LEFT_BRACE enum_parameters • RIGHT_BRACE
+   51 enum_parameters: enum_parameters • COMMA ID
+
+    RIGHT_BRACE  shift, and go to state 153
+    COMMA        shift, and go to state 151
+
+
+State 96
+
+   43 data_struct_stmts: data_struct_stmts • declaration_stmt SEMI
+   44                  | data_struct_stmts • func_declaration SEMI
+   48 union_declaration: UNION ID LEFT_BRACE data_struct_stmts • RIGHT_BRACE
+
+    STRUCT       shift, and go to state 86
+    TYPEDEF      shift, and go to state 2
+    EXTERN       shift, and go to state 3
+    LONG         shift, and go to state 4
+    ENUM         shift, and go to state 5
+    REGISTER     shift, and go to state 6
+    SHORT        shift, and go to state 7
+    STATIC       shift, and go to state 8
+    SIGNED       shift, and go to state 9
+    UNION        shift, and go to state 87
+    UNSIGNED     shift, and go to state 11
+    VOLATILE     shift, and go to state 12
+    RIGHT_BRACE  shift, and go to state 154
+    CONSTANT     shift, and go to state 14
+
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 156 (prefixes)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 156 (prefixes)
+
+    declaration_stmt      go to state 147
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    func_declaration      go to state 148
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    prefixes              go to state 29
+    prefix                go to state 30
+
+
+State 97
+
+   70 expr: expr • op term
+   71     | expr • comp_op term
+   72     | expr • bitwise_op term
+   73     | expr • logical_op term
+   82 factor: LPAREN expr • RPAREN
+
+    PLUS                   shift, and go to state 103
+    MINUS                  shift, and go to state 104
+    RPAREN                 shift, and go to state 155
+    BITWISE_AND            shift, and go to state 105
+    BITWISE_OR             shift, and go to state 106
+    BITWISE_NOT            shift, and go to state 107
+    BITWISE_XOR            shift, and go to state 108
+    LOGICAL_AND            shift, and go to state 109
+    LOGICAL_OR             shift, and go to state 110
+    EQUAL                  shift, and go to state 111
+    NOT_EQUAL              shift, and go to state 112
+    LESS_THAN              shift, and go to state 113
+    GREATER_THAN           shift, and go to state 114
+    LESS_THAN_OR_EQUAL     shift, and go to state 115
+    GREATER_THAN_OR_EQUAL  shift, and go to state 116
+    RIGHT_SHIFT            shift, and go to state 117
+    LEFT_SHIFT             shift, and go to state 118
+
+    op          go to state 119
+    comp_op     go to state 120
+    logical_op  go to state 121
+    bitwise_op  go to state 122
+
+
+State 98
+
+  168 type_cast: LPAREN type • RPAREN
+
+    RPAREN  shift, and go to state 156
+
+
+State 99
+
+   82 factor: LPAREN • expr RPAREN
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 71
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    func_inst  go to state 77
+    expr       go to state 97
+    term       go to state 80
+    operand    go to state 81
+    factor     go to state 82
+    unary_op   go to state 83
+    type_cast  go to state 84
+
+
+State 100
+
+   80 operand: LOGICAL_NOT factor •
+
+    $default  reduce using rule 80 (operand)
+
+
+State 101
+
+   65 func_inst: ID LPAREN func_inst_parameters RPAREN •
+
+    $default  reduce using rule 65 (func_inst)
+
+
+State 102
+
+   67 func_inst_parameters: func_inst_parameters COMMA • expr
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 71
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    func_inst  go to state 77
+    expr       go to state 157
+    term       go to state 80
+    operand    go to state 81
+    factor     go to state 82
+    unary_op   go to state 83
+    type_cast  go to state 84
+
+
+State 103
+
+   87 op: PLUS •
+
+    $default  reduce using rule 87 (op)
+
+
+State 104
+
+   88 op: MINUS •
+
+    $default  reduce using rule 88 (op)
+
+
+State 105
+
+  104 bitwise_op: BITWISE_AND •
+
+    $default  reduce using rule 104 (bitwise_op)
+
+
+State 106
+
+  106 bitwise_op: BITWISE_OR •
+
+    $default  reduce using rule 106 (bitwise_op)
+
+
+State 107
+
+  105 bitwise_op: BITWISE_NOT •
+
+    $default  reduce using rule 105 (bitwise_op)
+
+
+State 108
+
+  107 bitwise_op: BITWISE_XOR •
+
+    $default  reduce using rule 107 (bitwise_op)
+
+
+State 109
+
+  102 logical_op: LOGICAL_AND •
+
+    $default  reduce using rule 102 (logical_op)
+
+
+State 110
+
+  103 logical_op: LOGICAL_OR •
+
+    $default  reduce using rule 103 (logical_op)
+
+
+State 111
+
+  100 comp_op: EQUAL •
+
+    $default  reduce using rule 100 (comp_op)
+
+
+State 112
+
+  101 comp_op: NOT_EQUAL •
+
+    $default  reduce using rule 101 (comp_op)
+
+
+State 113
+
+   99 comp_op: LESS_THAN •
+
+    $default  reduce using rule 99 (comp_op)
+
+
+State 114
+
+   96 comp_op: GREATER_THAN •
+
+    $default  reduce using rule 96 (comp_op)
+
+
+State 115
+
+   97 comp_op: LESS_THAN_OR_EQUAL •
+
+    $default  reduce using rule 97 (comp_op)
+
+
+State 116
+
+   98 comp_op: GREATER_THAN_OR_EQUAL •
+
+    $default  reduce using rule 98 (comp_op)
+
+
+State 117
+
+   89 op: RIGHT_SHIFT •
+
+    $default  reduce using rule 89 (op)
+
+
+State 118
+
+   90 op: LEFT_SHIFT •
+
+    $default  reduce using rule 90 (op)
+
+
+State 119
+
+   70 expr: expr op • term
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 71
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    func_inst  go to state 77
+    term       go to state 158
+    operand    go to state 81
+    factor     go to state 82
+    unary_op   go to state 83
+    type_cast  go to state 84
+
+
+State 120
+
+   71 expr: expr comp_op • term
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 71
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    func_inst  go to state 77
+    term       go to state 159
+    operand    go to state 81
+    factor     go to state 82
+    unary_op   go to state 83
+    type_cast  go to state 84
+
+
+State 121
+
+   73 expr: expr logical_op • term
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 71
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    func_inst  go to state 77
+    term       go to state 160
+    operand    go to state 81
+    factor     go to state 82
+    unary_op   go to state 83
+    type_cast  go to state 84
+
+
+State 122
+
+   72 expr: expr bitwise_op • term
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 71
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    func_inst  go to state 77
+    term       go to state 161
+    operand    go to state 81
+    factor     go to state 82
+    unary_op   go to state 83
+    type_cast  go to state 84
+
+
+State 123
+
+   91 prio_op: TIMES •
+
+    $default  reduce using rule 91 (prio_op)
+
+
+State 124
+
+   92 prio_op: OVER •
+
+    $default  reduce using rule 92 (prio_op)
+
+
+State 125
+
+   93 prio_op: PERCENT •
+
+    $default  reduce using rule 93 (prio_op)
+
+
+State 126
+
+   75 term: term prio_op • operand
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 71
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    func_inst  go to state 77
+    operand    go to state 162
+    factor     go to state 82
+    unary_op   go to state 83
+    type_cast  go to state 84
+
+
+State 127
+
+   78 operand: factor unary_op •
+
+    $default  reduce using rule 78 (operand)
+
+
+State 128
+
+   77 operand: unary_op factor •
+
+    $default  reduce using rule 77 (operand)
+
+
+State 129
+
+   79 operand: type_cast factor •
+
+    $default  reduce using rule 79 (operand)
+
+
+State 130
+
+  108 assign_op: ASSIGN •
+
+    $default  reduce using rule 108 (assign_op)
+
+
+State 131
+
+   36 func_declaration: prefixes type ID LPAREN • func_parameters_declaration RPAREN compound_stmt
+   37                 | prefixes type ID LPAREN • func_parameters_declaration RPAREN SEMI
+
+    VOID      shift, and go to state 163
+    EXTERN    shift, and go to state 3
+    LONG      shift, and go to state 4
+    REGISTER  shift, and go to state 6
+    SHORT     shift, and go to state 7
+    STATIC    shift, and go to state 8
+    SIGNED    shift, and go to state 9
+    UNSIGNED  shift, and go to state 11
+    VOLATILE  shift, and go to state 12
+    CONSTANT  shift, and go to state 14
+
+    VOID      [reduce using rule 156 (prefixes)]
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 156 (prefixes)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    RPAREN    reduce using rule 38 (func_parameters_declaration)
+    COMMA     reduce using rule 38 (func_parameters_declaration)
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 156 (prefixes)
+
+    variable_declaration         go to state 164
+    func_parameters_declaration  go to state 165
+    prefixes                     go to state 166
+    prefix                       go to state 30
+
+
+State 132
+
+   34 array_declaration: prefixes type ID LEFT_BRACKET • expr RIGHT_BRACKET
+   35                  | prefixes type ID LEFT_BRACKET • expr RIGHT_BRACKET assign_op LEFT_BRACE expr RIGHT_BRACE
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 71
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    func_inst  go to state 77
+    expr       go to state 167
+    term       go to state 80
+    operand    go to state 81
+    factor     go to state 82
+    unary_op   go to state 83
+    type_cast  go to state 84
+
+
+State 133
+
+  109 assign_op: PLUS_ASSIGN •
+
+    $default  reduce using rule 109 (assign_op)
+
+
+State 134
+
+  110 assign_op: MINUS_ASSIGN •
+
+    $default  reduce using rule 110 (assign_op)
+
+
+State 135
+
+  112 assign_op: LEFT_SHIFT_ASSIGN •
+
+    $default  reduce using rule 112 (assign_op)
+
+
+State 136
+
+  113 assign_op: RIGHT_SHIFT_ASSIGN •
+
+    $default  reduce using rule 113 (assign_op)
+
+
+State 137
+
+  114 assign_op: BITWISE_AND_ASSIGN •
+
+    $default  reduce using rule 114 (assign_op)
+
+
+State 138
+
+  115 assign_op: BITWISE_OR_ASSIGN •
+
+    $default  reduce using rule 115 (assign_op)
+
+
+State 139
+
+  116 assign_op: BITWISE_XOR_ASSIGN •
+
+    $default  reduce using rule 116 (assign_op)
+
+
+State 140
+
+  117 assign_op: MULTIPLY_ASSIGN •
+
+    $default  reduce using rule 117 (assign_op)
+
+
+State 141
+
+  118 assign_op: DIVIDE_ASSIGN •
+
+    $default  reduce using rule 118 (assign_op)
+
+
+State 142
+
+  111 assign_op: MODULUS_ASSIGN •
+
+    $default  reduce using rule 111 (assign_op)
+
+
+State 143
+
+   33 variable_declaration: prefixes type ID assign_op • expr
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 71
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    func_inst  go to state 77
+    expr       go to state 168
+    term       go to state 80
+    operand    go to state 81
+    factor     go to state 82
+    unary_op   go to state 83
+    type_cast  go to state 84
+
+
+State 144
+
+   45 data_struct_stmts: declaration_stmt SEMI •
+
+    $default  reduce using rule 45 (data_struct_stmts)
+
+
+State 145
+
+   46 data_struct_stmts: func_declaration SEMI •
+
+    $default  reduce using rule 46 (data_struct_stmts)
+
+
+State 146
+
+   47 struct_declaration: STRUCT ID LEFT_BRACE data_struct_stmts RIGHT_BRACE •
+
+    $default  reduce using rule 47 (struct_declaration)
+
+
+State 147
+
+   43 data_struct_stmts: data_struct_stmts declaration_stmt • SEMI
+
+    SEMI  shift, and go to state 169
+
+
+State 148
+
+   44 data_struct_stmts: data_struct_stmts func_declaration • SEMI
+
+    SEMI  shift, and go to state 170
+
+
+State 149
+
+   58 typeDef_declaration: TYPEDEF STRUCT LEFT_BRACE data_struct_stmts RIGHT_BRACE • ID
+
+    ID  shift, and go to state 171
+
+
+State 150
+
+   54 typeDef_declaration: TYPEDEF ENUM LEFT_BRACE enum_parameters RIGHT_BRACE • ID
+
+    ID  shift, and go to state 172
+
+
+State 151
+
+   51 enum_parameters: enum_parameters COMMA • ID
+
+    ID  shift, and go to state 173
+
+
+State 152
+
+   56 typeDef_declaration: TYPEDEF UNION LEFT_BRACE data_struct_stmts RIGHT_BRACE • ID
+
+    ID  shift, and go to state 174
+
+
+State 153
+
+   49 enum_declaration: ENUM ID LEFT_BRACE enum_parameters RIGHT_BRACE •
+
+    $default  reduce using rule 49 (enum_declaration)
+
+
+State 154
+
+   48 union_declaration: UNION ID LEFT_BRACE data_struct_stmts RIGHT_BRACE •
+
+    $default  reduce using rule 48 (union_declaration)
+
+
+State 155
+
+   82 factor: LPAREN expr RPAREN •
+
+    $default  reduce using rule 82 (factor)
+
+
+State 156
+
+  168 type_cast: LPAREN type RPAREN •
+
+    $default  reduce using rule 168 (type_cast)
+
+
+State 157
+
+   67 func_inst_parameters: func_inst_parameters COMMA expr •
+   70 expr: expr • op term
+   71     | expr • comp_op term
+   72     | expr • bitwise_op term
+   73     | expr • logical_op term
+
+    PLUS                   shift, and go to state 103
+    MINUS                  shift, and go to state 104
+    BITWISE_AND            shift, and go to state 105
+    BITWISE_OR             shift, and go to state 106
+    BITWISE_NOT            shift, and go to state 107
+    BITWISE_XOR            shift, and go to state 108
+    LOGICAL_AND            shift, and go to state 109
+    LOGICAL_OR             shift, and go to state 110
+    EQUAL                  shift, and go to state 111
+    NOT_EQUAL              shift, and go to state 112
+    LESS_THAN              shift, and go to state 113
+    GREATER_THAN           shift, and go to state 114
+    LESS_THAN_OR_EQUAL     shift, and go to state 115
+    GREATER_THAN_OR_EQUAL  shift, and go to state 116
+    RIGHT_SHIFT            shift, and go to state 117
+    LEFT_SHIFT             shift, and go to state 118
+
+    $default  reduce using rule 67 (func_inst_parameters)
+
+    op          go to state 119
+    comp_op     go to state 120
+    logical_op  go to state 121
+    bitwise_op  go to state 122
+
+
+State 158
+
+   70 expr: expr op term •
+   75 term: term • prio_op operand
+
+    TIMES    shift, and go to state 123
+    OVER     shift, and go to state 124
+    PERCENT  shift, and go to state 125
+
+    $default  reduce using rule 70 (expr)
+
+    prio_op  go to state 126
+
+
+State 159
+
+   71 expr: expr comp_op term •
+   75 term: term • prio_op operand
+
+    TIMES    shift, and go to state 123
+    OVER     shift, and go to state 124
+    PERCENT  shift, and go to state 125
+
+    $default  reduce using rule 71 (expr)
+
+    prio_op  go to state 126
+
+
+State 160
+
+   73 expr: expr logical_op term •
+   75 term: term • prio_op operand
+
+    TIMES    shift, and go to state 123
+    OVER     shift, and go to state 124
+    PERCENT  shift, and go to state 125
+
+    $default  reduce using rule 73 (expr)
+
+    prio_op  go to state 126
+
+
+State 161
+
+   72 expr: expr bitwise_op term •
+   75 term: term • prio_op operand
+
+    TIMES    shift, and go to state 123
+    OVER     shift, and go to state 124
+    PERCENT  shift, and go to state 125
+
+    $default  reduce using rule 72 (expr)
+
+    prio_op  go to state 126
+
+
+State 162
+
+   75 term: term prio_op operand •
+
+    $default  reduce using rule 75 (term)
+
+
+State 163
+
+   41 func_parameters_declaration: VOID •
+
+    $default  reduce using rule 41 (func_parameters_declaration)
+
+
+State 164
+
+   40 func_parameters_declaration: variable_declaration •
+
+    $default  reduce using rule 40 (func_parameters_declaration)
+
+
+State 165
+
+   36 func_declaration: prefixes type ID LPAREN func_parameters_declaration • RPAREN compound_stmt
+   37                 | prefixes type ID LPAREN func_parameters_declaration • RPAREN SEMI
+   39 func_parameters_declaration: func_parameters_declaration • COMMA variable_declaration
+
+    RPAREN  shift, and go to state 175
+    COMMA   shift, and go to state 176
+
+
+State 166
+
+   32 variable_declaration: prefixes • type ID
+   33                     | prefixes • type ID assign_op expr
+  157 prefixes: prefixes • prefix
+
+    INT       shift, and go to state 32
+    FLOAT     shift, and go to state 33
+    DOUBLE    shift, and go to state 34
+    CHAR      shift, and go to state 35
+    VOID      shift, and go to state 36
+    EXTERN    shift, and go to state 3
+    LONG      shift, and go to state 4
+    REGISTER  shift, and go to state 6
+    SHORT     shift, and go to state 7
+    STATIC    shift, and go to state 8
+    SIGNED    shift, and go to state 9
+    UNSIGNED  shift, and go to state 11
+    VOLATILE  shift, and go to state 12
+    CONSTANT  shift, and go to state 14
+
+    type    go to state 177
+    prefix  go to state 54
+
+
+State 167
+
+   34 array_declaration: prefixes type ID LEFT_BRACKET expr • RIGHT_BRACKET
+   35                  | prefixes type ID LEFT_BRACKET expr • RIGHT_BRACKET assign_op LEFT_BRACE expr RIGHT_BRACE
+   70 expr: expr • op term
+   71     | expr • comp_op term
+   72     | expr • bitwise_op term
+   73     | expr • logical_op term
+
+    PLUS                   shift, and go to state 103
+    MINUS                  shift, and go to state 104
+    RIGHT_BRACKET          shift, and go to state 178
+    BITWISE_AND            shift, and go to state 105
+    BITWISE_OR             shift, and go to state 106
+    BITWISE_NOT            shift, and go to state 107
+    BITWISE_XOR            shift, and go to state 108
+    LOGICAL_AND            shift, and go to state 109
+    LOGICAL_OR             shift, and go to state 110
+    EQUAL                  shift, and go to state 111
+    NOT_EQUAL              shift, and go to state 112
+    LESS_THAN              shift, and go to state 113
+    GREATER_THAN           shift, and go to state 114
+    LESS_THAN_OR_EQUAL     shift, and go to state 115
+    GREATER_THAN_OR_EQUAL  shift, and go to state 116
+    RIGHT_SHIFT            shift, and go to state 117
+    LEFT_SHIFT             shift, and go to state 118
+
+    op          go to state 119
+    comp_op     go to state 120
+    logical_op  go to state 121
+    bitwise_op  go to state 122
+
+
+State 168
+
+   33 variable_declaration: prefixes type ID assign_op expr •
+   70 expr: expr • op term
+   71     | expr • comp_op term
+   72     | expr • bitwise_op term
+   73     | expr • logical_op term
+
+    PLUS                   shift, and go to state 103
+    MINUS                  shift, and go to state 104
+    BITWISE_AND            shift, and go to state 105
+    BITWISE_OR             shift, and go to state 106
+    BITWISE_NOT            shift, and go to state 107
+    BITWISE_XOR            shift, and go to state 108
+    LOGICAL_AND            shift, and go to state 109
+    LOGICAL_OR             shift, and go to state 110
+    EQUAL                  shift, and go to state 111
+    NOT_EQUAL              shift, and go to state 112
+    LESS_THAN              shift, and go to state 113
+    GREATER_THAN           shift, and go to state 114
+    LESS_THAN_OR_EQUAL     shift, and go to state 115
+    GREATER_THAN_OR_EQUAL  shift, and go to state 116
+    RIGHT_SHIFT            shift, and go to state 117
+    LEFT_SHIFT             shift, and go to state 118
+
+    $default  reduce using rule 33 (variable_declaration)
+
+    op          go to state 119
+    comp_op     go to state 120
+    logical_op  go to state 121
+    bitwise_op  go to state 122
+
+
+State 169
+
+   43 data_struct_stmts: data_struct_stmts declaration_stmt SEMI •
+
+    $default  reduce using rule 43 (data_struct_stmts)
+
+
+State 170
+
+   44 data_struct_stmts: data_struct_stmts func_declaration SEMI •
+
+    $default  reduce using rule 44 (data_struct_stmts)
+
+
+State 171
+
+   58 typeDef_declaration: TYPEDEF STRUCT LEFT_BRACE data_struct_stmts RIGHT_BRACE ID •
+
+    $default  reduce using rule 58 (typeDef_declaration)
+
+
+State 172
+
+   54 typeDef_declaration: TYPEDEF ENUM LEFT_BRACE enum_parameters RIGHT_BRACE ID •
+
+    $default  reduce using rule 54 (typeDef_declaration)
+
+
+State 173
+
+   51 enum_parameters: enum_parameters COMMA ID •
+
+    $default  reduce using rule 51 (enum_parameters)
+
+
+State 174
+
+   56 typeDef_declaration: TYPEDEF UNION LEFT_BRACE data_struct_stmts RIGHT_BRACE ID •
+
+    $default  reduce using rule 56 (typeDef_declaration)
+
+
+State 175
+
+   36 func_declaration: prefixes type ID LPAREN func_parameters_declaration RPAREN • compound_stmt
+   37                 | prefixes type ID LPAREN func_parameters_declaration RPAREN • SEMI
+
+    LEFT_BRACE  shift, and go to state 179
+    SEMI        shift, and go to state 180
+
+    compound_stmt  go to state 181
+
+
+State 176
+
+   39 func_parameters_declaration: func_parameters_declaration COMMA • variable_declaration
+
+    EXTERN    shift, and go to state 3
+    LONG      shift, and go to state 4
+    REGISTER  shift, and go to state 6
+    SHORT     shift, and go to state 7
+    STATIC    shift, and go to state 8
+    SIGNED    shift, and go to state 9
+    UNSIGNED  shift, and go to state 11
+    VOLATILE  shift, and go to state 12
+    CONSTANT  shift, and go to state 14
+
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 156 (prefixes)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 156 (prefixes)
+
+    variable_declaration  go to state 182
+    prefixes              go to state 166
+    prefix                go to state 30
+
+
+State 177
+
+   32 variable_declaration: prefixes type • ID
+   33                     | prefixes type • ID assign_op expr
+
+    ID  shift, and go to state 183
+
+
+State 178
+
+   34 array_declaration: prefixes type ID LEFT_BRACKET expr RIGHT_BRACKET •
+   35                  | prefixes type ID LEFT_BRACKET expr RIGHT_BRACKET • assign_op LEFT_BRACE expr RIGHT_BRACE
+
+    ASSIGN              shift, and go to state 130
+    PLUS_ASSIGN         shift, and go to state 133
+    MINUS_ASSIGN        shift, and go to state 134
+    LEFT_SHIFT_ASSIGN   shift, and go to state 135
+    RIGHT_SHIFT_ASSIGN  shift, and go to state 136
+    BITWISE_AND_ASSIGN  shift, and go to state 137
+    BITWISE_OR_ASSIGN   shift, and go to state 138
+    BITWISE_XOR_ASSIGN  shift, and go to state 139
+    MULTIPLY_ASSIGN     shift, and go to state 140
+    DIVIDE_ASSIGN       shift, and go to state 141
+    MODULUS_ASSIGN      shift, and go to state 142
+
+    $default  reduce using rule 34 (array_declaration)
+
+    assign_op  go to state 184
+
+
+State 179
+
+  119 compound_stmt: LEFT_BRACE • stmts RIGHT_BRACE
+  120              | LEFT_BRACE • RIGHT_BRACE
+
+    IF           shift, and go to state 185
+    DO           shift, and go to state 186
+    WHILE        shift, and go to state 187
+    FOR          shift, and go to state 188
+    RETURN       shift, and go to state 189
+    BREAK        shift, and go to state 190
+    STRUCT       shift, and go to state 1
+    TYPEDEF      shift, and go to state 2
+    CONTINUE     shift, and go to state 191
+    EXTERN       shift, and go to state 3
+    GOTO         shift, and go to state 192
+    LONG         shift, and go to state 4
+    ENUM         shift, and go to state 5
+    REGISTER     shift, and go to state 6
+    SHORT        shift, and go to state 7
+    STATIC       shift, and go to state 8
+    SIGNED       shift, and go to state 9
+    UNION        shift, and go to state 10
+    UNSIGNED     shift, and go to state 11
+    VOLATILE     shift, and go to state 12
+    ID           shift, and go to state 193
+    RIGHT_BRACE  shift, and go to state 194
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    CONSTANT     shift, and go to state 14
+
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 156 (prefixes)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 156 (prefixes)
+
+    stmts                 go to state 195
+    stmt                  go to state 196
+    assignment_stmt       go to state 197
+    declaration_stmt      go to state 198
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    instantiation_stmt    go to state 199
+    struct_inst           go to state 26
+    union_inst            go to state 27
+    func_inst             go to state 28
+    unary_op              go to state 200
+    if_stmt               go to state 201
+    do_while_stmt         go to state 202
+    while_stmt            go to state 203
+    for_stmt              go to state 204
+    return_stmt           go to state 205
+    goto_stmt             go to state 206
+    label                 go to state 207
+    prefixes              go to state 208
+    prefix                go to state 30
+
+
+State 180
+
+   37 func_declaration: prefixes type ID LPAREN func_parameters_declaration RPAREN SEMI •
+
+    $default  reduce using rule 37 (func_declaration)
+
+
+State 181
+
+   36 func_declaration: prefixes type ID LPAREN func_parameters_declaration RPAREN compound_stmt •
+
+    $default  reduce using rule 36 (func_declaration)
+
+
+State 182
+
+   39 func_parameters_declaration: func_parameters_declaration COMMA variable_declaration •
+
+    $default  reduce using rule 39 (func_parameters_declaration)
+
+
+State 183
+
+   32 variable_declaration: prefixes type ID •
+   33                     | prefixes type ID • assign_op expr
+
+    ASSIGN              shift, and go to state 130
+    PLUS_ASSIGN         shift, and go to state 133
+    MINUS_ASSIGN        shift, and go to state 134
+    LEFT_SHIFT_ASSIGN   shift, and go to state 135
+    RIGHT_SHIFT_ASSIGN  shift, and go to state 136
+    BITWISE_AND_ASSIGN  shift, and go to state 137
+    BITWISE_OR_ASSIGN   shift, and go to state 138
+    BITWISE_XOR_ASSIGN  shift, and go to state 139
+    MULTIPLY_ASSIGN     shift, and go to state 140
+    DIVIDE_ASSIGN       shift, and go to state 141
+    MODULUS_ASSIGN      shift, and go to state 142
+
+    $default  reduce using rule 32 (variable_declaration)
+
+    assign_op  go to state 143
+
+
+State 184
+
+   35 array_declaration: prefixes type ID LEFT_BRACKET expr RIGHT_BRACKET assign_op • LEFT_BRACE expr RIGHT_BRACE
+
+    LEFT_BRACE  shift, and go to state 209
+
+
+State 185
+
+  121 if_stmt: IF • LPAREN condition RPAREN compound_stmt
+  122        | IF • LPAREN condition RPAREN compound_stmt elseif_stmt
+  123        | IF • LPAREN condition RPAREN compound_stmt else_stmt
+  124        | IF • LPAREN condition RPAREN stmt
+  125        | IF • LPAREN condition RPAREN stmt elseif_stmt
+  126        | IF • LPAREN condition RPAREN stmt else_stmt
+  127        | IF • LPAREN condition RPAREN SEMI
+
+    LPAREN  shift, and go to state 210
+
+
+State 186
+
+  136 do_while_stmt: DO • compound_stmt WHILE LPAREN condition RPAREN
+  137              | DO • stmt WHILE LPAREN LPAREN condition RPAREN
+
+    IF          shift, and go to state 185
+    DO          shift, and go to state 186
+    WHILE       shift, and go to state 187
+    FOR         shift, and go to state 188
+    RETURN      shift, and go to state 189
+    BREAK       shift, and go to state 190
+    STRUCT      shift, and go to state 1
+    TYPEDEF     shift, and go to state 2
+    CONTINUE    shift, and go to state 191
+    EXTERN      shift, and go to state 3
+    GOTO        shift, and go to state 192
+    LONG        shift, and go to state 4
+    ENUM        shift, and go to state 5
+    REGISTER    shift, and go to state 6
+    SHORT       shift, and go to state 7
+    STATIC      shift, and go to state 8
+    SIGNED      shift, and go to state 9
+    UNION       shift, and go to state 10
+    UNSIGNED    shift, and go to state 11
+    VOLATILE    shift, and go to state 12
+    ID          shift, and go to state 193
+    LEFT_BRACE  shift, and go to state 179
+    INCREMENT   shift, and go to state 74
+    DECREMENT   shift, and go to state 75
+    CONSTANT    shift, and go to state 14
+
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 156 (prefixes)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 156 (prefixes)
+
+    stmt                  go to state 211
+    assignment_stmt       go to state 197
+    declaration_stmt      go to state 198
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    instantiation_stmt    go to state 199
+    struct_inst           go to state 26
+    union_inst            go to state 27
+    func_inst             go to state 28
+    unary_op              go to state 200
+    compound_stmt         go to state 212
+    if_stmt               go to state 201
+    do_while_stmt         go to state 202
+    while_stmt            go to state 203
+    for_stmt              go to state 204
+    return_stmt           go to state 205
+    goto_stmt             go to state 206
+    label                 go to state 207
+    prefixes              go to state 208
+    prefix                go to state 30
+
+
+State 187
+
+  138 while_stmt: WHILE • LPAREN condition RPAREN compound_stmt
+  139           | WHILE • LPAREN condition RPAREN stmt
+  140           | WHILE • LPAREN condition RPAREN SEMI
+
+    LPAREN  shift, and go to state 213
+
+
+State 188
+
+  141 for_stmt: FOR • LPAREN condition SEMI condition SEMI condition RPAREN compound_stmt
+  142         | FOR • LPAREN condition SEMI condition SEMI condition RPAREN stmt
+  143         | FOR • LPAREN variable_declaration SEMI condition SEMI condition RPAREN compound_stmt
+  144         | FOR • LPAREN variable_declaration SEMI condition SEMI condition RPAREN stmt
+
+    LPAREN  shift, and go to state 214
+
+
+State 189
+
+  147 return_stmt: RETURN • expr
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 71
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    func_inst  go to state 77
+    expr       go to state 215
+    term       go to state 80
+    operand    go to state 81
+    factor     go to state 82
+    unary_op   go to state 83
+    type_cast  go to state 84
+
+
+State 190
+
+   20 stmt: BREAK • SEMI
+
+    SEMI  shift, and go to state 216
+
+
+State 191
+
+   19 stmt: CONTINUE • SEMI
+
+    SEMI  shift, and go to state 217
+
+
+State 192
+
+  148 goto_stmt: GOTO • ID SEMI
+
+    ID  shift, and go to state 218
+
+
+State 193
+
+   21 assignment_stmt: ID • assign_op expr
+   23                | ID • unary_op
+   24                | ID • assign_op LEFT_BRACE expr RIGHT_BRACE
+   25                | ID • LEFT_BRACKET expr RIGHT_BRACKET assign_op expr
+   65 func_inst: ID • LPAREN func_inst_parameters RPAREN
+  149 label: ID • COLON
+
+    ASSIGN              shift, and go to state 130
+    LPAREN              shift, and go to state 46
+    LEFT_BRACKET        shift, and go to state 219
+    COLON               shift, and go to state 220
+    INCREMENT           shift, and go to state 74
+    DECREMENT           shift, and go to state 75
+    PLUS_ASSIGN         shift, and go to state 133
+    MINUS_ASSIGN        shift, and go to state 134
+    LEFT_SHIFT_ASSIGN   shift, and go to state 135
+    RIGHT_SHIFT_ASSIGN  shift, and go to state 136
+    BITWISE_AND_ASSIGN  shift, and go to state 137
+    BITWISE_OR_ASSIGN   shift, and go to state 138
+    BITWISE_XOR_ASSIGN  shift, and go to state 139
+    MULTIPLY_ASSIGN     shift, and go to state 140
+    DIVIDE_ASSIGN       shift, and go to state 141
+    MODULUS_ASSIGN      shift, and go to state 142
+
+    unary_op   go to state 221
+    assign_op  go to state 222
+
+
+State 194
+
+  120 compound_stmt: LEFT_BRACE RIGHT_BRACE •
+
+    $default  reduce using rule 120 (compound_stmt)
+
+
+State 195
+
+    7 stmts: stmts • stmt
+  119 compound_stmt: LEFT_BRACE stmts • RIGHT_BRACE
+
+    IF           shift, and go to state 185
+    DO           shift, and go to state 186
+    WHILE        shift, and go to state 187
+    FOR          shift, and go to state 188
+    RETURN       shift, and go to state 189
+    BREAK        shift, and go to state 190
+    STRUCT       shift, and go to state 1
+    TYPEDEF      shift, and go to state 2
+    CONTINUE     shift, and go to state 191
+    EXTERN       shift, and go to state 3
+    GOTO         shift, and go to state 192
+    LONG         shift, and go to state 4
+    ENUM         shift, and go to state 5
+    REGISTER     shift, and go to state 6
+    SHORT        shift, and go to state 7
+    STATIC       shift, and go to state 8
+    SIGNED       shift, and go to state 9
+    UNION        shift, and go to state 10
+    UNSIGNED     shift, and go to state 11
+    VOLATILE     shift, and go to state 12
+    ID           shift, and go to state 193
+    RIGHT_BRACE  shift, and go to state 223
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    CONSTANT     shift, and go to state 14
+
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 156 (prefixes)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 156 (prefixes)
+
+    stmt                  go to state 224
+    assignment_stmt       go to state 197
+    declaration_stmt      go to state 198
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    instantiation_stmt    go to state 199
+    struct_inst           go to state 26
+    union_inst            go to state 27
+    func_inst             go to state 28
+    unary_op              go to state 200
+    if_stmt               go to state 201
+    do_while_stmt         go to state 202
+    while_stmt            go to state 203
+    for_stmt              go to state 204
+    return_stmt           go to state 205
+    goto_stmt             go to state 206
+    label                 go to state 207
+    prefixes              go to state 208
+    prefix                go to state 30
+
+
+State 196
+
+    8 stmts: stmt •
+
+    $default  reduce using rule 8 (stmts)
+
+
+State 197
+
+   17 stmt: assignment_stmt • SEMI
+
+    SEMI  shift, and go to state 225
+
+
+State 198
+
+   16 stmt: declaration_stmt • SEMI
+
+    SEMI  shift, and go to state 226
+
+
+State 199
+
+   18 stmt: instantiation_stmt • SEMI
+
+    SEMI  shift, and go to state 227
+
+
+State 200
+
+   22 assignment_stmt: unary_op • ID
+
+    ID  shift, and go to state 228
+
+
+State 201
+
+   11 stmt: if_stmt •
+
+    $default  reduce using rule 11 (stmt)
+
+
+State 202
+
+   14 stmt: do_while_stmt • SEMI
+
+    SEMI  shift, and go to state 229
+
+
+State 203
+
+   13 stmt: while_stmt •
+
+    $default  reduce using rule 13 (stmt)
+
+
+State 204
+
+   12 stmt: for_stmt •
+
+    $default  reduce using rule 12 (stmt)
+
+
+State 205
+
+   15 stmt: return_stmt • SEMI
+
+    SEMI  shift, and go to state 230
+
+
+State 206
+
+    9 stmt: goto_stmt •
+
+    $default  reduce using rule 9 (stmt)
+
+
+State 207
+
+   10 stmt: label •
+
+    $default  reduce using rule 10 (stmt)
+
+
+State 208
+
+   32 variable_declaration: prefixes • type ID
+   33                     | prefixes • type ID assign_op expr
+   34 array_declaration: prefixes • type ID LEFT_BRACKET expr RIGHT_BRACKET
+   35                  | prefixes • type ID LEFT_BRACKET expr RIGHT_BRACKET assign_op LEFT_BRACE expr RIGHT_BRACE
+  157 prefixes: prefixes • prefix
+
+    INT       shift, and go to state 32
+    FLOAT     shift, and go to state 33
+    DOUBLE    shift, and go to state 34
+    CHAR      shift, and go to state 35
+    VOID      shift, and go to state 36
+    EXTERN    shift, and go to state 3
+    LONG      shift, and go to state 4
+    REGISTER  shift, and go to state 6
+    SHORT     shift, and go to state 7
+    STATIC    shift, and go to state 8
+    SIGNED    shift, and go to state 9
+    UNSIGNED  shift, and go to state 11
+    VOLATILE  shift, and go to state 12
+    CONSTANT  shift, and go to state 14
+
+    type    go to state 231
+    prefix  go to state 54
+
+
+State 209
+
+   35 array_declaration: prefixes type ID LEFT_BRACKET expr RIGHT_BRACKET assign_op LEFT_BRACE • expr RIGHT_BRACE
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 71
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    func_inst  go to state 77
+    expr       go to state 232
+    term       go to state 80
+    operand    go to state 81
+    factor     go to state 82
+    unary_op   go to state 83
+    type_cast  go to state 84
+
+
+State 210
+
+  121 if_stmt: IF LPAREN • condition RPAREN compound_stmt
+  122        | IF LPAREN • condition RPAREN compound_stmt elseif_stmt
+  123        | IF LPAREN • condition RPAREN compound_stmt else_stmt
+  124        | IF LPAREN • condition RPAREN stmt
+  125        | IF LPAREN • condition RPAREN stmt elseif_stmt
+  126        | IF LPAREN • condition RPAREN stmt else_stmt
+  127        | IF LPAREN • condition RPAREN SEMI
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 233
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    assignment_stmt  go to state 234
+    func_inst        go to state 77
+    expr             go to state 235
+    term             go to state 80
+    operand          go to state 81
+    factor           go to state 82
+    unary_op         go to state 236
+    condition        go to state 237
+    type_cast        go to state 84
+
+
+State 211
+
+  137 do_while_stmt: DO stmt • WHILE LPAREN LPAREN condition RPAREN
+
+    WHILE  shift, and go to state 238
+
+
+State 212
+
+  136 do_while_stmt: DO compound_stmt • WHILE LPAREN condition RPAREN
+
+    WHILE  shift, and go to state 239
+
+
+State 213
+
+  138 while_stmt: WHILE LPAREN • condition RPAREN compound_stmt
+  139           | WHILE LPAREN • condition RPAREN stmt
+  140           | WHILE LPAREN • condition RPAREN SEMI
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 233
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    assignment_stmt  go to state 234
+    func_inst        go to state 77
+    expr             go to state 235
+    term             go to state 80
+    operand          go to state 81
+    factor           go to state 82
+    unary_op         go to state 236
+    condition        go to state 240
+    type_cast        go to state 84
+
+
+State 214
+
+  141 for_stmt: FOR LPAREN • condition SEMI condition SEMI condition RPAREN compound_stmt
+  142         | FOR LPAREN • condition SEMI condition SEMI condition RPAREN stmt
+  143         | FOR LPAREN • variable_declaration SEMI condition SEMI condition RPAREN compound_stmt
+  144         | FOR LPAREN • variable_declaration SEMI condition SEMI condition RPAREN stmt
+
+    EXTERN       shift, and go to state 3
+    LONG         shift, and go to state 4
+    REGISTER     shift, and go to state 6
+    SHORT        shift, and go to state 7
+    STATIC       shift, and go to state 8
+    SIGNED       shift, and go to state 9
+    UNSIGNED     shift, and go to state 11
+    VOLATILE     shift, and go to state 12
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 233
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+    CONSTANT     shift, and go to state 14
+
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 156 (prefixes)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 156 (prefixes)
+
+    assignment_stmt       go to state 234
+    variable_declaration  go to state 241
+    func_inst             go to state 77
+    expr                  go to state 235
+    term                  go to state 80
+    operand               go to state 81
+    factor                go to state 82
+    unary_op              go to state 236
+    condition             go to state 242
+    prefixes              go to state 166
+    prefix                go to state 30
+    type_cast             go to state 84
+
+
+State 215
+
+   70 expr: expr • op term
+   71     | expr • comp_op term
+   72     | expr • bitwise_op term
+   73     | expr • logical_op term
+  147 return_stmt: RETURN expr •
+
+    PLUS                   shift, and go to state 103
+    MINUS                  shift, and go to state 104
+    BITWISE_AND            shift, and go to state 105
+    BITWISE_OR             shift, and go to state 106
+    BITWISE_NOT            shift, and go to state 107
+    BITWISE_XOR            shift, and go to state 108
+    LOGICAL_AND            shift, and go to state 109
+    LOGICAL_OR             shift, and go to state 110
+    EQUAL                  shift, and go to state 111
+    NOT_EQUAL              shift, and go to state 112
+    LESS_THAN              shift, and go to state 113
+    GREATER_THAN           shift, and go to state 114
+    LESS_THAN_OR_EQUAL     shift, and go to state 115
+    GREATER_THAN_OR_EQUAL  shift, and go to state 116
+    RIGHT_SHIFT            shift, and go to state 117
+    LEFT_SHIFT             shift, and go to state 118
+
+    $default  reduce using rule 147 (return_stmt)
+
+    op          go to state 119
+    comp_op     go to state 120
+    logical_op  go to state 121
+    bitwise_op  go to state 122
+
+
+State 216
+
+   20 stmt: BREAK SEMI •
+
+    $default  reduce using rule 20 (stmt)
+
+
+State 217
+
+   19 stmt: CONTINUE SEMI •
+
+    $default  reduce using rule 19 (stmt)
+
+
+State 218
+
+  148 goto_stmt: GOTO ID • SEMI
+
+    SEMI  shift, and go to state 243
+
+
+State 219
+
+   25 assignment_stmt: ID LEFT_BRACKET • expr RIGHT_BRACKET assign_op expr
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 71
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    func_inst  go to state 77
+    expr       go to state 244
+    term       go to state 80
+    operand    go to state 81
+    factor     go to state 82
+    unary_op   go to state 83
+    type_cast  go to state 84
+
+
+State 220
+
+  149 label: ID COLON •
+
+    $default  reduce using rule 149 (label)
+
+
+State 221
+
+   23 assignment_stmt: ID unary_op •
+
+    $default  reduce using rule 23 (assignment_stmt)
+
+
+State 222
+
+   21 assignment_stmt: ID assign_op • expr
+   24                | ID assign_op • LEFT_BRACE expr RIGHT_BRACE
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 71
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    LEFT_BRACE   shift, and go to state 245
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    func_inst  go to state 77
+    expr       go to state 246
+    term       go to state 80
+    operand    go to state 81
+    factor     go to state 82
+    unary_op   go to state 83
+    type_cast  go to state 84
+
+
+State 223
+
+  119 compound_stmt: LEFT_BRACE stmts RIGHT_BRACE •
+
+    $default  reduce using rule 119 (compound_stmt)
+
+
+State 224
+
+    7 stmts: stmts stmt •
+
+    $default  reduce using rule 7 (stmts)
+
+
+State 225
+
+   17 stmt: assignment_stmt SEMI •
+
+    $default  reduce using rule 17 (stmt)
+
+
+State 226
+
+   16 stmt: declaration_stmt SEMI •
+
+    $default  reduce using rule 16 (stmt)
+
+
+State 227
+
+   18 stmt: instantiation_stmt SEMI •
+
+    $default  reduce using rule 18 (stmt)
+
+
+State 228
+
+   22 assignment_stmt: unary_op ID •
+
+    $default  reduce using rule 22 (assignment_stmt)
+
+
+State 229
+
+   14 stmt: do_while_stmt SEMI •
+
+    $default  reduce using rule 14 (stmt)
+
+
+State 230
+
+   15 stmt: return_stmt SEMI •
+
+    $default  reduce using rule 15 (stmt)
+
+
+State 231
+
+   32 variable_declaration: prefixes type • ID
+   33                     | prefixes type • ID assign_op expr
+   34 array_declaration: prefixes type • ID LEFT_BRACKET expr RIGHT_BRACKET
+   35                  | prefixes type • ID LEFT_BRACKET expr RIGHT_BRACKET assign_op LEFT_BRACE expr RIGHT_BRACE
+
+    ID  shift, and go to state 247
+
+
+State 232
+
+   35 array_declaration: prefixes type ID LEFT_BRACKET expr RIGHT_BRACKET assign_op LEFT_BRACE expr • RIGHT_BRACE
+   70 expr: expr • op term
+   71     | expr • comp_op term
+   72     | expr • bitwise_op term
+   73     | expr • logical_op term
+
+    PLUS                   shift, and go to state 103
+    MINUS                  shift, and go to state 104
+    RIGHT_BRACE            shift, and go to state 248
+    BITWISE_AND            shift, and go to state 105
+    BITWISE_OR             shift, and go to state 106
+    BITWISE_NOT            shift, and go to state 107
+    BITWISE_XOR            shift, and go to state 108
+    LOGICAL_AND            shift, and go to state 109
+    LOGICAL_OR             shift, and go to state 110
+    EQUAL                  shift, and go to state 111
+    NOT_EQUAL              shift, and go to state 112
+    LESS_THAN              shift, and go to state 113
+    GREATER_THAN           shift, and go to state 114
+    LESS_THAN_OR_EQUAL     shift, and go to state 115
+    GREATER_THAN_OR_EQUAL  shift, and go to state 116
+    RIGHT_SHIFT            shift, and go to state 117
+    LEFT_SHIFT             shift, and go to state 118
+
+    op          go to state 119
+    comp_op     go to state 120
+    logical_op  go to state 121
+    bitwise_op  go to state 122
+
+
+State 233
+
+   21 assignment_stmt: ID • assign_op expr
+   23                | ID • unary_op
+   24                | ID • assign_op LEFT_BRACE expr RIGHT_BRACE
+   25                | ID • LEFT_BRACKET expr RIGHT_BRACKET assign_op expr
+   65 func_inst: ID • LPAREN func_inst_parameters RPAREN
+   84 factor: ID •
+
+    ASSIGN              shift, and go to state 130
+    LPAREN              shift, and go to state 46
+    LEFT_BRACKET        shift, and go to state 219
+    INCREMENT           shift, and go to state 74
+    DECREMENT           shift, and go to state 75
+    PLUS_ASSIGN         shift, and go to state 133
+    MINUS_ASSIGN        shift, and go to state 134
+    LEFT_SHIFT_ASSIGN   shift, and go to state 135
+    RIGHT_SHIFT_ASSIGN  shift, and go to state 136
+    BITWISE_AND_ASSIGN  shift, and go to state 137
+    BITWISE_OR_ASSIGN   shift, and go to state 138
+    BITWISE_XOR_ASSIGN  shift, and go to state 139
+    MULTIPLY_ASSIGN     shift, and go to state 140
+    DIVIDE_ASSIGN       shift, and go to state 141
+    MODULUS_ASSIGN      shift, and go to state 142
+
+    INCREMENT  [reduce using rule 84 (factor)]
+    DECREMENT  [reduce using rule 84 (factor)]
+    $default   reduce using rule 84 (factor)
+
+    unary_op   go to state 221
+    assign_op  go to state 222
+
+
+State 234
+
+  146 condition: assignment_stmt •
+
+    $default  reduce using rule 146 (condition)
+
+
+State 235
+
+   70 expr: expr • op term
+   71     | expr • comp_op term
+   72     | expr • bitwise_op term
+   73     | expr • logical_op term
+  145 condition: expr •
+
+    PLUS                   shift, and go to state 103
+    MINUS                  shift, and go to state 104
+    BITWISE_AND            shift, and go to state 105
+    BITWISE_OR             shift, and go to state 106
+    BITWISE_NOT            shift, and go to state 107
+    BITWISE_XOR            shift, and go to state 108
+    LOGICAL_AND            shift, and go to state 109
+    LOGICAL_OR             shift, and go to state 110
+    EQUAL                  shift, and go to state 111
+    NOT_EQUAL              shift, and go to state 112
+    LESS_THAN              shift, and go to state 113
+    GREATER_THAN           shift, and go to state 114
+    LESS_THAN_OR_EQUAL     shift, and go to state 115
+    GREATER_THAN_OR_EQUAL  shift, and go to state 116
+    RIGHT_SHIFT            shift, and go to state 117
+    LEFT_SHIFT             shift, and go to state 118
+
+    $default  reduce using rule 145 (condition)
+
+    op          go to state 119
+    comp_op     go to state 120
+    logical_op  go to state 121
+    bitwise_op  go to state 122
+
+
+State 236
+
+   22 assignment_stmt: unary_op • ID
+   77 operand: unary_op • factor
+
+    NUM     shift, and go to state 70
+    ID      shift, and go to state 249
+    FNUM    shift, and go to state 72
+    LPAREN  shift, and go to state 99
+
+    func_inst  go to state 77
+    factor     go to state 128
+
+
+State 237
+
+  121 if_stmt: IF LPAREN condition • RPAREN compound_stmt
+  122        | IF LPAREN condition • RPAREN compound_stmt elseif_stmt
+  123        | IF LPAREN condition • RPAREN compound_stmt else_stmt
+  124        | IF LPAREN condition • RPAREN stmt
+  125        | IF LPAREN condition • RPAREN stmt elseif_stmt
+  126        | IF LPAREN condition • RPAREN stmt else_stmt
+  127        | IF LPAREN condition • RPAREN SEMI
+
+    RPAREN  shift, and go to state 250
+
+
+State 238
+
+  137 do_while_stmt: DO stmt WHILE • LPAREN LPAREN condition RPAREN
+
+    LPAREN  shift, and go to state 251
+
+
+State 239
+
+  136 do_while_stmt: DO compound_stmt WHILE • LPAREN condition RPAREN
+
+    LPAREN  shift, and go to state 252
+
+
+State 240
+
+  138 while_stmt: WHILE LPAREN condition • RPAREN compound_stmt
+  139           | WHILE LPAREN condition • RPAREN stmt
+  140           | WHILE LPAREN condition • RPAREN SEMI
+
+    RPAREN  shift, and go to state 253
+
+
+State 241
+
+  143 for_stmt: FOR LPAREN variable_declaration • SEMI condition SEMI condition RPAREN compound_stmt
+  144         | FOR LPAREN variable_declaration • SEMI condition SEMI condition RPAREN stmt
+
+    SEMI  shift, and go to state 254
+
+
+State 242
+
+  141 for_stmt: FOR LPAREN condition • SEMI condition SEMI condition RPAREN compound_stmt
+  142         | FOR LPAREN condition • SEMI condition SEMI condition RPAREN stmt
+
+    SEMI  shift, and go to state 255
+
+
+State 243
+
+  148 goto_stmt: GOTO ID SEMI •
+
+    $default  reduce using rule 148 (goto_stmt)
+
+
+State 244
+
+   25 assignment_stmt: ID LEFT_BRACKET expr • RIGHT_BRACKET assign_op expr
+   70 expr: expr • op term
+   71     | expr • comp_op term
+   72     | expr • bitwise_op term
+   73     | expr • logical_op term
+
+    PLUS                   shift, and go to state 103
+    MINUS                  shift, and go to state 104
+    RIGHT_BRACKET          shift, and go to state 256
+    BITWISE_AND            shift, and go to state 105
+    BITWISE_OR             shift, and go to state 106
+    BITWISE_NOT            shift, and go to state 107
+    BITWISE_XOR            shift, and go to state 108
+    LOGICAL_AND            shift, and go to state 109
+    LOGICAL_OR             shift, and go to state 110
+    EQUAL                  shift, and go to state 111
+    NOT_EQUAL              shift, and go to state 112
+    LESS_THAN              shift, and go to state 113
+    GREATER_THAN           shift, and go to state 114
+    LESS_THAN_OR_EQUAL     shift, and go to state 115
+    GREATER_THAN_OR_EQUAL  shift, and go to state 116
+    RIGHT_SHIFT            shift, and go to state 117
+    LEFT_SHIFT             shift, and go to state 118
+
+    op          go to state 119
+    comp_op     go to state 120
+    logical_op  go to state 121
+    bitwise_op  go to state 122
+
+
+State 245
+
+   24 assignment_stmt: ID assign_op LEFT_BRACE • expr RIGHT_BRACE
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 71
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    func_inst  go to state 77
+    expr       go to state 257
+    term       go to state 80
+    operand    go to state 81
+    factor     go to state 82
+    unary_op   go to state 83
+    type_cast  go to state 84
+
+
+State 246
+
+   21 assignment_stmt: ID assign_op expr •
+   70 expr: expr • op term
+   71     | expr • comp_op term
+   72     | expr • bitwise_op term
+   73     | expr • logical_op term
+
+    PLUS                   shift, and go to state 103
+    MINUS                  shift, and go to state 104
+    BITWISE_AND            shift, and go to state 105
+    BITWISE_OR             shift, and go to state 106
+    BITWISE_NOT            shift, and go to state 107
+    BITWISE_XOR            shift, and go to state 108
+    LOGICAL_AND            shift, and go to state 109
+    LOGICAL_OR             shift, and go to state 110
+    EQUAL                  shift, and go to state 111
+    NOT_EQUAL              shift, and go to state 112
+    LESS_THAN              shift, and go to state 113
+    GREATER_THAN           shift, and go to state 114
+    LESS_THAN_OR_EQUAL     shift, and go to state 115
+    GREATER_THAN_OR_EQUAL  shift, and go to state 116
+    RIGHT_SHIFT            shift, and go to state 117
+    LEFT_SHIFT             shift, and go to state 118
+
+    $default  reduce using rule 21 (assignment_stmt)
+
+    op          go to state 119
+    comp_op     go to state 120
+    logical_op  go to state 121
+    bitwise_op  go to state 122
+
+
+State 247
+
+   32 variable_declaration: prefixes type ID •
+   33                     | prefixes type ID • assign_op expr
+   34 array_declaration: prefixes type ID • LEFT_BRACKET expr RIGHT_BRACKET
+   35                  | prefixes type ID • LEFT_BRACKET expr RIGHT_BRACKET assign_op LEFT_BRACE expr RIGHT_BRACE
+
+    ASSIGN              shift, and go to state 130
+    LEFT_BRACKET        shift, and go to state 132
+    PLUS_ASSIGN         shift, and go to state 133
+    MINUS_ASSIGN        shift, and go to state 134
+    LEFT_SHIFT_ASSIGN   shift, and go to state 135
+    RIGHT_SHIFT_ASSIGN  shift, and go to state 136
+    BITWISE_AND_ASSIGN  shift, and go to state 137
+    BITWISE_OR_ASSIGN   shift, and go to state 138
+    BITWISE_XOR_ASSIGN  shift, and go to state 139
+    MULTIPLY_ASSIGN     shift, and go to state 140
+    DIVIDE_ASSIGN       shift, and go to state 141
+    MODULUS_ASSIGN      shift, and go to state 142
+
+    $default  reduce using rule 32 (variable_declaration)
+
+    assign_op  go to state 143
+
+
+State 248
+
+   35 array_declaration: prefixes type ID LEFT_BRACKET expr RIGHT_BRACKET assign_op LEFT_BRACE expr RIGHT_BRACE •
+
+    $default  reduce using rule 35 (array_declaration)
+
+
+State 249
+
+   22 assignment_stmt: unary_op ID •
+   65 func_inst: ID • LPAREN func_inst_parameters RPAREN
+   84 factor: ID •
+
+    LPAREN  shift, and go to state 46
+
+    RPAREN    reduce using rule 22 (assignment_stmt)
+    RPAREN    [reduce using rule 84 (factor)]
+    SEMI      reduce using rule 22 (assignment_stmt)
+    SEMI      [reduce using rule 84 (factor)]
+    $default  reduce using rule 84 (factor)
+
+
+State 250
+
+  121 if_stmt: IF LPAREN condition RPAREN • compound_stmt
+  122        | IF LPAREN condition RPAREN • compound_stmt elseif_stmt
+  123        | IF LPAREN condition RPAREN • compound_stmt else_stmt
+  124        | IF LPAREN condition RPAREN • stmt
+  125        | IF LPAREN condition RPAREN • stmt elseif_stmt
+  126        | IF LPAREN condition RPAREN • stmt else_stmt
+  127        | IF LPAREN condition RPAREN • SEMI
+
+    IF          shift, and go to state 185
+    DO          shift, and go to state 186
+    WHILE       shift, and go to state 187
+    FOR         shift, and go to state 188
+    RETURN      shift, and go to state 189
+    BREAK       shift, and go to state 190
+    STRUCT      shift, and go to state 1
+    TYPEDEF     shift, and go to state 2
+    CONTINUE    shift, and go to state 191
+    EXTERN      shift, and go to state 3
+    GOTO        shift, and go to state 192
+    LONG        shift, and go to state 4
+    ENUM        shift, and go to state 5
+    REGISTER    shift, and go to state 6
+    SHORT       shift, and go to state 7
+    STATIC      shift, and go to state 8
+    SIGNED      shift, and go to state 9
+    UNION       shift, and go to state 10
+    UNSIGNED    shift, and go to state 11
+    VOLATILE    shift, and go to state 12
+    ID          shift, and go to state 193
+    LEFT_BRACE  shift, and go to state 179
+    SEMI        shift, and go to state 258
+    INCREMENT   shift, and go to state 74
+    DECREMENT   shift, and go to state 75
+    CONSTANT    shift, and go to state 14
+
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 156 (prefixes)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 156 (prefixes)
+
+    stmt                  go to state 259
+    assignment_stmt       go to state 197
+    declaration_stmt      go to state 198
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    instantiation_stmt    go to state 199
+    struct_inst           go to state 26
+    union_inst            go to state 27
+    func_inst             go to state 28
+    unary_op              go to state 200
+    compound_stmt         go to state 260
+    if_stmt               go to state 201
+    do_while_stmt         go to state 202
+    while_stmt            go to state 203
+    for_stmt              go to state 204
+    return_stmt           go to state 205
+    goto_stmt             go to state 206
+    label                 go to state 207
+    prefixes              go to state 208
+    prefix                go to state 30
+
+
+State 251
+
+  137 do_while_stmt: DO stmt WHILE LPAREN • LPAREN condition RPAREN
+
+    LPAREN  shift, and go to state 261
+
+
+State 252
+
+  136 do_while_stmt: DO compound_stmt WHILE LPAREN • condition RPAREN
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 233
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    assignment_stmt  go to state 234
+    func_inst        go to state 77
+    expr             go to state 235
+    term             go to state 80
+    operand          go to state 81
+    factor           go to state 82
+    unary_op         go to state 236
+    condition        go to state 262
+    type_cast        go to state 84
+
+
+State 253
+
+  138 while_stmt: WHILE LPAREN condition RPAREN • compound_stmt
+  139           | WHILE LPAREN condition RPAREN • stmt
+  140           | WHILE LPAREN condition RPAREN • SEMI
+
+    IF          shift, and go to state 185
+    DO          shift, and go to state 186
+    WHILE       shift, and go to state 187
+    FOR         shift, and go to state 188
+    RETURN      shift, and go to state 189
+    BREAK       shift, and go to state 190
+    STRUCT      shift, and go to state 1
+    TYPEDEF     shift, and go to state 2
+    CONTINUE    shift, and go to state 191
+    EXTERN      shift, and go to state 3
+    GOTO        shift, and go to state 192
+    LONG        shift, and go to state 4
+    ENUM        shift, and go to state 5
+    REGISTER    shift, and go to state 6
+    SHORT       shift, and go to state 7
+    STATIC      shift, and go to state 8
+    SIGNED      shift, and go to state 9
+    UNION       shift, and go to state 10
+    UNSIGNED    shift, and go to state 11
+    VOLATILE    shift, and go to state 12
+    ID          shift, and go to state 193
+    LEFT_BRACE  shift, and go to state 179
+    SEMI        shift, and go to state 263
+    INCREMENT   shift, and go to state 74
+    DECREMENT   shift, and go to state 75
+    CONSTANT    shift, and go to state 14
+
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 156 (prefixes)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 156 (prefixes)
+
+    stmt                  go to state 264
+    assignment_stmt       go to state 197
+    declaration_stmt      go to state 198
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    instantiation_stmt    go to state 199
+    struct_inst           go to state 26
+    union_inst            go to state 27
+    func_inst             go to state 28
+    unary_op              go to state 200
+    compound_stmt         go to state 265
+    if_stmt               go to state 201
+    do_while_stmt         go to state 202
+    while_stmt            go to state 203
+    for_stmt              go to state 204
+    return_stmt           go to state 205
+    goto_stmt             go to state 206
+    label                 go to state 207
+    prefixes              go to state 208
+    prefix                go to state 30
+
+
+State 254
+
+  143 for_stmt: FOR LPAREN variable_declaration SEMI • condition SEMI condition RPAREN compound_stmt
+  144         | FOR LPAREN variable_declaration SEMI • condition SEMI condition RPAREN stmt
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 233
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    assignment_stmt  go to state 234
+    func_inst        go to state 77
+    expr             go to state 235
+    term             go to state 80
+    operand          go to state 81
+    factor           go to state 82
+    unary_op         go to state 236
+    condition        go to state 266
+    type_cast        go to state 84
+
+
+State 255
+
+  141 for_stmt: FOR LPAREN condition SEMI • condition SEMI condition RPAREN compound_stmt
+  142         | FOR LPAREN condition SEMI • condition SEMI condition RPAREN stmt
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 233
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    assignment_stmt  go to state 234
+    func_inst        go to state 77
+    expr             go to state 235
+    term             go to state 80
+    operand          go to state 81
+    factor           go to state 82
+    unary_op         go to state 236
+    condition        go to state 267
+    type_cast        go to state 84
+
+
+State 256
+
+   25 assignment_stmt: ID LEFT_BRACKET expr RIGHT_BRACKET • assign_op expr
+
+    ASSIGN              shift, and go to state 130
+    PLUS_ASSIGN         shift, and go to state 133
+    MINUS_ASSIGN        shift, and go to state 134
+    LEFT_SHIFT_ASSIGN   shift, and go to state 135
+    RIGHT_SHIFT_ASSIGN  shift, and go to state 136
+    BITWISE_AND_ASSIGN  shift, and go to state 137
+    BITWISE_OR_ASSIGN   shift, and go to state 138
+    BITWISE_XOR_ASSIGN  shift, and go to state 139
+    MULTIPLY_ASSIGN     shift, and go to state 140
+    DIVIDE_ASSIGN       shift, and go to state 141
+    MODULUS_ASSIGN      shift, and go to state 142
+
+    assign_op  go to state 268
+
+
+State 257
+
+   24 assignment_stmt: ID assign_op LEFT_BRACE expr • RIGHT_BRACE
+   70 expr: expr • op term
+   71     | expr • comp_op term
+   72     | expr • bitwise_op term
+   73     | expr • logical_op term
+
+    PLUS                   shift, and go to state 103
+    MINUS                  shift, and go to state 104
+    RIGHT_BRACE            shift, and go to state 269
+    BITWISE_AND            shift, and go to state 105
+    BITWISE_OR             shift, and go to state 106
+    BITWISE_NOT            shift, and go to state 107
+    BITWISE_XOR            shift, and go to state 108
+    LOGICAL_AND            shift, and go to state 109
+    LOGICAL_OR             shift, and go to state 110
+    EQUAL                  shift, and go to state 111
+    NOT_EQUAL              shift, and go to state 112
+    LESS_THAN              shift, and go to state 113
+    GREATER_THAN           shift, and go to state 114
+    LESS_THAN_OR_EQUAL     shift, and go to state 115
+    GREATER_THAN_OR_EQUAL  shift, and go to state 116
+    RIGHT_SHIFT            shift, and go to state 117
+    LEFT_SHIFT             shift, and go to state 118
+
+    op          go to state 119
+    comp_op     go to state 120
+    logical_op  go to state 121
+    bitwise_op  go to state 122
+
+
+State 258
+
+  127 if_stmt: IF LPAREN condition RPAREN SEMI •
+
+    $default  reduce using rule 127 (if_stmt)
+
+
+State 259
+
+  124 if_stmt: IF LPAREN condition RPAREN stmt •
+  125        | IF LPAREN condition RPAREN stmt • elseif_stmt
+  126        | IF LPAREN condition RPAREN stmt • else_stmt
+
+    ELSEIF  shift, and go to state 270
+    ELSE    shift, and go to state 271
+
+    ELSEIF    [reduce using rule 124 (if_stmt)]
+    ELSE      [reduce using rule 124 (if_stmt)]
+    $default  reduce using rule 124 (if_stmt)
+
+    elseif_stmt  go to state 272
+    else_stmt    go to state 273
+
+
+State 260
+
+  121 if_stmt: IF LPAREN condition RPAREN compound_stmt •
+  122        | IF LPAREN condition RPAREN compound_stmt • elseif_stmt
+  123        | IF LPAREN condition RPAREN compound_stmt • else_stmt
+
+    ELSEIF  shift, and go to state 270
+    ELSE    shift, and go to state 271
+
+    ELSEIF    [reduce using rule 121 (if_stmt)]
+    ELSE      [reduce using rule 121 (if_stmt)]
+    $default  reduce using rule 121 (if_stmt)
+
+    elseif_stmt  go to state 274
+    else_stmt    go to state 275
+
+
+State 261
+
+  137 do_while_stmt: DO stmt WHILE LPAREN LPAREN • condition RPAREN
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 233
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    assignment_stmt  go to state 234
+    func_inst        go to state 77
+    expr             go to state 235
+    term             go to state 80
+    operand          go to state 81
+    factor           go to state 82
+    unary_op         go to state 236
+    condition        go to state 276
+    type_cast        go to state 84
+
+
+State 262
+
+  136 do_while_stmt: DO compound_stmt WHILE LPAREN condition • RPAREN
+
+    RPAREN  shift, and go to state 277
+
+
+State 263
+
+  140 while_stmt: WHILE LPAREN condition RPAREN SEMI •
+
+    $default  reduce using rule 140 (while_stmt)
+
+
+State 264
+
+  139 while_stmt: WHILE LPAREN condition RPAREN stmt •
+
+    $default  reduce using rule 139 (while_stmt)
+
+
+State 265
+
+  138 while_stmt: WHILE LPAREN condition RPAREN compound_stmt •
+
+    $default  reduce using rule 138 (while_stmt)
+
+
+State 266
+
+  143 for_stmt: FOR LPAREN variable_declaration SEMI condition • SEMI condition RPAREN compound_stmt
+  144         | FOR LPAREN variable_declaration SEMI condition • SEMI condition RPAREN stmt
+
+    SEMI  shift, and go to state 278
+
+
+State 267
+
+  141 for_stmt: FOR LPAREN condition SEMI condition • SEMI condition RPAREN compound_stmt
+  142         | FOR LPAREN condition SEMI condition • SEMI condition RPAREN stmt
+
+    SEMI  shift, and go to state 279
+
+
+State 268
+
+   25 assignment_stmt: ID LEFT_BRACKET expr RIGHT_BRACKET assign_op • expr
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 71
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    func_inst  go to state 77
+    expr       go to state 280
+    term       go to state 80
+    operand    go to state 81
+    factor     go to state 82
+    unary_op   go to state 83
+    type_cast  go to state 84
+
+
+State 269
+
+   24 assignment_stmt: ID assign_op LEFT_BRACE expr RIGHT_BRACE •
+
+    $default  reduce using rule 24 (assignment_stmt)
+
+
+State 270
+
+  130 elseif_stmt: ELSEIF • LPAREN condition RPAREN stmt
+  131            | ELSEIF • LPAREN condition RPAREN stmt else_stmt
+  132            | ELSEIF • LPAREN condition RPAREN compound_stmt
+  133            | ELSEIF • LPAREN condition RPAREN compound_stmt else_stmt
+
+    LPAREN  shift, and go to state 281
+
+
+State 271
+
+  134 else_stmt: ELSE • stmt
+  135          | ELSE • compound_stmt
+
+    IF          shift, and go to state 185
+    DO          shift, and go to state 186
+    WHILE       shift, and go to state 187
+    FOR         shift, and go to state 188
+    RETURN      shift, and go to state 189
+    BREAK       shift, and go to state 190
+    STRUCT      shift, and go to state 1
+    TYPEDEF     shift, and go to state 2
+    CONTINUE    shift, and go to state 191
+    EXTERN      shift, and go to state 3
+    GOTO        shift, and go to state 192
+    LONG        shift, and go to state 4
+    ENUM        shift, and go to state 5
+    REGISTER    shift, and go to state 6
+    SHORT       shift, and go to state 7
+    STATIC      shift, and go to state 8
+    SIGNED      shift, and go to state 9
+    UNION       shift, and go to state 10
+    UNSIGNED    shift, and go to state 11
+    VOLATILE    shift, and go to state 12
+    ID          shift, and go to state 193
+    LEFT_BRACE  shift, and go to state 179
+    INCREMENT   shift, and go to state 74
+    DECREMENT   shift, and go to state 75
+    CONSTANT    shift, and go to state 14
+
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 156 (prefixes)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 156 (prefixes)
+
+    stmt                  go to state 282
+    assignment_stmt       go to state 197
+    declaration_stmt      go to state 198
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    instantiation_stmt    go to state 199
+    struct_inst           go to state 26
+    union_inst            go to state 27
+    func_inst             go to state 28
+    unary_op              go to state 200
+    compound_stmt         go to state 283
+    if_stmt               go to state 201
+    do_while_stmt         go to state 202
+    while_stmt            go to state 203
+    for_stmt              go to state 204
+    return_stmt           go to state 205
+    goto_stmt             go to state 206
+    label                 go to state 207
+    prefixes              go to state 208
+    prefix                go to state 30
+
+
+State 272
+
+  125 if_stmt: IF LPAREN condition RPAREN stmt elseif_stmt •
+  128 elseif_stmt: elseif_stmt • ELSEIF LPAREN condition RPAREN stmt
+  129            | elseif_stmt • ELSEIF LPAREN condition RPAREN compound_stmt
+
+    ELSEIF  shift, and go to state 284
+
+    ELSEIF    [reduce using rule 125 (if_stmt)]
+    $default  reduce using rule 125 (if_stmt)
+
+
+State 273
+
+  126 if_stmt: IF LPAREN condition RPAREN stmt else_stmt •
+
+    $default  reduce using rule 126 (if_stmt)
+
+
+State 274
+
+  122 if_stmt: IF LPAREN condition RPAREN compound_stmt elseif_stmt •
+  128 elseif_stmt: elseif_stmt • ELSEIF LPAREN condition RPAREN stmt
+  129            | elseif_stmt • ELSEIF LPAREN condition RPAREN compound_stmt
+
+    ELSEIF  shift, and go to state 284
+
+    ELSEIF    [reduce using rule 122 (if_stmt)]
+    $default  reduce using rule 122 (if_stmt)
+
+
+State 275
+
+  123 if_stmt: IF LPAREN condition RPAREN compound_stmt else_stmt •
+
+    $default  reduce using rule 123 (if_stmt)
+
+
+State 276
+
+  137 do_while_stmt: DO stmt WHILE LPAREN LPAREN condition • RPAREN
+
+    RPAREN  shift, and go to state 285
+
+
+State 277
+
+  136 do_while_stmt: DO compound_stmt WHILE LPAREN condition RPAREN •
+
+    $default  reduce using rule 136 (do_while_stmt)
+
+
+State 278
+
+  143 for_stmt: FOR LPAREN variable_declaration SEMI condition SEMI • condition RPAREN compound_stmt
+  144         | FOR LPAREN variable_declaration SEMI condition SEMI • condition RPAREN stmt
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 233
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    assignment_stmt  go to state 234
+    func_inst        go to state 77
+    expr             go to state 235
+    term             go to state 80
+    operand          go to state 81
+    factor           go to state 82
+    unary_op         go to state 236
+    condition        go to state 286
+    type_cast        go to state 84
+
+
+State 279
+
+  141 for_stmt: FOR LPAREN condition SEMI condition SEMI • condition RPAREN compound_stmt
+  142         | FOR LPAREN condition SEMI condition SEMI • condition RPAREN stmt
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 233
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    assignment_stmt  go to state 234
+    func_inst        go to state 77
+    expr             go to state 235
+    term             go to state 80
+    operand          go to state 81
+    factor           go to state 82
+    unary_op         go to state 236
+    condition        go to state 287
+    type_cast        go to state 84
+
+
+State 280
+
+   25 assignment_stmt: ID LEFT_BRACKET expr RIGHT_BRACKET assign_op expr •
+   70 expr: expr • op term
+   71     | expr • comp_op term
+   72     | expr • bitwise_op term
+   73     | expr • logical_op term
+
+    PLUS                   shift, and go to state 103
+    MINUS                  shift, and go to state 104
+    BITWISE_AND            shift, and go to state 105
+    BITWISE_OR             shift, and go to state 106
+    BITWISE_NOT            shift, and go to state 107
+    BITWISE_XOR            shift, and go to state 108
+    LOGICAL_AND            shift, and go to state 109
+    LOGICAL_OR             shift, and go to state 110
+    EQUAL                  shift, and go to state 111
+    NOT_EQUAL              shift, and go to state 112
+    LESS_THAN              shift, and go to state 113
+    GREATER_THAN           shift, and go to state 114
+    LESS_THAN_OR_EQUAL     shift, and go to state 115
+    GREATER_THAN_OR_EQUAL  shift, and go to state 116
+    RIGHT_SHIFT            shift, and go to state 117
+    LEFT_SHIFT             shift, and go to state 118
+
+    $default  reduce using rule 25 (assignment_stmt)
+
+    op          go to state 119
+    comp_op     go to state 120
+    logical_op  go to state 121
+    bitwise_op  go to state 122
+
+
+State 281
+
+  130 elseif_stmt: ELSEIF LPAREN • condition RPAREN stmt
+  131            | ELSEIF LPAREN • condition RPAREN stmt else_stmt
+  132            | ELSEIF LPAREN • condition RPAREN compound_stmt
+  133            | ELSEIF LPAREN • condition RPAREN compound_stmt else_stmt
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 233
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    assignment_stmt  go to state 234
+    func_inst        go to state 77
+    expr             go to state 235
+    term             go to state 80
+    operand          go to state 81
+    factor           go to state 82
+    unary_op         go to state 236
+    condition        go to state 288
+    type_cast        go to state 84
+
+
+State 282
+
+  134 else_stmt: ELSE stmt •
+
+    $default  reduce using rule 134 (else_stmt)
+
+
+State 283
+
+  135 else_stmt: ELSE compound_stmt •
+
+    $default  reduce using rule 135 (else_stmt)
+
+
+State 284
+
+  128 elseif_stmt: elseif_stmt ELSEIF • LPAREN condition RPAREN stmt
+  129            | elseif_stmt ELSEIF • LPAREN condition RPAREN compound_stmt
+
+    LPAREN  shift, and go to state 289
+
+
+State 285
+
+  137 do_while_stmt: DO stmt WHILE LPAREN LPAREN condition RPAREN •
+
+    $default  reduce using rule 137 (do_while_stmt)
+
+
+State 286
+
+  143 for_stmt: FOR LPAREN variable_declaration SEMI condition SEMI condition • RPAREN compound_stmt
+  144         | FOR LPAREN variable_declaration SEMI condition SEMI condition • RPAREN stmt
+
+    RPAREN  shift, and go to state 290
+
+
+State 287
+
+  141 for_stmt: FOR LPAREN condition SEMI condition SEMI condition • RPAREN compound_stmt
+  142         | FOR LPAREN condition SEMI condition SEMI condition • RPAREN stmt
+
+    RPAREN  shift, and go to state 291
+
+
+State 288
+
+  130 elseif_stmt: ELSEIF LPAREN condition • RPAREN stmt
+  131            | ELSEIF LPAREN condition • RPAREN stmt else_stmt
+  132            | ELSEIF LPAREN condition • RPAREN compound_stmt
+  133            | ELSEIF LPAREN condition • RPAREN compound_stmt else_stmt
+
+    RPAREN  shift, and go to state 292
+
+
+State 289
+
+  128 elseif_stmt: elseif_stmt ELSEIF LPAREN • condition RPAREN stmt
+  129            | elseif_stmt ELSEIF LPAREN • condition RPAREN compound_stmt
+
+    NUM          shift, and go to state 70
+    ID           shift, and go to state 233
+    FNUM         shift, and go to state 72
+    LPAREN       shift, and go to state 73
+    INCREMENT    shift, and go to state 74
+    DECREMENT    shift, and go to state 75
+    LOGICAL_NOT  shift, and go to state 76
+
+    assignment_stmt  go to state 234
+    func_inst        go to state 77
+    expr             go to state 235
+    term             go to state 80
+    operand          go to state 81
+    factor           go to state 82
+    unary_op         go to state 236
+    condition        go to state 293
+    type_cast        go to state 84
+
+
+State 290
+
+  143 for_stmt: FOR LPAREN variable_declaration SEMI condition SEMI condition RPAREN • compound_stmt
+  144         | FOR LPAREN variable_declaration SEMI condition SEMI condition RPAREN • stmt
+
+    IF          shift, and go to state 185
+    DO          shift, and go to state 186
+    WHILE       shift, and go to state 187
+    FOR         shift, and go to state 188
+    RETURN      shift, and go to state 189
+    BREAK       shift, and go to state 190
+    STRUCT      shift, and go to state 1
+    TYPEDEF     shift, and go to state 2
+    CONTINUE    shift, and go to state 191
+    EXTERN      shift, and go to state 3
+    GOTO        shift, and go to state 192
+    LONG        shift, and go to state 4
+    ENUM        shift, and go to state 5
+    REGISTER    shift, and go to state 6
+    SHORT       shift, and go to state 7
+    STATIC      shift, and go to state 8
+    SIGNED      shift, and go to state 9
+    UNION       shift, and go to state 10
+    UNSIGNED    shift, and go to state 11
+    VOLATILE    shift, and go to state 12
+    ID          shift, and go to state 193
+    LEFT_BRACE  shift, and go to state 179
+    INCREMENT   shift, and go to state 74
+    DECREMENT   shift, and go to state 75
+    CONSTANT    shift, and go to state 14
+
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 156 (prefixes)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 156 (prefixes)
+
+    stmt                  go to state 294
+    assignment_stmt       go to state 197
+    declaration_stmt      go to state 198
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    instantiation_stmt    go to state 199
+    struct_inst           go to state 26
+    union_inst            go to state 27
+    func_inst             go to state 28
+    unary_op              go to state 200
+    compound_stmt         go to state 295
+    if_stmt               go to state 201
+    do_while_stmt         go to state 202
+    while_stmt            go to state 203
+    for_stmt              go to state 204
+    return_stmt           go to state 205
+    goto_stmt             go to state 206
+    label                 go to state 207
+    prefixes              go to state 208
+    prefix                go to state 30
+
+
+State 291
+
+  141 for_stmt: FOR LPAREN condition SEMI condition SEMI condition RPAREN • compound_stmt
+  142         | FOR LPAREN condition SEMI condition SEMI condition RPAREN • stmt
+
+    IF          shift, and go to state 185
+    DO          shift, and go to state 186
+    WHILE       shift, and go to state 187
+    FOR         shift, and go to state 188
+    RETURN      shift, and go to state 189
+    BREAK       shift, and go to state 190
+    STRUCT      shift, and go to state 1
+    TYPEDEF     shift, and go to state 2
+    CONTINUE    shift, and go to state 191
+    EXTERN      shift, and go to state 3
+    GOTO        shift, and go to state 192
+    LONG        shift, and go to state 4
+    ENUM        shift, and go to state 5
+    REGISTER    shift, and go to state 6
+    SHORT       shift, and go to state 7
+    STATIC      shift, and go to state 8
+    SIGNED      shift, and go to state 9
+    UNION       shift, and go to state 10
+    UNSIGNED    shift, and go to state 11
+    VOLATILE    shift, and go to state 12
+    ID          shift, and go to state 193
+    LEFT_BRACE  shift, and go to state 179
+    INCREMENT   shift, and go to state 74
+    DECREMENT   shift, and go to state 75
+    CONSTANT    shift, and go to state 14
+
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 156 (prefixes)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 156 (prefixes)
+
+    stmt                  go to state 296
+    assignment_stmt       go to state 197
+    declaration_stmt      go to state 198
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    instantiation_stmt    go to state 199
+    struct_inst           go to state 26
+    union_inst            go to state 27
+    func_inst             go to state 28
+    unary_op              go to state 200
+    compound_stmt         go to state 297
+    if_stmt               go to state 201
+    do_while_stmt         go to state 202
+    while_stmt            go to state 203
+    for_stmt              go to state 204
+    return_stmt           go to state 205
+    goto_stmt             go to state 206
+    label                 go to state 207
+    prefixes              go to state 208
+    prefix                go to state 30
+
+
+State 292
+
+  130 elseif_stmt: ELSEIF LPAREN condition RPAREN • stmt
+  131            | ELSEIF LPAREN condition RPAREN • stmt else_stmt
+  132            | ELSEIF LPAREN condition RPAREN • compound_stmt
+  133            | ELSEIF LPAREN condition RPAREN • compound_stmt else_stmt
+
+    IF          shift, and go to state 185
+    DO          shift, and go to state 186
+    WHILE       shift, and go to state 187
+    FOR         shift, and go to state 188
+    RETURN      shift, and go to state 189
+    BREAK       shift, and go to state 190
+    STRUCT      shift, and go to state 1
+    TYPEDEF     shift, and go to state 2
+    CONTINUE    shift, and go to state 191
+    EXTERN      shift, and go to state 3
+    GOTO        shift, and go to state 192
+    LONG        shift, and go to state 4
+    ENUM        shift, and go to state 5
+    REGISTER    shift, and go to state 6
+    SHORT       shift, and go to state 7
+    STATIC      shift, and go to state 8
+    SIGNED      shift, and go to state 9
+    UNION       shift, and go to state 10
+    UNSIGNED    shift, and go to state 11
+    VOLATILE    shift, and go to state 12
+    ID          shift, and go to state 193
+    LEFT_BRACE  shift, and go to state 179
+    INCREMENT   shift, and go to state 74
+    DECREMENT   shift, and go to state 75
+    CONSTANT    shift, and go to state 14
+
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 156 (prefixes)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 156 (prefixes)
+
+    stmt                  go to state 298
+    assignment_stmt       go to state 197
+    declaration_stmt      go to state 198
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    instantiation_stmt    go to state 199
+    struct_inst           go to state 26
+    union_inst            go to state 27
+    func_inst             go to state 28
+    unary_op              go to state 200
+    compound_stmt         go to state 299
+    if_stmt               go to state 201
+    do_while_stmt         go to state 202
+    while_stmt            go to state 203
+    for_stmt              go to state 204
+    return_stmt           go to state 205
+    goto_stmt             go to state 206
+    label                 go to state 207
+    prefixes              go to state 208
+    prefix                go to state 30
+
+
+State 293
+
+  128 elseif_stmt: elseif_stmt ELSEIF LPAREN condition • RPAREN stmt
+  129            | elseif_stmt ELSEIF LPAREN condition • RPAREN compound_stmt
+
+    RPAREN  shift, and go to state 300
+
+
+State 294
+
+  144 for_stmt: FOR LPAREN variable_declaration SEMI condition SEMI condition RPAREN stmt •
+
+    $default  reduce using rule 144 (for_stmt)
+
+
+State 295
+
+  143 for_stmt: FOR LPAREN variable_declaration SEMI condition SEMI condition RPAREN compound_stmt •
+
+    $default  reduce using rule 143 (for_stmt)
+
+
+State 296
+
+  142 for_stmt: FOR LPAREN condition SEMI condition SEMI condition RPAREN stmt •
+
+    $default  reduce using rule 142 (for_stmt)
+
+
+State 297
+
+  141 for_stmt: FOR LPAREN condition SEMI condition SEMI condition RPAREN compound_stmt •
+
+    $default  reduce using rule 141 (for_stmt)
+
+
+State 298
+
+  130 elseif_stmt: ELSEIF LPAREN condition RPAREN stmt •
+  131            | ELSEIF LPAREN condition RPAREN stmt • else_stmt
+
+    ELSE  shift, and go to state 271
+
+    ELSE      [reduce using rule 130 (elseif_stmt)]
+    $default  reduce using rule 130 (elseif_stmt)
+
+    else_stmt  go to state 301
+
+
+State 299
+
+  132 elseif_stmt: ELSEIF LPAREN condition RPAREN compound_stmt •
+  133            | ELSEIF LPAREN condition RPAREN compound_stmt • else_stmt
+
+    ELSE  shift, and go to state 271
+
+    ELSE      [reduce using rule 132 (elseif_stmt)]
+    $default  reduce using rule 132 (elseif_stmt)
+
+    else_stmt  go to state 302
+
+
+State 300
+
+  128 elseif_stmt: elseif_stmt ELSEIF LPAREN condition RPAREN • stmt
+  129            | elseif_stmt ELSEIF LPAREN condition RPAREN • compound_stmt
+
+    IF          shift, and go to state 185
+    DO          shift, and go to state 186
+    WHILE       shift, and go to state 187
+    FOR         shift, and go to state 188
+    RETURN      shift, and go to state 189
+    BREAK       shift, and go to state 190
+    STRUCT      shift, and go to state 1
+    TYPEDEF     shift, and go to state 2
+    CONTINUE    shift, and go to state 191
+    EXTERN      shift, and go to state 3
+    GOTO        shift, and go to state 192
+    LONG        shift, and go to state 4
+    ENUM        shift, and go to state 5
+    REGISTER    shift, and go to state 6
+    SHORT       shift, and go to state 7
+    STATIC      shift, and go to state 8
+    SIGNED      shift, and go to state 9
+    UNION       shift, and go to state 10
+    UNSIGNED    shift, and go to state 11
+    VOLATILE    shift, and go to state 12
+    ID          shift, and go to state 193
+    LEFT_BRACE  shift, and go to state 179
+    INCREMENT   shift, and go to state 74
+    DECREMENT   shift, and go to state 75
+    CONSTANT    shift, and go to state 14
+
+    EXTERN    [reduce using rule 156 (prefixes)]
+    LONG      [reduce using rule 156 (prefixes)]
+    REGISTER  [reduce using rule 156 (prefixes)]
+    SHORT     [reduce using rule 156 (prefixes)]
+    STATIC    [reduce using rule 156 (prefixes)]
+    SIGNED    [reduce using rule 156 (prefixes)]
+    UNSIGNED  [reduce using rule 156 (prefixes)]
+    VOLATILE  [reduce using rule 156 (prefixes)]
+    CONSTANT  [reduce using rule 156 (prefixes)]
+    $default  reduce using rule 156 (prefixes)
+
+    stmt                  go to state 303
+    assignment_stmt       go to state 197
+    declaration_stmt      go to state 198
+    variable_declaration  go to state 18
+    array_declaration     go to state 19
+    struct_declaration    go to state 21
+    union_declaration     go to state 22
+    enum_declaration      go to state 23
+    typeDef_declaration   go to state 24
+    instantiation_stmt    go to state 199
+    struct_inst           go to state 26
+    union_inst            go to state 27
+    func_inst             go to state 28
+    unary_op              go to state 200
+    compound_stmt         go to state 304
+    if_stmt               go to state 201
+    do_while_stmt         go to state 202
+    while_stmt            go to state 203
+    for_stmt              go to state 204
+    return_stmt           go to state 205
+    goto_stmt             go to state 206
+    label                 go to state 207
+    prefixes              go to state 208
+    prefix                go to state 30
+
+
+State 301
+
+  131 elseif_stmt: ELSEIF LPAREN condition RPAREN stmt else_stmt •
+
+    $default  reduce using rule 131 (elseif_stmt)
+
+
+State 302
+
+  133 elseif_stmt: ELSEIF LPAREN condition RPAREN compound_stmt else_stmt •
+
+    $default  reduce using rule 133 (elseif_stmt)
+
+
+State 303
+
+  128 elseif_stmt: elseif_stmt ELSEIF LPAREN condition RPAREN stmt •
+
+    $default  reduce using rule 128 (elseif_stmt)
+
+
+State 304
+
+  129 elseif_stmt: elseif_stmt ELSEIF LPAREN condition RPAREN compound_stmt •
+
+    $default  reduce using rule 129 (elseif_stmt)

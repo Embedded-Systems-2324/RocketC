@@ -1,5 +1,6 @@
-
 int main(){
     
-    int a = sizeof(int);
+    int a = 3;
+    char b;
+    float portugal = eder;
 }
