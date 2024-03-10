@@ -4,13 +4,7 @@
 /* Function parse returns the newly 
  * constructed syntax tree
  */
-//TreeNode * parse(void);
-
-/*
- * Inits the program file and prases it
- * The return type is temporary 
-*/
-void parse (void);
+TreeNode * parse(void);
 
 /* Error Handler */
 int yyerror(char *s);

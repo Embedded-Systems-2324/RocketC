@@ -1,14 +1,14 @@
 #include "globals.h"
 #include "scanner.h"
 #include "parser.h"
-
+#include "useful.h"
 FILE * sourceCode;
 int linenum = 1;    //Line number zero doesnt exist
 
 int main(int argc, char * argv[]){
     char* mode;     // --flex or --parse
     char pgm[120];
-
+    TreeNode * syntaxTree;
     /* 
     * If the number of command-line arguments is not equal to 2 or 3,
     * print a usage message to stderr indicating the correct usage of the program,
@@ -36,12 +36,15 @@ int main(int argc, char * argv[]){
     if (strcmp(mode, "--lex") == 0) {
         while (getToken() != ENDFILE);          //We use this for a scanner-only compiler because the Parser(using bison) autommaticly fetches the tokens whe he needs them
     } else if (strcmp(mode, "--parse") == 0) {
-        parse();
+        syntaxTree = parse();
+        if (syntaxTree == NULL)
+            printf(" [DEBUG: Tree is empty]\n");
+        printTree(syntaxTree);
     } else {
         printf("Default Mode\n");               //No mode was selected
         return 0;
     }
-    
+
     fclose(sourceCode); 
     return 0;
 }
