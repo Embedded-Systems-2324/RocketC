@@ -7,7 +7,7 @@ TreeNode * newStmtNode(StmtKind kind)
   if (t==NULL)
     printf("Out of memory error at line %d\n",linenum);
   else {
-    printf(" [DEBUG: New Statement Created]\n");
+    //printf(" [DEBUG: New Statement Created]\n");
     for (i=0;i<MAXCHILDREN;i++) t->child[i] = NULL;
     t->sibling = NULL;
     t->nodekind = StmtK;
@@ -48,8 +48,50 @@ void printTree( TreeNode * tree )
     if (tree->nodekind==StmtK)
     { 
       switch (tree->kind.stmt) {
+        case GotoK:
+          printf("Tree: GoTo\n");
+          break;
+        case LabelK:
+          printf("Tree: Label\n");
+          break;
         case IfK:
-          printf("If\n");
+          printf("Tree: If\n");
+          break;
+        case ForK:
+          printf("Tree: For\n");
+          break;
+        case WhileK:
+          printf("Tree: While\n");
+          break;
+        case SwitchK:
+          printf("Tree: Switch\n");
+          break;
+        case DowhileK:
+          printf("Tree: Do While\n");
+          break;
+        case ReturnK:
+          printf("Tree: Return\n");
+          break;
+        case DeclarationK:
+          printf("Tree: Declaration\n");
+          break;
+        case AssignmentK:
+          printf("Tree: Assign\n");
+          break;
+        case InstantiationK:
+          printf("Tree: Instantiation\n");
+          break;
+        case ContinueK:
+          printf("Tree: Continue\n");
+          break;
+        case BreakK:
+          printf("Tree: Break\n");
+          break;
+        case COMPOUNDK:
+          printf("Tree: Compound statements\n");
+          break;
+        case FuncDeclarationK:
+          printf("Tree: Function Declaration\n");
           break;
         default:
           printf("Unknown ExpNode kind\n");
