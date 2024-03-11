@@ -110,22 +110,33 @@ assignment_stmt:  ID assign_op expr                                         // a
 /*
 *   Declarations
 */
-declaration_stmt:  variable_declaration
-                |  array_declaration
-                |  struct_declaration
-                |  enum_declaration
-                |  union_declaration
-                |  typeDef_declaration
+declaration_stmt:  variable_declaration {$$ = $1;}
+                |  array_declaration    {$$ = $1;}
+                |  struct_declaration   {$$ = $1;}
+                |  enum_declaration     {$$ = $1;}
+                |  union_declaration    {$$ = $1;}
+                |  typeDef_declaration  {$$ = $1;}
                 ;
 
 // Variables
 variable_declaration:  prefixes type ID                     // const int a;
-                    |  prefixes type ID assign_op expr      // const int a = b;
+                    {
+                        $$ = newStmtNode(DeclarationK);
+                        $$->child[0]=$1;    //prefixes
+                        $$->child[1]=$2;    //type
+                    }
+                    |  prefixes type ID assign_op expr      // ---------declaração + assign -----------------const int a = b; declaração + assign ???????????????
                     ;
 
 // Array
 array_declaration:  prefixes type ID LEFT_BRACKET expr RIGHT_BRACKET                                            // const int a[n];
-                 |  prefixes type ID LEFT_BRACKET expr RIGHT_BRACKET assign_op LEFT_BRACE expr RIGHT_BRACE      // const int a[n] = {2, b + c, ...};
+                    {
+                        $$ = newStmtNode(DeclarationK);
+                        $$->child[0]=$1;    //prefixes
+                        $$->child[1]=$2;    //type 
+                        $$->child[1]=$5;    //expr (array size)
+                    }
+                 |  prefixes type ID LEFT_BRACKET expr RIGHT_BRACKET assign_op LEFT_BRACE expr RIGHT_BRACE  // ---------declaração + assign -----------------const int a[n] = {2, b + c, ...}; 
                  ;
 
 // Functions
@@ -137,7 +148,7 @@ func_declaration:  prefixes type ID LPAREN func_parameters_declaration RPAREN co
                         $$->child[2]=$5;    //func_parameters_declaration
                         $$->child[3]=$7;    //compound_stmt
                     }  // const int func(...) { ... }*/
-                |  prefixes type ID LPAREN func_parameters_declaration RPAREN SEMI              // const int func(...);
+                |  prefixes type ID LPAREN func_parameters_declaration RPAREN SEMI    // -------------------function prototype != function declaration ----------------const int func(...);
                 ;
 
 func_parameters_declaration:                                                                    // ( )
@@ -297,12 +308,16 @@ assign_op:  ASSIGN
 /*
 *   Flow Control Statements
 */
-compound_stmt:  LEFT_BRACE stmts RIGHT_BRACE   
+compound_stmt:  LEFT_BRACE stmts RIGHT_BRACE        // {a = b; ...}
                 {
-                $$ = newStmtNode(COMPOUNDK);
-                $$->child[0]=$2;    //condition
-                }  // {a = b; ...}
-             |  LEFT_BRACE RIGHT_BRACE  {$$ = NULL;} // {a = b; ...}                            // { }
+                    $$ = newStmtNode(COMPOUNDK);
+                    $$->child[0]=$2;    
+                }  
+             |  LEFT_BRACE RIGHT_BRACE              // { } 
+                {
+                    $$ = newStmtNode(COMPOUNDK);
+                    $$->child[0] = NULL;   
+                }                          
              ;
 // If
 if_stmt:
@@ -316,15 +331,23 @@ if_stmt:
             {
                 $$ = newStmtNode(IfK);
                 $$->child[0]=$3;    //condition
-                $$->child[1]=$5;    //stmt
+                $$->child[1]=$5;    //stmts
                 $$->child[2]=$6;    //elseif_stmt
             }
-        |  IF LPAREN condition RPAREN stmts else_stmt                       // if (a==b) a = c; else { ... }   
+        |  IF LPAREN condition RPAREN stmts elseif_stmt ELSE stmts                      // if (a==b) a = c; else if (a==c) { ... } else { ... }   
             {
                 $$ = newStmtNode(IfK);
                 $$->child[0]=$3;    //condition
                 $$->child[1]=$5;    //stmt
-                $$->child[2]=$6;    //else_stmt
+                $$->child[2]=$6;    //elseif_stmt
+                $$->child[3]=$8;    //elseif_stmt
+            }
+        |  IF LPAREN condition RPAREN stmts ELSE stmts                        // if (a==b) a = c; else { ... }   
+            {
+                $$ = newStmtNode(IfK);
+                $$->child[0]=$3;    //condition
+                $$->child[1]=$5;    //stmt
+                $$->child[2]=$7;    //else_stmt
             }
         |  IF LPAREN condition RPAREN SEMI                                 // if (a==b);
             {
@@ -333,53 +356,37 @@ if_stmt:
             }
         ;
 
-elseif_stmt:  elseif_stmt ELSEIF LPAREN condition RPAREN stmts              // else if (a==c) a = b; ...
+elseif_stmt: ELSEIF LPAREN condition RPAREN stmts elseif_stmt
             {
-               // $$ = newStmtNode();
-                $$->child[0]=$1;    //elseif_stmt
-                $$->child[1]=$4;    //condition
+                $$->child[0]=$3;    //condition
+                $$->child[1]=$5;    //stmt
                 $$->child[2]=$6;    //stmt
-            }  
-           |  ELSEIF LPAREN condition RPAREN stmts                          // else if (a==c) a = b;
-            {
-              //  $$ = newStmtNode();
-                $$->child[0]=$3;    //condition
-                $$->child[1]=$5;    //stmt
             }
-           |  ELSEIF LPAREN condition RPAREN stmts else_stmt                // else if (a==c) a = b; else { ... }
+            | ELSEIF LPAREN condition RPAREN stmts                          // else if (a==c) a = b;
             {
-                //$$ = newStmtNode();
-                $$->child[0]=$3;    //condition
-                $$->child[1]=$5;    //stmt
-                $$->child[2]=$6;    //else_stmt
+               //$$->child[0]=$3;    //condition       ERRO! :  //como o else if tem de ter uma lista "infinita" de else ifs nao se pode pôr por extenso na regra do if
+               //$$->child[1]=$5;    //stmt                     // ao criar assim uma regra recursiva para os elseifs ta a dar problemas com as childs (dá sempre seg fault)
             }
            ; 
 
-else_stmt: ELSE stmts                                                       // else a = b;
-            {
-                //$$ = newStmtNode();
-                $$->child[0]=$2;    //stmt
-            }
-        ;
-
 // While
-do_while_stmt:  DO stmts WHILE LPAREN LPAREN condition RPAREN              // do a++ while (a==b);
+do_while_stmt:  DO compound_stmt WHILE LPAREN condition RPAREN              // do a++ while (a==b);
                 {
-                $$ = newStmtNode(DowhileK);
-                $$->child[0]=$2;    //stmt
-                $$->child[1]=$6;    //condition
+                    $$ = newStmtNode(DowhileK);
+                    $$->child[0]=$2;    //stmt
+                    $$->child[1]=$5;    //condition
                 }
             ;
 
 while_stmt:  WHILE LPAREN condition RPAREN stmts                     // while(a==b) a++;
             {
-                $$ = newStmtNode(DowhileK);
+                $$ = newStmtNode(WhileK);
                 $$->child[0]=$3;    //condition
                 $$->child[1]=$5;    //compound_stmt
             }  
           |  WHILE LPAREN condition RPAREN SEMI                     // while(a==b);
             {
-                $$ = newStmtNode(DowhileK);
+                $$ = newStmtNode(WhileK);
                 $$->child[0]=$3;    //condition
             }  
           ;
