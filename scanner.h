@@ -1,10 +1,10 @@
 #ifndef _SCANNER_H_
 #define _SCANNER_H_
-#include "globals.h"
+
 /* MAXTOKENLEN is the maximum size of a token */
 #define MAXTOKENLEN 40
 
-/* tokenString array stores the lexeme of each token */
+/* tokenString array stores the string of each token */
 extern char tokenString[MAXTOKENLEN+1];
 
 /* function getToken returns the 

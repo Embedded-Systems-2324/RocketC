@@ -3,8 +3,12 @@
 
 %{
 #include "globals.h"
+#include "scanner.h"
 
 #define YY_BUFFER_SIZE 32                      // alter to define the value of the input buffer
+
+char tokenString[MAXTOKENLEN+1];
+
 static char yy_buffer[YY_BUFFER_SIZE];
 static char* yy_buf_pos = yy_buffer;
 static size_t yy_buf_size = 0;
@@ -143,9 +147,9 @@ whitespace  [ \t]+
 "\0"            {return ENDFILE;} 
 
 
-{number}        { (yylval.intval=atoi(yytext));          printf(" [NUM: %d]", yylval.intval);    return NUM; }
-{identifier}    { sscanf(yytext,"%s",yylval.identifier); printf(" [ID: %s]", yylval.identifier); return ID;  }
-{float_number}  { (yylval.floatval=atof(yytext));        printf(" [FNUM: %f]", yylval.floatval);  return FNUM;}
+{number}        { printf(" NUM");    return NUM; }
+{identifier}    { printf(" ID");     return ID;  }
+{float_number}  { printf(" FNUM");   return FNUM;}
 {newline}       { printf(" \n");                         linenum++;                                   }
 {whitespace}    { /*  ignore */}  
 
@@ -187,6 +191,7 @@ TokenType getToken(void)
     firstTime = FALSE;
     yyin = sourceCode;
   }
+  strncpy(tokenString,yytext,MAXTOKENLEN);
   currentToken = yylex();
   return currentToken;
 }
