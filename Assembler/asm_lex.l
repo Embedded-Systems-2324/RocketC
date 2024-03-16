@@ -1,3 +1,6 @@
+%option noyywrap
+%x INCOMMENT   
+
 %{
 #include "asm_globals.h"
 %}
@@ -10,6 +13,10 @@ letter      [a-zA-Z]
 
 register    [rR]{digit}+
 identifier  [a-zA-Z_][a-zA-Z0-9_]*
+
+special_char [,#:;$]
+
+newline     \n
 
 %%
 "NOP"   { printf(" NOP");                       return NOP;     }
@@ -57,7 +64,27 @@ identifier  [a-zA-Z_][a-zA-Z0-9_]*
 
 "\0"    {return ENDFILE;} 
 
-{number}    { (yyval.intval = atoi(yytext));    printf(" [NUM: %d]", yyval.intval); return NUM};
+{number}        { printf(" [NUM]");             return NUM;         }
+{identifier}    { printf(" [IDENTIFIER]");      return ID;          }
+{register}      { printf(" [REGISTER]");        return REGISTER;    }
+{special_char}  { printf(" [SPECIAL_CHAR]");    return SPECIAL_CHAR;}
+{newline}       { printf(" \n");                linenum++;          }
 
 <<EOF>>         {yyterminate(); return ENDFILE; }
 %%
+
+void File_Init() {
+    yyin = sourceCode;
+}
+
+TokenType getToken(void)
+{ 
+  static int firstTime = TRUE;
+  TokenType currentToken;
+  if (firstTime){ 
+    firstTime = FALSE;
+    yyin = sourceCode;
+  }
+  currentToken = yylex();
+  return currentToken;
+}
