@@ -1,13 +1,15 @@
 %{
-
-
+#include "asm_globals.h"
 %}
 
 digit       [0-9]
+hex         [a-fA-F]
 number      {digit}+
+hex_number  0x({digit}|{hex})+
 letter      [a-zA-Z]
-hexadecimal [a-fA-F]
-register    
+
+register    [rR]{digit}+
+identifier  [a-zA-Z_][a-zA-Z0-9_]*
 
 %%
 "NOP"   { printf(" NOP");                       return NOP;     }
@@ -45,8 +47,17 @@ register
 "PUSH"  { printf(" PUSH");              return PUSH;            }
 "POP"   { printf(" POP");               return POP;             }
 
-"RETI"  { printf(" RETI");              return RETI             }
+"RETI"  { printf(" RETI");              return RETI;            }
 "HALT"  { printf(" HALT");              return HALT;            }
 
+"BYTE"  { printf(" BYTE");              return BYTE;            }
+"WORD"  { printf(" WORD");              return WORD;            }
+"ALLOC" { printf(" ALLOC");             return ALLOC;           }
+"ORG"   { printf(" ORG");               return ORG;             }
+
 "\0"    {return ENDFILE;} 
+
+{number}    { (yyval.intval = atoi(yytext));    printf(" [NUM: %d]", yyval.intval); return NUM};
+
+<<EOF>>         {yyterminate(); return ENDFILE; }
 %%
