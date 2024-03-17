@@ -16,8 +16,8 @@ int yyerror(char *s);
 /*Directives tokens*/
 %token BYTE WORD ALLOC ORG EQU
 
-
-
+/* */
+%token REG IDENTIFIER NUMBER
 
 
 /*Data types*/
@@ -38,8 +38,8 @@ stmt: add_stmt
     | and_stmt
     | not_stmt
     | cmp_stmt
-    | bra_stmt
-    | mov_stmt
+    | branch_stmt
+    | move_stmt
     | jump_stmt
     | load_dir_stmt
     | load_immd_stmt
@@ -72,9 +72,9 @@ not_stmt :
 
 cmp_stmt :
 
-bra_stmt :
+branch_stmt :
 
-mov_stmt :
+move_stmt :
 
 jump_stmt :
 
@@ -107,3 +107,11 @@ alloc_stmt :
 org_stmt :
 
 equ_stmt :
+
+%%
+
+int yyerror(char *s)
+{
+  	fprintf (stderr, "%s in line number : %d\n", s, linenum);
+	return 1;
+}

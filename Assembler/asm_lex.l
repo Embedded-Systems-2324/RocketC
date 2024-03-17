@@ -64,12 +64,12 @@ newline     \n
 
 "\0"    {/*return ENDFILE;*/} 
 
-{number}        { printf(" [NUM]");           /*  return NUMBER;         */ }
-{identifier}    { printf(" [IDENTIFIER]");    /*  return IDENTIFIER;     */ }
-{register}      { printf(" [REGISTER]");      /*  return REGISTER;       */ }
-{special_char}  { printf(" [SPECIAL_CHAR]");  /*  return SPECIAL_CHAR;   */ }
-{hex_number}    { printf(" [HEX_NUMBER]");    /*  return HEX_NUMBER      */ }
-{newline}       { printf(" \n");              /*  linenum++;             */ }
+{number}        { printf(" [NUM]");                         /*  return NUMBER;         */ }
+{identifier}    { printf(" [IDENTIFIER]");                  /*  return IDENTIFIER;     */ }
+{register}      { printf(" [REGISTER]");                    /*  return REGISTER;       */ }
+{special_char}  { printf(" %c", *yytext);                   /*  return SPECIAL_CHAR;   */ }
+{hex_number}    { printf(" [HEX_NUMBER]");                  /*  return HEX_NUMBER      */ }
+{newline}       { printf(" \n");                            /*  linenum++;             */ }
 
 <<EOF>>         {yyterminate(); /* return ENDFILE; */ }
 %%
