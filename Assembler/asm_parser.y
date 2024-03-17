@@ -17,7 +17,7 @@ int yyerror(char *s);
 %token BYTE WORD ALLOC ORG EQU
 
 /* */
-%token REG IDENTIFIER NUMBER SPECIAL_CHAR
+%token REG IDENTIFIER NUMBER
 
 
 /*Data types*/

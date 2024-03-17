@@ -50,7 +50,6 @@ digit       [0-9]
 hex         [a-fA-F]
 number      {digit}+
 hex_number  0x({digit}|{hex})+
-letter      [a-zA-Z]
 
 register    [rR]{digit}+
 identifier  [a-zA-Z_][a-zA-Z0-9_]*
