@@ -14,9 +14,10 @@ letter      [a-zA-Z]
 register    [rR]{digit}+
 identifier  [a-zA-Z_][a-zA-Z0-9_]*
 
-special_char [,#:;$]
+special_char [,#:$]
 
 newline     \n
+whitespace  [ \t]+
 
 %%
 "ADD"   { printf(" ADD");                      /* return ADD; */    }
@@ -64,14 +65,17 @@ newline     \n
 
 "\0"    {/*return ENDFILE;*/} 
 
-{number}        { printf(" [NUM]");               /*  return NUMBER;         */ }
-{register}      { printf(" [REGISTER]");          /*  return REGISTER;       */ }
-{identifier}    { printf(" [IDENTIFIER]");        /*  return IDENTIFIER;     */ }
-{special_char}  { printf(" %c", *yytext);         /*  return SPECIAL_CHAR;   */ }
-{hex_number}    { printf(" [HEX_NUMBER]");        /*  return NUMBER          */ }
-{newline}       { printf(" \n");                  /*  linenum++;             */ }
+{number}        { printf(" [NUM]");               /* return NUMBER;       */ }
+{register}      { printf(" [REGISTER]");          /* return REG;          */ }
+{identifier}    { printf(" [IDENTIFIER]");        /* return IDENTIFIER;   */ }
+{special_char}  { printf(" %c", *yytext);         /* return SPECIAL_CHAR; */ }
+{hex_number}    { printf(" [HEX_NUMBER]");        /* return NUMBER;       */ }
+{newline}       { printf(" \n");                  linenum++;            }
+{whitespace}    { /*  ignore */}  
 
-<<EOF>>         {yyterminate(); /* return ENDFILE; */ }
+<<EOF>>         {yyterminate();  return ENDFILE;}
+
+. {printf("Error, [%s] is an invalid token\n",yytext); YY_FATAL_ERROR("Unrecoverable error in lexer"); return ERROR;}
 %%
 
 void File_Init() {

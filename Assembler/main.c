@@ -2,6 +2,7 @@
 #include "asm_scanner.h"
 
 FILE * sourceCode;
+int linenum = 1;    //Line number zero doesnt exist
 
 int main(int argc, char * argv[]){
 
@@ -24,6 +25,10 @@ int main(int argc, char * argv[]){
     }
 
     while (getToken())
+
+    //File_Init();
+
+    //yyparse();
 
     fclose(sourceCode);
     return 0;

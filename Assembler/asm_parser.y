@@ -17,7 +17,7 @@ int yyerror(char *s);
 %token BYTE WORD ALLOC ORG EQU
 
 /* */
-%token REG IDENTIFIER NUMBER
+%token REG IDENTIFIER NUMBER SPECIAL_CHAR
 
 
 /*Data types*/
@@ -56,12 +56,13 @@ stmt: add_stmt
     | alloc_stmt
     | org_stmt
     | equ_stmt
+    | label
     ;
 
 /* Instructions */
 
-add_stmt : ADD REG ',' REG ',' REG
-         | ADD REG ',' REG ',' '#'NUMBER
+add_stmt : ADD REG ',' REG ',' REG          { printf("ADD STATEMENT");}
+         | ADD REG ',' REG ',' '#'NUMBER    {}
 
 sub_stmt : SUB 
 
@@ -75,7 +76,7 @@ cmp_stmt : CMP
 
 branch_stmt : BRANCH
 
-move_stmt : MOVE
+move_stmt : MOVE REG ',' '#' NUMBER
 
 jump_stmt : JUMP
           | JUMP_LONG
@@ -100,15 +101,15 @@ halt_stmt : HALT {}
 
 nop_stmt : NOP {}
 
-byte_stmt :
+byte_stmt : BYTE NUMBER
 
-word_stmt :
+word_stmt : WORD NUMBER
 
-alloc_stmt :
+alloc_stmt : ALLOC NUMBER
 
-org_stmt :
+org_stmt : ORG NUMBER {}
 
-equ_stmt :
+equ_stmt : IDENTIFIER EQU NUMBER {}
 
 /* Labels */
 

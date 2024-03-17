@@ -4,9 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-extern FILE* sourceCode; 
-extern int linenum;
+#include "asm_parser.tab.h"
 
 #ifndef FALSE
 #define FALSE 0
@@ -15,6 +13,9 @@ extern int linenum;
 #ifndef TRUE
 #define TRUE 1
 #endif
+
+extern FILE* sourceCode; 
+extern int linenum;
 
 typedef int TokenType; 
 
