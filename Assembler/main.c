@@ -1,6 +1,8 @@
 #include "asm_globals.h"
 #include "asm_scanner.h"
 
+FILE * sourceCode;
+
 int main(int argc, char * argv[]){
 
     char pgm[120];
@@ -22,7 +24,6 @@ int main(int argc, char * argv[]){
     }
 
     while (getToken())
-    
 
     fclose(sourceCode);
     return 0;
