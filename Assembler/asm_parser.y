@@ -60,43 +60,45 @@ stmt: add_stmt
 
 /* Instructions */
 
-add_stmt :
+add_stmt : ADD REG ',' REG ',' REG
+         | ADD REG ',' REG ',' '#'NUMBER
 
-sub_stmt :
+sub_stmt : SUB 
 
-or_stmt :
+or_stmt : OR
 
-and_stmt :
+and_stmt : AND
 
-not_stmt :
+not_stmt : NOT
 
-cmp_stmt :
+cmp_stmt : CMP
 
-branch_stmt :
+branch_stmt : BRANCH
 
-move_stmt :
+move_stmt : MOVE
 
-jump_stmt :
+jump_stmt : JUMP
+          | JUMP_LONG
 
-load_dir_stmt :
+load_dir_stmt : LOAD
 
-load_immd_stmt :
+load_immd_stmt : LOAD_IMMEDIATE
 
-load_indir_stmt : 
+load_indir_stmt : LOAD_INDIRECT
 
-store_dir_stmt :
+store_dir_stmt : STORE_DIRECT
 
-store_indir_stmt :
+store_indir_stmt : STORE_INDIRECT
 
-push_stmt :
+push_stmt : PUSH
 
-pop_stmt :
+pop_stmt : POP
 
-reti_stmt :
+reti_stmt : RETI {}
 
-halt_stmt :
+halt_stmt : HALT {}
 
-nop_stmt :
+nop_stmt : NOP {}
 
 byte_stmt :
 
@@ -107,6 +109,10 @@ alloc_stmt :
 org_stmt :
 
 equ_stmt :
+
+/* Labels */
+
+label : IDENTIFIER ':' {}
 
 %%
 
