@@ -25,9 +25,9 @@ int main(int argc, char * argv[]){
     }
 
     while (getToken())
-
+    
     //File_Init();
-
+    
     //yyparse();
 
     fclose(sourceCode);

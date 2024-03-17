@@ -3,6 +3,10 @@
 
 %{
 #include "asm_globals.h"
+
+extern char error_end; 
+char error_msg[100];
+void yyerror(char *);
 %}
 
 digit       [0-9]
@@ -18,6 +22,7 @@ special_char [,#:$]
 
 newline     \n
 whitespace  [ \t]+
+carriage    \r
 
 %%
 "ADD"   { printf(" ADD");                      /* return ADD; */    }
@@ -68,10 +73,26 @@ whitespace  [ \t]+
 {number}        { printf(" [NUM]");               /* return NUMBER;       */ }
 {register}      { printf(" [REGISTER]");          /* return REG;          */ }
 {identifier}    { printf(" [IDENTIFIER]");        /* return IDENTIFIER;   */ }
-{special_char}  { printf(" %c", *yytext);         /* return SPECIAL_CHAR; */ }
+{special_char}  { printf(" [SPEC_CHAR]");         /* return SPECIAL_CHAR; */ }
 {hex_number}    { printf(" [HEX_NUMBER]");        /* return NUMBER;       */ }
 {newline}       { printf(" \n");                  linenum++;            }
 {whitespace}    { /*  ignore */}  
+{carriage}      { /*  ignore */}
+
+"//".*         { /* When "//" is found, zero or more occurrences of any character are ignored */}
+
+<INITIAL>{      // INITIAL Lexical state
+  "/*"          { printf(" [In comment]");} BEGIN(INCOMMENT);      
+}
+
+<INCOMMENT>{    // INCOMMENT Lexical state
+  <<EOF>>       { printf(" Error: Unterminated comment\n");
+                  return ERROR; 
+                }
+  "*/"          { printf(" [Out comment]");}BEGIN(INITIAL);
+  "\n"          { ++linenum;}
+  [^*\n]+         ; // Consume characters within the comment block
+}
 
 <<EOF>>         {yyterminate();  return ENDFILE;}
 
