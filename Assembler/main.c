@@ -24,11 +24,11 @@ int main(int argc, char * argv[]){
         exit(1);
     }
 
-    while (getToken())
+    //while (getToken())
     
-    //File_Init();
+    File_Init();
     
-    //yyparse();
+    yyparse();
 
     fclose(sourceCode);
     return 0;

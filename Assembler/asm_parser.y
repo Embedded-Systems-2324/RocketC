@@ -10,7 +10,7 @@ int yyerror(char *s);
 
 /* Instruction Tokens */
 %token ADD SUB OR AND NOT CMP BRANCH MOVE JUMP JUMP_LONG
-%token LOAD LOAD_IMMEDIATE LOAD_INDIRECT STORE_DIRECT STORE_INDIRECT PUSH POP
+%token LOAD_DIRECT LOAD_IMMEDIATE LOAD_INDIRECT STORE_DIRECT STORE_INDIRECT PUSH POP
 %token RETI HALT NOP
 
 /*Directives tokens*/
@@ -61,10 +61,11 @@ stmt: add_stmt
 
 /* Instructions */
 
-add_stmt : ADD REG ',' REG ',' REG          { printf("ADD STATEMENT");}
+add_stmt : ADD REG ',' REG ',' REG          {}
          | ADD REG ',' REG ',' '#'NUMBER    {}
 
-sub_stmt : SUB 
+sub_stmt : SUB REG ',' REG ',' REG          {}
+         | SUB REG ',' REG ',' '#'NUMBER    {}
 
 or_stmt : OR
 
@@ -74,14 +75,15 @@ not_stmt : NOT
 
 cmp_stmt : CMP
 
-branch_stmt : BRANCH
+branch_stmt : BRANCH REG ',' IDENTIFIER
 
 move_stmt : MOVE REG ',' '#' NUMBER
+          | MOVE REG ',' REG
 
 jump_stmt : JUMP
           | JUMP_LONG
 
-load_dir_stmt : LOAD
+load_dir_stmt : LOAD_DIRECT
 
 load_immd_stmt : LOAD_IMMEDIATE
 
