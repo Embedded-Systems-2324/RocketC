@@ -4,9 +4,46 @@
 %{
 #include "asm_globals.h"
 
-extern char error_end; 
-char error_msg[100];
-void yyerror(char *);
+#define YY_BUFFER_SIZE 32                      // alter to define the value of the input buffer
+static char yy_buffer[YY_BUFFER_SIZE];
+static char* yy_buf_pos = yy_buffer;
+static size_t yy_buf_size = 0;
+static int endOfFileReached = 0;
+
+/*
+   1st IF: The macro checks if the current position (yy_buf_pos) in the buffer
+   has reached the end. If so, it refills the buffer by reading a block
+   of characters from the input file.
+
+   2nd IF: If the buffer is fully consumed and the file has no more characters,
+   it indicates end-of-file by setting 'result' to YY_NULL, and the
+   scanning loop is terminated.
+
+   3rd IF: Characters are then copied from the buffer to the provided 'buf' until
+   'max_size' is reached. The 'yy_buf_pos' is updated to point to the
+   next position in the buffer.
+*/
+#define YY_INPUT(buf,result,max_size) \
+{ \
+    if (!endOfFileReached && yy_buf_pos >= yy_buffer + yy_buf_size) { \
+        memset(yy_buffer, 0, YY_BUFFER_SIZE); \
+        yy_buf_size = fread(yy_buffer, 1, YY_BUFFER_SIZE, yyin); \
+        yy_buf_pos = yy_buffer; \
+        if (yy_buf_size <= 0) { \
+            endOfFileReached = 1; \
+            result = YY_NULL; \
+        } \
+    } \
+    size_t n = YY_BUFFER_SIZE - (yy_buf_pos - yy_buffer); \
+    if (n > max_size) n = max_size; \
+    memcpy(buf, yy_buf_pos, n); \
+    yy_buf_pos += n; \
+    result = n; \
+    /*printf("\n----[BUFFER] buf:\n%s\n", buf);*/ \
+}
+
+
+
 %}
 
 digit       [0-9]

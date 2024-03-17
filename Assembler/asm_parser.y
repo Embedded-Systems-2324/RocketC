@@ -67,35 +67,37 @@ add_stmt : ADD REG ',' REG ',' REG          {}
 sub_stmt : SUB REG ',' REG ',' REG          {}
          | SUB REG ',' REG ',' '#'NUMBER    {}
 
-or_stmt : OR
+or_stmt : OR REG ',' REG ',' REG            {}
+        | OR REG ',' REG ',' '#'NUMBER      {}
 
-and_stmt : AND
+and_stmt : AND REG ',' REG ',' REG          {}
+         | AND REG ',' REG ',' '#'NUMBER    {}
 
-not_stmt : NOT
+not_stmt : NOT REG ',' REG {}
 
-cmp_stmt : CMP
+cmp_stmt : CMP REG ',' REG {}
 
-branch_stmt : BRANCH REG ',' IDENTIFIER
+branch_stmt : BRANCH REG ',' IDENTIFIER {}
 
-move_stmt : MOVE REG ',' '#' NUMBER
-          | MOVE REG ',' REG
+move_stmt : MOVE REG ',' REG        {}
+          | MOVE REG ',' '#'NUMBER  {}
 
-jump_stmt : JUMP
-          | JUMP_LONG
+jump_stmt : JUMP REG ',' '#'NUMBER                 {}
+          | JUMP_LONG REG ',' REG ',' '#'NUMBER    {}
 
-load_dir_stmt : LOAD_DIRECT
+load_dir_stmt : LOAD_DIRECT REG ',' '#'NUMBER {}
 
-load_immd_stmt : LOAD_IMMEDIATE
+load_immd_stmt : LOAD_IMMEDIATE REG ',' '#'NUMBER {}
 
-load_indir_stmt : LOAD_INDIRECT
+load_indir_stmt : LOAD_INDIRECT REG ',' REG ',' '#'NUMBER {}
 
-store_dir_stmt : STORE_DIRECT
+store_dir_stmt : STORE_DIRECT REG ',' '#'NUMBER {}
 
-store_indir_stmt : STORE_INDIRECT
+store_indir_stmt : STORE_INDIRECT REG ',' REG ',' '#'NUMBER {}
 
-push_stmt : PUSH
+push_stmt : PUSH REG {}
 
-pop_stmt : POP
+pop_stmt : POP REG {}
 
 reti_stmt : RETI {}
 
@@ -103,11 +105,11 @@ halt_stmt : HALT {}
 
 nop_stmt : NOP {}
 
-byte_stmt : BYTE NUMBER
+byte_stmt : BYTE NUMBER {}
 
-word_stmt : WORD NUMBER
+word_stmt : WORD NUMBER {}
 
-alloc_stmt : ALLOC NUMBER
+alloc_stmt : ALLOC NUMBER {}
 
 org_stmt : ORG NUMBER {}
 
