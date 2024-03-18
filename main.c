@@ -1,50 +1,85 @@
-#include "globals.h"
-#include "scanner.h"
-#include "parser.h"
-#include "useful.h"
-FILE * sourceCode;
-int linenum = 1;    //Line number zero doesnt exist
+#include <stdio.h>
+#include <errno.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
+#include "Util/Logger.h"
+#include "Util/Globals.h"
+#include "Lexer/Scanner.h"
 
-int main(int argc, char * argv[]){
-    char* mode;     // --flex or --parse
-    char pgm[120];
-    TreeNode * syntaxTree;
-    /* 
-    * If the number of command-line arguments is not equal to 2 or 3,
-    * print a usage message to stderr indicating the correct usage of the program,
-    * and exit the program with a return status of 1. (Correct usage: $ ./MyProgram test.c or $ ./MyProgram test.c --lex/--parse)
-    */
-    if (argc < 2 || argc > 3){  /* The mode is optional*/
-        fprintf(stderr,"usage: %s <filename> --<mode>\n",argv[0]);
-        exit(1);
-    }else if (argc == 3) mode = argv[2];
-    
-    /* 
-    * Copy the filename provided as a command-line argument to the 'pgm' variable.
-    * If the filename does not contain a file extension, append ".c" to it.
-    */
-    strcpy(pgm,argv[1]);
-    if (strchr (pgm, '.') == NULL)  strcat(pgm,".c");
-    /*Open the source code file in read mode and checks if it exists or cannot be opened*/
-    sourceCode = fopen(pgm,"r");
-    if (sourceCode==NULL)
-    { 
-        fprintf(stderr,"File %s not found\n",pgm);
-        exit(1);
+static TreeNode_st pTreeRoot;
+static FILE* pSourceFile;
+static size_t lineNumber = 1;
+static bool bReady = 0;
+
+size_t getLineNumber()
+{
+    return lineNumber;
+}
+
+size_t incrementLineNumber(size_t n)
+{
+    lineNumber += n;
+    return lineNumber;
+}
+
+int getSourceFile(FILE** ppSourceFile)
+{
+    if (!ppSourceFile)
+        return -EINVAL;
+
+    if (!bReady)
+        return -EPERM;
+
+    *ppSourceFile = pSourceFile;
+
+    return 0;
+}
+
+int main(int argc, char *argv[])
+{
+    char* pMode;
+
+    if (argc < 2 || argc > 3)
+    {
+        LOG_ERROR("Usage: %s <source_file> --<mode>\n", argv[0]);
+        exit(-1);
+    }
+    else if (argc == 3)
+    {
+        pMode = argv[2];
     }
 
-    if (strcmp(mode, "--lex") == 0) {
-        while (getToken() != ENDFILE);          //We use this for a scanner-only compiler because the Parser(using bison) autommaticly fetches the tokens whe he needs them
-    } else if (strcmp(mode, "--parse") == 0) {
-        syntaxTree = parse();
-        if (syntaxTree == NULL)
-            printf(" [DEBUG: Tree is empty]\n");
-        printTree(syntaxTree);
-    } else {
-        printf("Default Mode\n");               //No mode was selected
-        return 0;
+    pSourceFile = fopen(argv[1], "r");
+    if (!pSourceFile)
+    {
+        LOG_ERROR("Failed to open source file!\n");
+        exit(-1);
     }
 
-    fclose(sourceCode); 
+    bReady = true;
+
+    if (argc == 3)
+    {
+        if (strcmp(pMode, "--lex") == 0)
+        {
+            while (getToken() != TOKEN_EOF);          //We use this for a scanner-only compiler because the Parser(using bison) autommaticly fetches the tokens whe he needs them
+        }
+        else if (strcmp(pMode, "--parse") == 0)
+        {
+//        syntaxTree = parse();
+//        if (syntaxTree == NULL)
+//            printf(" [DEBUG: Tree is empty]\n");
+//        printTree(syntaxTree);
+        }
+    }
+    else
+    {
+        //TODO: Reserved for future use, for complete compiling process
+        LOG_ERROR("Usage: %s <source_file> --<mode>\n", argv[0]);
+    }
+
+    fclose(pSourceFile);
+
     return 0;
 }
