@@ -25,13 +25,6 @@
 #define RETI_OPCODE     17
 #define MUL_OPCODE      18
 
-//directives
-#define WORD_DIR        26
-#define BYTE_DIR        27
-#define ALLOC_DIR       28
-#define ORG_DIR         29
-#define EQU_DIR         30
-
 //branch conditions
 #define BRA_COND        0
 #define BCC_COND        1
