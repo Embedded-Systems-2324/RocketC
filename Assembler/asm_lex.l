@@ -42,8 +42,6 @@ static int endOfFileReached = 0;
     /*printf("\n----[BUFFER] buf:\n%s\n", buf);*/ \
 }
 
-
-
 %}
 
 digit       [0-9]
@@ -66,22 +64,23 @@ carriage    \r
 "OR"    { printf(" OR");                        return OR;    }
 "AND"   { printf(" AND");                       return AND;   }
 "NOT"   { printf(" NOT");                       return NOT;   }
+"XOR"   { printf(" XOR");                       return XOR;   }
 "CMP"   { printf(" CMP");                       return CMP;   }
         
-"BRA"   { printf(" BRANCH_ALWAYS");            /* yyval=BRA_COND;  */   return BRANCH;  }
-"BCC"   { printf(" BRANCH_CARRY_CLEAR");       /* yyval=BNE_COND;  */   return BRANCH;  }
-"BVC"   { printf(" BRANCH_OVERFLOW_CLEAR");    /* yyval=BVC_COND;  */   return BRANCH;  }
-"BEQ"   { printf(" BRANCH_EQUAL");             /* yyval=BEQ_COND;  */   return BRANCH;  }
-"BGE"   { printf(" BRANCH_GREATER_EQUAL");     /* yyval=BGE_COND;  */   return BRANCH;  }
-"BGT"   { printf(" BRANCH_GREATER");           /* yyval=BGT_COND;  */   return BRANCH;  }
-"BPL"   { printf(" BRANCH_PLUS");              /* yyval=BPL_COND;  */   return BRANCH;  }
-"BNV"   { printf(" BRANCH_NEVER");             /* yyval=BNV_COND;  */   return BRANCH;  }
-"BCS"   { printf(" BRANCH_CARRY_SET");         /* yyval=BCS_COND;  */   return BRANCH;  }
-"BVS"   { printf(" BRANCH_OVERFLOW_SET");      /* yyval=BVS_COND;  */   return BRANCH;  }
-"BNE"   { printf(" BRANCH_NOT_EQUAL");         /* yyval=BNE_COND;  */   return BRANCH;  }
-"BLT"   { printf(" BRANCH_LESS");              /* yyval=BLT_COND;  */   return BRANCH;  }
-"BLE"   { printf(" BRANCH_LESS_EQUAL");        /* yyval=BLE_COND;  */   return BRANCH;  }
-"BMI"   { printf(" BRANCH_MINUS");             /* yyval=BMI_COND;  */   return BRANCH;  }
+"BRA"   { printf(" BRANCH_ALWAYS");             yylval=BRA_COND;    return BRANCH;  }
+"BCC"   { printf(" BRANCH_CARRY_CLEAR");        yylval=BNE_COND;    return BRANCH;  }
+"BVC"   { printf(" BRANCH_OVERFLOW_CLEAR");     yylval=BVC_COND;    return BRANCH;  }
+"BEQ"   { printf(" BRANCH_EQUAL");              yylval=BEQ_COND;    return BRANCH;  }
+"BGE"   { printf(" BRANCH_GREATER_EQUAL");      yylval=BGE_COND;    return BRANCH;  }
+"BGT"   { printf(" BRANCH_GREATER");            yylval=BGT_COND;    return BRANCH;  }
+"BPL"   { printf(" BRANCH_PLUS");               yylval=BPL_COND;    return BRANCH;  }
+"BNV"   { printf(" BRANCH_NEVER");              yylval=BNV_COND;    return BRANCH;  }
+"BCS"   { printf(" BRANCH_CARRY_SET");          yylval=BCS_COND;    return BRANCH;  }
+"BVS"   { printf(" BRANCH_OVERFLOW_SET");       yylval=BVS_COND;    return BRANCH;  }
+"BNE"   { printf(" BRANCH_NOT_EQUAL");          yylval=BNE_COND;    return BRANCH;  }
+"BLT"   { printf(" BRANCH_LESS");               yylval=BLT_COND;    return BRANCH;  }
+"BLE"   { printf(" BRANCH_LESS_EQUAL");         yylval=BLE_COND;    return BRANCH;  }
+"BMI"   { printf(" BRANCH_MINUS");              yylval=BMI_COND;    return BRANCH;  }
 
 "MOV"   { printf(" MOVE");             return MOVE;            }
 "JMP"   { printf(" JUMP");             return JUMP;            }
