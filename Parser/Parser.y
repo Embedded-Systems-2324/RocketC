@@ -6,7 +6,6 @@ int yylex();
 int yyerror(char *s);
 %}
 
-
 /* book-keeping tokens */
 %token ENDFILE ERROR
 

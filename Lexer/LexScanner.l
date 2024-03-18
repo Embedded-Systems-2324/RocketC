@@ -11,8 +11,6 @@
 
 #define YY_BUFFER_SIZE 32                      // alter to define the value of the input buffer
 
-char tokenString[MAX_TOKEN_LEN + 1];
-
 static char yy_buffer[YY_BUFFER_SIZE];
 static char* yy_buf_pos = yy_buffer;
 static size_t yy_buf_size = 0;
@@ -57,13 +55,14 @@ number      {digit}+
 float_number  {digit}*"."{digit}+({expo}{digit}+)?
 
 identifier  [a-zA-Z_][a-zA-Z0-9_]*
+string ["]([^"\\\n]|\\.|\\\n)*["]
 newline     \n
 sign        ([-+])
 expo        [eE]{sign}?
 whitespace  [ \t]+
 
 %%
-"break"         { LOG_DEBUG_SHORT("BREAK ");                 return TOKEN_BREAK;       }
+"break"         { LOG_DEBUG_SHORT("BREAK ");                 return TOKEN_BREAK;}
 "case"          { LOG_DEBUG_SHORT("CASE ");                  return TOKEN_CASE;        }
 "char"          { LOG_DEBUG_SHORT("CHAR ");                  return TOKEN_CHAR;        }
 "const"         { LOG_DEBUG_SHORT("CONST ");                 return TOKEN_CONSTANT;    }
@@ -145,8 +144,8 @@ whitespace  [ \t]+
 "->"            { LOG_DEBUG_SHORT("ARROW ");                 return TOKEN_ARROW;                 }
 "\0"            {return TOKEN_EOF;}
 
-
 {number}        { LOG_DEBUG_SHORT("NUM ");    return TOKEN_NUM; }
+{string}        { LOG_DEBUG_SHORT("STR ");    return TOKEN_STR; }
 {identifier}    { LOG_DEBUG_SHORT("ID ");     return TOKEN_ID;  }
 {float_number}  { LOG_DEBUG_SHORT("FNUM ");   return TOKEN_FNUM;}
 {newline}       { LOG_DEBUG_SHORT(" \n"); incrementLineNumber(1);}
@@ -163,14 +162,15 @@ whitespace  [ \t]+
                   return TOKEN_ERROR;
                 }
   "*/"          { LOG_DEBUG_SHORT(" [Out comment]");}BEGIN(INITIAL);
-  "\n"          { incrementLineNumber(1);}
-  [^*\n]+         ; // Consume characters within the comment block
+  "\n"          { incrementLineNumber(1);};
+  [^*\n]+       ; // Consume characters within the comment block
 }
 
 
 <<EOF>>         {yyterminate(); return TOKEN_EOF; }
 
 . {LOG_ERROR("[%s] is an invalid token\n", yytext); YY_FATAL_ERROR("Unrecoverable error in lexer"); return TOKEN_ERROR;}
+
 %%
 
 
@@ -193,8 +193,6 @@ TokenType_et getToken()
             return TOKEN_ERROR;
         }
     } 
-
-    strncpy(tokenString, yytext ,MAX_TOKEN_LEN);
 
     currentToken = (TokenType_et) yylex();
 
