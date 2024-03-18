@@ -6,10 +6,19 @@ setup:
 lexer:
 	flex -l --outfile="Output/lex.yy.c" Lexer/LexScanner.l
 
+parser:
+	bison -dv Parser/Parser.y;
+	mv Parser.* Output/
+
 src:
-	gcc -o Output/RocketC Util/Logger.c Output/lex.yy.c main.c
+	gcc -o Output/RocketC Util/Logger.c Output/Parser.tab.c Output/lex.yy.c main.c
 
 clean:
 	rm -r Output
 
-all: setup lexer src
+prog:
+	./Output/RocketC TestSrc.c --parse
+
+run: clean all prog
+
+all: setup parser lexer src

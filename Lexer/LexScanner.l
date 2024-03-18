@@ -7,7 +7,8 @@
 #include "../main.h"
 #include "../Util/Globals.h"
 #include "../Util/Logger.h"
-#include "../Lexer/Scanner.h"
+#include "../Output/Parser.tab.h"
+#include "../Lexer/Lexer.h"
 
 #define YY_BUFFER_SIZE 32                      // alter to define the value of the input buffer
 
@@ -15,7 +16,6 @@ static char yy_buffer[YY_BUFFER_SIZE];
 static char* yy_buf_pos = yy_buffer;
 static size_t yy_buf_size = 0;
 static int endOfFileReached = 0;
-
 
 /*
    1st IF: The macro checks if the current position (yy_buf_pos) in the buffer
@@ -97,7 +97,7 @@ whitespace  [ \t]+
 "while"         { LOG_DEBUG_SHORT("WHILE ");                 return TOKEN_WHILE;       }
 "+"             { LOG_DEBUG_SHORT("PLUS ");                  return TOKEN_PLUS;        }
 "-"             { LOG_DEBUG_SHORT("MINUS ");                 return TOKEN_MINUS;       }
-"*"             { LOG_DEBUG_SHORT("TIMES ");                 return TOKEN_TIMES;       }
+"*"             { LOG_DEBUG_SHORT("ASTERISK ");              return TOKEN_ASTERISK;    }
 "/"             { LOG_DEBUG_SHORT("OVER ");                  return TOKEN_OVER;        }
 "%"             { LOG_DEBUG_SHORT("PERCENT ");               return TOKEN_PERCENT;     }
 "++"            { LOG_DEBUG_SHORT("INCREMENT ");             return TOKEN_INCREMENT;   }
@@ -123,16 +123,15 @@ whitespace  [ \t]+
 "*="            { LOG_DEBUG_SHORT("MULTIPLY_ASSIGN ");       return TOKEN_MULTIPLY_ASSIGN;       }
 "/="            { LOG_DEBUG_SHORT("DIVIDE_ASSIGN ");         return TOKEN_DIVIDE_ASSIGN;         }
 "%="            { LOG_DEBUG_SHORT("MODULUS_ASSIGN ");        return TOKEN_MODULUS_ASSIGN;        }
-"&="            { LOG_DEBUG_SHORT("AND_ASSIGN ");            return TOKEN_BITWISE_AND_ASSIGN;     }
+"&="            { LOG_DEBUG_SHORT("AND_ASSIGN ");            return TOKEN_BITWISE_AND_ASSIGN;    }
 ">>="           { LOG_DEBUG_SHORT("RIGHT_SHIFT_ASSIGN ");    return TOKEN_RIGHT_SHIFT_ASSIGN;    }
 "<<="           { LOG_DEBUG_SHORT("LEFT_SHIFT_ASSIGN ");     return TOKEN_LEFT_SHIFT_ASSIGN;     }
-"|="            { LOG_DEBUG_SHORT("OR_ASSIGN ");             return TOKEN_BITWISE_OR_ASSIGN;      }
-"^="            { LOG_DEBUG_SHORT("XOR_ASSIGN ");            return TOKEN_BITWISE_XOR_ASSIGN;     }
+"|="            { LOG_DEBUG_SHORT("OR_ASSIGN ");             return TOKEN_BITWISE_OR_ASSIGN;     }
+"^="            { LOG_DEBUG_SHORT("XOR_ASSIGN ");            return TOKEN_BITWISE_XOR_ASSIGN;    }
 ";"             { LOG_DEBUG_SHORT("SEMI ");                  return TOKEN_SEMI;                  }
 ","             { LOG_DEBUG_SHORT("COMMA ");                 return TOKEN_COMMA;                 }
 ":"             { LOG_DEBUG_SHORT("COLON ");                 return TOKEN_COLON;                 }
 "."             { LOG_DEBUG_SHORT("DOT ");                   return TOKEN_DOT;                   }
-"\""            { LOG_DEBUG_SHORT("QUOTE ");                 return TOKEN_QUOTE;                 }
 "("             { LOG_DEBUG_SHORT("LEFT_PAREN ");            return TOKEN_LPAREN;                }
 ")"             { LOG_DEBUG_SHORT("RIGHT_PAREN ");           return TOKEN_RPAREN;                }
 "{"             { LOG_DEBUG_SHORT("LEFT_BRACE ");            return TOKEN_LEFT_BRACE;            }
@@ -142,12 +141,12 @@ whitespace  [ \t]+
 "?"             { LOG_DEBUG_SHORT("TERNARY ");               return TOKEN_TERNARY;               }
 "#"             { LOG_DEBUG_SHORT("CARDINAL ");              return TOKEN_CARDINAL;              }
 "->"            { LOG_DEBUG_SHORT("ARROW ");                 return TOKEN_ARROW;                 }
-"\0"            {return TOKEN_EOF;}
+"\0"            { return TOKEN_EOF; }
 
-{number}        { LOG_DEBUG_SHORT("NUM ");    return TOKEN_NUM; }
-{string}        { LOG_DEBUG_SHORT("STR ");    return TOKEN_STR; }
-{identifier}    { LOG_DEBUG_SHORT("ID ");     return TOKEN_ID;  }
-{float_number}  { LOG_DEBUG_SHORT("FNUM ");   return TOKEN_FNUM;}
+{number}        { LOG_DEBUG_SHORT("NUM ");    yylval.dVal = strtol(yytext, NULL, 10); return TOKEN_NUM; }
+{string}        { LOG_DEBUG_SHORT("STR ");    yylval.sVal = yytext; return TOKEN_STR; }
+{identifier}    { LOG_DEBUG_SHORT("ID ");     yylval.sId = yytext; return TOKEN_ID;  }
+{float_number}  { LOG_DEBUG_SHORT("FNUM ");   yylval.fVal = strtod(yytext, NULL); return TOKEN_FNUM;}
 {newline}       { LOG_DEBUG_SHORT(" \n"); incrementLineNumber(1);}
 {whitespace}    { /*  ignore */}
 
@@ -166,32 +165,32 @@ whitespace  [ \t]+
   [^*\n]+       ; // Consume characters within the comment block
 }
 
-
 <<EOF>>         {yyterminate(); return TOKEN_EOF; }
 
 . {LOG_ERROR("[%s] is an invalid token\n", yytext); YY_FATAL_ERROR("Unrecoverable error in lexer"); return TOKEN_ERROR;}
 
 %%
 
-
+int initLexer()
+{
+    return getSourceFile(&yyin);
+}
 
 /// \brief
 /// \return
 TokenType_et getToken()
 {
     int ret;
-    static bool firstTime = true;
-
     TokenType_et currentToken;
+    static bool firstTime = true;
 
     if (firstTime)
     {
         firstTime = false;
-        ret = getSourceFile(&yyin);
+
+        ret = initLexer();
         if (ret < 0)
-        {
-            return TOKEN_ERROR;
-        }
+            return ret;
     } 
 
     currentToken = (TokenType_et) yylex();

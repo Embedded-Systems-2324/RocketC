@@ -5,7 +5,9 @@
 #include <string.h>
 #include "Util/Logger.h"
 #include "Util/Globals.h"
-#include "Lexer/Scanner.h"
+#include "Lexer/Lexer.h"
+#include "Parser/Parser.h"
+#include "Output/Parser.tab.h"
 
 static TreeNode_st pTreeRoot;
 static FILE* pSourceFile;
@@ -63,14 +65,11 @@ int main(int argc, char *argv[])
     {
         if (strcmp(pMode, "--lex") == 0)
         {
-            while (getToken() != TOKEN_EOF);          //We use this for a scanner-only compiler because the Parser(using bison) autommaticly fetches the tokens whe he needs them
+            while (getToken() != TOKEN_EOF);
         }
         else if (strcmp(pMode, "--parse") == 0)
         {
-//        syntaxTree = parse();
-//        if (syntaxTree == NULL)
-//            printf(" [DEBUG: Tree is empty]\n");
-//        printTree(syntaxTree);
+            (void) executeParser(&pTreeRoot);
         }
     }
     else

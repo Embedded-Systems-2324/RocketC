@@ -1,0 +1,1 @@
+int test(char* pStr, int x, float artur);

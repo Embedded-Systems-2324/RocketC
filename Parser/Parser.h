@@ -1,8 +1,9 @@
 #ifndef _PARSER_H_
 #define _PARSER_H_
 
-TreeNode * parse(void);
+#include "../Util/Globals.h"
 
-/* Error Handler */
-int yyerror(char *s);
+int yyerror(char* pStr);
+int executeParser(TreeNode_st* pTreeRoot);
+
 #endif
