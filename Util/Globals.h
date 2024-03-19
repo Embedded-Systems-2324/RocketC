@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include "Types.h"
 
 #define TREE_MAX_CHILD 5
 
@@ -16,20 +17,9 @@ typedef enum
 
 typedef enum
 {
-    STMT_IF,
-    STMT_FOR,
-    STMT_GOTO,
-    STMT_LABEL,
-    STMT_WHILE,
-    STMT_SWITCH,
-    STMT_RETURN,
-    STMT_CONTINUE,
-    STMT_DO_WHILE,
-    STMT_COMPOUND,
-    STMT_ASSIGNMENT,
-    STMT_INVOCATION,
-    STMT_DECLARATION,
-    STMT_FUNC_DECLARATION
+    STMT_VAR_DECL,
+    STMT_FUNC_IMPL,
+    STMT_FUNC_PROTOTYPE
 }StatementType_et;
 
 typedef enum
@@ -60,5 +50,18 @@ typedef struct TreeNode
     }nodeAttributes;
 }
 TreeNode_st;
+
+typedef union
+{
+    TreeNode_st* treeNode;
+    
+    union 
+    {
+        double fVal;
+        long int dVal;
+        char* sVal;
+        char* sId;
+    }tokenData;
+}ParserObject_ut;
 
 #endif

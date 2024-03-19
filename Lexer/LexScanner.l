@@ -10,6 +10,7 @@
 #include "../Output/Parser.tab.h"
 #include "../Lexer/Lexer.h"
 
+#define YYSTYPE ParserObject_ut
 #define YY_BUFFER_SIZE 32                      // alter to define the value of the input buffer
 
 static char yy_buffer[YY_BUFFER_SIZE];
@@ -143,10 +144,10 @@ whitespace  [ \t]+
 "->"            { LOG_DEBUG_SHORT("ARROW ");                 return TOKEN_ARROW;                 }
 "\0"            { return TOKEN_EOF; }
 
-{number}        { LOG_DEBUG_SHORT("NUM ");    yylval.dVal = strtol(yytext, NULL, 10); return TOKEN_NUM; }
-{string}        { LOG_DEBUG_SHORT("STR ");    yylval.sVal = yytext; return TOKEN_STR; }
-{identifier}    { LOG_DEBUG_SHORT("ID ");     yylval.sId = yytext; return TOKEN_ID;  }
-{float_number}  { LOG_DEBUG_SHORT("FNUM ");   yylval.fVal = strtod(yytext, NULL); return TOKEN_FNUM;}
+{number}        { LOG_DEBUG_SHORT("NUM ");    yylval.tokenData.dVal = strtol(yytext, NULL, 10); return TOKEN_NUM; }
+{string}        { LOG_DEBUG_SHORT("STR ");    yylval.tokenData.sVal = yytext; return TOKEN_STR; }
+{identifier}    { LOG_DEBUG_SHORT("ID ");     yylval.tokenData.sId = yytext; return TOKEN_ID;  }
+{float_number}  { LOG_DEBUG_SHORT("FNUM ");   yylval.tokenData.fVal = strtod(yytext, NULL); return TOKEN_FNUM;}
 {newline}       { LOG_DEBUG_SHORT(" \n"); incrementLineNumber(1);}
 {whitespace}    { /*  ignore */}
 

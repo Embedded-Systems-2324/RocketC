@@ -1,6 +1,11 @@
 //--------------------------------------------------------------------------------------------------------------------//
 // Prologue
 //--------------------------------------------------------------------------------------------------------------------//
+
+%code requires {
+#include "../Util/Globals.h"
+}
+
 %{
 #include <stdint.h>
 #include <errno.h>
@@ -102,17 +107,7 @@ int yyerror(char* pStr);
 %token TOKEN_STR
 %token TOKEN_ID
 
-%union {
-    double fVal;
-    long int dVal;
-    char* sVal;
-    char* sId;
-}
-
-%type <fVal> TOKEN_FNUM
-%type <dVal> TOKEN_NUM
-%type <sVal> TOKEN_STR
-%type <sId>  TOKEN_ID
+%define api.value.type {ParserObject_ut}
 
 //--------------------------------------------------------------------------------------------------------------------//
 // Grammar Rules
@@ -123,16 +118,21 @@ int yyerror(char* pStr);
 R_PROGRAM: R_PROGRAM R_EOF | R_PROGRAM R_GLOBAL_STATEMENT | R_GLOBAL_STATEMENT;
 
 //TODO: Add missing cases: Func. Implementations
-R_GLOBAL_STATEMENT: R_FUNC_PROTOTYPE;
+R_GLOBAL_STATEMENT: R_VAR_DECLARATION | R_FUNC_PROTOTYPE ;
+
+R_VAR_DECLARATION: R_FUNC_PREAMBLE TOKEN_SEMI
+{
+    
+};
 
 //Start of a function prototype or definition. Example: char* getString, static int getNumber
 R_FUNC_PREAMBLE: R_TYPE_ALL TOKEN_ID 
 {
-    LOG_DEBUG("Function preamble found! | Name: %s\n", $2);
+    LOG_DEBUG("Type preamble found! | Name: %s\n", $2.tokenData.sId);
 } 
 | R_FUNC_QUALIFIER R_TYPE_ALL TOKEN_ID 
 {
-    LOG_DEBUG("Function preamble found! | Name: %s\n", $3);  
+    LOG_DEBUG("Type preamble found! | Name: %s\n", $3.tokenData.sId);  
 };
 
 //Functions can be marked as either static or extern, never both at the same time.
@@ -153,11 +153,11 @@ R_ARG_LIST: R_ARG | R_ARG_LIST TOKEN_COMMA R_ARG | ;
 //Function argument type. Example: int x | const char* pString
 R_ARG: R_TYPE_ALL TOKEN_ID 
 {
-    LOG_DEBUG("Function argument found! | Name: %s\n", $2);
+    LOG_DEBUG("Function argument found! | Name: %s\n", $2.tokenData.sId);
 }
 | R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID
 {
-    LOG_DEBUG("Function argument found! | Name: %s: %d\n", $3);
+    LOG_DEBUG("Function argument found! | Name: %s: | Qualifier: %d\n", $3.tokenData.sId, $$.tokenData.dVal);
 };
 
 //Standard C data types. Doesn't account for user defined types (aka typedefs), as this will need a symbol table
@@ -173,11 +173,12 @@ R_TYPE_ALL: R_SIGN_QUALIFIER R_TYPE | R_SIGN_QUALIFIER R_TYPE_PTR;
 //Types can be marked as constant or volatile. There is also some other more advanced qualifiers not being considered.
 R_TYPE_QUALIFIER: TOKEN_CONSTANT
 {
+    $$.tokenData.dVal = (long int) TOKEN_CONSTANT;
     LOG_DEBUG("Qualifier found: Const\n");
 } 
 | TOKEN_VOLATILE
 {
-
+    $$.tokenData.dVal = (long int) TOKEN_VOLATILE;    
     LOG_DEBUG("Qualifier found: Volatile\n");
 };
 
@@ -190,7 +191,11 @@ R_SIGN_QUALIFIER: | TOKEN_SIGNED
     LOG_DEBUG("Unsigned qualifier found!\n");
 };
 
-R_EOF: TOKEN_EOF {LOG_DEBUG("Reached end of file!\n"); return 0;};
+R_EOF: TOKEN_EOF
+{
+    LOG_DEBUG("Reached end of file!\n");
+    return 0;
+};
 %%
 
 //--------------------------------------------------------------------------------------------------------------------//
