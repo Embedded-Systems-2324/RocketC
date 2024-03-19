@@ -174,9 +174,6 @@ static void print_code_binary(FILE *fp, int code, int inst_size, uint32_t i){
         fprintf(fp, ";");
 }
 
-// check_immed limpar ficheiro
-// ter em atencao a linha
-
 static int check_immed(int value, int width, int i){
 
     int max_possible = 1 << (width-1);
