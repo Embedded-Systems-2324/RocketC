@@ -104,7 +104,7 @@ int yyerror(char* pStr);
 
 %union {
     double fVal;
-    int dVal;
+    long int dVal;
     char* sVal;
     char* sId;
 }
@@ -157,7 +157,7 @@ R_ARG: R_TYPE_ALL TOKEN_ID
 }
 | R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID
 {
-    LOG_DEBUG("Function argument found! | Name: %s | Qualifier: %d\n", $3, $1);
+    LOG_DEBUG("Function argument found! | Name: %s: %d\n", $3);
 };
 
 //Standard C data types. Doesn't account for user defined types (aka typedefs), as this will need a symbol table
@@ -173,12 +173,12 @@ R_TYPE_ALL: R_TYPE | R_TYPE_PTR;
 //Types can be marked as constant or volatile. There is also some other more advanced qualifiers not being considered.
 R_TYPE_QUALIFIER: TOKEN_CONSTANT
 {
-    $$ = $1;
+    LOG_DEBUG("Qualifier found: Const\n");
 } 
-| TOKEN_VOLATILE 
+| TOKEN_VOLATILE
 {
 
-    $$ = $1;
+    LOG_DEBUG("Qualifier found: Volatile\n");
 };
 
 R_EOF: TOKEN_EOF {LOG_DEBUG("Reached end of file!\n"); return 0;};
@@ -200,6 +200,8 @@ int executeParser(TreeNode_st** pTreeRoot)
         LOG_ERROR("Failed to get source file!\n");
         return ret; 
     }
+
+    LOG_WARNING("\n--------------Parser Start--------------\n");
 
     return yyparse();
 }
