@@ -16,12 +16,12 @@
 #define LDX_OP      12
 #define ST_OP       13
 #define STX_OP      14
-#define HLT_OP      31
+#define HLT_OP      15
 
-#define DOT_BYTE_OP 17 
-#define DOT_WORD_OP 18
-#define DOT_ALLOC_OP 19
-#define DOT_ORG_OP 20
+#define DOT_BYTE_OP 22
+#define DOT_WORD_OP 23
+#define DOT_ALLOC_OP 24
+#define DOT_ORG_OP 25
 
 #define IMMED16 16
 #define IMMED17 17
