@@ -168,7 +168,7 @@ R_TYPE: TOKEN_CHAR | TOKEN_SHORT | TOKEN_INT | TOKEN_LONG | TOKEN_FLOAT | TOKEN_
 R_TYPE_PTR: R_TYPE_PTR TOKEN_ASTERISK | R_TYPE TOKEN_ASTERISK;
 
 //Union between the pointer and standard types.
-R_TYPE_ALL: R_TYPE | R_TYPE_PTR;
+R_TYPE_ALL: R_SIGN_QUALIFIER R_TYPE | R_SIGN_QUALIFIER R_TYPE_PTR;
 
 //Types can be marked as constant or volatile. There is also some other more advanced qualifiers not being considered.
 R_TYPE_QUALIFIER: TOKEN_CONSTANT
@@ -179,6 +179,15 @@ R_TYPE_QUALIFIER: TOKEN_CONSTANT
 {
 
     LOG_DEBUG("Qualifier found: Volatile\n");
+};
+
+R_SIGN_QUALIFIER: | TOKEN_SIGNED
+{
+    LOG_DEBUG("Signed qualifier found!\n");
+} 
+| TOKEN_UNSIGNED
+{
+    LOG_DEBUG("Unsigned qualifier found!\n");
 };
 
 R_EOF: TOKEN_EOF {LOG_DEBUG("Reached end of file!\n"); return 0;};

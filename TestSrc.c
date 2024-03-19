@@ -1,1 +1,1 @@
-int test(const char* pStr, int x, float at);
+int test(const unsigned char* pStr, int x, float at);
