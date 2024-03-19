@@ -11,7 +11,7 @@
 #define LOG_LEVEL_WARNING   2U
 #define LOG_LEVEL_ERROR     3U
 
-#define LOG_LEVEL_SHORT LOG_LEVEL_WARNING
+#define LOG_LEVEL_SHORT LOG_LEVEL_DEBUG
 
 #define LOG_MESSAGE(format, ...)                log_write(COLOR_CODE_WHITE, __FUNCTION__, format, ##__VA_ARGS__)
 #define LOG_DEBUG(format, ...)                  log_write(COLOR_CODE_CYAN, __FUNCTION__, format, ##__VA_ARGS__)

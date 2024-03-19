@@ -16,6 +16,7 @@
 
 int yylex();
 int yyerror(char* pStr);
+const char* getTokenName(int tokenValue);
 %}
 
 %token TOKEN_IF
@@ -174,7 +175,7 @@ R_TYPE_ALL: R_SIGN_QUALIFIER R_TYPE | R_SIGN_QUALIFIER R_TYPE_PTR;
 R_TYPE_QUALIFIER: TOKEN_CONSTANT
 {
     $$.tokenData.dVal = (long int) TOKEN_CONSTANT;
-    LOG_DEBUG("Qualifier found: Const\n");
+    LOG_DEBUG("Qualifier found: %s\n", getTokenName($$.tokenData.dVal));
 } 
 | TOKEN_VOLATILE
 {
@@ -228,4 +229,9 @@ int yyerror(char* pStr)
     LOG_ERROR("Error at line: %lu | Error was: %s\n", getLineNumber(), pStr);
 
     return 0;
+}
+
+const char* getTokenName(int tokenValue) 
+{
+    return yysymbol_name(YYTRANSLATE(tokenValue));
 }
