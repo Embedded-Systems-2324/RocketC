@@ -114,7 +114,8 @@ carriage    \r
 {whitespace}    { /*  ignore */}  
 {carriage}      { /*  ignore */}
 
-"//".*         { /* When "//" is found, zero or more occurrences of any character are ignored */}
+"//".*         { printf(" Comment "); /* When "//" is found, zero or more occurrences of any character are ignored */}
+";".*         { printf(" Comment "); /* When ";" is found, zero or more occurrences of any character are ignored */}
 
 <INITIAL>{      // INITIAL Lexical state
   "/*"          { printf(" [In comment]");} BEGIN(INCOMMENT);      

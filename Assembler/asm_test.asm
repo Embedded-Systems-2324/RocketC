@@ -1,11 +1,13 @@
-INIT :
+/* Program to calculate some fibonacci numbers */
+
+INIT :      ;Init variables
 MOV R0, #1
 MOV R1, #0
 MOV R2, #0
 MOV R3, #10
 ADD R2, R0, R1
 
-LOOP :
+LOOP :      //Computing Loop 
 MOV R1, R0
 MOV R0, R2
 ADD R2, R0, R1
