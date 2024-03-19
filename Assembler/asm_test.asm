@@ -2,9 +2,9 @@
 
 INIT :      ;Init variables
 MOV R0, #1
-MOV R1, #0
-MOV R2, #0
-MOV R3, #10
+MOV R1, #0000b
+MOV R2, #0x00
+MOV R3, #0AH
 ADD R2, R0, R1
 
 LOOP :      //Computing Loop 

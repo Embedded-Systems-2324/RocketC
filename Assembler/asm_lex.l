@@ -46,10 +46,13 @@ static int endOfFileReached = 0;
 
 digit       [0-9]
 hex         [a-fA-F]
-number      {digit}+
-hex_number  0x({digit}|{hex})+
 
-register    [rR]{digit}+
+number      {digit}+
+binary      [01]+b
+hex_number_x  0x({digit}|{hex})+
+hex_number_h  ({digit}|{hex})+[hH]
+
+register    R({digit}|[12]{digit}|3[01])
 identifier  [a-zA-Z_][a-zA-Z0-9_]*
 
 special_char [,#:$]
@@ -105,17 +108,19 @@ carriage    \r
 
 "\0"    {/*return ENDFILE;*/} 
 
-{number}        { printf(" [NUM]");               return NUMBER;        }
+{number}        { printf(" [NUMBER]");            return NUMBER;        }
+{hex_number_x}  { printf(" [HEX_NUMBER]");        return NUMBER;        }
+{hex_number_h}  { printf(" [HEX_NUMBER]");        return NUMBER;        }
+{binary}        { printf(" [BIN_NUMBER]");        return NUMBER;        }
 {register}      { printf(" [REGISTER]");          return REG;           }
 {identifier}    { printf(" [IDENTIFIER]");        return IDENTIFIER;    }
 {special_char}  { printf(" %c", *yytext);         return *yytext;       }
-{hex_number}    { printf(" [HEX_NUMBER]");        return NUMBER;        }
 {newline}       { printf(" \n");                  linenum++;            }
 {whitespace}    { /*  ignore */}  
 {carriage}      { /*  ignore */}
 
-"//".*         { printf(" Comment "); /* When "//" is found, zero or more occurrences of any character are ignored */}
-";".*         { printf(" Comment "); /* When ";" is found, zero or more occurrences of any character are ignored */}
+"//".*          { printf(" Comment "); /* When "//" is found, zero or more occurrences of any character are ignored */}
+";".*           { printf(" Comment "); /* When ";" is found, zero or more occurrences of any character are ignored */}
 
 <INITIAL>{      // INITIAL Lexical state
   "/*"          { printf(" [In comment]");} BEGIN(INCOMMENT);      
