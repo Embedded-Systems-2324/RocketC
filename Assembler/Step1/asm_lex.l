@@ -9,6 +9,11 @@
 #include "../Step1/asm_scanner.h"
 #include "../main.h"
 #include "../Output/asm_parser.tab.h"
+#include "../Util/symbol_table.h"
+
+#include "../Util/statements_list.h"
+
+int binaryToDecimal(char *binaryString);
 
 #define YY_BUFFER_SIZE 32                      // alter to define the value of the input buffer
 
@@ -16,6 +21,9 @@ static char yy_buffer[YY_BUFFER_SIZE];
 static char* yy_buf_pos = yy_buffer;
 static size_t yy_buf_size = 0;
 static int endOfFileReached = 0;
+
+
+static int value_to_insert = 0;
 
 /*
    1st IF: The macro checks if the current position (yy_buf_pos) in the buffer
@@ -67,20 +75,20 @@ whitespace      [ \t]+
 
 
 %%
-"BRA"   { printf(" BRANCH_ALWAYS");             /*yylval=BRA_COND;*/    return BRANCH;  }
-"BCC"   { printf(" BRANCH_CARRY_CLEAR");        /*yylval=BNE_COND;*/    return BRANCH;  }
-"BVC"   { printf(" BRANCH_OVERFLOW_CLEAR");     /*yylval=BVC_COND;*/    return BRANCH;  }
-"BEQ"   { printf(" BRANCH_EQUAL");              /*yylval=BEQ_COND;*/    return BRANCH;  }
-"BGE"   { printf(" BRANCH_GREATER_EQUAL");      /*yylval=BGE_COND;*/    return BRANCH;  }
-"BGT"   { printf(" BRANCH_GREATER");            /*yylval=BGT_COND;*/    return BRANCH;  }
-"BPL"   { printf(" BRANCH_PLUS");               /*yylval=BPL_COND;*/    return BRANCH;  }
-"BNV"   { printf(" BRANCH_NEVER");              /*yylval=BNV_COND;*/    return BRANCH;  }
-"BCS"   { printf(" BRANCH_CARRY_SET");          /*yylval=BCS_COND;*/    return BRANCH;  }
-"BVS"   { printf(" BRANCH_OVERFLOW_SET");       /*yylval=BVS_COND;*/    return BRANCH;  }
-"BNE"   { printf(" BRANCH_NOT_EQUAL");          /*yylval=BNE_COND;*/    return BRANCH;  }
-"BLT"   { printf(" BRANCH_LESS");               /*yylval=BLT_COND;*/    return BRANCH;  }
-"BLE"   { printf(" BRANCH_LESS_EQUAL");         /*yylval=BLE_COND;*/    return BRANCH;  }
-"BMI"   { printf(" BRANCH_MINUS");              /*yylval=BMI_COND;*/    return BRANCH;  }
+"BRA"   { printf(" BRANCH_ALWAYS");               yylval=BRA_COND;    return BRANCH;  }
+"BCC"   { printf(" BRANCH_CARRY_CLEAR");          yylval=BNE_COND;    return BRANCH;  }
+"BVC"   { printf(" BRANCH_OVERFLOW_CLEAR");       yylval=BVC_COND;    return BRANCH;  }
+"BEQ"   { printf(" BRANCH_EQUAL");                yylval=BEQ_COND;    return BRANCH;  }
+"BGE"   { printf(" BRANCH_GREATER_EQUAL");        yylval=BGE_COND;    return BRANCH;  }
+"BGT"   { printf(" BRANCH_GREATER");              yylval=BGT_COND;    return BRANCH;  }
+"BPL"   { printf(" BRANCH_PLUS");                 yylval=BPL_COND;    return BRANCH;  }
+"BNV"   { printf(" BRANCH_NEVER");                yylval=BNV_COND;    return BRANCH;  }
+"BCS"   { printf(" BRANCH_CARRY_SET");            yylval=BCS_COND;    return BRANCH;  }
+"BVS"   { printf(" BRANCH_OVERFLOW_SET");         yylval=BVS_COND;    return BRANCH;  }
+"BNE"   { printf(" BRANCH_NOT_EQUAL");            yylval=BNE_COND;    return BRANCH;  }
+"BLT"   { printf(" BRANCH_LESS");                 yylval=BLT_COND;    return BRANCH;  }
+"BLE"   { printf(" BRANCH_LESS_EQUAL");           yylval=BLE_COND;    return BRANCH;  }
+"BMI"   { printf(" BRANCH_MINUS");                yylval=BMI_COND;    return BRANCH;  }
 
 "ADD"   { printf(" ADD");                       return ADD;             }
 "SUB"   { printf(" SUB");                       return SUB;             }
@@ -119,13 +127,58 @@ whitespace      [ \t]+
 
 
 
-{dec_number}    { printf(" [NUMBER]");          return NUMBER;          }
-{hex_number_x}  { printf(" [HEX_NUMBER]");      return NUMBER;          }
-{hex_number_h}  { printf(" [HEX_NUMBER]");      return NUMBER;          }
-{bin_number}    { printf(" [BIN_NUMBER]");      return NUMBER;          }
-{register}      { printf(" [REGISTER]");        return REG;             }
-{identifier}    { printf(" [IDENTIFIER]");      return IDENTIFIER;      }
-{newline}       { printf(" \n");                increment_line_number(1);}
+{dec_number} {   
+  printf(" [NUMBER]");          
+  yylval = add_symbol(yytext); 
+  sscanf(yytext, "%d", &value_to_insert);    
+  set_symbol_value(yylval, value_to_insert); 
+  return NUMBER;          
+}
+
+
+{hex_number_x}  { 
+  printf(" [HEX_NUMBER]");      
+  yylval = add_symbol(yytext); 
+  sscanf(yytext, "0x%x", &value_to_insert);  
+  set_symbol_value(yylval, value_to_insert); 
+  return NUMBER;          
+}
+
+
+{hex_number_h} { 
+  printf(" [HEX_NUMBER]");      
+  yylval = add_symbol(yytext); 
+  sscanf(yytext, "%xh", &value_to_insert);   
+  set_symbol_value(yylval, value_to_insert); 
+  return NUMBER;          
+}
+
+
+{bin_number} { 
+  printf(" [BIN_NUMBER]");      
+  yylval = add_symbol(yytext); 
+  set_symbol_value(yylval, 
+  binaryToDecimal(yytext)); 
+  return NUMBER;          
+}
+
+
+{register} { 
+  printf(" [REGISTER]");        
+  yylval = add_symbol(yytext); 
+  sscanf(yytext, "R%d", &value_to_insert);   
+  set_symbol_value(yylval, value_to_insert); 
+  return REG;             
+}
+
+
+{identifier} { 
+  printf(" [IDENTIFIER]");      
+  yylval = add_symbol(yytext); 
+  return IDENTIFIER;      
+}
+
+{newline}       { printf(" \n");   increment_line_number(1);}
 {whitespace}    { /*  ignore */}  
 {carriage}      { /*  ignore */}
 
@@ -145,7 +198,7 @@ whitespace      [ \t]+
   [^*\n]+         ; // Consume characters within the comment block
 }
 
-<<EOF>>         {yyterminate();  return ENDFILE;}
+<<EOF>>         {yyterminate();   return ENDFILE;}
 
 . {printf("Error, [%s] is an invalid token\n",yytext); YY_FATAL_ERROR("Unrecoverable error in lexer"); return ERROR;}
 %%
@@ -170,4 +223,19 @@ TokenType getToken(void)
 
   currentToken = yylex();
   return currentToken;
+}
+
+
+
+int binaryToDecimal(char *binaryString) {
+    int result = 0;
+    while (*binaryString != ('\0' || 'b' )) {
+        if (*binaryString == '1') {
+            result = (result << 1) | 1;
+        } else if (*binaryString == '0') {
+            result = result << 1;
+        }
+        binaryString++;
+    }
+    return result;
 }

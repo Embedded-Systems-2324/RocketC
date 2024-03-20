@@ -176,15 +176,20 @@ int32_t get_symbol_value(uint32_t index){
 }
 
 
+char* get_symbol_name(uint32_t index){
+    return sym_table[index].name;
+}
+
+
+
 /// @brief function to print the symbol table
 /// @param table
 void print_table(){
-    printf("\n\n---------SYMBOL TABLE---------\n");
+    printf("\n\n-------------SYMBOL TABLE-------------\n");
 
     for (int i = 1; i < next_free_index; i++){
         printf("index: %03d  |  value: %05d  |  name: %s\n", i, sym_table[i].value, sym_table[i].name);
     }
 
-    printf("--------------------------------\n\n");
+    printf("----------------------------------------\n\n");
 }
-

@@ -4,9 +4,8 @@
 #include <stdint.h>
 
 #define NO_TYPE     0
-#define REG_TYPE    1
-#define IMMEDIATE   2
-#define PSEUDO_OP   3
+#define IMMEDIATE   1
+#define LINK        2
 
 
 typedef struct{

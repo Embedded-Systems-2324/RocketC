@@ -5,6 +5,8 @@
 #include "Util/logger.h"
 #include "Step1/asm_scanner.h"
 #include "Output/asm_parser.tab.h"
+#include "Util/statements_list.h"
+#include "Util/symbol_table.h"
 
 
 static FILE* pSourceFile;
@@ -36,6 +38,9 @@ void get_output_file(FILE** ppFile){
 
 int main(int argc, char *argv[]){
     char* pMode;
+
+    init_statements_list();
+    init_symbol_table();
     
     if (argc < 2 || argc > 3)
     {
@@ -62,7 +67,7 @@ int main(int argc, char *argv[]){
         }
         else if (strcmp(pMode, "--parse") == 0)
         {
-            initLexer();
+            init_lexer();
             yyparse();
         }
     }
@@ -72,6 +77,9 @@ int main(int argc, char *argv[]){
     }
 
     fclose(pSourceFile);
+
+    print_statements();
+    print_table();
 
     return 0;
 }

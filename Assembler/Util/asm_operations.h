@@ -18,14 +18,16 @@
 #define STX_OP      14
 #define HLT_OP      15
 
+
+#define PUSH_OP 16
+#define POP_OP 17
+#define RETI_OP 18
+
+
 #define DOT_BYTE_OP 22
 #define DOT_WORD_OP 23
 #define DOT_ALLOC_OP 24
 #define DOT_ORG_OP 25
 
-#define IMMED16 16
-#define IMMED17 17
-#define IMMED22 22
-#define IMMED23 23
 
 #endif

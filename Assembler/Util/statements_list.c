@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "logger.h"
-#include "statements_list.h"
-#include "asm_operations.h"
+#include "../Util/logger.h"
+#include "../Util/statements_list.h"
+#include "../Util/asm_operations.h"
 
 #define INITIAL_STMT_LIST_SIZE       128
 #define INC_STMT_LIST                64 
@@ -98,19 +98,19 @@ const uint32_t get_current_stmt_index(){
 /// @brief function to print all statements list
 /// @param list 
 void print_statements(){
-    printf("\n**********INTERMEDIATE REPRESENTATIION**********\n");
+    printf("\n*************INTERMEDIATE REPRESENTATIION*************\n");
+    printf("LINE    TYPE    OPCODE      OP1     OP2     OP3     MISC\n");
    
     for (int i = 0; i < curr_stmt; i++){
-        printf("LINE    TYPE    OPCODE      OP1     OP2     OP3     MISC\n");
-        printf("%02d    %02d     %02d         %03d     %03d     %03d     %d\n", stmt_list[i].line_num,
-                                                                                stmt_list[i].op_type,
-                                                                                stmt_list[i].op_code,
-                                                                                stmt_list[i].op1,
-                                                                                stmt_list[i].op2, 
-                                                                                stmt_list[i].op3,
-                                                                                stmt_list[i].misc);
+        printf("%02d       %02d       %02d        %03d     %03d     %03d     %d\n", stmt_list[i].line_num,
+                                                                                    stmt_list[i].op_type,
+                                                                                    stmt_list[i].op_code,
+                                                                                    stmt_list[i].op1,
+                                                                                    stmt_list[i].op2, 
+                                                                                    stmt_list[i].op3,
+                                                                                    stmt_list[i].misc);
     }
 
-    printf("*********************************************\n\n");
+    printf("*******************************************************\n\n");
     printf("Location counter: %d", location_counter);
 }

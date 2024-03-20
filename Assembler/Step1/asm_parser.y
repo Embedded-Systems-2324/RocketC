@@ -3,6 +3,9 @@
 #include "../Step1/asm_scanner.h"
 #include "../Output/asm_parser.tab.h"
 #include "../Util/statements_list.h"
+#include "../Util/symbol_table.h"
+#include "../Util/opcodes.h"
+#include "../Util/asm_operations.h"
 #include "../main.h"
 
 int yylex();
@@ -87,168 +90,169 @@ stmt    :   add_stmt
 /* Instructions */
 add_stmt    :   ADD REG COMMA REG COMMA REG                
                     {  
-                        add_statement(ADD_OP,ADD_CODE, $2, $4, $6,REG_TYPE); 
+                        add_statement(ADD_OP, ADD_OPCODE, $2, $4, $6, NO_TYPE); 
                     } 
             |   ADD REG COMMA REG COMMA CARDINAL NUMBER    
                     {
-                        add_statement(ADD_OP,ADD_CODE, $2, $4, $7,IMMEDIATE); 
+                        add_statement(ADD_OP, ADD_OPCODE, $2, $4, $7, IMMEDIATE); 
                     }
             ;        
 
 
 sub_stmt    :   SUB REG COMMA REG COMMA REG                
                     { 
-                        add_statement(SUB_OP,SUB_CODE, $2, $4, $6,REG_TYPE);  
+                        add_statement(SUB_OP, SUB_OPCODE, $2, $4, $6, NO_TYPE);  
                     }
             |   SUB REG COMMA REG COMMA CARDINAL NUMBER    
                     { 
-                        add_statement(SUB_OP,SUB_CODE, $2, $4, $7,IMMEDIATE); 
+                        add_statement(SUB_OP, SUB_OPCODE, $2, $4, $7, IMMEDIATE); 
                     }
             ;        
 
 
 or_stmt     :   OR REG COMMA REG COMMA REG                  
                     { 
-                        add_statement(OR_OP,OR_CODE, $2, $4, $6,REG_TYPE);    
+                        add_statement(OR_OP, OR_OPCODE, $2, $4, $6, NO_TYPE);    
                     }
             |   OR REG COMMA REG COMMA CARDINAL NUMBER      
                     { 
-                        add_statement(OR_OP,OR_CODE, $2, $4, $7,IMMEDIATE);   
-                    }
+                        add_statement(OR_OP, OR_OPCODE, $2, $4, $7, IMMEDIATE);   
+                    } 
             ;
 
 and_stmt    :   AND REG COMMA REG COMMA REG                
                     { 
-                        add_statement(AND_OP,AND_CODE, $2, $4, $6,REG_TYPE);  
+                        add_statement(AND_OP, AND_OPCODE, $2, $4, $6, NO_TYPE);  
                     }
             |   AND REG COMMA REG COMMA CARDINAL NUMBER    
                     { 
-                        add_statement(AND_OP,AND_CODE, $2, $4, $7,IMMEDIATE); 
+                        add_statement(AND_OP, AND_OPCODE, $2, $4, $7, IMMEDIATE); 
+                    }
+            ;
+
+
+xor_stmt    :   XOR REG COMMA REG COMMA REG                          
+                    { 
+                        add_statement(XOR_OP, XOR_OPCODE, $2, $4, $6, NO_TYPE);  
+                    }
+            |   XOR REG COMMA REG COMMA CARDINAL NUMBER              
+                    { 
+                        add_statement(XOR_OP, XOR_OPCODE, $2, $4, $7, IMMEDIATE); 
                     }
             ;
 
 
 not_stmt    :   NOT REG COMMA REG                          
                     { 
-                        add_statement(NOT_OP,NOT_CODE,$2,$4,NULL_ARG,REG_TYPE);   
+                        add_statement(NOT_OP, NOT_OPCODE, $2, $4, NULL_ARG, NO_TYPE);   
                     }
             |   NOT REG COMMA CARDINAL NUMBER              
                     { 
-                        add_statement(NOT_OP,NOT_CODE,$2,$5,NULL_ARG, IMMEDIATE); 
+                        add_statement(NOT_OP, NOT_OPCODE, $2, $5, NULL_ARG, IMMEDIATE); 
                     }
             ;        
-
-
-xor_stmt    :   XOR REG COMMA REG                          
-                    { 
-                        add_statement(XOR_OP,XOR_CODE, $2, $4,REG_TYPE);  
-                    }
-            |   XOR REG COMMA CARDINAL NUMBER              
-                    { 
-                        add_statement(XOR_OP,XOR_CODE, $2, $5,IMMEDIATE); 
-                    }
-            ;
 
 
 cmp_stmt    :   CMP REG COMMA REG                          
                     { 
-                        add_statement(CMP_OP,CMP_CODE,$2,$4,NULL_ARG,REG_TYPE);
+                        add_statement(CMP_OP, CMP_OPCODE, $2, $4, NULL_ARG, NO_TYPE);
                     };
 
 
-branch_stmt :   BRANCH REG COMMA IDENTIFIER             
+branch_stmt :   BRANCH IDENTIFIER             
                     {
-                        add_statement(BRANCH_OP,yylval,$2,NULL_ARG,NULL_ARG,$1); 
+                        add_statement(BXX_OP, yylval, $2, NULL_ARG, NULL_ARG, NO_TYPE); 
                     };
+            /*|   BRANCH REG COMMA CARDINAL NUMBER   
+                    {
+                        add_statement(BXX_OP, yylval, $2, NULL_ARG, NULL_ARG, NO_TYPE); 
+                    };*/        
 
 
 move_stmt   :   MOVE REG COMMA REG                        
                     {
-                        add_statement(MOV_OP,MOV_CODE,$2,$4,NULL_ARG,REG_TYPE);  
-                    }
-            |   MOVE REG COMMA CARDINAL NUMBER            
-                    { 
-                        add_statement(MOV_OP,MOV_CODE,$2,$5,NULL_ARG,IMMEDIATE); 
-                    } 
-            ;        
+                        add_statement(ADD_OP, ADD_OPCODE, $2, $4, 0, IMMEDIATE);
+                    };     
 
 
 jump_stmt   :   JUMP REG COMMA CARDINAL NUMBER                   
                     { 
-                        add_statement(JMP_OP,JMP_CODE,$2,$5,NULL_ARG,IMMEDIATE); 
+                        add_statement(JMP_OP, JMP_OPCODE, $2, $5, NULL_ARG, NO_TYPE); 
                     }
             |   JUMP_LINK REG COMMA REG COMMA CARDINAL NUMBER    
                     {
-                        add_statement(JMP_OP,JMP_CODE,$2,$4,$7,NULL_ARG,IMMEDIATE);
+                        add_statement(JMP_OP, JMP_OPCODE, $2, $4 , $7, LINK);
                     }
             ;        
 
 
 load_stmt   :   LOAD_DIRECT REG COMMA CARDINAL NUMBER               
                     { 
-                        add_statement(LD_OP,LD_CODE,$2,NULL_ARG,$5,IMMEDIATE); 
+                        add_statement(LD_OP, LD_OPCODE, $2, NULL_ARG, $5, NO_TYPE); 
                     }
 
             |   LOAD_IMMEDIATE REG COMMA CARDINAL NUMBER           
                     {
-                        add_statement(LDI_OP,LDI_CODE,$2,NULL_ARG,$5,IMMEDIATE); 
+                        add_statement(LDI_OP, LDI_OPCODE, $2, $5, NULL_ARG, NO_TYPE); 
                     }
             |   LOAD_INDEXED REG COMMA REG COMMA CARDINAL NUMBER  
                     { 
-                        add_statement(LDX_OP,LDX_CODE, $2, $4, $7, IMMEDIATE); 
+                        add_statement(LDX_OP, LDX_OPCODE, $2, $4, $7, NO_TYPE); 
                     }
             ;        
 
 
 store_stmt  :   STORE_DIRECT REG COMMA CARDINAL NUMBER             
                     { 
-                        add_statement(ST_OP,ST_CODE, $2, $5, IMMEDIATE); 
+                        add_statement(ST_OP,ST_OPCODE, $2, $5, NULL_ARG, NO_TYPE); 
                     }
             |   STORE_INDEXED REG COMMA REG COMMA CARDINAL NUMBER
                     { 
-                        add_statement(ST_OP, ST_CODE, $2, $4, $7, IMMEDIATE); 
+                        add_statement(STX_OP, ST_OPCODE, $2, $4, $7, NO_TYPE);
                     }
             ;        
 
 
 push_stmt   :   PUSH REG 
                     { 
-                        add_statement(PUSH_OP,PUSH_CODE,$2, NULL_ARG, NULL_ARG, NULL_ARG);
+                        add_statement(PUSH_OP,PUSH_OPCODE,$2, NULL_ARG, NULL_ARG, NO_TYPE);
                     };
 
 
 pop_stmt    :   POP REG   
                     { 
-                        add_statement(POP_OP, POP_CODE,$2, NULL_ARG, NULL_ARG, NULL_ARG);
+                        add_statement(POP_OP, POP_OPCODE,$2, NULL_ARG, NULL_ARG, NO_TYPE);
                     };
 
 
 reti_stmt   :   RETI     
                     {
-                        add_statement(RETI_OP, RETI_CODE, NULL_ARG, NULL_ARG, NULL_ARG, NULL_ARG);
+                        add_statement(RETI_OP, RETI_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     };
 
 halt_stmt   :   HALT 
                     { 
-                        add_statement(HLT_OP, HLT_CODE, NULL_ARG, NULL_ARG, NULL_ARG, NULL_ARG);
+                        add_statement(HLT_OP, HLT_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     };
 
 
 nop_stmt    :   NOP 
                     { 
-                        add_statement(NOP_OP, NOP_CODE, NULL_ARG, NULL_ARG, NULL_ARG, NULL_ARG);
+                        add_statement(NOP_OP, NOP_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     };
 
 
 byte_stmt   :   BYTE NUMBER 
                     { 
-                        /*sym_table[$1].value = sym_table[$3].value; $$ = $1;*/
+                        /*sym_table[$1].value = sym_table[$3].value; 
+                        $$ = $1;*/
                     };
 
 
 word_stmt   :   WORD NUMBER 
                     { 
-                        /*sym_table[$1].value = sym_table[$3].value; $$ = $1;*/
+                        /*sym_table[$1].value = sym_table[$3].value; 
+                        $$ = $1;*/
                     };
 
 
@@ -260,20 +264,27 @@ alloc_stmt  :   ALLOC IDENTIFIER NUMBER
 
 org_stmt    :   ORG NUMBER 
                     {
-
+                        add_statement(DOT_ORG_OP, DOT_ORG_OP, $2, NULL_ARG, NULL_ARG, NO_TYPE);
                     };
 
 
 equ_stmt    :   IDENTIFIER EQU NUMBER 
-                    { 
-                        /*sym_table[$1].value = sym_table[$3].value; $$ = $1;*/
+                    {
+                        /*sym_table[$1].value = sym_table[$3].value; 
+                        $$ = $1;*/
                     };
 
 
 /* Labels */
 label       :   IDENTIFIER COLON 
                     { 
-                        /*sym_table[$1].value = lc; $$ = $1;*/
+                        if(get_symbol_value($1) != UNINITIALIZED_VALUE){
+                            printf("ERROR: Label redefinition: %s in line %ld\n", get_symbol_name($1), get_line_number());
+                        }
+                        else{
+                            set_symbol_value($1, get_location_counter());
+                            $$ = $1;
+                        }
                     };
 %%
 

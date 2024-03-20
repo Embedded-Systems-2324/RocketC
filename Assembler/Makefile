@@ -11,7 +11,7 @@ parser:
 	mv asm_parser.* Output/
 
 src:
-	gcc -o Output/VASM Util/Logger.c Output/asm_parser.tab.c Output/lex.yy.c Util/symbol_table.c Util/statements_list.c main.c
+	gcc -o Output/VASM Util/logger.c Output/asm_parser.tab.c Output/lex.yy.c Util/statements_list.c  Util/symbol_table.c main.c
 
 clean:
 	rm -r Output

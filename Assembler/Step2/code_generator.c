@@ -57,6 +57,7 @@ uint32_t generate_code(){
                 code |= (0x1f & current_statement.op_code) << 27;
                 code |= (0x1f & get_symbol_value(current_statement.op1)) << 22;
                 code |= (0x1f & get_symbol_value(current_statement.op2)) << 17;
+
                 if(current_statement.misc == IMMEDIATE){
                     if(check_immed(get_symbol_value(current_statement.op3), IMMED16, i)){
                         error = 1;
