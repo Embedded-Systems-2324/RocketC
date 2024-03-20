@@ -7,6 +7,7 @@
 #include "Output/asm_parser.tab.h"
 #include "Util/statements_list.h"
 #include "Util/symbol_table.h"
+#include "Step2/code_generator.h"
 
 
 static FILE* pSourceFile;
@@ -69,6 +70,7 @@ int main(int argc, char *argv[]){
         {
             init_lexer();
             yyparse();
+            generate_code();
         }
     }
     else

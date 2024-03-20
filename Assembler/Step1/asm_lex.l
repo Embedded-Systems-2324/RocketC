@@ -22,7 +22,6 @@ static char* yy_buf_pos = yy_buffer;
 static size_t yy_buf_size = 0;
 static int endOfFileReached = 0;
 
-
 static int value_to_insert = 0;
 
 /*
@@ -123,7 +122,7 @@ whitespace      [ \t]+
 "#"      { printf(" CARDINAL");                 return CARDINAL;        }
 ":"      { printf(" COLON");                    return COLON;           }
 "$"      { printf(" DOLAR");                    return DOLAR;           }
-"\0"     {return ENDFILE;} 
+"\0"     { return ENDFILE;} 
 
 
 

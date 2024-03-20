@@ -1,5 +1,6 @@
 /* Program to calculate some fibonacci numbers */
 
+
 INIT :      ;Init variables
 LDI R0, #1
 LDI R1, #010b

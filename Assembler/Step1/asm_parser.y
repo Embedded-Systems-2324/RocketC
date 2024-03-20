@@ -268,10 +268,15 @@ org_stmt    :   ORG NUMBER
                     };
 
 
-equ_stmt    :   IDENTIFIER EQU NUMBER 
+equ_stmt    :   EQU IDENTIFIER COMMA NUMBER 
                     {
-                        /*sym_table[$1].value = sym_table[$3].value; 
-                        $$ = $1;*/
+                         if(get_symbol_value($1) != UNINITIALIZED_VALUE){
+                            printf("ERROR: Constant redefinition: %s in line %ld\n", get_symbol_name($1), get_line_number());
+                        }
+                        else{
+                            set_symbol_value($1, get_symbol_value($4));
+                            $$ = $1;
+                        }
                     };
 
 
