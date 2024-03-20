@@ -124,7 +124,7 @@ whitespace      [ \t]+
 {dec_number}    { printf(" [NUMBER]");          yylval = add_symbol(yytext); sscanf(yytext, "%d", &value_to_insert);    set_symbol_value(yylval, value_to_insert); return NUMBER;          }
 {hex_number_x}  { printf(" [HEX_NUMBER]");      yylval = add_symbol(yytext); sscanf(yytext, "0x%x", &value_to_insert);  set_symbol_value(yylval, value_to_insert); return NUMBER;          }
 {hex_number_h}  { printf(" [HEX_NUMBER]");      yylval = add_symbol(yytext); sscanf(yytext, "%xh", &value_to_insert);   set_symbol_value(yylval, value_to_insert); return NUMBER;          }
-{bin_number}    { printf(" [BIN_NUMBER]");      yylval = add_symbol(yytext); sscanf(yytext, "%db", &value_to_insert);   set_symbol_value(yylval, value_to_insert); return NUMBER;          }
+{bin_number}    { printf(" [BIN_NUMBER]");      yylval = add_symbol(yytext); set_symbol_value(yylval, binaryToDecimal(*yytext)); return NUMBER;          }
 {register}      { printf(" [REGISTER]");        yylval = add_symbol(yytext); sscanf(yytext, "R%d", &value_to_insert);   set_symbol_value(yylval, value_to_insert); return REG;             }
 {identifier}    { printf(" [IDENTIFIER]");      yylval = add_symbol(yytext); return IDENTIFIER;      }
 {newline}       { printf(" \n");                increment_line_number(1);}
@@ -172,4 +172,17 @@ TokenType getToken(void)
 
   currentToken = yylex();
   return currentToken;
+}
+
+int binaryToDecimal(char *binaryString) {
+    int result = 0;
+    while (*binaryString != ('\0' || 'b' )) {
+        if (*binaryString == '1') {
+            result = (result << 1) | 1;
+        } else if (*binaryString == '0') {
+            result = result << 1;
+        }
+        binaryString++;
+    }
+    return result;
 }
