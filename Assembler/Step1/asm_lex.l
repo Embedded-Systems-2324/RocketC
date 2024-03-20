@@ -17,6 +17,8 @@ static char* yy_buf_pos = yy_buffer;
 static size_t yy_buf_size = 0;
 static int endOfFileReached = 0;
 
+static int symbol_value_to_insert = 0;
+
 /*
    1st IF: The macro checks if the current position (yy_buf_pos) in the buffer
    has reached the end. If so, it refills the buffer by reading a block
@@ -119,12 +121,12 @@ whitespace      [ \t]+
 
 
 
-{dec_number}    { printf(" [NUMBER]");          return NUMBER;          }
-{hex_number_x}  { printf(" [HEX_NUMBER]");      return NUMBER;          }
-{hex_number_h}  { printf(" [HEX_NUMBER]");      return NUMBER;          }
-{bin_number}    { printf(" [BIN_NUMBER]");      return NUMBER;          }
-{register}      { printf(" [REGISTER]");        return REG;             }
-{identifier}    { printf(" [IDENTIFIER]");      return IDENTIFIER;      }
+{dec_number}    { printf(" [NUMBER]");          yylval = add_symbol(yytext); sscanf(yytext, "%d", &value_to_insert);    set_symbol_value(yylval, value_to_insert); return NUMBER;          }
+{hex_number_x}  { printf(" [HEX_NUMBER]");      yylval = add_symbol(yytext); sscanf(yytext, "0x%x", &value_to_insert);  set_symbol_value(yylval, value_to_insert); return NUMBER;          }
+{hex_number_h}  { printf(" [HEX_NUMBER]");      yylval = add_symbol(yytext); sscanf(yytext, "%xh", &value_to_insert);   set_symbol_value(yylval, value_to_insert); return NUMBER;          }
+{bin_number}    { printf(" [BIN_NUMBER]");      yylval = add_symbol(yytext); sscanf(yytext, "%db", &value_to_insert);   set_symbol_value(yylval, value_to_insert); return NUMBER;          }
+{register}      { printf(" [REGISTER]");        yylval = add_symbol(yytext); sscanf(yytext, "R%d", &value_to_insert);   set_symbol_value(yylval, value_to_insert); return REG;             }
+{identifier}    { printf(" [IDENTIFIER]");      yylval = add_symbol(yytext); return IDENTIFIER;      }
 {newline}       { printf(" \n");                increment_line_number(1);}
 {whitespace}    { /*  ignore */}  
 {carriage}      { /*  ignore */}
