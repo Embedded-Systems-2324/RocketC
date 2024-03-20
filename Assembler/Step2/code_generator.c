@@ -6,6 +6,10 @@
 #include "../Util/logger.h"
 #include "../main.h"
 
+#define IMMED16 16
+#define IMMED17 17
+#define IMMED22 22
+#define IMMED23 23
 
 uint32_t generate_code(){
     
@@ -57,10 +61,9 @@ uint32_t generate_code(){
                 code |= (0x1f & current_statement.op_code) << 27;
                 code |= (0x1f & get_symbol_value(current_statement.op1)) << 22;
                 code |= (0x1f & get_symbol_value(current_statement.op2)) << 17;
+                
                 if(current_statement.misc == IMMEDIATE){
-                    if(check_immed(get_symbol_value(current_statement.op3), IMMED16, i)){
-                        error = 1;
-                    }
+                    error = check_immed(get_symbol_value(current_statement.op3), IMMED16, i);
                     code |= 1 << 16;
                     code |= (0xffff & get_symbol_value(current_statement.op3));
                 }
@@ -69,6 +72,7 @@ uint32_t generate_code(){
                 }
                 break;
 
+
             case BXX_OP:
                 code |= (0x1f & current_statement.op_code) << 27;
                 code |= (0xf & current_statement.misc) << 23;
@@ -76,12 +80,8 @@ uint32_t generate_code(){
                 if(get_symbol_value(current_statement.op1) == 0){
                     printf("Uninitialized symbol %s\n", get_symbol_value(current_statement.op1));
                 }
-
                 int brx_displ = get_symbol_value(current_statement.op1) - (lc - 4);
-                
-                if(check_immed(brx_displ, IMMED23, i)){ 
-                    error = 1;
-                }
+                error = check_immed(brx_displ, IMMED23, i);
 
                 code |= (0x7fffff & brx_displ);
                 break;
@@ -90,9 +90,9 @@ uint32_t generate_code(){
             case JMP_OP:
                 code |= (0x1f & current_statement.op_code) << 27;
                 
-                if(current_statement.misc == IMMEDIATE){
+                if(current_statement.misc == LINK){
                     code |= 1 << 16;
-                    code |= (0x1f & table->sym_table[current_statement.op1].value) << 22;
+                    code |= (0x1f & get_symbol_value(current_statement.op1)) << 22;
                 }
                 code |= (0x1f & et_symbol_value(current_statement.op1)) << 17;
                 code |= (0xffff & get_symbol_value(current_statement.op3));
@@ -102,41 +102,41 @@ uint32_t generate_code(){
             case LD_OP ... LDI_OP:
             case ST_OP:
                 code |= (0x1f & current_statement.op_code) << 27;
-                code |= (0x1f & table->sym_table[current_statement.op1].value) << 22;
+                code |= (0x1f & get_symbol_value(current_statement.op1)) << 22;
                 
-                if(check_immed(table->sym_table[current_statement.op2].value, IMMED22, i)) error = 1;
-                code |= (0x3fffff & table->sym_table[current_statement.op2].value);
+                error = check_immed(get_symbol_value(current_statement.op2), IMMED22, i);
+                code |= (0x3fffff & get_symbol_value(current_statement.op2));
                 break;
 
             case LDX_OP:
             case STX_OP:
                 code |= (0x1f & current_statement.op_code) << 27;
-                code |= (0x1f & table->sym_table[current_statement.op1].value) << 22;
-                code |= (0x1f & table->sym_table[current_statement.op2].value) << 17;
-                if(check_immed(table->sym_table[current_statement.op3].value, IMMED17, i)) error = 1;
-                code |= (0x1ffff & table->sym_table[current_statement.op3].value);
+                code |= (0x1f & get_symbol_value(current_statement.op1)) << 22;
+                code |= (0x1f & get_symbol_value(current_statement.op2)) << 17;
+                error = check_immed(get_symbol_value(current_statement.op3), IMMED17, i);
+                code |= (0x1ffff & get_symbol_value(current_statement.op3));
                 break;
 
 
             case DOT_BYTE_OP:
-                if(check_immed(table->sym_table[current_statement.op1].value, 8, i)) error = 1;
-                code = table->sym_table[current_statement.op1].value & 0xff;
+                error = check_immed(get_symbol_value(current_statement.op1), 8, i);
+                code = get_symbol_value(current_statement.op1) & 0xff;
                 inst_size = 1;
                 break;
 
 
             case DOT_WORD_OP:
-                code = table->sym_table[current_statement.op1].value & 0xffffffff;
+                code = get_symbol_value(current_statement.op1) & 0xffffffff;
                 break;
 
 
             case DOT_ALLOC_OP:
-                for (int j = 1; j <= table->sym_table[current_statement.op1].value; j++)
+                for (int j = 1; j <= get_symbol_value(current_statement.op1); j++)
                     print_code(fp_hex, fp_bin, 0, 1, &lc, i);
                 break;
 
             case DOT_ORG_OP:
-                lc = table->sym_table[current_statement.op1].value;
+                lc = get_symbol_value(current_statement.op1);
                 break;    
 
             default:
@@ -198,7 +198,7 @@ static int check_immed(int value, int width, int i){
     int max_possible = 1 << (width-1);
 
     if((value >= max_possible) || (value <= -max_possible)){
-        LOG_DEBUG("The value: %d, must be smaller than: %d", value, max_possible);
+        printf("The value: %d, must be smaller than: %d", value, max_possible);
         return 1;
     }
 
