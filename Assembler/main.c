@@ -1,35 +1,72 @@
-#include "asm_globals.h"
-#include "asm_scanner.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "main.h"
+#include "Util/logger.h"
+#include "Step1/asm_scanner.h"
+#include "Output/asm_parser.tab.h"
 
-FILE * sourceCode;
-int linenum = 1;    //Line number zero doesnt exist
 
-int main(int argc, char * argv[]){
+static FILE* pSourceFile;
+static size_t lineNumber = 1;
 
-    char pgm[120];
 
-    if (argc == 0){
-        fprintf(stderr, "usage: %s <filename>\n", argv[0]);
-        exit(1);
-    }
-        
-    strcpy(pgm, argv[1]);
-    if (strchr(pgm, '.') == NULL)
-        strcat(pgm, ".asm");
+size_t get_line_number()
+{
+    return lineNumber;
+}
 
-    sourceCode = fopen(pgm,"r");
-    if(sourceCode == NULL)
+
+size_t increment_line_number(size_t n)
+{
+    lineNumber += n;
+    return lineNumber;
+}
+
+
+void get_source_file(FILE** ppFile){
+    *ppFile = pSourceFile;
+}
+
+
+int main(int argc, char *argv[]){
+    char* pMode;
+    
+    if (argc < 2 || argc > 3)
     {
-        fprintf(stderr, "File %s not found\n", pgm);
-        exit(1);
+        printf("Usage: %s <source_file> --<mode>\n", argv[0]);
+        exit(-1);
+    }
+    else if (argc == 3)
+    {
+        pMode = argv[2];
     }
 
-    //while (getToken())
-    
-    File_Init();
-    
-    yyparse();
+    pSourceFile = fopen(argv[1], "r");
+    if (!pSourceFile)
+    {
+        printf("Failed to open source file!\n");
+        exit(-1);
+    }
 
-    fclose(sourceCode);
+    if (argc == 3)
+    {
+        if (strcmp(pMode, "--lex") == 0)
+        {
+            while (getToken() != ENDFILE);
+        }
+        else if (strcmp(pMode, "--parse") == 0)
+        {
+            initLexer();
+            yyparse();
+        }
+    }
+    else
+    {
+
+    }
+
+    fclose(pSourceFile);
+
     return 0;
 }

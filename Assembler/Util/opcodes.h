@@ -1,5 +1,5 @@
-#ifndef _OPCODES_H_
-#define _OPCODES_H_
+#ifndef __OPCODES_H__
+#define __OPCODES_H__
 
 //basic instructions opcodes
 #define NOP_OPCODE      0

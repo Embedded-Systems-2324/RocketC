@@ -4,19 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "asm_parser.tab.h"
 #include "opcodes.h"
 
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#ifndef TRUE
-#define TRUE 1
-#endif
-
-extern FILE* sourceCode; 
-extern int linenum;
 
 typedef int TokenType; 
 

@@ -1,9 +1,24 @@
-default:
-	clear
-	flex -l asm_lex.l
-	bison -dv asm_parser.y
-	gcc -o test asm_parser.tab.c lex.yy.c main.c
+default:all
+
+setup:
+	mkdir -p Output
+
+lexer:
+	flex -l --outfile="Output/lex.yy.c" Step1/asm_lex.l
+
+parser:
+	bison -dv -k --graph Step1/asm_parser.y;
+	mv asm_parser.* Output/
+
+src:
+	gcc -o Output/VASM Util/Logger.c Output/asm_parser.tab.c Output/lex.yy.c Util/symbol_table.c Util/statements_list.c main.c
+
 clean:
-	rm -f asm_parser.tab.c asm_parser.tab.h asm_parser.output lex.yy.c test
-run:
-	./test asm_test.asm
+	rm -r Output
+
+prog:
+	./Output/VASM test.asm
+
+run: clean all prog
+
+all: setup parser lexer src
