@@ -95,9 +95,9 @@ whitespace      [ \t]+
 "JMPL"  { printf(" JUMP_LINK");                 return JUMP_LINK;       }
 "LD"    { printf(" LOAD_DIRECT");               return LOAD_DIRECT;     }
 "LDI"   { printf(" LOAD_IMMEDIATE");            return LOAD_IMMEDIATE;  }
-"LDX"   { printf(" LOAD_INDIRECT");             return LOAD_INDEXED;    }
+"LDX"   { printf(" LOAD_INDEXED ");             return LOAD_INDEXED;    }
 "ST"    { printf(" STORE_DIRECT");              return STORE_DIRECT;    }
-"STX"   { printf(" STORE_INDIRECT");            return STORE_INDEXED;   }
+"STX"   { printf(" STORE_INDEXED");             return STORE_INDEXED;   }
 "PUSH"  { printf(" PUSH");                      return PUSH;            }
 "POP"   { printf(" POP");                       return POP;             }
 
@@ -140,7 +140,7 @@ whitespace      [ \t]+
   <<EOF>>       { printf(" Error: Unterminated comment\n");
                   return ERROR; 
                 }
-  "*/"          { printf(" [Out comment]");}BEGIN(INITIAL);
+  "*/"          { printf(" [Out comment]");} BEGIN(INITIAL);
   "\n"          { increment_line_number(1);}
   [^*\n]+         ; // Consume characters within the comment block
 }

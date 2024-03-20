@@ -8,6 +8,7 @@
 
 
 static FILE* pSourceFile;
+static FILE* pOutputFile;
 static size_t lineNumber = 1;
 
 
@@ -26,6 +27,10 @@ size_t increment_line_number(size_t n)
 
 void get_source_file(FILE** ppFile){
     *ppFile = pSourceFile;
+}
+
+void get_output_file(FILE** ppFile){
+    *ppFile = pOutputFile;
 }
 
 
