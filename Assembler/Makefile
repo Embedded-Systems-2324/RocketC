@@ -17,7 +17,7 @@ clean:
 	rm -r Output
 
 prog:
-	./Output/VASM test.asm
+	./Output/VASM test.asm --parse
 
 run: clean all prog
 

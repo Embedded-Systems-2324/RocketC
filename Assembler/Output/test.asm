@@ -11,8 +11,6 @@ ADD R2, R0, R1
 LOOP :      //Computing Loop 
 MOV R1, R0
 MOV R0, R2
-
-INIT :      ;Init variables
 ADD R2, R0, R1
 SUB R3, R3, #1
 BNE LOOP

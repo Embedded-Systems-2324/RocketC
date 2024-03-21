@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "../Util/logger.h"
 #include "../Util/statements_list.h"
+#include "../Util/symbol_table.h"
 #include "../Util/asm_operations.h"
 
 #define INITIAL_STMT_LIST_SIZE       128
