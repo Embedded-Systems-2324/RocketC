@@ -1,10 +1,10 @@
-static int test();
+int main();
 
-static int test()
+int varHex = 0xA5;
+int varBin = 0b01;
+int varDec = 11;  
+
+int main()
 {
-    for (int j = 0; j < 10; ++j)
-    {
-        j = 1;
-        j = 0;
-    }
+
 }
