@@ -75,7 +75,6 @@ whitespace  [ \t]+
 "do"            { LOG_DEBUG_SHORT("DO ");                    return TOKEN_DO;          }
 "double"        { LOG_DEBUG_SHORT("DOUBLE ");                return TOKEN_DOUBLE;      }
 "if"            { LOG_DEBUG_SHORT("IF ");                    return TOKEN_IF;          }
-"else if"       { LOG_DEBUG_SHORT("ELSEIF ");                return TOKEN_ELSEIF;      }
 "else"          { LOG_DEBUG_SHORT("ELSE ");                  return TOKEN_ELSE;        }
 "enum"          { LOG_DEBUG_SHORT("ENUM ");                  return TOKEN_ENUM;        }
 "extern"        { LOG_DEBUG_SHORT("EXTERN ");                return TOKEN_EXTERN;      }

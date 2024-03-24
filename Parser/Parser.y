@@ -23,7 +23,6 @@ const char* getTokenName(int tokenValue);
 // Token Types
 //--------------------------------------------------------------------------------------------------------------------//
 %token TOKEN_IF
-%token TOKEN_ELSEIF
 %token TOKEN_EOF
 %token TOKEN_ERROR
 %token TOKEN_ELSE
@@ -133,8 +132,8 @@ R_LOCAL_STATEMENT_LIST: R_LOCAL_STATEMENT_LIST R_LOCAL_STATEMENT
     LOG_DEBUG("Single local statement found!\n");
 };
 
-R_LOCAL_STATEMENT: /*R_IF_STATEMENT_FULL 
-                 |*/ R_GOTO
+R_LOCAL_STATEMENT: R_IF_STATEMENT 
+                 | R_GOTO
                  | R_SWITCH
                  | R_CASE
                  | R_DEFAULT
@@ -175,6 +174,7 @@ R_SWITCH: TOKEN_SWITCH TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES TOKE
     LOG_DEBUG("Switch statement found!\n");
 };
 
+
 //Switch can be composed by a list of cases, a default only, or a list of cases and a default
 //Examples: ... 
 //          case 3: ...
@@ -197,46 +197,18 @@ R_CASE: TOKEN_CASE TOKEN_NUM TOKEN_COLON R_LOCAL_STATEMENT
     
 R_DEFAULT: TOKEN_DEFAULT TOKEN_COLON R_LOCAL_STATEMENT
 {
-    LOG_DEBUG("Manel statement found");
+    LOG_DEBUG("Default statement found");
 };
-/*
-R_IF_STATEMENT_FULL: R_IF_STATEMENT
+
+R_IF_STATEMENT: TOKEN_IF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES  R_LOCAL_STATEMENT_LIST 
 {
-    LOG_DEBUG("If forever alone D:\n");
+    LOG_DEBUG("Simple IF statement detected!\n");
 }
-| R_IF_STATEMENT R_ELSE_IF_STATEMENT_LIST
+| TOKEN_IF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES  R_LOCAL_STATEMENT_LIST 
+  TOKEN_ELSE  R_LOCAL_STATEMENT_LIST 
 {
-    LOG_DEBUG("If with fren\n");
-}
-| R_IF_STATEMENT R_ELSE_STATEMENT
-{
-    LOG_DEBUG("If with fren\n");
-}
-| R_IF_STATEMENT R_ELSE_IF_STATEMENT_LIST R_ELSE_STATEMENT
-{
-    LOG_DEBUG("If with two fren :D\n");
+    LOG_DEBUG("IF + ELSE statement detected");
 };
-
-R_IF_STATEMENT: TOKEN_IF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES R_LOCAL_STATEMENT
-{
-    LOG_DEBUG("If statement found!\n");
-};
-
-R_ELSE_STATEMENT: TOKEN_ELSE R_LOCAL_STATEMENT
-{
-    LOG_DEBUG("Else statement found!\n");
-};
-
-R_ELSE_IF_STATEMENT: TOKEN_ELSEIF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES R_LOCAL_STATEMENT
-{
-
-};
-
-R_ELSE_IF_STATEMENT_LIST: R_ELSE_IF_STATEMENT | R_ELSE_IF_STATEMENT_LIST R_ELSE_IF_STATEMENT
-{
-    LOG_DEBUG("Else if statement list found!\n");
-};
-*/
 
 R_RETURN: TOKEN_RETURN TOKEN_SEMI | TOKEN_RETURN R_FACTOR TOKEN_SEMI
 {

@@ -1,10 +1,9 @@
-int main();
-
-int varHex = 0xA5;
-int varBin = 0b01;
-int varDec = 11;  
-
 int main()
 {
-
+    if (1)
+        return 0; 
+    else if (0)
+        return 1;
+    else
+        return 2;
 }
