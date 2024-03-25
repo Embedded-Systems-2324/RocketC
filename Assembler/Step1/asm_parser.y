@@ -6,6 +6,7 @@
 #include "../Util/symbol_table.h"
 #include "../Util/opcodes.h"
 #include "../Util/asm_operations.h"
+#include "../Util/logger.h"
 #include "../main.h"
 
 int yylex();
@@ -45,7 +46,7 @@ int yyerror(char *str);
 %token COMMA
 %token CARDINAL
 %token COLON
-%token DOLAR  
+%token DOLLAR  
 %token BYTE
 %token WORD
 %token ALLOC
@@ -161,12 +162,16 @@ cmp_stmt    :   CMP REG COMMA REG
 
 branch_stmt :   BRANCH IDENTIFIER             
                     {
-                        add_statement(BXX_OP, yylval, $2, NULL_ARG, NULL_ARG, NO_TYPE); 
+                        add_statement(yylval, BXX_OP, $2, NULL_ARG, NULL_ARG, NO_TYPE); 
                     };
-            /*|   BRANCH REG COMMA CARDINAL NUMBER   
+            |   BRANCH REG COMMA CARDINAL NUMBER   
                     {
                         add_statement(BXX_OP, yylval, $2, NULL_ARG, NULL_ARG, NO_TYPE); 
-                    };*/        
+                    };  
+            |   BRANCH DOLLAR
+                    {
+                        add_statement(BXX_OP, yylval, $2, NULL_ARG, NULL_ARG, NO_TYPE);
+                    };    
 
 
 move_stmt   :   MOVE REG COMMA REG                        
@@ -244,21 +249,19 @@ nop_stmt    :   NOP
 
 byte_stmt   :   BYTE NUMBER 
                     { 
-                        /*sym_table[$1].value = sym_table[$3].value; 
-                        $$ = $1;*/
+                        add_statement(DOT_BYTE_OP, DOT_BYTE_OP, $2, NULL_ARG, NULL_ARG, NO_TYPE);
                     };
 
 
 word_stmt   :   WORD NUMBER 
                     { 
-                        /*sym_table[$1].value = sym_table[$3].value; 
-                        $$ = $1;*/
+                        add_statement(DOT_WORD_OP, DOT_WORD_OP, $2, NULL_ARG, NULL_ARG, NO_TYPE);
                     };
 
 
-alloc_stmt  :   ALLOC IDENTIFIER NUMBER 
+alloc_stmt  :   ALLOC IDENTIFIER NUMBER
                     {
-
+                        add_statement(DOT_ALLOC_OP, DOT_ALLOC_OP, $3, NULL_ARG, NULL_ARG, NO_TYPE);
                     };
 
 
@@ -279,7 +282,6 @@ equ_stmt    :   EQU IDENTIFIER COMMA NUMBER
                         }
                     };
 
-
 /* Labels */
 label       :   IDENTIFIER COLON 
                     { 
@@ -292,7 +294,6 @@ label       :   IDENTIFIER COLON
                         }
                     };
 %%
-
 
 int yyerror(char *str)
 {

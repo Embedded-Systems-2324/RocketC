@@ -139,7 +139,7 @@ uint32_t generate_code(){
 
             case DOT_ALLOC_OP:
                 for (int j = 1; j <= get_symbol_value(current_statement.op1); j++)
-                    print_code(fp_hex, fp_bin, 0, 1, &lc, i);
+                    print_code(fp_hex, fp_bin, 0, 4, &lc, i);
                 break;
 
             case DOT_ORG_OP:

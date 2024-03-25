@@ -83,7 +83,7 @@ extern int yydebug;
     COMMA = 284,                   /* COMMA  */
     CARDINAL = 285,                /* CARDINAL  */
     COLON = 286,                   /* COLON  */
-    DOLAR = 287,                   /* DOLAR  */
+    DOLLAR = 287,                  /* DOLLAR  */
     BYTE = 288,                    /* BYTE  */
     WORD = 289,                    /* WORD  */
     ALLOC = 290,                   /* ALLOC  */

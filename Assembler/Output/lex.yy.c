@@ -386,9 +386,9 @@ struct yy_trans_info
 static const flex_int16_t yy_accept[137] =
     {   0,
         0,    0,    0,    0,   62,   60,   52,   51,   53,   41,
-       43,   40,   60,   60,   45,   45,   45,   42,   55,   50,
+       44,   40,   60,   60,   45,   45,   45,   42,   55,   50,
        50,   50,   50,   50,   50,   50,   50,   50,   50,   50,
-       50,   50,   50,   50,   44,   59,   58,   61,   52,    0,
+       50,   50,   50,   50,   43,   59,   58,   61,   52,    0,
         0,    0,    0,    0,   56,   54,   45,   45,    0,   47,
        48,    0,   55,   50,   50,   50,   47,   50,   50,   50,
        50,   50,   50,   50,   50,   50,   50,   50,   50,   50,
@@ -618,6 +618,8 @@ static int endOfFileReached = 0;
 
 static int value_to_insert = 0;
 
+static int dollar_count = 0;
+
 /*
    1st IF: The macro checks if the current position (yy_buf_pos) in the buffer
    has reached the end. If so, it refills the buffer by reading a block
@@ -649,8 +651,8 @@ static int value_to_insert = 0;
     result = n; \
 }
 
-#line 653 "Output/lex.yy.c"
-#line 654 "Output/lex.yy.c"
+#line 655 "Output/lex.yy.c"
+#line 656 "Output/lex.yy.c"
 
 #define INITIAL 0
 #define INCOMMENT 1
@@ -868,9 +870,9 @@ YY_DECL
 		}
 
 	{
-#line 76 "Step1/asm_lex.l"
+#line 78 "Step1/asm_lex.l"
 
-#line 874 "Output/lex.yy.c"
+#line 876 "Output/lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -939,227 +941,232 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 77 "Step1/asm_lex.l"
+#line 79 "Step1/asm_lex.l"
 { printf(" BRANCH_ALWAYS");               yylval=BRA_COND;    return BRANCH;  }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 78 "Step1/asm_lex.l"
-{ printf(" BRANCH_CARRY_CLEAR");          yylval=BNE_COND;    return BRANCH;  }
+#line 80 "Step1/asm_lex.l"
+{ printf(" BRANCH_CARRY_CLEAR");          yylval=BCC_COND;    return BRANCH;  }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 79 "Step1/asm_lex.l"
+#line 81 "Step1/asm_lex.l"
 { printf(" BRANCH_OVERFLOW_CLEAR");       yylval=BVC_COND;    return BRANCH;  }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 80 "Step1/asm_lex.l"
+#line 82 "Step1/asm_lex.l"
 { printf(" BRANCH_EQUAL");                yylval=BEQ_COND;    return BRANCH;  }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 81 "Step1/asm_lex.l"
+#line 83 "Step1/asm_lex.l"
 { printf(" BRANCH_GREATER_EQUAL");        yylval=BGE_COND;    return BRANCH;  }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 82 "Step1/asm_lex.l"
+#line 84 "Step1/asm_lex.l"
 { printf(" BRANCH_GREATER");              yylval=BGT_COND;    return BRANCH;  }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 83 "Step1/asm_lex.l"
+#line 85 "Step1/asm_lex.l"
 { printf(" BRANCH_PLUS");                 yylval=BPL_COND;    return BRANCH;  }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 84 "Step1/asm_lex.l"
+#line 86 "Step1/asm_lex.l"
 { printf(" BRANCH_NEVER");                yylval=BNV_COND;    return BRANCH;  }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 85 "Step1/asm_lex.l"
+#line 87 "Step1/asm_lex.l"
 { printf(" BRANCH_CARRY_SET");            yylval=BCS_COND;    return BRANCH;  }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 86 "Step1/asm_lex.l"
+#line 88 "Step1/asm_lex.l"
 { printf(" BRANCH_OVERFLOW_SET");         yylval=BVS_COND;    return BRANCH;  }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 87 "Step1/asm_lex.l"
+#line 89 "Step1/asm_lex.l"
 { printf(" BRANCH_NOT_EQUAL");            yylval=BNE_COND;    return BRANCH;  }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 88 "Step1/asm_lex.l"
+#line 90 "Step1/asm_lex.l"
 { printf(" BRANCH_LESS");                 yylval=BLT_COND;    return BRANCH;  }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 89 "Step1/asm_lex.l"
+#line 91 "Step1/asm_lex.l"
 { printf(" BRANCH_LESS_EQUAL");           yylval=BLE_COND;    return BRANCH;  }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 90 "Step1/asm_lex.l"
+#line 92 "Step1/asm_lex.l"
 { printf(" BRANCH_MINUS");                yylval=BMI_COND;    return BRANCH;  }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 92 "Step1/asm_lex.l"
+#line 94 "Step1/asm_lex.l"
 { printf(" ADD");                       return ADD;             }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 93 "Step1/asm_lex.l"
+#line 95 "Step1/asm_lex.l"
 { printf(" SUB");                       return SUB;             }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 94 "Step1/asm_lex.l"
+#line 96 "Step1/asm_lex.l"
 { printf(" OR");                        return OR;              }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 95 "Step1/asm_lex.l"
+#line 97 "Step1/asm_lex.l"
 { printf(" AND");                       return AND;             }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 96 "Step1/asm_lex.l"
+#line 98 "Step1/asm_lex.l"
 { printf(" NOT");                       return NOT;             }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 97 "Step1/asm_lex.l"
+#line 99 "Step1/asm_lex.l"
 { printf(" XOR");                       return XOR;             }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 98 "Step1/asm_lex.l"
+#line 100 "Step1/asm_lex.l"
 { printf(" CMP");                       return CMP;             }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 100 "Step1/asm_lex.l"
+#line 102 "Step1/asm_lex.l"
 { printf(" MOVE");                      return MOVE;            }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 101 "Step1/asm_lex.l"
+#line 103 "Step1/asm_lex.l"
 { printf(" JUMP");                      return JUMP;            }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 102 "Step1/asm_lex.l"
+#line 104 "Step1/asm_lex.l"
 { printf(" JUMP_LINK");                 return JUMP_LINK;       }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 103 "Step1/asm_lex.l"
+#line 105 "Step1/asm_lex.l"
 { printf(" LOAD_DIRECT");               return LOAD_DIRECT;     }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 104 "Step1/asm_lex.l"
+#line 106 "Step1/asm_lex.l"
 { printf(" LOAD_IMMEDIATE");            return LOAD_IMMEDIATE;  }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 105 "Step1/asm_lex.l"
+#line 107 "Step1/asm_lex.l"
 { printf(" LOAD_INDEXED ");             return LOAD_INDEXED;    }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 106 "Step1/asm_lex.l"
+#line 108 "Step1/asm_lex.l"
 { printf(" STORE_DIRECT");              return STORE_DIRECT;    }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 107 "Step1/asm_lex.l"
+#line 109 "Step1/asm_lex.l"
 { printf(" STORE_INDEXED");             return STORE_INDEXED;   }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 108 "Step1/asm_lex.l"
+#line 110 "Step1/asm_lex.l"
 { printf(" PUSH");                      return PUSH;            }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 109 "Step1/asm_lex.l"
+#line 111 "Step1/asm_lex.l"
 { printf(" POP");                       return POP;             }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 111 "Step1/asm_lex.l"
+#line 113 "Step1/asm_lex.l"
 { printf(" RETI");                      return RETI;            }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 112 "Step1/asm_lex.l"
+#line 114 "Step1/asm_lex.l"
 { printf(" HALT");                      return HALT;            }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 113 "Step1/asm_lex.l"
+#line 115 "Step1/asm_lex.l"
 { printf(" NOP");                       return NOP;             }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 115 "Step1/asm_lex.l"
+#line 117 "Step1/asm_lex.l"
 { printf(" .byte");                    return BYTE;            }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 116 "Step1/asm_lex.l"
+#line 118 "Step1/asm_lex.l"
 { printf(" .word");                    return WORD;            }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 117 "Step1/asm_lex.l"
+#line 119 "Step1/asm_lex.l"
 { printf(" .alloc");                   return ALLOC;           }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 118 "Step1/asm_lex.l"
+#line 120 "Step1/asm_lex.l"
 { printf(" .org");                     return ORG;             }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 119 "Step1/asm_lex.l"
+#line 121 "Step1/asm_lex.l"
 { printf(" .equ");                     return EQU;             }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 121 "Step1/asm_lex.l"
+#line 123 "Step1/asm_lex.l"
 { printf(" COMMA");                    return COMMA;           }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 122 "Step1/asm_lex.l"
+#line 124 "Step1/asm_lex.l"
 { printf(" CARDINAL");                 return CARDINAL;        }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 123 "Step1/asm_lex.l"
+#line 125 "Step1/asm_lex.l"
 { printf(" COLON");                    return COLON;           }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 124 "Step1/asm_lex.l"
-{ printf(" DOLAR");                    return DOLAR;           }
+#line 126 "Step1/asm_lex.l"
+{ return ENDFILE;} 
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 125 "Step1/asm_lex.l"
-{ return ENDFILE;} 
+#line 128 "Step1/asm_lex.l"
+{
+   printf(" DOLLAR");
+   yylval = add_symbol("DOLLAR");
+   set_symbol_value(yylval, get_location_counter());
+   return DOLLAR;          
+  }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 129 "Step1/asm_lex.l"
+#line 135 "Step1/asm_lex.l"
 {   
   printf(" [NUMBER]");          
   yylval = add_symbol(yytext); 
@@ -1170,7 +1177,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 138 "Step1/asm_lex.l"
+#line 144 "Step1/asm_lex.l"
 { 
   printf(" [HEX_NUMBER]");      
   yylval = add_symbol(yytext); 
@@ -1181,7 +1188,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 147 "Step1/asm_lex.l"
+#line 153 "Step1/asm_lex.l"
 { 
   printf(" [HEX_NUMBER]");      
   yylval = add_symbol(yytext); 
@@ -1192,7 +1199,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 156 "Step1/asm_lex.l"
+#line 162 "Step1/asm_lex.l"
 { 
   printf(" [BIN_NUMBER]");      
   yylval = add_symbol(yytext); 
@@ -1203,7 +1210,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 165 "Step1/asm_lex.l"
+#line 171 "Step1/asm_lex.l"
 { 
   printf(" [REGISTER]");        
   yylval = add_symbol(yytext); 
@@ -1214,7 +1221,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 174 "Step1/asm_lex.l"
+#line 180 "Step1/asm_lex.l"
 { 
   printf(" [IDENTIFIER]");      
   yylval = add_symbol(yytext); 
@@ -1224,75 +1231,75 @@ YY_RULE_SETUP
 case 51:
 /* rule 51 can match eol */
 YY_RULE_SETUP
-#line 180 "Step1/asm_lex.l"
+#line 186 "Step1/asm_lex.l"
 { printf(" \n");   increment_line_number(1);}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 181 "Step1/asm_lex.l"
+#line 187 "Step1/asm_lex.l"
 { /*  ignore */}  
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 182 "Step1/asm_lex.l"
+#line 188 "Step1/asm_lex.l"
 { /*  ignore */}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 184 "Step1/asm_lex.l"
+#line 190 "Step1/asm_lex.l"
 { printf(" Comment "); /* When "//" is found, zero or more occurrences of any character are ignored */}
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 185 "Step1/asm_lex.l"
+#line 191 "Step1/asm_lex.l"
 { printf(" Comment "); /* When ";" is found, zero or more occurrences of any character are ignored */}
 	YY_BREAK
 // INITIAL Lexical state
 case 56:
 YY_RULE_SETUP
-#line 188 "Step1/asm_lex.l"
+#line 194 "Step1/asm_lex.l"
 { printf(" [In comment]");} BEGIN(INCOMMENT);      
 	YY_BREAK
 
 // INCOMMENT Lexical state
 case YY_STATE_EOF(INCOMMENT):
-#line 192 "Step1/asm_lex.l"
+#line 198 "Step1/asm_lex.l"
 { printf(" Error: Unterminated comment\n");
                   return ERROR; 
                 }
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 195 "Step1/asm_lex.l"
+#line 201 "Step1/asm_lex.l"
 { printf(" [Out comment]");} BEGIN(INITIAL);
 	YY_BREAK
 case 58:
 /* rule 58 can match eol */
 YY_RULE_SETUP
-#line 196 "Step1/asm_lex.l"
+#line 202 "Step1/asm_lex.l"
 { increment_line_number(1);}
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 197 "Step1/asm_lex.l"
+#line 203 "Step1/asm_lex.l"
 ; // Consume characters within the comment block
 	YY_BREAK
 
 case YY_STATE_EOF(INITIAL):
-#line 200 "Step1/asm_lex.l"
+#line 206 "Step1/asm_lex.l"
 {yyterminate();   return ENDFILE;}
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 202 "Step1/asm_lex.l"
+#line 208 "Step1/asm_lex.l"
 {printf("Error, [%s] is an invalid token\n",yytext); YY_FATAL_ERROR("Unrecoverable error in lexer"); return ERROR;}
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 203 "Step1/asm_lex.l"
+#line 209 "Step1/asm_lex.l"
 ECHO;
 	YY_BREAK
-#line 1296 "Output/lex.yy.c"
+#line 1303 "Output/lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2307,7 +2314,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 203 "Step1/asm_lex.l"
+#line 209 "Step1/asm_lex.l"
 
 
 

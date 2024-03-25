@@ -24,6 +24,8 @@ static int endOfFileReached = 0;
 
 static int value_to_insert = 0;
 
+static int dollar_count = 0;
+
 /*
    1st IF: The macro checks if the current position (yy_buf_pos) in the buffer
    has reached the end. If so, it refills the buffer by reading a block
@@ -75,7 +77,7 @@ whitespace      [ \t]+
 
 %%
 "BRA"   { printf(" BRANCH_ALWAYS");               yylval=BRA_COND;    return BRANCH;  }
-"BCC"   { printf(" BRANCH_CARRY_CLEAR");          yylval=BNE_COND;    return BRANCH;  }
+"BCC"   { printf(" BRANCH_CARRY_CLEAR");          yylval=BCC_COND;    return BRANCH;  }
 "BVC"   { printf(" BRANCH_OVERFLOW_CLEAR");       yylval=BVC_COND;    return BRANCH;  }
 "BEQ"   { printf(" BRANCH_EQUAL");                yylval=BEQ_COND;    return BRANCH;  }
 "BGE"   { printf(" BRANCH_GREATER_EQUAL");        yylval=BGE_COND;    return BRANCH;  }
@@ -121,10 +123,14 @@ whitespace      [ \t]+
 ","      { printf(" COMMA");                    return COMMA;           }
 "#"      { printf(" CARDINAL");                 return CARDINAL;        }
 ":"      { printf(" COLON");                    return COLON;           }
-"$"      { printf(" DOLAR");                    return DOLAR;           }
 "\0"     { return ENDFILE;} 
 
-
+"$"      {
+   printf(" DOLLAR");
+   yylval = add_symbol("DOLLAR");
+   set_symbol_value(yylval, get_location_counter());
+   return DOLLAR;          
+  }
 
 {dec_number} {   
   printf(" [NUMBER]");          
