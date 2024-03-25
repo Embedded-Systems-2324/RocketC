@@ -76,20 +76,20 @@ whitespace      [ \t]+
 
 
 %%
-"BRA"   { printf(" BRANCH_ALWAYS");               yylval=BRA_COND;    return BRANCH;  }
-"BCC"   { printf(" BRANCH_CARRY_CLEAR");          yylval=BCC_COND;    return BRANCH;  }
-"BVC"   { printf(" BRANCH_OVERFLOW_CLEAR");       yylval=BVC_COND;    return BRANCH;  }
-"BEQ"   { printf(" BRANCH_EQUAL");                yylval=BEQ_COND;    return BRANCH;  }
-"BGE"   { printf(" BRANCH_GREATER_EQUAL");        yylval=BGE_COND;    return BRANCH;  }
-"BGT"   { printf(" BRANCH_GREATER");              yylval=BGT_COND;    return BRANCH;  }
-"BPL"   { printf(" BRANCH_PLUS");                 yylval=BPL_COND;    return BRANCH;  }
-"BNV"   { printf(" BRANCH_NEVER");                yylval=BNV_COND;    return BRANCH;  }
-"BCS"   { printf(" BRANCH_CARRY_SET");            yylval=BCS_COND;    return BRANCH;  }
-"BVS"   { printf(" BRANCH_OVERFLOW_SET");         yylval=BVS_COND;    return BRANCH;  }
-"BNE"   { printf(" BRANCH_NOT_EQUAL");            yylval=BNE_COND;    return BRANCH;  }
-"BLT"   { printf(" BRANCH_LESS");                 yylval=BLT_COND;    return BRANCH;  }
-"BLE"   { printf(" BRANCH_LESS_EQUAL");           yylval=BLE_COND;    return BRANCH;  }
-"BMI"   { printf(" BRANCH_MINUS");                yylval=BMI_COND;    return BRANCH;  }
+"BRA"   { printf(" BRANCH_ALWAYS");             set_branch_condition(BRA_COND);    return BRANCH;  }
+"BCC"   { printf(" BRANCH_CARRY_CLEAR");        set_branch_condition(BCC_COND);    return BRANCH;  }
+"BVC"   { printf(" BRANCH_OVERFLOW_CLEAR");     set_branch_condition(BVC_COND);    return BRANCH;  }
+"BEQ"   { printf(" BRANCH_EQUAL");              set_branch_condition(BEQ_COND);    return BRANCH;  }
+"BGE"   { printf(" BRANCH_GREATER_EQUAL");      set_branch_condition(BGE_COND);    return BRANCH;  }
+"BGT"   { printf(" BRANCH_GREATER");            set_branch_condition(BGT_COND);    return BRANCH;  }
+"BPL"   { printf(" BRANCH_PLUS");               set_branch_condition(BPL_COND);    return BRANCH;  }
+"BNV"   { printf(" BRANCH_NEVER");              set_branch_condition(BNV_COND);    return BRANCH;  }
+"BCS"   { printf(" BRANCH_CARRY_SET");          set_branch_condition(BCS_COND);    return BRANCH;  }
+"BVS"   { printf(" BRANCH_OVERFLOW_SET");       set_branch_condition(BVS_COND);    return BRANCH;  }
+"BNE"   { printf(" BRANCH_NOT_EQUAL");          set_branch_condition(BNE_COND);    return BRANCH;  }
+"BLT"   { printf(" BRANCH_LESS");               set_branch_condition(BLT_COND);    return BRANCH;  }
+"BLE"   { printf(" BRANCH_LESS_EQUAL");         set_branch_condition(BLE_COND);    return BRANCH;  }
+"BMI"   { printf(" BRANCH_MINUS");              set_branch_condition(BMI_COND);    return BRANCH;  }
 
 "ADD"   { printf(" ADD");                       return ADD;             }
 "SUB"   { printf(" SUB");                       return SUB;             }

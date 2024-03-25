@@ -12,7 +12,11 @@
 int yylex();
 int yyerror(char *str);
 
+
 #define NULL_ARG    0
+
+static int bra_cond = 0;
+int set_branch_condition(int);
 
 %}
 
@@ -162,16 +166,17 @@ cmp_stmt    :   CMP REG COMMA REG
 
 branch_stmt :   BRANCH IDENTIFIER             
                     {
-                        add_statement(yylval, BXX_OP, $2, NULL_ARG, NULL_ARG, NO_TYPE); 
+                        LOG_DEBUG("\n bra_cond: %d", bra_cond);
+                        add_statement(BXX_OP, bra_cond, $2, NULL_ARG, NULL_ARG, NO_TYPE); 
                     };
-            |   BRANCH REG COMMA CARDINAL NUMBER   
+            /*|   BRANCH REG COMMA CARDINAL NUMBER   
                     {
                         add_statement(BXX_OP, yylval, $2, NULL_ARG, NULL_ARG, NO_TYPE); 
                     };  
             |   BRANCH DOLLAR
                     {
                         add_statement(BXX_OP, yylval, $2, NULL_ARG, NULL_ARG, NO_TYPE);
-                    };    
+                    };    */
 
 
 move_stmt   :   MOVE REG COMMA REG                        
@@ -299,4 +304,9 @@ int yyerror(char *str)
 {
   	fprintf (stderr, "%s in line number : %ld\n", str, get_line_number());
 	return 1;
+}
+
+int set_branch_condition(int condition)
+{
+    return bra_cond = condition;
 }

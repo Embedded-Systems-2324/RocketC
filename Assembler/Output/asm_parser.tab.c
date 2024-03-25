@@ -82,10 +82,14 @@
 int yylex();
 int yyerror(char *str);
 
+
 #define NULL_ARG    0
 
+static int bra_cond = 0;
+int set_branch_condition(int);
 
-#line 89 "asm_parser.tab.c"
+
+#line 93 "asm_parser.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -566,13 +570,13 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    59,    59,    60,    61,    65,    66,    67,    68,    69,
-      70,    71,    72,    73,    74,    75,    76,    77,    78,    79,
-      80,    81,    82,    83,    84,    85,    86,    87,    92,    96,
-     103,   107,   114,   118,   124,   128,   135,   139,   146,   150,
-     157,   163,   167,   171,   177,   183,   187,   194,   199,   203,
-     210,   214,   221,   227,   233,   238,   244,   250,   256,   262,
-     268,   274,   286
+       0,    63,    63,    64,    65,    69,    70,    71,    72,    73,
+      74,    75,    76,    77,    78,    79,    80,    81,    82,    83,
+      84,    85,    86,    87,    88,    89,    90,    91,    96,   100,
+     107,   111,   118,   122,   128,   132,   139,   143,   150,   154,
+     161,   167,   172,   176,   182,   188,   192,   199,   204,   208,
+     215,   219,   226,   232,   238,   243,   249,   255,   261,   267,
+     273,   279,   291
 };
 #endif
 
@@ -1231,271 +1235,272 @@ yyreduce:
   switch (yyn)
     {
   case 28: /* add_stmt: ADD REG COMMA REG COMMA REG  */
-#line 93 "Step1/asm_parser.y"
+#line 97 "Step1/asm_parser.y"
                     {  
                         add_statement(ADD_OP, ADD_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE); 
                     }
-#line 1239 "asm_parser.tab.c"
+#line 1243 "asm_parser.tab.c"
     break;
 
   case 29: /* add_stmt: ADD REG COMMA REG COMMA CARDINAL NUMBER  */
-#line 97 "Step1/asm_parser.y"
+#line 101 "Step1/asm_parser.y"
                     {
                         add_statement(ADD_OP, ADD_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE); 
                     }
-#line 1247 "asm_parser.tab.c"
+#line 1251 "asm_parser.tab.c"
     break;
 
   case 30: /* sub_stmt: SUB REG COMMA REG COMMA REG  */
-#line 104 "Step1/asm_parser.y"
+#line 108 "Step1/asm_parser.y"
                     { 
                         add_statement(SUB_OP, SUB_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE);  
                     }
-#line 1255 "asm_parser.tab.c"
+#line 1259 "asm_parser.tab.c"
     break;
 
   case 31: /* sub_stmt: SUB REG COMMA REG COMMA CARDINAL NUMBER  */
-#line 108 "Step1/asm_parser.y"
+#line 112 "Step1/asm_parser.y"
                     { 
                         add_statement(SUB_OP, SUB_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE); 
                     }
-#line 1263 "asm_parser.tab.c"
+#line 1267 "asm_parser.tab.c"
     break;
 
   case 32: /* or_stmt: OR REG COMMA REG COMMA REG  */
-#line 115 "Step1/asm_parser.y"
+#line 119 "Step1/asm_parser.y"
                     { 
                         add_statement(OR_OP, OR_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE);    
                     }
-#line 1271 "asm_parser.tab.c"
+#line 1275 "asm_parser.tab.c"
     break;
 
   case 33: /* or_stmt: OR REG COMMA REG COMMA CARDINAL NUMBER  */
-#line 119 "Step1/asm_parser.y"
+#line 123 "Step1/asm_parser.y"
                     { 
                         add_statement(OR_OP, OR_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE);   
                     }
-#line 1279 "asm_parser.tab.c"
+#line 1283 "asm_parser.tab.c"
     break;
 
   case 34: /* and_stmt: AND REG COMMA REG COMMA REG  */
-#line 125 "Step1/asm_parser.y"
+#line 129 "Step1/asm_parser.y"
                     { 
                         add_statement(AND_OP, AND_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE);  
                     }
-#line 1287 "asm_parser.tab.c"
+#line 1291 "asm_parser.tab.c"
     break;
 
   case 35: /* and_stmt: AND REG COMMA REG COMMA CARDINAL NUMBER  */
-#line 129 "Step1/asm_parser.y"
+#line 133 "Step1/asm_parser.y"
                     { 
                         add_statement(AND_OP, AND_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE); 
                     }
-#line 1295 "asm_parser.tab.c"
+#line 1299 "asm_parser.tab.c"
     break;
 
   case 36: /* xor_stmt: XOR REG COMMA REG COMMA REG  */
-#line 136 "Step1/asm_parser.y"
+#line 140 "Step1/asm_parser.y"
                     { 
                         add_statement(XOR_OP, XOR_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE);  
                     }
-#line 1303 "asm_parser.tab.c"
+#line 1307 "asm_parser.tab.c"
     break;
 
   case 37: /* xor_stmt: XOR REG COMMA REG COMMA CARDINAL NUMBER  */
-#line 140 "Step1/asm_parser.y"
+#line 144 "Step1/asm_parser.y"
                     { 
                         add_statement(XOR_OP, XOR_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE); 
                     }
-#line 1311 "asm_parser.tab.c"
+#line 1315 "asm_parser.tab.c"
     break;
 
   case 38: /* not_stmt: NOT REG COMMA REG  */
-#line 147 "Step1/asm_parser.y"
+#line 151 "Step1/asm_parser.y"
                     { 
                         add_statement(NOT_OP, NOT_OPCODE, yyvsp[-2], yyvsp[0], NULL_ARG, NO_TYPE);   
                     }
-#line 1319 "asm_parser.tab.c"
+#line 1323 "asm_parser.tab.c"
     break;
 
   case 39: /* not_stmt: NOT REG COMMA CARDINAL NUMBER  */
-#line 151 "Step1/asm_parser.y"
+#line 155 "Step1/asm_parser.y"
                     { 
                         add_statement(NOT_OP, NOT_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, IMMEDIATE); 
                     }
-#line 1327 "asm_parser.tab.c"
+#line 1331 "asm_parser.tab.c"
     break;
 
   case 40: /* cmp_stmt: CMP REG COMMA REG  */
-#line 158 "Step1/asm_parser.y"
+#line 162 "Step1/asm_parser.y"
                     { 
                         add_statement(CMP_OP, CMP_OPCODE, yyvsp[-2], yyvsp[0], NULL_ARG, NO_TYPE);
                     }
-#line 1335 "asm_parser.tab.c"
+#line 1339 "asm_parser.tab.c"
     break;
 
   case 41: /* branch_stmt: BRANCH IDENTIFIER  */
-#line 164 "Step1/asm_parser.y"
+#line 168 "Step1/asm_parser.y"
                     {
-                        add_statement(yylval, BXX_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE); 
+                        LOG_DEBUG("\n bra_cond: %d", bra_cond);
+                        add_statement(bra_cond, BXX_OPCODE, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE); 
                     }
-#line 1343 "asm_parser.tab.c"
+#line 1348 "asm_parser.tab.c"
     break;
 
   case 42: /* branch_stmt: BRANCH REG COMMA CARDINAL NUMBER  */
-#line 168 "Step1/asm_parser.y"
+#line 173 "Step1/asm_parser.y"
                     {
                         add_statement(BXX_OP, yylval, yyvsp[-3], NULL_ARG, NULL_ARG, NO_TYPE); 
                     }
-#line 1351 "asm_parser.tab.c"
+#line 1356 "asm_parser.tab.c"
     break;
 
   case 43: /* branch_stmt: BRANCH DOLLAR  */
-#line 172 "Step1/asm_parser.y"
+#line 177 "Step1/asm_parser.y"
                     {
                         add_statement(BXX_OP, yylval, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
-#line 1359 "asm_parser.tab.c"
+#line 1364 "asm_parser.tab.c"
     break;
 
   case 44: /* move_stmt: MOVE REG COMMA REG  */
-#line 178 "Step1/asm_parser.y"
+#line 183 "Step1/asm_parser.y"
                     {
                         add_statement(ADD_OP, ADD_OPCODE, yyvsp[-2], yyvsp[0], 0, IMMEDIATE);
                     }
-#line 1367 "asm_parser.tab.c"
+#line 1372 "asm_parser.tab.c"
     break;
 
   case 45: /* jump_stmt: JUMP REG COMMA CARDINAL NUMBER  */
-#line 184 "Step1/asm_parser.y"
+#line 189 "Step1/asm_parser.y"
                     { 
                         add_statement(JMP_OP, JMP_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, NO_TYPE); 
                     }
-#line 1375 "asm_parser.tab.c"
+#line 1380 "asm_parser.tab.c"
     break;
 
   case 46: /* jump_stmt: JUMP_LINK REG COMMA REG COMMA CARDINAL NUMBER  */
-#line 188 "Step1/asm_parser.y"
+#line 193 "Step1/asm_parser.y"
                     {
                         add_statement(JMP_OP, JMP_OPCODE, yyvsp[-5], yyvsp[-3] , yyvsp[0], LINK);
                     }
-#line 1383 "asm_parser.tab.c"
+#line 1388 "asm_parser.tab.c"
     break;
 
   case 47: /* load_stmt: LOAD_DIRECT REG COMMA CARDINAL NUMBER  */
-#line 195 "Step1/asm_parser.y"
+#line 200 "Step1/asm_parser.y"
                     { 
                         add_statement(LD_OP, LD_OPCODE, yyvsp[-3], NULL_ARG, yyvsp[0], NO_TYPE); 
                     }
-#line 1391 "asm_parser.tab.c"
+#line 1396 "asm_parser.tab.c"
     break;
 
   case 48: /* load_stmt: LOAD_IMMEDIATE REG COMMA CARDINAL NUMBER  */
-#line 200 "Step1/asm_parser.y"
+#line 205 "Step1/asm_parser.y"
                     {
                         add_statement(LDI_OP, LDI_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, NO_TYPE); 
                     }
-#line 1399 "asm_parser.tab.c"
+#line 1404 "asm_parser.tab.c"
     break;
 
   case 49: /* load_stmt: LOAD_INDEXED REG COMMA REG COMMA CARDINAL NUMBER  */
-#line 204 "Step1/asm_parser.y"
+#line 209 "Step1/asm_parser.y"
                     { 
                         add_statement(LDX_OP, LDX_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], NO_TYPE); 
                     }
-#line 1407 "asm_parser.tab.c"
+#line 1412 "asm_parser.tab.c"
     break;
 
   case 50: /* store_stmt: STORE_DIRECT REG COMMA CARDINAL NUMBER  */
-#line 211 "Step1/asm_parser.y"
+#line 216 "Step1/asm_parser.y"
                     { 
                         add_statement(ST_OP,ST_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, NO_TYPE); 
                     }
-#line 1415 "asm_parser.tab.c"
+#line 1420 "asm_parser.tab.c"
     break;
 
   case 51: /* store_stmt: STORE_INDEXED REG COMMA REG COMMA CARDINAL NUMBER  */
-#line 215 "Step1/asm_parser.y"
+#line 220 "Step1/asm_parser.y"
                     { 
                         add_statement(STX_OP, ST_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], NO_TYPE);
                     }
-#line 1423 "asm_parser.tab.c"
+#line 1428 "asm_parser.tab.c"
     break;
 
   case 52: /* push_stmt: PUSH REG  */
-#line 222 "Step1/asm_parser.y"
+#line 227 "Step1/asm_parser.y"
                     { 
                         add_statement(PUSH_OP,PUSH_OPCODE,yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
-#line 1431 "asm_parser.tab.c"
+#line 1436 "asm_parser.tab.c"
     break;
 
   case 53: /* pop_stmt: POP REG  */
-#line 228 "Step1/asm_parser.y"
+#line 233 "Step1/asm_parser.y"
                     { 
                         add_statement(POP_OP, POP_OPCODE,yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
-#line 1439 "asm_parser.tab.c"
+#line 1444 "asm_parser.tab.c"
     break;
 
   case 54: /* reti_stmt: RETI  */
-#line 234 "Step1/asm_parser.y"
+#line 239 "Step1/asm_parser.y"
                     {
                         add_statement(RETI_OP, RETI_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     }
-#line 1447 "asm_parser.tab.c"
+#line 1452 "asm_parser.tab.c"
     break;
 
   case 55: /* halt_stmt: HALT  */
-#line 239 "Step1/asm_parser.y"
+#line 244 "Step1/asm_parser.y"
                     { 
                         add_statement(HLT_OP, HLT_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     }
-#line 1455 "asm_parser.tab.c"
+#line 1460 "asm_parser.tab.c"
     break;
 
   case 56: /* nop_stmt: NOP  */
-#line 245 "Step1/asm_parser.y"
+#line 250 "Step1/asm_parser.y"
                     { 
                         add_statement(NOP_OP, NOP_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     }
-#line 1463 "asm_parser.tab.c"
+#line 1468 "asm_parser.tab.c"
     break;
 
   case 57: /* byte_stmt: BYTE NUMBER  */
-#line 251 "Step1/asm_parser.y"
+#line 256 "Step1/asm_parser.y"
                     { 
                         add_statement(DOT_BYTE_OP, DOT_BYTE_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
-#line 1471 "asm_parser.tab.c"
+#line 1476 "asm_parser.tab.c"
     break;
 
   case 58: /* word_stmt: WORD NUMBER  */
-#line 257 "Step1/asm_parser.y"
+#line 262 "Step1/asm_parser.y"
                     { 
                         add_statement(DOT_WORD_OP, DOT_WORD_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
-#line 1479 "asm_parser.tab.c"
+#line 1484 "asm_parser.tab.c"
     break;
 
   case 59: /* alloc_stmt: ALLOC IDENTIFIER NUMBER  */
-#line 263 "Step1/asm_parser.y"
+#line 268 "Step1/asm_parser.y"
                     {
                         add_statement(DOT_ALLOC_OP, DOT_ALLOC_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
-#line 1487 "asm_parser.tab.c"
+#line 1492 "asm_parser.tab.c"
     break;
 
   case 60: /* org_stmt: ORG NUMBER  */
-#line 269 "Step1/asm_parser.y"
+#line 274 "Step1/asm_parser.y"
                     {
                         add_statement(DOT_ORG_OP, DOT_ORG_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
-#line 1495 "asm_parser.tab.c"
+#line 1500 "asm_parser.tab.c"
     break;
 
   case 61: /* equ_stmt: EQU IDENTIFIER COMMA NUMBER  */
-#line 275 "Step1/asm_parser.y"
+#line 280 "Step1/asm_parser.y"
                     {
                          if(get_symbol_value(yyvsp[-3]) != UNINITIALIZED_VALUE){
                             printf("ERROR: Constant redefinition: %s in line %ld\n", get_symbol_name(yyvsp[-3]), get_line_number());
@@ -1505,11 +1510,11 @@ yyreduce:
                             yyval = yyvsp[-3];
                         }
                     }
-#line 1509 "asm_parser.tab.c"
+#line 1514 "asm_parser.tab.c"
     break;
 
   case 62: /* label: IDENTIFIER COLON  */
-#line 287 "Step1/asm_parser.y"
+#line 292 "Step1/asm_parser.y"
                     { 
                         if(get_symbol_value(yyvsp[-1]) != UNINITIALIZED_VALUE){
                             printf("ERROR: Label redefinition: %s in line %ld\n", get_symbol_name(yyvsp[-1]), get_line_number());
@@ -1519,11 +1524,11 @@ yyreduce:
                             yyval = yyvsp[-1];
                         }
                     }
-#line 1523 "asm_parser.tab.c"
+#line 1528 "asm_parser.tab.c"
     break;
 
 
-#line 1527 "asm_parser.tab.c"
+#line 1532 "asm_parser.tab.c"
 
       default: break;
     }
@@ -1716,11 +1721,16 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 296 "Step1/asm_parser.y"
+#line 301 "Step1/asm_parser.y"
 
 
 int yyerror(char *str)
 {
   	fprintf (stderr, "%s in line number : %ld\n", str, get_line_number());
 	return 1;
+}
+
+int set_branch_condition(int condition)
+{
+    return bra_cond = condition;
 }

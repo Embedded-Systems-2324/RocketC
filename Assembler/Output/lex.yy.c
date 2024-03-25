@@ -942,72 +942,72 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 YY_RULE_SETUP
 #line 79 "Step1/asm_lex.l"
-{ printf(" BRANCH_ALWAYS");               yylval=BRA_COND;    return BRANCH;  }
+{ printf(" BRANCH_ALWAYS");             set_branch_condition(BRA_COND);    return BRANCH;  }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
 #line 80 "Step1/asm_lex.l"
-{ printf(" BRANCH_CARRY_CLEAR");          yylval=BCC_COND;    return BRANCH;  }
+{ printf(" BRANCH_CARRY_CLEAR");        set_branch_condition(BCC_COND);    return BRANCH;  }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
 #line 81 "Step1/asm_lex.l"
-{ printf(" BRANCH_OVERFLOW_CLEAR");       yylval=BVC_COND;    return BRANCH;  }
+{ printf(" BRANCH_OVERFLOW_CLEAR");     set_branch_condition(BVC_COND);    return BRANCH;  }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
 #line 82 "Step1/asm_lex.l"
-{ printf(" BRANCH_EQUAL");                yylval=BEQ_COND;    return BRANCH;  }
+{ printf(" BRANCH_EQUAL");              set_branch_condition(BEQ_COND);    return BRANCH;  }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
 #line 83 "Step1/asm_lex.l"
-{ printf(" BRANCH_GREATER_EQUAL");        yylval=BGE_COND;    return BRANCH;  }
+{ printf(" BRANCH_GREATER_EQUAL");      set_branch_condition(BGE_COND);    return BRANCH;  }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
 #line 84 "Step1/asm_lex.l"
-{ printf(" BRANCH_GREATER");              yylval=BGT_COND;    return BRANCH;  }
+{ printf(" BRANCH_GREATER");            set_branch_condition(BGT_COND);    return BRANCH;  }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
 #line 85 "Step1/asm_lex.l"
-{ printf(" BRANCH_PLUS");                 yylval=BPL_COND;    return BRANCH;  }
+{ printf(" BRANCH_PLUS");               set_branch_condition(BPL_COND);    return BRANCH;  }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
 #line 86 "Step1/asm_lex.l"
-{ printf(" BRANCH_NEVER");                yylval=BNV_COND;    return BRANCH;  }
+{ printf(" BRANCH_NEVER");              set_branch_condition(BNV_COND);    return BRANCH;  }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 87 "Step1/asm_lex.l"
-{ printf(" BRANCH_CARRY_SET");            yylval=BCS_COND;    return BRANCH;  }
+{ printf(" BRANCH_CARRY_SET");          set_branch_condition(BCS_COND);    return BRANCH;  }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 88 "Step1/asm_lex.l"
-{ printf(" BRANCH_OVERFLOW_SET");         yylval=BVS_COND;    return BRANCH;  }
+{ printf(" BRANCH_OVERFLOW_SET");       set_branch_condition(BVS_COND);    return BRANCH;  }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
 #line 89 "Step1/asm_lex.l"
-{ printf(" BRANCH_NOT_EQUAL");            yylval=BNE_COND;    return BRANCH;  }
+{ printf(" BRANCH_NOT_EQUAL");          set_branch_condition(BNE_COND);    return BRANCH;  }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 90 "Step1/asm_lex.l"
-{ printf(" BRANCH_LESS");                 yylval=BLT_COND;    return BRANCH;  }
+{ printf(" BRANCH_LESS");               set_branch_condition(BLT_COND);    return BRANCH;  }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
 #line 91 "Step1/asm_lex.l"
-{ printf(" BRANCH_LESS_EQUAL");           yylval=BLE_COND;    return BRANCH;  }
+{ printf(" BRANCH_LESS_EQUAL");         set_branch_condition(BLE_COND);    return BRANCH;  }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
 #line 92 "Step1/asm_lex.l"
-{ printf(" BRANCH_MINUS");                yylval=BMI_COND;    return BRANCH;  }
+{ printf(" BRANCH_MINUS");              set_branch_condition(BMI_COND);    return BRANCH;  }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
