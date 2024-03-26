@@ -136,15 +136,22 @@ unsigned int hexToDec(char *hexNum){
     return decimalNumber;
 }
 
-int main() 
-{ 
+int main(int argc, char *argv[]) {
+    
     char line[19];
     char addr[5];
     char hexValue[16];
     int strSize = 0;
     int index = 0;
 
-    FILE* file_hex = openFile("out.hex", "r");
+    if (argc != 2) {
+        printf("File name missing!\n Use: %s <hex_file>\n", argv[0]);
+        return 1;
+    }
+
+    const char *hex_file = argv[1];
+
+    FILE* file_hex = openFile(hex_file, "r");
     FILE* file_bin = openFile("code.coe", "w");
 
     sLineParams *lineParams;
