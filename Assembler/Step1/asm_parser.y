@@ -165,17 +165,16 @@ cmp_stmt    :   CMP REG COMMA REG
 
 branch_stmt :   BRANCH IDENTIFIER             
                     {
-                        LOG_DEBUG("\n bra_cond: %d", bra_cond);
-                        add_statement(BXX_OP, bra_cond, $2, NULL_ARG, NULL_ARG, NO_TYPE); 
+                        add_statement(BXX_OP, BXX_OPCODE, $2, NULL_ARG, NULL_ARG, bra_cond); 
                     };
-            /*|   BRANCH REG COMMA CARDINAL NUMBER   
+            |   BRANCH REG COMMA CARDINAL NUMBER   
                     {
-                        add_statement(BXX_OP, yylval, $2, NULL_ARG, NULL_ARG, NO_TYPE); 
+                        add_statement(BXX_OP, BXX_OPCODE, $2, NULL_ARG, NULL_ARG, bra_cond); 
                     };  
             |   BRANCH DOLLAR
                     {
-                        add_statement(BXX_OP, yylval, $2, NULL_ARG, NULL_ARG, NO_TYPE);
-                    };    */
+                        add_statement(BXX_OP, BXX_OPCODE, $2, NULL_ARG, NULL_ARG, bra_cond);
+                    };    
 
 
 move_stmt   :   MOVE REG COMMA REG                        

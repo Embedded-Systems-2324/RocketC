@@ -1,7 +1,6 @@
 Terminals unused in grammar
 
     ERROR
-    DOLLAR
 
 
 Grammar
@@ -57,40 +56,42 @@ Grammar
    39 cmp_stmt: CMP REG COMMA REG
 
    40 branch_stmt: BRANCH IDENTIFIER
+   41            | BRANCH REG COMMA CARDINAL NUMBER
+   42            | BRANCH DOLLAR
 
-   41 move_stmt: MOVE REG COMMA REG
+   43 move_stmt: MOVE REG COMMA REG
 
-   42 jump_stmt: JUMP REG COMMA CARDINAL NUMBER
-   43          | JUMP_LINK REG COMMA REG COMMA CARDINAL NUMBER
+   44 jump_stmt: JUMP REG COMMA CARDINAL NUMBER
+   45          | JUMP_LINK REG COMMA REG COMMA CARDINAL NUMBER
 
-   44 load_stmt: LOAD_DIRECT REG COMMA CARDINAL NUMBER
-   45          | LOAD_IMMEDIATE REG COMMA CARDINAL NUMBER
-   46          | LOAD_INDEXED REG COMMA REG COMMA CARDINAL NUMBER
+   46 load_stmt: LOAD_DIRECT REG COMMA CARDINAL NUMBER
+   47          | LOAD_IMMEDIATE REG COMMA CARDINAL NUMBER
+   48          | LOAD_INDEXED REG COMMA REG COMMA CARDINAL NUMBER
 
-   47 store_stmt: STORE_DIRECT REG COMMA CARDINAL NUMBER
-   48           | STORE_INDEXED REG COMMA REG COMMA CARDINAL NUMBER
+   49 store_stmt: STORE_DIRECT REG COMMA CARDINAL NUMBER
+   50           | STORE_INDEXED REG COMMA REG COMMA CARDINAL NUMBER
 
-   49 push_stmt: PUSH REG
+   51 push_stmt: PUSH REG
 
-   50 pop_stmt: POP REG
+   52 pop_stmt: POP REG
 
-   51 reti_stmt: RETI
+   53 reti_stmt: RETI
 
-   52 halt_stmt: HALT
+   54 halt_stmt: HALT
 
-   53 nop_stmt: NOP
+   55 nop_stmt: NOP
 
-   54 byte_stmt: BYTE NUMBER
+   56 byte_stmt: BYTE NUMBER
 
-   55 word_stmt: WORD NUMBER
+   57 word_stmt: WORD NUMBER
 
-   56 alloc_stmt: ALLOC IDENTIFIER NUMBER
+   58 alloc_stmt: ALLOC IDENTIFIER NUMBER
 
-   57 org_stmt: ORG NUMBER
+   59 org_stmt: ORG NUMBER
 
-   58 equ_stmt: EQU IDENTIFIER COMMA NUMBER
+   60 equ_stmt: EQU IDENTIFIER COMMA NUMBER
 
-   59 label: IDENTIFIER COLON
+   61 label: IDENTIFIER COLON
 
 
 Terminals, with rules where they appear
@@ -104,34 +105,34 @@ Terminals, with rules where they appear
     NOT (262) 37 38
     XOR (263) 35 36
     CMP (264) 39
-    BRANCH (265) 40
-    JUMP (266) 42
-    JUMP_LINK (267) 43
-    MOVE (268) 41
-    LOAD_DIRECT (269) 44
-    LOAD_IMMEDIATE (270) 45
-    LOAD_INDEXED (271) 46
-    STORE_DIRECT (272) 47
-    STORE_INDEXED (273) 48
-    PUSH (274) 49
-    POP (275) 50
-    RETI (276) 51
-    HALT (277) 52
-    NOP (278) 53
-    NUMBER (279) 28 30 32 34 36 38 42 43 44 45 46 47 48 54 55 56 57 58
-    REG (280) 27 28 29 30 31 32 33 34 35 36 37 38 39 41 42 43 44 45 46 47 48 49 50
-    IDENTIFIER (281) 40 56 58 59
+    BRANCH (265) 40 41 42
+    JUMP (266) 44
+    JUMP_LINK (267) 45
+    MOVE (268) 43
+    LOAD_DIRECT (269) 46
+    LOAD_IMMEDIATE (270) 47
+    LOAD_INDEXED (271) 48
+    STORE_DIRECT (272) 49
+    STORE_INDEXED (273) 50
+    PUSH (274) 51
+    POP (275) 52
+    RETI (276) 53
+    HALT (277) 54
+    NOP (278) 55
+    NUMBER (279) 28 30 32 34 36 38 41 44 45 46 47 48 49 50 56 57 58 59 60
+    REG (280) 27 28 29 30 31 32 33 34 35 36 37 38 39 41 43 44 45 46 47 48 49 50 51 52
+    IDENTIFIER (281) 40 58 60 61
     ENDFILE (282) 1
     ERROR (283)
-    COMMA (284) 27 28 29 30 31 32 33 34 35 36 37 38 39 41 42 43 44 45 46 47 48 58
-    CARDINAL (285) 28 30 32 34 36 38 42 43 44 45 46 47 48
-    COLON (286) 59
-    DOLLAR (287)
-    BYTE (288) 54
-    WORD (289) 55
-    ALLOC (290) 56
-    ORG (291) 57
-    EQU (292) 58
+    COMMA (284) 27 28 29 30 31 32 33 34 35 36 37 38 39 41 43 44 45 46 47 48 49 50 60
+    CARDINAL (285) 28 30 32 34 36 38 41 44 45 46 47 48 49 50
+    COLON (286) 61
+    DOLLAR (287) 42
+    BYTE (288) 56
+    WORD (289) 57
+    ALLOC (290) 58
+    ORG (291) 59
+    EQU (292) 60
 
 
 Nonterminals, with rules where they appear
@@ -166,52 +167,52 @@ Nonterminals, with rules where they appear
         on left: 39
         on right: 10
     branch_stmt (48)
-        on left: 40
+        on left: 40 41 42
         on right: 11
     move_stmt (49)
-        on left: 41
+        on left: 43
         on right: 12
     jump_stmt (50)
-        on left: 42 43
+        on left: 44 45
         on right: 13
     load_stmt (51)
-        on left: 44 45 46
+        on left: 46 47 48
         on right: 14
     store_stmt (52)
-        on left: 47 48
+        on left: 49 50
         on right: 15
     push_stmt (53)
-        on left: 49
+        on left: 51
         on right: 16
     pop_stmt (54)
-        on left: 50
+        on left: 52
         on right: 17
     reti_stmt (55)
-        on left: 51
+        on left: 53
         on right: 18
     halt_stmt (56)
-        on left: 52
+        on left: 54
         on right: 19
     nop_stmt (57)
-        on left: 53
+        on left: 55
         on right: 20
     byte_stmt (58)
-        on left: 54
+        on left: 56
         on right: 21
     word_stmt (59)
-        on left: 55
+        on left: 57
         on right: 22
     alloc_stmt (60)
-        on left: 56
+        on left: 58
         on right: 23
     org_stmt (61)
-        on left: 57
+        on left: 59
         on right: 24
     equ_stmt (62)
-        on left: 58
+        on left: 60
         on right: 25
     label (63)
-        on left: 59
+        on left: 61
         on right: 26
 
 
@@ -332,141 +333,145 @@ State 7
 State 8
 
    40 branch_stmt: BRANCH • IDENTIFIER
+   41            | BRANCH • REG COMMA CARDINAL NUMBER
+   42            | BRANCH • DOLLAR
 
-    IDENTIFIER  shift, and go to state 60
+    REG         shift, and go to state 60
+    IDENTIFIER  shift, and go to state 61
+    DOLLAR      shift, and go to state 62
 
 
 State 9
 
-   42 jump_stmt: JUMP • REG COMMA CARDINAL NUMBER
-
-    REG  shift, and go to state 61
-
-
-State 10
-
-   43 jump_stmt: JUMP_LINK • REG COMMA REG COMMA CARDINAL NUMBER
-
-    REG  shift, and go to state 62
-
-
-State 11
-
-   41 move_stmt: MOVE • REG COMMA REG
+   44 jump_stmt: JUMP • REG COMMA CARDINAL NUMBER
 
     REG  shift, and go to state 63
 
 
-State 12
+State 10
 
-   44 load_stmt: LOAD_DIRECT • REG COMMA CARDINAL NUMBER
+   45 jump_stmt: JUMP_LINK • REG COMMA REG COMMA CARDINAL NUMBER
 
     REG  shift, and go to state 64
 
 
-State 13
+State 11
 
-   45 load_stmt: LOAD_IMMEDIATE • REG COMMA CARDINAL NUMBER
+   43 move_stmt: MOVE • REG COMMA REG
 
     REG  shift, and go to state 65
 
 
-State 14
+State 12
 
-   46 load_stmt: LOAD_INDEXED • REG COMMA REG COMMA CARDINAL NUMBER
+   46 load_stmt: LOAD_DIRECT • REG COMMA CARDINAL NUMBER
 
     REG  shift, and go to state 66
 
 
-State 15
+State 13
 
-   47 store_stmt: STORE_DIRECT • REG COMMA CARDINAL NUMBER
+   47 load_stmt: LOAD_IMMEDIATE • REG COMMA CARDINAL NUMBER
 
     REG  shift, and go to state 67
 
 
-State 16
+State 14
 
-   48 store_stmt: STORE_INDEXED • REG COMMA REG COMMA CARDINAL NUMBER
+   48 load_stmt: LOAD_INDEXED • REG COMMA REG COMMA CARDINAL NUMBER
 
     REG  shift, and go to state 68
 
 
-State 17
+State 15
 
-   49 push_stmt: PUSH • REG
+   49 store_stmt: STORE_DIRECT • REG COMMA CARDINAL NUMBER
 
     REG  shift, and go to state 69
 
 
-State 18
+State 16
 
-   50 pop_stmt: POP • REG
+   50 store_stmt: STORE_INDEXED • REG COMMA REG COMMA CARDINAL NUMBER
 
     REG  shift, and go to state 70
 
 
+State 17
+
+   51 push_stmt: PUSH • REG
+
+    REG  shift, and go to state 71
+
+
+State 18
+
+   52 pop_stmt: POP • REG
+
+    REG  shift, and go to state 72
+
+
 State 19
 
-   51 reti_stmt: RETI •
+   53 reti_stmt: RETI •
 
-    $default  reduce using rule 51 (reti_stmt)
+    $default  reduce using rule 53 (reti_stmt)
 
 
 State 20
 
-   52 halt_stmt: HALT •
+   54 halt_stmt: HALT •
 
-    $default  reduce using rule 52 (halt_stmt)
+    $default  reduce using rule 54 (halt_stmt)
 
 
 State 21
 
-   53 nop_stmt: NOP •
+   55 nop_stmt: NOP •
 
-    $default  reduce using rule 53 (nop_stmt)
+    $default  reduce using rule 55 (nop_stmt)
 
 
 State 22
 
-   59 label: IDENTIFIER • COLON
+   61 label: IDENTIFIER • COLON
 
-    COLON  shift, and go to state 71
+    COLON  shift, and go to state 73
 
 
 State 23
 
-   54 byte_stmt: BYTE • NUMBER
+   56 byte_stmt: BYTE • NUMBER
 
-    NUMBER  shift, and go to state 72
+    NUMBER  shift, and go to state 74
 
 
 State 24
 
-   55 word_stmt: WORD • NUMBER
-
-    NUMBER  shift, and go to state 73
-
-
-State 25
-
-   56 alloc_stmt: ALLOC • IDENTIFIER NUMBER
-
-    IDENTIFIER  shift, and go to state 74
-
-
-State 26
-
-   57 org_stmt: ORG • NUMBER
+   57 word_stmt: WORD • NUMBER
 
     NUMBER  shift, and go to state 75
 
 
-State 27
+State 25
 
-   58 equ_stmt: EQU • IDENTIFIER COMMA NUMBER
+   58 alloc_stmt: ALLOC • IDENTIFIER NUMBER
 
     IDENTIFIER  shift, and go to state 76
+
+
+State 26
+
+   59 org_stmt: ORG • NUMBER
+
+    NUMBER  shift, and go to state 77
+
+
+State 27
+
+   60 equ_stmt: EQU • IDENTIFIER COMMA NUMBER
+
+    IDENTIFIER  shift, and go to state 78
 
 
 State 28
@@ -475,7 +480,7 @@ State 28
     1 prog: prog • ENDFILE
     2     | prog • stmt
 
-    $end            shift, and go to state 77
+    $end            shift, and go to state 79
     ADD             shift, and go to state 1
     SUB             shift, and go to state 2
     OR              shift, and go to state 3
@@ -498,14 +503,14 @@ State 28
     HALT            shift, and go to state 20
     NOP             shift, and go to state 21
     IDENTIFIER      shift, and go to state 22
-    ENDFILE         shift, and go to state 78
+    ENDFILE         shift, and go to state 80
     BYTE            shift, and go to state 23
     WORD            shift, and go to state 24
     ALLOC           shift, and go to state 25
     ORG             shift, and go to state 26
     EQU             shift, and go to state 27
 
-    stmt         go to state 79
+    stmt         go to state 81
     add_stmt     go to state 30
     sub_stmt     go to state 31
     or_stmt      go to state 32
@@ -704,7 +709,7 @@ State 53
    27 add_stmt: ADD REG • COMMA REG COMMA REG
    28         | ADD REG • COMMA REG COMMA CARDINAL NUMBER
 
-    COMMA  shift, and go to state 80
+    COMMA  shift, and go to state 82
 
 
 State 54
@@ -712,7 +717,7 @@ State 54
    29 sub_stmt: SUB REG • COMMA REG COMMA REG
    30         | SUB REG • COMMA REG COMMA CARDINAL NUMBER
 
-    COMMA  shift, and go to state 81
+    COMMA  shift, and go to state 83
 
 
 State 55
@@ -720,7 +725,7 @@ State 55
    31 or_stmt: OR REG • COMMA REG COMMA REG
    32        | OR REG • COMMA REG COMMA CARDINAL NUMBER
 
-    COMMA  shift, and go to state 82
+    COMMA  shift, and go to state 84
 
 
 State 56
@@ -728,7 +733,7 @@ State 56
    33 and_stmt: AND REG • COMMA REG COMMA REG
    34         | AND REG • COMMA REG COMMA CARDINAL NUMBER
 
-    COMMA  shift, and go to state 83
+    COMMA  shift, and go to state 85
 
 
 State 57
@@ -736,7 +741,7 @@ State 57
    37 not_stmt: NOT REG • COMMA REG
    38         | NOT REG • COMMA CARDINAL NUMBER
 
-    COMMA  shift, and go to state 84
+    COMMA  shift, and go to state 86
 
 
 State 58
@@ -744,649 +749,684 @@ State 58
    35 xor_stmt: XOR REG • COMMA REG COMMA REG
    36         | XOR REG • COMMA REG COMMA CARDINAL NUMBER
 
-    COMMA  shift, and go to state 85
+    COMMA  shift, and go to state 87
 
 
 State 59
 
    39 cmp_stmt: CMP REG • COMMA REG
 
-    COMMA  shift, and go to state 86
+    COMMA  shift, and go to state 88
 
 
 State 60
+
+   41 branch_stmt: BRANCH REG • COMMA CARDINAL NUMBER
+
+    COMMA  shift, and go to state 89
+
+
+State 61
 
    40 branch_stmt: BRANCH IDENTIFIER •
 
     $default  reduce using rule 40 (branch_stmt)
 
 
-State 61
-
-   42 jump_stmt: JUMP REG • COMMA CARDINAL NUMBER
-
-    COMMA  shift, and go to state 87
-
-
 State 62
 
-   43 jump_stmt: JUMP_LINK REG • COMMA REG COMMA CARDINAL NUMBER
+   42 branch_stmt: BRANCH DOLLAR •
 
-    COMMA  shift, and go to state 88
+    $default  reduce using rule 42 (branch_stmt)
 
 
 State 63
 
-   41 move_stmt: MOVE REG • COMMA REG
-
-    COMMA  shift, and go to state 89
-
-
-State 64
-
-   44 load_stmt: LOAD_DIRECT REG • COMMA CARDINAL NUMBER
+   44 jump_stmt: JUMP REG • COMMA CARDINAL NUMBER
 
     COMMA  shift, and go to state 90
 
 
-State 65
+State 64
 
-   45 load_stmt: LOAD_IMMEDIATE REG • COMMA CARDINAL NUMBER
+   45 jump_stmt: JUMP_LINK REG • COMMA REG COMMA CARDINAL NUMBER
 
     COMMA  shift, and go to state 91
 
 
-State 66
+State 65
 
-   46 load_stmt: LOAD_INDEXED REG • COMMA REG COMMA CARDINAL NUMBER
+   43 move_stmt: MOVE REG • COMMA REG
 
     COMMA  shift, and go to state 92
 
 
-State 67
+State 66
 
-   47 store_stmt: STORE_DIRECT REG • COMMA CARDINAL NUMBER
+   46 load_stmt: LOAD_DIRECT REG • COMMA CARDINAL NUMBER
 
     COMMA  shift, and go to state 93
 
 
-State 68
+State 67
 
-   48 store_stmt: STORE_INDEXED REG • COMMA REG COMMA CARDINAL NUMBER
+   47 load_stmt: LOAD_IMMEDIATE REG • COMMA CARDINAL NUMBER
 
     COMMA  shift, and go to state 94
 
 
+State 68
+
+   48 load_stmt: LOAD_INDEXED REG • COMMA REG COMMA CARDINAL NUMBER
+
+    COMMA  shift, and go to state 95
+
+
 State 69
 
-   49 push_stmt: PUSH REG •
-
-    $default  reduce using rule 49 (push_stmt)
-
-
-State 70
-
-   50 pop_stmt: POP REG •
-
-    $default  reduce using rule 50 (pop_stmt)
-
-
-State 71
-
-   59 label: IDENTIFIER COLON •
-
-    $default  reduce using rule 59 (label)
-
-
-State 72
-
-   54 byte_stmt: BYTE NUMBER •
-
-    $default  reduce using rule 54 (byte_stmt)
-
-
-State 73
-
-   55 word_stmt: WORD NUMBER •
-
-    $default  reduce using rule 55 (word_stmt)
-
-
-State 74
-
-   56 alloc_stmt: ALLOC IDENTIFIER • NUMBER
-
-    NUMBER  shift, and go to state 95
-
-
-State 75
-
-   57 org_stmt: ORG NUMBER •
-
-    $default  reduce using rule 57 (org_stmt)
-
-
-State 76
-
-   58 equ_stmt: EQU IDENTIFIER • COMMA NUMBER
+   49 store_stmt: STORE_DIRECT REG • COMMA CARDINAL NUMBER
 
     COMMA  shift, and go to state 96
 
 
+State 70
+
+   50 store_stmt: STORE_INDEXED REG • COMMA REG COMMA CARDINAL NUMBER
+
+    COMMA  shift, and go to state 97
+
+
+State 71
+
+   51 push_stmt: PUSH REG •
+
+    $default  reduce using rule 51 (push_stmt)
+
+
+State 72
+
+   52 pop_stmt: POP REG •
+
+    $default  reduce using rule 52 (pop_stmt)
+
+
+State 73
+
+   61 label: IDENTIFIER COLON •
+
+    $default  reduce using rule 61 (label)
+
+
+State 74
+
+   56 byte_stmt: BYTE NUMBER •
+
+    $default  reduce using rule 56 (byte_stmt)
+
+
+State 75
+
+   57 word_stmt: WORD NUMBER •
+
+    $default  reduce using rule 57 (word_stmt)
+
+
+State 76
+
+   58 alloc_stmt: ALLOC IDENTIFIER • NUMBER
+
+    NUMBER  shift, and go to state 98
+
+
 State 77
+
+   59 org_stmt: ORG NUMBER •
+
+    $default  reduce using rule 59 (org_stmt)
+
+
+State 78
+
+   60 equ_stmt: EQU IDENTIFIER • COMMA NUMBER
+
+    COMMA  shift, and go to state 99
+
+
+State 79
 
     0 $accept: prog $end •
 
     $default  accept
 
 
-State 78
+State 80
 
     1 prog: prog ENDFILE •
 
     $default  reduce using rule 1 (prog)
 
 
-State 79
+State 81
 
     2 prog: prog stmt •
 
     $default  reduce using rule 2 (prog)
 
 
-State 80
+State 82
 
    27 add_stmt: ADD REG COMMA • REG COMMA REG
    28         | ADD REG COMMA • REG COMMA CARDINAL NUMBER
 
-    REG  shift, and go to state 97
-
-
-State 81
-
-   29 sub_stmt: SUB REG COMMA • REG COMMA REG
-   30         | SUB REG COMMA • REG COMMA CARDINAL NUMBER
-
-    REG  shift, and go to state 98
-
-
-State 82
-
-   31 or_stmt: OR REG COMMA • REG COMMA REG
-   32        | OR REG COMMA • REG COMMA CARDINAL NUMBER
-
-    REG  shift, and go to state 99
+    REG  shift, and go to state 100
 
 
 State 83
 
-   33 and_stmt: AND REG COMMA • REG COMMA REG
-   34         | AND REG COMMA • REG COMMA CARDINAL NUMBER
+   29 sub_stmt: SUB REG COMMA • REG COMMA REG
+   30         | SUB REG COMMA • REG COMMA CARDINAL NUMBER
 
-    REG  shift, and go to state 100
+    REG  shift, and go to state 101
 
 
 State 84
 
-   37 not_stmt: NOT REG COMMA • REG
-   38         | NOT REG COMMA • CARDINAL NUMBER
+   31 or_stmt: OR REG COMMA • REG COMMA REG
+   32        | OR REG COMMA • REG COMMA CARDINAL NUMBER
 
-    REG       shift, and go to state 101
-    CARDINAL  shift, and go to state 102
+    REG  shift, and go to state 102
 
 
 State 85
 
-   35 xor_stmt: XOR REG COMMA • REG COMMA REG
-   36         | XOR REG COMMA • REG COMMA CARDINAL NUMBER
+   33 and_stmt: AND REG COMMA • REG COMMA REG
+   34         | AND REG COMMA • REG COMMA CARDINAL NUMBER
 
     REG  shift, and go to state 103
 
 
 State 86
 
-   39 cmp_stmt: CMP REG COMMA • REG
+   37 not_stmt: NOT REG COMMA • REG
+   38         | NOT REG COMMA • CARDINAL NUMBER
 
-    REG  shift, and go to state 104
+    REG       shift, and go to state 104
+    CARDINAL  shift, and go to state 105
 
 
 State 87
 
-   42 jump_stmt: JUMP REG COMMA • CARDINAL NUMBER
-
-    CARDINAL  shift, and go to state 105
-
-
-State 88
-
-   43 jump_stmt: JUMP_LINK REG COMMA • REG COMMA CARDINAL NUMBER
+   35 xor_stmt: XOR REG COMMA • REG COMMA REG
+   36         | XOR REG COMMA • REG COMMA CARDINAL NUMBER
 
     REG  shift, and go to state 106
 
 
-State 89
+State 88
 
-   41 move_stmt: MOVE REG COMMA • REG
+   39 cmp_stmt: CMP REG COMMA • REG
 
     REG  shift, and go to state 107
 
 
-State 90
+State 89
 
-   44 load_stmt: LOAD_DIRECT REG COMMA • CARDINAL NUMBER
+   41 branch_stmt: BRANCH REG COMMA • CARDINAL NUMBER
 
     CARDINAL  shift, and go to state 108
 
 
-State 91
+State 90
 
-   45 load_stmt: LOAD_IMMEDIATE REG COMMA • CARDINAL NUMBER
+   44 jump_stmt: JUMP REG COMMA • CARDINAL NUMBER
 
     CARDINAL  shift, and go to state 109
 
 
-State 92
+State 91
 
-   46 load_stmt: LOAD_INDEXED REG COMMA • REG COMMA CARDINAL NUMBER
+   45 jump_stmt: JUMP_LINK REG COMMA • REG COMMA CARDINAL NUMBER
 
     REG  shift, and go to state 110
 
 
+State 92
+
+   43 move_stmt: MOVE REG COMMA • REG
+
+    REG  shift, and go to state 111
+
+
 State 93
 
-   47 store_stmt: STORE_DIRECT REG COMMA • CARDINAL NUMBER
+   46 load_stmt: LOAD_DIRECT REG COMMA • CARDINAL NUMBER
 
-    CARDINAL  shift, and go to state 111
+    CARDINAL  shift, and go to state 112
 
 
 State 94
 
-   48 store_stmt: STORE_INDEXED REG COMMA • REG COMMA CARDINAL NUMBER
+   47 load_stmt: LOAD_IMMEDIATE REG COMMA • CARDINAL NUMBER
 
-    REG  shift, and go to state 112
+    CARDINAL  shift, and go to state 113
 
 
 State 95
 
-   56 alloc_stmt: ALLOC IDENTIFIER NUMBER •
+   48 load_stmt: LOAD_INDEXED REG COMMA • REG COMMA CARDINAL NUMBER
 
-    $default  reduce using rule 56 (alloc_stmt)
+    REG  shift, and go to state 114
 
 
 State 96
 
-   58 equ_stmt: EQU IDENTIFIER COMMA • NUMBER
+   49 store_stmt: STORE_DIRECT REG COMMA • CARDINAL NUMBER
 
-    NUMBER  shift, and go to state 113
+    CARDINAL  shift, and go to state 115
 
 
 State 97
 
-   27 add_stmt: ADD REG COMMA REG • COMMA REG
-   28         | ADD REG COMMA REG • COMMA CARDINAL NUMBER
+   50 store_stmt: STORE_INDEXED REG COMMA • REG COMMA CARDINAL NUMBER
 
-    COMMA  shift, and go to state 114
+    REG  shift, and go to state 116
 
 
 State 98
 
-   29 sub_stmt: SUB REG COMMA REG • COMMA REG
-   30         | SUB REG COMMA REG • COMMA CARDINAL NUMBER
+   58 alloc_stmt: ALLOC IDENTIFIER NUMBER •
 
-    COMMA  shift, and go to state 115
+    $default  reduce using rule 58 (alloc_stmt)
 
 
 State 99
 
-   31 or_stmt: OR REG COMMA REG • COMMA REG
-   32        | OR REG COMMA REG • COMMA CARDINAL NUMBER
+   60 equ_stmt: EQU IDENTIFIER COMMA • NUMBER
 
-    COMMA  shift, and go to state 116
+    NUMBER  shift, and go to state 117
 
 
 State 100
 
-   33 and_stmt: AND REG COMMA REG • COMMA REG
-   34         | AND REG COMMA REG • COMMA CARDINAL NUMBER
+   27 add_stmt: ADD REG COMMA REG • COMMA REG
+   28         | ADD REG COMMA REG • COMMA CARDINAL NUMBER
 
-    COMMA  shift, and go to state 117
+    COMMA  shift, and go to state 118
 
 
 State 101
+
+   29 sub_stmt: SUB REG COMMA REG • COMMA REG
+   30         | SUB REG COMMA REG • COMMA CARDINAL NUMBER
+
+    COMMA  shift, and go to state 119
+
+
+State 102
+
+   31 or_stmt: OR REG COMMA REG • COMMA REG
+   32        | OR REG COMMA REG • COMMA CARDINAL NUMBER
+
+    COMMA  shift, and go to state 120
+
+
+State 103
+
+   33 and_stmt: AND REG COMMA REG • COMMA REG
+   34         | AND REG COMMA REG • COMMA CARDINAL NUMBER
+
+    COMMA  shift, and go to state 121
+
+
+State 104
 
    37 not_stmt: NOT REG COMMA REG •
 
     $default  reduce using rule 37 (not_stmt)
 
 
-State 102
+State 105
 
    38 not_stmt: NOT REG COMMA CARDINAL • NUMBER
 
-    NUMBER  shift, and go to state 118
+    NUMBER  shift, and go to state 122
 
 
-State 103
+State 106
 
    35 xor_stmt: XOR REG COMMA REG • COMMA REG
    36         | XOR REG COMMA REG • COMMA CARDINAL NUMBER
 
-    COMMA  shift, and go to state 119
+    COMMA  shift, and go to state 123
 
 
-State 104
+State 107
 
    39 cmp_stmt: CMP REG COMMA REG •
 
     $default  reduce using rule 39 (cmp_stmt)
 
 
-State 105
-
-   42 jump_stmt: JUMP REG COMMA CARDINAL • NUMBER
-
-    NUMBER  shift, and go to state 120
-
-
-State 106
-
-   43 jump_stmt: JUMP_LINK REG COMMA REG • COMMA CARDINAL NUMBER
-
-    COMMA  shift, and go to state 121
-
-
-State 107
-
-   41 move_stmt: MOVE REG COMMA REG •
-
-    $default  reduce using rule 41 (move_stmt)
-
-
 State 108
 
-   44 load_stmt: LOAD_DIRECT REG COMMA CARDINAL • NUMBER
+   41 branch_stmt: BRANCH REG COMMA CARDINAL • NUMBER
 
-    NUMBER  shift, and go to state 122
+    NUMBER  shift, and go to state 124
 
 
 State 109
 
-   45 load_stmt: LOAD_IMMEDIATE REG COMMA CARDINAL • NUMBER
-
-    NUMBER  shift, and go to state 123
-
-
-State 110
-
-   46 load_stmt: LOAD_INDEXED REG COMMA REG • COMMA CARDINAL NUMBER
-
-    COMMA  shift, and go to state 124
-
-
-State 111
-
-   47 store_stmt: STORE_DIRECT REG COMMA CARDINAL • NUMBER
+   44 jump_stmt: JUMP REG COMMA CARDINAL • NUMBER
 
     NUMBER  shift, and go to state 125
 
 
-State 112
+State 110
 
-   48 store_stmt: STORE_INDEXED REG COMMA REG • COMMA CARDINAL NUMBER
+   45 jump_stmt: JUMP_LINK REG COMMA REG • COMMA CARDINAL NUMBER
 
     COMMA  shift, and go to state 126
 
 
+State 111
+
+   43 move_stmt: MOVE REG COMMA REG •
+
+    $default  reduce using rule 43 (move_stmt)
+
+
+State 112
+
+   46 load_stmt: LOAD_DIRECT REG COMMA CARDINAL • NUMBER
+
+    NUMBER  shift, and go to state 127
+
+
 State 113
 
-   58 equ_stmt: EQU IDENTIFIER COMMA NUMBER •
+   47 load_stmt: LOAD_IMMEDIATE REG COMMA CARDINAL • NUMBER
 
-    $default  reduce using rule 58 (equ_stmt)
+    NUMBER  shift, and go to state 128
 
 
 State 114
 
-   27 add_stmt: ADD REG COMMA REG COMMA • REG
-   28         | ADD REG COMMA REG COMMA • CARDINAL NUMBER
+   48 load_stmt: LOAD_INDEXED REG COMMA REG • COMMA CARDINAL NUMBER
 
-    REG       shift, and go to state 127
-    CARDINAL  shift, and go to state 128
+    COMMA  shift, and go to state 129
 
 
 State 115
 
-   29 sub_stmt: SUB REG COMMA REG COMMA • REG
-   30         | SUB REG COMMA REG COMMA • CARDINAL NUMBER
+   49 store_stmt: STORE_DIRECT REG COMMA CARDINAL • NUMBER
 
-    REG       shift, and go to state 129
-    CARDINAL  shift, and go to state 130
+    NUMBER  shift, and go to state 130
 
 
 State 116
 
-   31 or_stmt: OR REG COMMA REG COMMA • REG
-   32        | OR REG COMMA REG COMMA • CARDINAL NUMBER
+   50 store_stmt: STORE_INDEXED REG COMMA REG • COMMA CARDINAL NUMBER
 
-    REG       shift, and go to state 131
-    CARDINAL  shift, and go to state 132
+    COMMA  shift, and go to state 131
 
 
 State 117
 
-   33 and_stmt: AND REG COMMA REG COMMA • REG
-   34         | AND REG COMMA REG COMMA • CARDINAL NUMBER
+   60 equ_stmt: EQU IDENTIFIER COMMA NUMBER •
 
-    REG       shift, and go to state 133
-    CARDINAL  shift, and go to state 134
+    $default  reduce using rule 60 (equ_stmt)
 
 
 State 118
+
+   27 add_stmt: ADD REG COMMA REG COMMA • REG
+   28         | ADD REG COMMA REG COMMA • CARDINAL NUMBER
+
+    REG       shift, and go to state 132
+    CARDINAL  shift, and go to state 133
+
+
+State 119
+
+   29 sub_stmt: SUB REG COMMA REG COMMA • REG
+   30         | SUB REG COMMA REG COMMA • CARDINAL NUMBER
+
+    REG       shift, and go to state 134
+    CARDINAL  shift, and go to state 135
+
+
+State 120
+
+   31 or_stmt: OR REG COMMA REG COMMA • REG
+   32        | OR REG COMMA REG COMMA • CARDINAL NUMBER
+
+    REG       shift, and go to state 136
+    CARDINAL  shift, and go to state 137
+
+
+State 121
+
+   33 and_stmt: AND REG COMMA REG COMMA • REG
+   34         | AND REG COMMA REG COMMA • CARDINAL NUMBER
+
+    REG       shift, and go to state 138
+    CARDINAL  shift, and go to state 139
+
+
+State 122
 
    38 not_stmt: NOT REG COMMA CARDINAL NUMBER •
 
     $default  reduce using rule 38 (not_stmt)
 
 
-State 119
+State 123
 
    35 xor_stmt: XOR REG COMMA REG COMMA • REG
    36         | XOR REG COMMA REG COMMA • CARDINAL NUMBER
 
-    REG       shift, and go to state 135
-    CARDINAL  shift, and go to state 136
-
-
-State 120
-
-   42 jump_stmt: JUMP REG COMMA CARDINAL NUMBER •
-
-    $default  reduce using rule 42 (jump_stmt)
-
-
-State 121
-
-   43 jump_stmt: JUMP_LINK REG COMMA REG COMMA • CARDINAL NUMBER
-
-    CARDINAL  shift, and go to state 137
-
-
-State 122
-
-   44 load_stmt: LOAD_DIRECT REG COMMA CARDINAL NUMBER •
-
-    $default  reduce using rule 44 (load_stmt)
-
-
-State 123
-
-   45 load_stmt: LOAD_IMMEDIATE REG COMMA CARDINAL NUMBER •
-
-    $default  reduce using rule 45 (load_stmt)
+    REG       shift, and go to state 140
+    CARDINAL  shift, and go to state 141
 
 
 State 124
 
-   46 load_stmt: LOAD_INDEXED REG COMMA REG COMMA • CARDINAL NUMBER
+   41 branch_stmt: BRANCH REG COMMA CARDINAL NUMBER •
 
-    CARDINAL  shift, and go to state 138
+    $default  reduce using rule 41 (branch_stmt)
 
 
 State 125
 
-   47 store_stmt: STORE_DIRECT REG COMMA CARDINAL NUMBER •
+   44 jump_stmt: JUMP REG COMMA CARDINAL NUMBER •
 
-    $default  reduce using rule 47 (store_stmt)
+    $default  reduce using rule 44 (jump_stmt)
 
 
 State 126
 
-   48 store_stmt: STORE_INDEXED REG COMMA REG COMMA • CARDINAL NUMBER
+   45 jump_stmt: JUMP_LINK REG COMMA REG COMMA • CARDINAL NUMBER
 
-    CARDINAL  shift, and go to state 139
+    CARDINAL  shift, and go to state 142
 
 
 State 127
+
+   46 load_stmt: LOAD_DIRECT REG COMMA CARDINAL NUMBER •
+
+    $default  reduce using rule 46 (load_stmt)
+
+
+State 128
+
+   47 load_stmt: LOAD_IMMEDIATE REG COMMA CARDINAL NUMBER •
+
+    $default  reduce using rule 47 (load_stmt)
+
+
+State 129
+
+   48 load_stmt: LOAD_INDEXED REG COMMA REG COMMA • CARDINAL NUMBER
+
+    CARDINAL  shift, and go to state 143
+
+
+State 130
+
+   49 store_stmt: STORE_DIRECT REG COMMA CARDINAL NUMBER •
+
+    $default  reduce using rule 49 (store_stmt)
+
+
+State 131
+
+   50 store_stmt: STORE_INDEXED REG COMMA REG COMMA • CARDINAL NUMBER
+
+    CARDINAL  shift, and go to state 144
+
+
+State 132
 
    27 add_stmt: ADD REG COMMA REG COMMA REG •
 
     $default  reduce using rule 27 (add_stmt)
 
 
-State 128
+State 133
 
    28 add_stmt: ADD REG COMMA REG COMMA CARDINAL • NUMBER
 
-    NUMBER  shift, and go to state 140
+    NUMBER  shift, and go to state 145
 
 
-State 129
+State 134
 
    29 sub_stmt: SUB REG COMMA REG COMMA REG •
 
     $default  reduce using rule 29 (sub_stmt)
 
 
-State 130
+State 135
 
    30 sub_stmt: SUB REG COMMA REG COMMA CARDINAL • NUMBER
 
-    NUMBER  shift, and go to state 141
+    NUMBER  shift, and go to state 146
 
 
-State 131
+State 136
 
    31 or_stmt: OR REG COMMA REG COMMA REG •
 
     $default  reduce using rule 31 (or_stmt)
 
 
-State 132
+State 137
 
    32 or_stmt: OR REG COMMA REG COMMA CARDINAL • NUMBER
 
-    NUMBER  shift, and go to state 142
+    NUMBER  shift, and go to state 147
 
 
-State 133
+State 138
 
    33 and_stmt: AND REG COMMA REG COMMA REG •
 
     $default  reduce using rule 33 (and_stmt)
 
 
-State 134
+State 139
 
    34 and_stmt: AND REG COMMA REG COMMA CARDINAL • NUMBER
 
-    NUMBER  shift, and go to state 143
+    NUMBER  shift, and go to state 148
 
 
-State 135
+State 140
 
    35 xor_stmt: XOR REG COMMA REG COMMA REG •
 
     $default  reduce using rule 35 (xor_stmt)
 
 
-State 136
+State 141
 
    36 xor_stmt: XOR REG COMMA REG COMMA CARDINAL • NUMBER
 
-    NUMBER  shift, and go to state 144
+    NUMBER  shift, and go to state 149
 
 
-State 137
+State 142
 
-   43 jump_stmt: JUMP_LINK REG COMMA REG COMMA CARDINAL • NUMBER
+   45 jump_stmt: JUMP_LINK REG COMMA REG COMMA CARDINAL • NUMBER
 
-    NUMBER  shift, and go to state 145
-
-
-State 138
-
-   46 load_stmt: LOAD_INDEXED REG COMMA REG COMMA CARDINAL • NUMBER
-
-    NUMBER  shift, and go to state 146
+    NUMBER  shift, and go to state 150
 
 
-State 139
+State 143
 
-   48 store_stmt: STORE_INDEXED REG COMMA REG COMMA CARDINAL • NUMBER
+   48 load_stmt: LOAD_INDEXED REG COMMA REG COMMA CARDINAL • NUMBER
 
-    NUMBER  shift, and go to state 147
+    NUMBER  shift, and go to state 151
 
 
-State 140
+State 144
+
+   50 store_stmt: STORE_INDEXED REG COMMA REG COMMA CARDINAL • NUMBER
+
+    NUMBER  shift, and go to state 152
+
+
+State 145
 
    28 add_stmt: ADD REG COMMA REG COMMA CARDINAL NUMBER •
 
     $default  reduce using rule 28 (add_stmt)
 
 
-State 141
+State 146
 
    30 sub_stmt: SUB REG COMMA REG COMMA CARDINAL NUMBER •
 
     $default  reduce using rule 30 (sub_stmt)
 
 
-State 142
+State 147
 
    32 or_stmt: OR REG COMMA REG COMMA CARDINAL NUMBER •
 
     $default  reduce using rule 32 (or_stmt)
 
 
-State 143
+State 148
 
    34 and_stmt: AND REG COMMA REG COMMA CARDINAL NUMBER •
 
     $default  reduce using rule 34 (and_stmt)
 
 
-State 144
+State 149
 
    36 xor_stmt: XOR REG COMMA REG COMMA CARDINAL NUMBER •
 
     $default  reduce using rule 36 (xor_stmt)
 
 
-State 145
+State 150
 
-   43 jump_stmt: JUMP_LINK REG COMMA REG COMMA CARDINAL NUMBER •
+   45 jump_stmt: JUMP_LINK REG COMMA REG COMMA CARDINAL NUMBER •
 
-    $default  reduce using rule 43 (jump_stmt)
-
-
-State 146
-
-   46 load_stmt: LOAD_INDEXED REG COMMA REG COMMA CARDINAL NUMBER •
-
-    $default  reduce using rule 46 (load_stmt)
+    $default  reduce using rule 45 (jump_stmt)
 
 
-State 147
+State 151
 
-   48 store_stmt: STORE_INDEXED REG COMMA REG COMMA CARDINAL NUMBER •
+   48 load_stmt: LOAD_INDEXED REG COMMA REG COMMA CARDINAL NUMBER •
 
-    $default  reduce using rule 48 (store_stmt)
+    $default  reduce using rule 48 (load_stmt)
+
+
+State 152
+
+   50 store_stmt: STORE_INDEXED REG COMMA REG COMMA CARDINAL NUMBER •
+
+    $default  reduce using rule 50 (store_stmt)

@@ -82,7 +82,7 @@ uint32_t generate_code(){
 
             case BXX_OP:
                 code |= (0x1f & current_statement.op_code) << 27;
-                code |= (0xf & current_statement.op_type) << 23;
+                code |= (0xf & current_statement.misc) << 23;
                 
                 if(get_symbol_value(current_statement.op1) == 0){
                     printf("Uninitialized symbol %d\n", get_symbol_value(current_statement.op1));

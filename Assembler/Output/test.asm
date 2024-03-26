@@ -1,6 +1,5 @@
 /* Program to calculate some fibonacci numbers */
 
-
 INIT :      ;Init variables
 LDI R0, #1
 LDI R1, #010b
@@ -15,5 +14,4 @@ ADD R2, R0, R1
 SUB R3, R3, #1
 BNE LOOP
 
-LOOP_2 :
-BRA LOOP_2
+BRA $

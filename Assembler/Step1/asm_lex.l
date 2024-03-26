@@ -25,7 +25,7 @@ static int endOfFileReached = 0;
 static int value_to_insert = 0;
 
 static int dollar_count = 0;
-
+static char dollar_name [32];
 /*
    1st IF: The macro checks if the current position (yy_buf_pos) in the buffer
    has reached the end. If so, it refills the buffer by reading a block
@@ -126,9 +126,11 @@ whitespace      [ \t]+
 "\0"     { return ENDFILE;} 
 
 "$"      {
-   printf(" DOLLAR");
-   yylval = add_symbol("DOLLAR");
+   printf(" [DOLLAR]");
+   sprintf(dollar_name, "DOLLAR_%d", dollar_count);
+   yylval = add_symbol(dollar_name);
    set_symbol_value(yylval, get_location_counter());
+   dollar_count++;
    return DOLLAR;          
   }
 
