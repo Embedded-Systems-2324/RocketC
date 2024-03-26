@@ -71,7 +71,7 @@ const char* getTokenName(int tokenValue);
 %token TOKEN_COMMA
 %token TOKEN_INCREMENT
 %token TOKEN_DECREMENT
-%token TOKEN_BITWISE_AND
+%token TOKEN_BITWISE_AND        // falta o operador &
 %token TOKEN_BITWISE_OR
 %token TOKEN_LOGICAL_AND
 %token TOKEN_BITWISE_NOT
@@ -117,11 +117,11 @@ const char* getTokenName(int tokenValue);
 // Grammar Rules
 //--------------------------------------------------------------------------------------------------------------------//
 %%
-//Rules for the overall program
+// Rules for the overall program
 R_PROGRAM: R_PROGRAM R_EOF | R_PROGRAM R_GLOBAL_STATEMENT | R_GLOBAL_STATEMENT;
 
-//TODO: Add missing cases: Func. Implementations
-R_GLOBAL_STATEMENT: R_VAR_DECLARATION | R_FUNC_PROTOTYPE | R_VAR_DEC_ASSIGN | R_FUNC_IMPL;
+// TODO: Add missing cases: Func. Implementations
+R_GLOBAL_STATEMENT: R_VAR_DECLARATION | R_ARR_DECLARATION | R_FUNC_PROTOTYPE | R_FUNC_IMPL;
 
 R_LOCAL_STATEMENT_LIST: R_LOCAL_STATEMENT_LIST R_LOCAL_STATEMENT
 {
@@ -144,18 +144,20 @@ R_LOCAL_STATEMENT: R_IF_STATEMENT
                  | R_FOR_LOOP
                  | R_COMPOUND_STATEMENT
                  | R_RETURN 
+                 | R_ARR_DECLARATION
                  | R_VAR_DECLARATION
-                 | R_VAR_DEC_ASSIGN
-                 | R_VAR_ASSIGNMENT 
+                 | R_ARR_ASSIGNMENT
+                 | R_VAR_ASSIGNMENT
                  {
                     LOG_DEBUG("Var assignment found!\n");
                  };
 
-R_COMPOUND_STATEMENT: TOKEN_LEFT_BRACE R_LOCAL_STATEMENT_LIST TOKEN_RIGHT_BRACE
+// Statements with braces                                                           // Examples:
+R_COMPOUND_STATEMENT: TOKEN_LEFT_BRACE R_LOCAL_STATEMENT_LIST TOKEN_RIGHT_BRACE     // { ... }
 {
-    LOG_DEBUG("Compound statment found!\n");
+    LOG_DEBUG("Compound statement found!\n");
 }
-| TOKEN_LEFT_BRACE TOKEN_RIGHT_BRACE 
+| TOKEN_LEFT_BRACE TOKEN_RIGHT_BRACE                                                // {}
 {
     LOG_DEBUG("Empty statement found!\n");
 };
@@ -164,56 +166,52 @@ R_COMPOUND_STATEMENT: TOKEN_LEFT_BRACE R_LOCAL_STATEMENT_LIST TOKEN_RIGHT_BRACE
 // Flow Control Statements
 //--------------------------------------------------------------------------------------------------------------------//
 
-//                                      Examples:
-R_CONTINUE: TOKEN_CONTINUE TOKEN_SEMI;  //continue;
-R_BREAK: TOKEN_BREAK TOKEN_SEMI;        //break;
-R_GOTO: TOKEN_GOTO R_LABEL TOKEN_SEMI;  //goto label;
+// Flow control statements              // Examples:
+R_CONTINUE: TOKEN_CONTINUE TOKEN_SEMI;  // continue;
+R_BREAK: TOKEN_BREAK TOKEN_SEMI;        // break;
+R_GOTO: TOKEN_GOTO R_LABEL TOKEN_SEMI;  // goto label;
 
-R_SWITCH: TOKEN_SWITCH TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES TOKEN_LEFT_BRACE R_SWITCH_BODY TOKEN_RIGHT_BRACE
+// Rule to any SWITCH CASE implementation                               // Example: switch(var) { ... }                                                              
+R_SWITCH: TOKEN_SWITCH TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES TOKEN_LEFT_BRACE R_SWITCH_BODY TOKEN_RIGHT_BRACE    
 {
     LOG_DEBUG("Switch statement found!\n");
 };
 
+// A SWITCH body can be composed by: a list of cases, a default only, or a list of cases and a default 
+R_SWITCH_BODY: R_CASE_LIST              //Examples:     // case 0:  ... case 1: ... 
+             | R_DEFAULT                                // default: ...
+             | R_CASE_LIST R_DEFAULT                    // case 0:  ... default: ...
+             ;
 
-//Switch can be composed by a list of cases, a default only, or a list of cases and a default
-//Examples: ... 
-//          case 3: ...
-//          case 7: ...
-//          default: ...
-R_SWITCH_BODY: R_CASE_LIST | R_DEFAULT | R_CASE_LIST R_DEFAULT
-{
-    
-};
+// One or multiple CASEs            // Examples:
+R_CASE_LIST: R_CASE                 // case 0: ...
+           | R_CASE_LIST R_CASE     // case 0: ... case 1: ... case 2: ...
+           ;
 
-R_CASE_LIST: R_CASE | R_CASE_LIST R_CASE
-{
-    
-};
-
-R_CASE: TOKEN_CASE TOKEN_NUM TOKEN_COLON R_LOCAL_STATEMENT
+// CASE format - case 1: stmts
+R_CASE: TOKEN_CASE TOKEN_NUM TOKEN_COLON R_LOCAL_STATEMENT_LIST
 {
     LOG_DEBUG("Case statement found!\n");
 };
-    
-R_DEFAULT: TOKEN_DEFAULT TOKEN_COLON R_LOCAL_STATEMENT
+
+// CASE "default" format - default: stmts    
+R_DEFAULT: TOKEN_DEFAULT TOKEN_COLON R_LOCAL_STATEMENT_LIST
 {
     LOG_DEBUG("Default statement found");
 };
 
-R_IF_STATEMENT: TOKEN_IF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES  R_LOCAL_STATEMENT_LIST 
-{
-    LOG_DEBUG("Simple IF statement detected!\n");
-}
-| TOKEN_IF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES  R_LOCAL_STATEMENT_LIST 
-  TOKEN_ELSE  R_LOCAL_STATEMENT_LIST 
-{
-    LOG_DEBUG("IF + ELSE statement detected");
-};
+// An IF statement can only be a simple IF or a IF ELSE                                                     
+// The commonly seen ELSE IF is just a new IF statement inside the first ELSE                               // Examples: 
+R_IF_STATEMENT: TOKEN_IF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES  R_LOCAL_STATEMENT_LIST       // if (var==1) { stmts }
 
-R_RETURN: TOKEN_RETURN TOKEN_SEMI | TOKEN_RETURN R_FACTOR TOKEN_SEMI
-{
-    LOG_DEBUG("Return statement found!\n");
-};
+| TOKEN_IF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES  R_LOCAL_STATEMENT_LIST                     // if (var==1) { stmts } else { stmts }
+  TOKEN_ELSE  R_LOCAL_STATEMENT_LIST 
+;
+
+// The returm statement can be used to return NULL or a value               // Examples:
+R_RETURN: TOKEN_RETURN TOKEN_SEMI                                           // return:
+        | TOKEN_RETURN R_EXP TOKEN_SEMI                                  // return var;
+        ;
 
 //--------------------------------------------------------------------------------------------------------------------//
 // Loop Statements
@@ -252,7 +250,12 @@ R_EXP: R_EXP R_ARITHMETIC_OPERATOR R_TERM
      | R_EXP R_CONDITION_OPERATOR R_TERM
      | R_EXP R_BITWISE_OPERATOR R_TERM
      | R_EXP R_LOGIC_OPERATOR R_TERM
+     | R_EXP TOKEN_TERNARY R_EXP TOKEN_COLON R_EXP { LOG_DEBUG("TERNARY OPERATION found!\n");}
      | R_TERM;
+
+R_EXP_LIST: %empty
+          | R_EXP
+          | R_EXP_LIST TOKEN_COMMA R_EXP;
 
 R_TERM: R_TERM R_PRIORITY_OPERATOR R_OPERAND | R_OPERAND;
 
@@ -261,11 +264,11 @@ R_OPERAND: R_INC_DEC
          | R_TYPE_CAST R_FACTOR
          | R_FACTOR;
 
-R_FACTOR: TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES
-        | TOKEN_NUM
-        | TOKEN_ID
-        | TOKEN_FNUM
-        | TOKEN_STR;
+R_FACTOR:  TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES
+        |  TOKEN_NUM
+        |  TOKEN_ID
+        |  TOKEN_FNUM
+        |  TOKEN_STR;
         // TODO: Add function call and sizeoff()
 
 R_INC_DEC: R_PRE_INCREMENT | R_POST_INCREMENT | R_PRE_DECREMENT | R_POST_DECREMENT;
@@ -299,7 +302,7 @@ R_ASSIGN_OPERATOR: TOKEN_ASSIGN | TOKEN_PLUS_ASSIGN | TOKEN_MINUS_ASSIGN | TOKEN
 // Misc
 //--------------------------------------------------------------------------------------------------------------------//
 
-//Label definition for the goto statement. Example: primaDoFredo: 
+// Label definition for the goto statement. Example: primaDoFredo: 
 R_LABEL: TOKEN_ID TOKEN_COLON;
 
 R_TYPE_CAST: TOKEN_LEFT_PARENTHESES R_TYPE_ALL TOKEN_RIGHT_PARENTHESES;
@@ -308,13 +311,13 @@ R_TYPE_CAST: TOKEN_LEFT_PARENTHESES R_TYPE_ALL TOKEN_RIGHT_PARENTHESES;
 // Function Related Rules
 //--------------------------------------------------------------------------------------------------------------------//
 
-//Function signature i.e. the function format. Doesn't include the ; or the {. Example: int addNumbers(int x, int y)
+// Function signature i.e. the function format. Doesn't include the ; or the {. Example: int addNumbers(int x, int y)
 R_FUNC_SIGNATURE: R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
                 | R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
                 | R_VISIBILITY_QUALIFIER R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
                 | R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES;
 
-//Function prototype is just a function signature followed by a semi
+// Function prototype is just a function signature followed by a semi
 R_FUNC_PROTOTYPE: R_FUNC_SIGNATURE TOKEN_SEMI 
 {
     LOG_DEBUG("Function prototype found!\n");
@@ -325,61 +328,66 @@ R_FUNC_IMPL: R_FUNC_SIGNATURE R_COMPOUND_STATEMENT
     LOG_DEBUG("Function implementation found!\n");
 };
 
-//Function argument list. Note: The argument list can be empty. Example: int x | int x, int y
+// Function argument list. Note: The argument list can be empty. Example: int x | int x, int y
 R_ARG_LIST: %empty | R_ARG | R_ARG_LIST TOKEN_COMMA R_ARG;
 
-//Function argument type. Example: int x | const char* pString
+// Function argument type. Example: int x | const char* pString
 R_ARG:R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID 
 {
     LOG_DEBUG("Function argument found! | Name: %s\n", $2.tokenData.sId);
-}
+};
 
 //--------------------------------------------------------------------------------------------------------------------//
 // Variable Related Rules
 //--------------------------------------------------------------------------------------------------------------------//
 
-//Variable declarations can have a visibility qualifier (extern/static), a type qualifier (volatile/const), a sign qualifier
-//(signed/unsigned) and must explicitly specify a type (short, int, float...).               //Examples:
-R_VAR_PREAMBLE: R_VISIBILITY_QUALIFIER R_TYPE_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID //static const unsigned int var
-              | R_VISIBILITY_QUALIFIER R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID                  //static const int var
-              | R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                  //static signed int var
-              | R_TYPE_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                        //const signed int var
-              | R_VISIBILITY_QUALIFIER R_TYPE_ALL TOKEN_ID                                   //static int var
-              | R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID                                         //const int var
-              | R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                                         //signed int var
-              | R_TYPE_ALL TOKEN_ID;                                                         //int var
+// Variable declarations can have a visibility qualifier (extern/static), a type qualifier (volatile/const), a sign qualifier
+// (signed/unsigned) and must explicitly specify a type (short, int, float...).                  //Examples:
+R_VAR_PREAMBLE: R_VISIBILITY_QUALIFIER R_TYPE_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID     //static const unsigned int var
+              | R_VISIBILITY_QUALIFIER R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID                      //static const int var
+              | R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                      //static signed int var
+              | R_TYPE_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                            //const signed int var
+              | R_VISIBILITY_QUALIFIER R_TYPE_ALL TOKEN_ID                                       //static int var
+              | R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID                                             //const int var
+              | R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                                             //signed int var
+              | R_TYPE_ALL TOKEN_ID;                                                             //int var
 
-//Variable declaration followed by its assignment. Example: int var = 0;
-R_VAR_DEC_ASSIGN: R_VAR_PREAMBLE R_ASSIGN_OPERATOR R_EXP TOKEN_SEMI
-{
-    LOG_DEBUG("Variable declaration-assignment found!\n");
-};
+// Variable declaration (simple or followed by its assignment).         // Examples:
+R_VAR_DECLARATION: R_VAR_PREAMBLE TOKEN_SEMI                            // int var;  
+                 | R_VAR_PREAMBLE R_ASSIGN_OPERATOR R_EXP TOKEN_SEMI;   // int var = 1;
 
-R_VAR_DECLARATION: R_VAR_PREAMBLE TOKEN_SEMI
-{
-    LOG_DEBUG("Variable declaration found!\n");
-};
+// Array declaration                                                                                // Examples:
+R_ARR_DECLARATION: R_VAR_PREAMBLE TOKEN_LEFT_BRACKET TOKEN_RIGHT_BRACKET TOKEN_SEMI                 // int var [];
+                 | R_VAR_PREAMBLE TOKEN_LEFT_BRACKET R_EXP TOKEN_RIGHT_BRACKET TOKEN_SEMI           // int var [2];
+                 | R_VAR_PREAMBLE TOKEN_LEFT_BRACKET TOKEN_RIGHT_BRACKET R_ASSIGN_OPERATOR          // int var [] = {1, 2, 3};
+                   TOKEN_LEFT_BRACE R_EXP_LIST TOKEN_RIGHT_BRACE TOKEN_SEMI 
+                 | R_VAR_PREAMBLE TOKEN_LEFT_BRACKET R_EXP TOKEN_RIGHT_BRACKET R_ASSIGN_OPERATOR    // int var [2] = {1, 2};    // nao verifica se o tamanho do array
+                   TOKEN_LEFT_BRACE R_EXP_LIST TOKEN_RIGHT_BRACE TOKEN_SEMI;                                                    // e o numero de valores é igual
 
-R_VAR_ASSIGNMENT: TOKEN_ID R_ASSIGN_OPERATOR R_EXP;
+// Rule to assign a value to a variable                             // Example:
+R_VAR_ASSIGNMENT: TOKEN_ID R_ASSIGN_OPERATOR R_EXP TOKEN_SEMI;      // var = 1;
 
-//Standard C data types. Doesn't account for user defined types (aka typedefs), as this will need a symbol table
+// Rule to assign values to an array                // Example: var[1] = {1};
+R_ARR_ASSIGNMENT: TOKEN_ID TOKEN_LEFT_BRACKET R_EXP TOKEN_RIGHT_BRACKET R_ASSIGN_OPERATOR TOKEN_LEFT_BRACE R_EXP TOKEN_RIGHT_BRACE TOKEN_SEMI;
+
+// Standard C data types. Doesn't account for user defined types (aka typedefs), as this will need a symbol table
 //         char         short          int        long         float          double           long double
 R_TYPE: TOKEN_CHAR | TOKEN_SHORT | TOKEN_INT | TOKEN_LONG | TOKEN_FLOAT | TOKEN_DOUBLE | TOKEN_LONG TOKEN_DOUBLE;
 
-//Standard C data types but with pointer. This rule implements support for pointers of n length. Example: int*** ...
+// Standard C data types but with pointer. This rule implements support for pointers of n length. Example: int*** ...
 R_TYPE_PTR: R_TYPE_PTR TOKEN_ASTERISK | R_TYPE TOKEN_ASTERISK;
 
-//Union between the pointer and standard types.
+// Union between the pointer and standard types.
 R_TYPE_ALL: R_TYPE | R_TYPE_PTR;
 
-//Functions and variables can be marked as either static or extern, never both at the same time.
+// Functions and variables can be marked as either static or extern, never both at the same time.
 R_VISIBILITY_QUALIFIER: TOKEN_STATIC | TOKEN_EXTERN;
 
-//Types can be marked as constant, volatile, or have no type qualifier.
-//There is also some other more advanced qualifiers not being considered.
+// Types can be marked as constant, volatile, or have no type qualifier.
+// here is also some other more advanced qualifiers not being considered.
 R_TYPE_QUALIFIER: TOKEN_CONSTANT | TOKEN_VOLATILE;
 
-//Types can be marked as signed or unsigned, in C, if none is specified, the type defaults to signed.
+// Types can be marked as signed or unsigned, in C, if none is specified, the type defaults to signed.
 R_SIGN_QUALIFIER: TOKEN_SIGNED | TOKEN_UNSIGNED;
 
 R_EOF: TOKEN_EOF
