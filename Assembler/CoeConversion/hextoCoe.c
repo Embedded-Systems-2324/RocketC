@@ -4,18 +4,18 @@
 
 typedef struct lineParameters
 {
-    int addr;
-    int value;
+    unsigned int addr;
+    unsigned int value;
 }sLineParams;
 
 void init_statements_list(sLineParams** lineParams, int *strSize);
-void add_statement(sLineParams** lineParams, int addr, int value, int *index, int *strSize);
+void add_statement(sLineParams** lineParams, unsigned int addr, unsigned int value, int *index, int *strSize);
 void releaseStructure(sLineParams ** lineParams);
 void bubbleSort(sLineParams **arr, int n);
 FILE* openFile(const char* fileName, const char* openType);
 void print_bin_number(FILE* fp, int value);
 void print_code_binary(FILE *fp, const sLineParams* lineParams, int index);
-int hexToDec(char *hexNum);
+unsigned int hexToDec(char *hexNum);
 
 void init_statements_list(sLineParams** lineParams, int *strSize){
     *lineParams = (sLineParams*)malloc(sizeof(sLineParams) * 32);
@@ -27,7 +27,7 @@ void init_statements_list(sLineParams** lineParams, int *strSize){
     *strSize = 32;
 }
 
-void add_statement(sLineParams** lineParams, int addr, int value, int *index, int *strSize){
+void add_statement(sLineParams** lineParams, unsigned int addr, unsigned int value, int *index, int *strSize){
     
     if(*index >= *strSize){
         *strSize += 32;
@@ -37,6 +37,11 @@ void add_statement(sLineParams** lineParams, int addr, int value, int *index, in
             printf("Error allocating memory\n");
             exit(1);
         }
+    }
+
+    if (addr % 4 != 0){
+        printf("Address Invalid %4xh\n", addr);
+        exit(1);
     }
 
     (*lineParams)[*index].addr  = addr;
@@ -112,11 +117,11 @@ void print_code_binary(FILE *fp, const sLineParams* lineParams, int index){
     fprintf(fp, ";");
 }
 
-int hexToDec(char *hexNum){
+unsigned int hexToDec(char *hexNum){
 
     const char hexDigits[16] = { '0', '1', '2', '3', '4', '5', '6', '7', 
                                 '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' }; 
-    int decimalNumber = 0; 
+    unsigned int decimalNumber = 0; 
     int power = 0; 
 
     for (int i = strlen(hexNum) - 1; i >= 0; i--) { 
