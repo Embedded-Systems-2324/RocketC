@@ -123,6 +123,8 @@ whitespace      [ \t]+
 ","      { printf(" COMMA");                    return COMMA;           }
 "#"      { printf(" CARDINAL");                 return CARDINAL;        }
 ":"      { printf(" COLON");                    return COLON;           }
+"+"      { printf(" PLUS");                     return PLUS;            }
+"-"      { printf(" MINUS");                    return MINUS;           } 
 "\0"     { return ENDFILE;} 
 
 "$"      {

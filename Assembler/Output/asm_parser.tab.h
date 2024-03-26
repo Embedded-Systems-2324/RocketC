@@ -88,7 +88,9 @@ extern int yydebug;
     WORD = 289,                    /* WORD  */
     ALLOC = 290,                   /* ALLOC  */
     ORG = 291,                     /* ORG  */
-    EQU = 292                      /* EQU  */
+    EQU = 292,                     /* EQU  */
+    PLUS = 293,                    /* PLUS  */
+    MINUS = 294                    /* MINUS  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif

@@ -55,6 +55,8 @@ static int bra_cond = 0;
 %token ALLOC
 %token ORG
 %token EQU
+%token PLUS
+%token MINUS
 
 %%
 
@@ -274,14 +276,14 @@ org_stmt    :   ORG NUMBER
                     };
 
 
-equ_stmt    :   EQU IDENTIFIER COMMA NUMBER 
+equ_stmt    :   EQU IDENTIFIER COMMA expression 
                     {
-                         if(get_symbol_value($1) != UNINITIALIZED_VALUE){
+                         if(get_symbol_value($2) != UNINITIALIZED_VALUE){
                             printf("ERROR: Constant redefinition: %s in line %ld\n", get_symbol_name($1), get_line_number());
                         }
                         else{
-                            set_symbol_value($1, get_symbol_value($4));
-                            $$ = $1;
+                            set_symbol_value($2, $4);
+                            $$ = $2;
                         }
                     };
 
@@ -296,6 +298,28 @@ label       :   IDENTIFIER COLON
                             $$ = $1;
                         }
                     };
+
+expression  :   NUMBER
+                    {
+                        $$ = get_symbol_value($1);
+                    }
+            |   PLUS NUMBER
+                    {
+                        $$ = get_symbol_value($2);
+                    }
+            |   MINUS NUMBER
+                    {
+                        $$ = 0 - get_symbol_value($2);
+                    }
+            |   expression PLUS NUMBER
+                    {
+                        $$ = $$ + get_symbol_value($3);
+                    }
+            |   expression MINUS NUMBER
+                    {
+                        $$ = $$ - get_symbol_value($3);
+                    }
+
 %%
 
 int yyerror(char *str)

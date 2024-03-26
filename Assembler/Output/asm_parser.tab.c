@@ -154,32 +154,35 @@ enum yysymbol_kind_t
   YYSYMBOL_ALLOC = 35,                     /* ALLOC  */
   YYSYMBOL_ORG = 36,                       /* ORG  */
   YYSYMBOL_EQU = 37,                       /* EQU  */
-  YYSYMBOL_YYACCEPT = 38,                  /* $accept  */
-  YYSYMBOL_prog = 39,                      /* prog  */
-  YYSYMBOL_stmt = 40,                      /* stmt  */
-  YYSYMBOL_add_stmt = 41,                  /* add_stmt  */
-  YYSYMBOL_sub_stmt = 42,                  /* sub_stmt  */
-  YYSYMBOL_or_stmt = 43,                   /* or_stmt  */
-  YYSYMBOL_and_stmt = 44,                  /* and_stmt  */
-  YYSYMBOL_xor_stmt = 45,                  /* xor_stmt  */
-  YYSYMBOL_not_stmt = 46,                  /* not_stmt  */
-  YYSYMBOL_cmp_stmt = 47,                  /* cmp_stmt  */
-  YYSYMBOL_branch_stmt = 48,               /* branch_stmt  */
-  YYSYMBOL_move_stmt = 49,                 /* move_stmt  */
-  YYSYMBOL_jump_stmt = 50,                 /* jump_stmt  */
-  YYSYMBOL_load_stmt = 51,                 /* load_stmt  */
-  YYSYMBOL_store_stmt = 52,                /* store_stmt  */
-  YYSYMBOL_push_stmt = 53,                 /* push_stmt  */
-  YYSYMBOL_pop_stmt = 54,                  /* pop_stmt  */
-  YYSYMBOL_reti_stmt = 55,                 /* reti_stmt  */
-  YYSYMBOL_halt_stmt = 56,                 /* halt_stmt  */
-  YYSYMBOL_nop_stmt = 57,                  /* nop_stmt  */
-  YYSYMBOL_byte_stmt = 58,                 /* byte_stmt  */
-  YYSYMBOL_word_stmt = 59,                 /* word_stmt  */
-  YYSYMBOL_alloc_stmt = 60,                /* alloc_stmt  */
-  YYSYMBOL_org_stmt = 61,                  /* org_stmt  */
-  YYSYMBOL_equ_stmt = 62,                  /* equ_stmt  */
-  YYSYMBOL_label = 63                      /* label  */
+  YYSYMBOL_PLUS = 38,                      /* PLUS  */
+  YYSYMBOL_MINUS = 39,                     /* MINUS  */
+  YYSYMBOL_YYACCEPT = 40,                  /* $accept  */
+  YYSYMBOL_prog = 41,                      /* prog  */
+  YYSYMBOL_stmt = 42,                      /* stmt  */
+  YYSYMBOL_add_stmt = 43,                  /* add_stmt  */
+  YYSYMBOL_sub_stmt = 44,                  /* sub_stmt  */
+  YYSYMBOL_or_stmt = 45,                   /* or_stmt  */
+  YYSYMBOL_and_stmt = 46,                  /* and_stmt  */
+  YYSYMBOL_xor_stmt = 47,                  /* xor_stmt  */
+  YYSYMBOL_not_stmt = 48,                  /* not_stmt  */
+  YYSYMBOL_cmp_stmt = 49,                  /* cmp_stmt  */
+  YYSYMBOL_branch_stmt = 50,               /* branch_stmt  */
+  YYSYMBOL_move_stmt = 51,                 /* move_stmt  */
+  YYSYMBOL_jump_stmt = 52,                 /* jump_stmt  */
+  YYSYMBOL_load_stmt = 53,                 /* load_stmt  */
+  YYSYMBOL_store_stmt = 54,                /* store_stmt  */
+  YYSYMBOL_push_stmt = 55,                 /* push_stmt  */
+  YYSYMBOL_pop_stmt = 56,                  /* pop_stmt  */
+  YYSYMBOL_reti_stmt = 57,                 /* reti_stmt  */
+  YYSYMBOL_halt_stmt = 58,                 /* halt_stmt  */
+  YYSYMBOL_nop_stmt = 59,                  /* nop_stmt  */
+  YYSYMBOL_byte_stmt = 60,                 /* byte_stmt  */
+  YYSYMBOL_word_stmt = 61,                 /* word_stmt  */
+  YYSYMBOL_alloc_stmt = 62,                /* alloc_stmt  */
+  YYSYMBOL_org_stmt = 63,                  /* org_stmt  */
+  YYSYMBOL_equ_stmt = 64,                  /* equ_stmt  */
+  YYSYMBOL_label = 65,                     /* label  */
+  YYSYMBOL_expression = 66                 /* expression  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -507,19 +510,19 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  79
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   167
+#define YYLAST   173
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  38
+#define YYNTOKENS  40
 /* YYNNTS -- Number of nonterminals.  */
-#define YYNNTS  26
+#define YYNNTS  27
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  62
+#define YYNRULES  67
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  153
+#define YYNSTATES  162
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   292
+#define YYMAXUTOK   294
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -562,20 +565,20 @@ static const yytype_int8 yytranslate[] =
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
-      35,    36,    37
+      35,    36,    37,    38,    39
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    62,    62,    63,    64,    68,    69,    70,    71,    72,
-      73,    74,    75,    76,    77,    78,    79,    80,    81,    82,
-      83,    84,    85,    86,    87,    88,    89,    90,    95,    99,
-     106,   110,   117,   121,   127,   131,   138,   142,   149,   153,
-     160,   166,   170,   174,   180,   186,   190,   197,   202,   206,
-     213,   217,   224,   230,   236,   241,   247,   253,   259,   265,
-     271,   277,   289
+       0,    64,    64,    65,    66,    70,    71,    72,    73,    74,
+      75,    76,    77,    78,    79,    80,    81,    82,    83,    84,
+      85,    86,    87,    88,    89,    90,    91,    92,    97,   101,
+     108,   112,   119,   123,   129,   133,   140,   144,   151,   155,
+     162,   168,   172,   176,   182,   188,   192,   199,   204,   208,
+     215,   219,   226,   232,   238,   243,   249,   255,   261,   267,
+     273,   279,   291,   302,   306,   310,   314,   318
 };
 #endif
 
@@ -596,12 +599,12 @@ static const char *const yytname[] =
   "LOAD_DIRECT", "LOAD_IMMEDIATE", "LOAD_INDEXED", "STORE_DIRECT",
   "STORE_INDEXED", "PUSH", "POP", "RETI", "HALT", "NOP", "NUMBER", "REG",
   "IDENTIFIER", "ENDFILE", "ERROR", "COMMA", "CARDINAL", "COLON", "DOLLAR",
-  "BYTE", "WORD", "ALLOC", "ORG", "EQU", "$accept", "prog", "stmt",
-  "add_stmt", "sub_stmt", "or_stmt", "and_stmt", "xor_stmt", "not_stmt",
-  "cmp_stmt", "branch_stmt", "move_stmt", "jump_stmt", "load_stmt",
-  "store_stmt", "push_stmt", "pop_stmt", "reti_stmt", "halt_stmt",
-  "nop_stmt", "byte_stmt", "word_stmt", "alloc_stmt", "org_stmt",
-  "equ_stmt", "label", YY_NULLPTR
+  "BYTE", "WORD", "ALLOC", "ORG", "EQU", "PLUS", "MINUS", "$accept",
+  "prog", "stmt", "add_stmt", "sub_stmt", "or_stmt", "and_stmt",
+  "xor_stmt", "not_stmt", "cmp_stmt", "branch_stmt", "move_stmt",
+  "jump_stmt", "load_stmt", "store_stmt", "push_stmt", "pop_stmt",
+  "reti_stmt", "halt_stmt", "nop_stmt", "byte_stmt", "word_stmt",
+  "alloc_stmt", "org_stmt", "equ_stmt", "label", "expression", YY_NULLPTR
 };
 
 static const char *
@@ -611,7 +614,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-25)
+#define YYPACT_NINF (-38)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -625,22 +628,23 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
-      35,   -24,   -23,     3,     4,     5,     7,    38,    -1,    40,
-      41,    52,    57,    58,    59,    60,    61,    62,    63,   -25,
-     -25,   -25,    29,    65,    66,    67,    68,    69,     0,   -25,
-     -25,   -25,   -25,   -25,   -25,   -25,   -25,   -25,   -25,   -25,
-     -25,   -25,   -25,   -25,   -25,   -25,   -25,   -25,   -25,   -25,
-     -25,   -25,   -25,    70,    71,    72,    73,    74,    75,    76,
-      77,   -25,   -25,    78,    79,    80,    81,    82,    83,    84,
-      85,   -25,   -25,   -25,   -25,   -25,    91,   -25,    87,   -25,
-     -25,   -25,    92,    93,    94,    95,    34,    96,    97,    64,
-      98,    99,   100,   101,   102,   104,   103,   105,   -25,   110,
-     106,   107,   108,   109,   -25,   115,   111,   -25,   117,   118,
-     114,   -25,   120,   121,   119,   122,   123,   -25,    37,    48,
-      49,    50,   -25,    51,   -25,   -25,   124,   -25,   -25,   125,
-     -25,   126,   -25,   127,   -25,   129,   -25,   133,   -25,   134,
-     -25,   135,   136,   137,   138,   -25,   -25,   -25,   -25,   -25,
-     -25,   -25,   -25
+      35,     3,     4,     5,     7,    38,    40,    41,    -1,    55,
+      58,    60,    61,    62,    63,    64,    65,    66,    67,   -38,
+     -38,   -38,    68,    69,    70,    71,    72,    74,     0,   -38,
+     -38,   -38,   -38,   -38,   -38,   -38,   -38,   -38,   -38,   -38,
+     -38,   -38,   -38,   -38,   -38,   -38,   -38,   -38,   -38,   -38,
+     -38,   -38,   -38,    73,    75,    76,    77,    78,    79,    80,
+      81,   -38,   -38,    82,    83,    84,    85,    86,    87,    88,
+      89,   -38,   -38,   -38,   -38,   -38,    95,   -38,    91,   -38,
+     -38,   -38,    96,    97,    98,    99,    34,   100,   101,   102,
+     103,   104,   105,   106,   107,   109,   108,   110,   -38,    36,
+     111,   112,   113,   114,   -38,   115,   116,   -38,   120,   122,
+     118,   -38,   124,   125,   121,   127,   123,   -38,   129,   130,
+     -37,    37,    48,    51,    52,   -38,    54,   -38,   -38,   126,
+     -38,   -38,   128,   -38,   131,   -38,   -38,   133,   135,   -38,
+     136,   -38,   138,   -38,   139,   -38,   140,   -38,   141,   142,
+     143,   144,   -38,   -38,   -38,   -38,   -38,   -38,   -38,   -38,
+     -38,   -38
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -659,19 +663,20 @@ static const yytype_int8 yydefact[] =
        2,     3,     0,     0,     0,     0,     0,     0,     0,     0,
        0,     0,     0,     0,     0,     0,     0,     0,    59,     0,
        0,     0,     0,     0,    38,     0,     0,    40,     0,     0,
-       0,    44,     0,     0,     0,     0,     0,    61,     0,     0,
-       0,     0,    39,     0,    42,    45,     0,    47,    48,     0,
-      50,     0,    28,     0,    30,     0,    32,     0,    34,     0,
-      36,     0,     0,     0,     0,    29,    31,    33,    35,    37,
-      46,    49,    51
+       0,    44,     0,     0,     0,     0,     0,    63,     0,     0,
+      61,     0,     0,     0,     0,    39,     0,    42,    45,     0,
+      47,    48,     0,    50,     0,    64,    65,     0,     0,    28,
+       0,    30,     0,    32,     0,    34,     0,    36,     0,     0,
+       0,     0,    66,    67,    29,    31,    33,    35,    37,    46,
+      49,    51
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
-     -25,   -25,   139,   -25,   -25,   -25,   -25,   -25,   -25,   -25,
-     -25,   -25,   -25,   -25,   -25,   -25,   -25,   -25,   -25,   -25,
-     -25,   -25,   -25,   -25,   -25,   -25
+     -38,   -38,   145,   -38,   -38,   -38,   -38,   -38,   -38,   -38,
+     -38,   -38,   -38,   -38,   -38,   -38,   -38,   -38,   -38,   -38,
+     -38,   -38,   -38,   -38,   -38,   -38,   -38
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
@@ -679,7 +684,7 @@ static const yytype_int8 yydefgoto[] =
 {
        0,    28,    29,    30,    31,    32,    33,    34,    35,    36,
       37,    38,    39,    40,    41,    42,    43,    44,    45,    46,
-      47,    48,    49,    50,    51,    52
+      47,    48,    49,    50,    51,    52,   120
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -687,44 +692,46 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-      79,    53,    54,     1,     2,     3,     4,     5,     6,     7,
+      79,   137,   138,     1,     2,     3,     4,     5,     6,     7,
        8,     9,    10,    11,    12,    13,    14,    15,    16,    17,
-      18,    19,    20,    21,    60,    61,    22,    80,    55,    56,
-      57,    62,    58,    23,    24,    25,    26,    27,     1,     2,
+      18,    19,    20,    21,    60,    61,    22,    80,    53,    54,
+      55,    62,    56,    23,    24,    25,    26,    27,     1,     2,
        3,     4,     5,     6,     7,     8,     9,    10,    11,    12,
       13,    14,    15,    16,    17,    18,    19,    20,    21,   104,
-      73,    22,   132,    59,   105,    63,    64,   133,    23,    24,
-      25,    26,    27,   134,   136,   138,   140,    65,   135,   137,
-     139,   141,    66,    67,    68,    69,    70,    71,    72,    74,
-      75,     0,    77,    76,   108,    78,     0,     0,     0,    82,
-      83,    84,    85,    86,    87,    88,    89,    90,    91,    92,
-      93,    94,    95,    96,    97,    98,    99,   100,   101,   102,
-     103,   106,   107,     0,   110,   111,     0,     0,   109,   114,
-     116,   112,   113,   115,   117,   118,   119,   120,   121,   122,
-     123,   124,   125,   126,   127,   128,   130,     0,   129,     0,
-       0,   145,   131,   146,   142,   143,   144,   147,   148,   149,
-     150,   151,   152,     0,     0,     0,     0,    81
+     117,    22,   139,    57,   105,    58,    59,   140,    23,    24,
+      25,    26,    27,   141,   118,   119,   143,   145,   142,   147,
+      63,   144,   146,    64,   148,    65,    66,    67,    68,    69,
+      70,    71,    72,    74,    75,     0,    77,    76,     0,    73,
+      78,     0,    82,     0,    83,    84,    85,    86,    87,    88,
+      89,    90,    91,    92,    93,    94,    95,    96,    97,    98,
+      99,   100,   101,   102,   103,   106,   107,     0,     0,   110,
+     111,     0,   108,   109,   114,   116,   112,   113,   115,   125,
+     121,   122,   123,   124,   127,   126,   128,   129,   130,   131,
+     132,   133,   134,   135,   136,     0,   149,   152,   150,   153,
+     154,   151,   155,   156,   157,   158,   159,   160,   161,     0,
+       0,     0,     0,    81
 };
 
 static const yytype_int8 yycheck[] =
 {
-       0,    25,    25,     3,     4,     5,     6,     7,     8,     9,
+       0,    38,    39,     3,     4,     5,     6,     7,     8,     9,
       10,    11,    12,    13,    14,    15,    16,    17,    18,    19,
       20,    21,    22,    23,    25,    26,    26,    27,    25,    25,
       25,    32,    25,    33,    34,    35,    36,    37,     3,     4,
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    25,
-      31,    26,    25,    25,    30,    25,    25,    30,    33,    34,
-      35,    36,    37,    25,    25,    25,    25,    25,    30,    30,
-      30,    30,    25,    25,    25,    25,    25,    25,    25,    24,
-      24,    -1,    24,    26,    30,    26,    -1,    -1,    -1,    29,
-      29,    29,    29,    29,    29,    29,    29,    29,    29,    29,
-      29,    29,    29,    29,    29,    24,    29,    25,    25,    25,
-      25,    25,    25,    -1,    25,    25,    -1,    -1,    30,    25,
-      25,    30,    30,    30,    24,    29,    29,    29,    29,    24,
-      29,    24,    24,    29,    24,    24,    24,    -1,    29,    -1,
-      -1,    24,    29,    24,    30,    30,    30,    24,    24,    24,
-      24,    24,    24,    -1,    -1,    -1,    -1,    28
+      24,    26,    25,    25,    30,    25,    25,    30,    33,    34,
+      35,    36,    37,    25,    38,    39,    25,    25,    30,    25,
+      25,    30,    30,    25,    30,    25,    25,    25,    25,    25,
+      25,    25,    25,    24,    24,    -1,    24,    26,    -1,    31,
+      26,    -1,    29,    -1,    29,    29,    29,    29,    29,    29,
+      29,    29,    29,    29,    29,    29,    29,    29,    29,    24,
+      29,    25,    25,    25,    25,    25,    25,    -1,    -1,    25,
+      25,    -1,    30,    30,    25,    25,    30,    30,    30,    24,
+      29,    29,    29,    29,    24,    29,    24,    29,    24,    24,
+      29,    24,    29,    24,    24,    -1,    30,    24,    30,    24,
+      24,    30,    24,    24,    24,    24,    24,    24,    24,    -1,
+      -1,    -1,    -1,    28
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
@@ -733,32 +740,33 @@ static const yytype_int8 yystos[] =
 {
        0,     3,     4,     5,     6,     7,     8,     9,    10,    11,
       12,    13,    14,    15,    16,    17,    18,    19,    20,    21,
-      22,    23,    26,    33,    34,    35,    36,    37,    39,    40,
-      41,    42,    43,    44,    45,    46,    47,    48,    49,    50,
-      51,    52,    53,    54,    55,    56,    57,    58,    59,    60,
-      61,    62,    63,    25,    25,    25,    25,    25,    25,    25,
+      22,    23,    26,    33,    34,    35,    36,    37,    41,    42,
+      43,    44,    45,    46,    47,    48,    49,    50,    51,    52,
+      53,    54,    55,    56,    57,    58,    59,    60,    61,    62,
+      63,    64,    65,    25,    25,    25,    25,    25,    25,    25,
       25,    26,    32,    25,    25,    25,    25,    25,    25,    25,
       25,    25,    25,    31,    24,    24,    26,    24,    26,     0,
-      27,    40,    29,    29,    29,    29,    29,    29,    29,    29,
+      27,    42,    29,    29,    29,    29,    29,    29,    29,    29,
       29,    29,    29,    29,    29,    29,    29,    29,    24,    29,
       25,    25,    25,    25,    25,    30,    25,    25,    30,    30,
-      25,    25,    30,    30,    25,    30,    25,    24,    29,    29,
-      29,    29,    24,    29,    24,    24,    29,    24,    24,    29,
-      24,    29,    25,    30,    25,    30,    25,    30,    25,    30,
-      25,    30,    30,    30,    30,    24,    24,    24,    24,    24,
-      24,    24,    24
+      25,    25,    30,    30,    25,    30,    25,    24,    38,    39,
+      66,    29,    29,    29,    29,    24,    29,    24,    24,    29,
+      24,    24,    29,    24,    29,    24,    24,    38,    39,    25,
+      30,    25,    30,    25,    30,    25,    30,    25,    30,    30,
+      30,    30,    24,    24,    24,    24,    24,    24,    24,    24,
+      24,    24
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    38,    39,    39,    39,    40,    40,    40,    40,    40,
-      40,    40,    40,    40,    40,    40,    40,    40,    40,    40,
-      40,    40,    40,    40,    40,    40,    40,    40,    41,    41,
-      42,    42,    43,    43,    44,    44,    45,    45,    46,    46,
-      47,    48,    48,    48,    49,    50,    50,    51,    51,    51,
-      52,    52,    53,    54,    55,    56,    57,    58,    59,    60,
-      61,    62,    63
+       0,    40,    41,    41,    41,    42,    42,    42,    42,    42,
+      42,    42,    42,    42,    42,    42,    42,    42,    42,    42,
+      42,    42,    42,    42,    42,    42,    42,    42,    43,    43,
+      44,    44,    45,    45,    46,    46,    47,    47,    48,    48,
+      49,    50,    50,    50,    51,    52,    52,    53,    53,    53,
+      54,    54,    55,    56,    57,    58,    59,    60,    61,    62,
+      63,    64,    65,    66,    66,    66,    66,    66
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
@@ -770,7 +778,7 @@ static const yytype_int8 yyr2[] =
        6,     7,     6,     7,     6,     7,     6,     7,     4,     5,
        4,     2,     5,     2,     4,     5,     7,     5,     5,     7,
        5,     7,     2,     2,     1,     1,     1,     2,     2,     3,
-       2,     4,     2
+       2,     4,     2,     1,     2,     2,     3,     3
 };
 
 
@@ -1234,285 +1242,285 @@ yyreduce:
   switch (yyn)
     {
   case 28: /* add_stmt: ADD REG COMMA REG COMMA REG  */
-#line 96 "Step1/asm_parser.y"
+#line 98 "Step1/asm_parser.y"
                     {  
                         add_statement(ADD_OP, ADD_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE); 
-                    }
-#line 1242 "asm_parser.tab.c"
-    break;
-
-  case 29: /* add_stmt: ADD REG COMMA REG COMMA CARDINAL NUMBER  */
-#line 100 "Step1/asm_parser.y"
-                    {
-                        add_statement(ADD_OP, ADD_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE); 
                     }
 #line 1250 "asm_parser.tab.c"
     break;
 
-  case 30: /* sub_stmt: SUB REG COMMA REG COMMA REG  */
-#line 107 "Step1/asm_parser.y"
-                    { 
-                        add_statement(SUB_OP, SUB_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE);  
+  case 29: /* add_stmt: ADD REG COMMA REG COMMA CARDINAL NUMBER  */
+#line 102 "Step1/asm_parser.y"
+                    {
+                        add_statement(ADD_OP, ADD_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE); 
                     }
 #line 1258 "asm_parser.tab.c"
     break;
 
-  case 31: /* sub_stmt: SUB REG COMMA REG COMMA CARDINAL NUMBER  */
-#line 111 "Step1/asm_parser.y"
+  case 30: /* sub_stmt: SUB REG COMMA REG COMMA REG  */
+#line 109 "Step1/asm_parser.y"
                     { 
-                        add_statement(SUB_OP, SUB_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE); 
+                        add_statement(SUB_OP, SUB_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE);  
                     }
 #line 1266 "asm_parser.tab.c"
     break;
 
-  case 32: /* or_stmt: OR REG COMMA REG COMMA REG  */
-#line 118 "Step1/asm_parser.y"
+  case 31: /* sub_stmt: SUB REG COMMA REG COMMA CARDINAL NUMBER  */
+#line 113 "Step1/asm_parser.y"
                     { 
-                        add_statement(OR_OP, OR_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE);    
+                        add_statement(SUB_OP, SUB_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE); 
                     }
 #line 1274 "asm_parser.tab.c"
     break;
 
-  case 33: /* or_stmt: OR REG COMMA REG COMMA CARDINAL NUMBER  */
-#line 122 "Step1/asm_parser.y"
+  case 32: /* or_stmt: OR REG COMMA REG COMMA REG  */
+#line 120 "Step1/asm_parser.y"
                     { 
-                        add_statement(OR_OP, OR_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE);   
+                        add_statement(OR_OP, OR_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE);    
                     }
 #line 1282 "asm_parser.tab.c"
     break;
 
-  case 34: /* and_stmt: AND REG COMMA REG COMMA REG  */
-#line 128 "Step1/asm_parser.y"
+  case 33: /* or_stmt: OR REG COMMA REG COMMA CARDINAL NUMBER  */
+#line 124 "Step1/asm_parser.y"
                     { 
-                        add_statement(AND_OP, AND_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE);  
+                        add_statement(OR_OP, OR_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE);   
                     }
 #line 1290 "asm_parser.tab.c"
     break;
 
-  case 35: /* and_stmt: AND REG COMMA REG COMMA CARDINAL NUMBER  */
-#line 132 "Step1/asm_parser.y"
+  case 34: /* and_stmt: AND REG COMMA REG COMMA REG  */
+#line 130 "Step1/asm_parser.y"
                     { 
-                        add_statement(AND_OP, AND_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE); 
+                        add_statement(AND_OP, AND_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE);  
                     }
 #line 1298 "asm_parser.tab.c"
     break;
 
-  case 36: /* xor_stmt: XOR REG COMMA REG COMMA REG  */
-#line 139 "Step1/asm_parser.y"
+  case 35: /* and_stmt: AND REG COMMA REG COMMA CARDINAL NUMBER  */
+#line 134 "Step1/asm_parser.y"
                     { 
-                        add_statement(XOR_OP, XOR_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE);  
+                        add_statement(AND_OP, AND_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE); 
                     }
 #line 1306 "asm_parser.tab.c"
     break;
 
-  case 37: /* xor_stmt: XOR REG COMMA REG COMMA CARDINAL NUMBER  */
-#line 143 "Step1/asm_parser.y"
+  case 36: /* xor_stmt: XOR REG COMMA REG COMMA REG  */
+#line 141 "Step1/asm_parser.y"
                     { 
-                        add_statement(XOR_OP, XOR_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE); 
+                        add_statement(XOR_OP, XOR_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE);  
                     }
 #line 1314 "asm_parser.tab.c"
     break;
 
-  case 38: /* not_stmt: NOT REG COMMA REG  */
-#line 150 "Step1/asm_parser.y"
+  case 37: /* xor_stmt: XOR REG COMMA REG COMMA CARDINAL NUMBER  */
+#line 145 "Step1/asm_parser.y"
                     { 
-                        add_statement(NOT_OP, NOT_OPCODE, yyvsp[-2], yyvsp[0], NULL_ARG, NO_TYPE);   
+                        add_statement(XOR_OP, XOR_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE); 
                     }
 #line 1322 "asm_parser.tab.c"
     break;
 
-  case 39: /* not_stmt: NOT REG COMMA CARDINAL NUMBER  */
-#line 154 "Step1/asm_parser.y"
+  case 38: /* not_stmt: NOT REG COMMA REG  */
+#line 152 "Step1/asm_parser.y"
                     { 
-                        add_statement(NOT_OP, NOT_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, IMMEDIATE); 
+                        add_statement(NOT_OP, NOT_OPCODE, yyvsp[-2], yyvsp[0], NULL_ARG, NO_TYPE);   
                     }
 #line 1330 "asm_parser.tab.c"
     break;
 
-  case 40: /* cmp_stmt: CMP REG COMMA REG  */
-#line 161 "Step1/asm_parser.y"
+  case 39: /* not_stmt: NOT REG COMMA CARDINAL NUMBER  */
+#line 156 "Step1/asm_parser.y"
                     { 
-                        add_statement(CMP_OP, CMP_OPCODE, yyvsp[-2], yyvsp[0], NULL_ARG, NO_TYPE);
+                        add_statement(NOT_OP, NOT_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, IMMEDIATE); 
                     }
 #line 1338 "asm_parser.tab.c"
     break;
 
-  case 41: /* branch_stmt: BRANCH IDENTIFIER  */
-#line 167 "Step1/asm_parser.y"
-                    {
-                        add_statement(BXX_OP, BXX_OPCODE, yyvsp[0], NULL_ARG, NULL_ARG, bra_cond); 
+  case 40: /* cmp_stmt: CMP REG COMMA REG  */
+#line 163 "Step1/asm_parser.y"
+                    { 
+                        add_statement(CMP_OP, CMP_OPCODE, yyvsp[-2], yyvsp[0], NULL_ARG, NO_TYPE);
                     }
 #line 1346 "asm_parser.tab.c"
     break;
 
-  case 42: /* branch_stmt: BRANCH REG COMMA CARDINAL NUMBER  */
-#line 171 "Step1/asm_parser.y"
+  case 41: /* branch_stmt: BRANCH IDENTIFIER  */
+#line 169 "Step1/asm_parser.y"
                     {
-                        add_statement(BXX_OP, BXX_OPCODE, yyvsp[-3], NULL_ARG, NULL_ARG, bra_cond); 
+                        add_statement(BXX_OP, BXX_OPCODE, yyvsp[0], NULL_ARG, NULL_ARG, bra_cond); 
                     }
 #line 1354 "asm_parser.tab.c"
     break;
 
-  case 43: /* branch_stmt: BRANCH DOLLAR  */
-#line 175 "Step1/asm_parser.y"
+  case 42: /* branch_stmt: BRANCH REG COMMA CARDINAL NUMBER  */
+#line 173 "Step1/asm_parser.y"
                     {
-                        add_statement(BXX_OP, BXX_OPCODE, yyvsp[0], NULL_ARG, NULL_ARG, bra_cond);
+                        add_statement(BXX_OP, BXX_OPCODE, yyvsp[-3], NULL_ARG, NULL_ARG, bra_cond); 
                     }
 #line 1362 "asm_parser.tab.c"
     break;
 
-  case 44: /* move_stmt: MOVE REG COMMA REG  */
-#line 181 "Step1/asm_parser.y"
+  case 43: /* branch_stmt: BRANCH DOLLAR  */
+#line 177 "Step1/asm_parser.y"
                     {
-                        add_statement(ADD_OP, ADD_OPCODE, yyvsp[-2], yyvsp[0], 0, IMMEDIATE);
+                        add_statement(BXX_OP, BXX_OPCODE, yyvsp[0], NULL_ARG, NULL_ARG, bra_cond);
                     }
 #line 1370 "asm_parser.tab.c"
     break;
 
-  case 45: /* jump_stmt: JUMP REG COMMA CARDINAL NUMBER  */
-#line 187 "Step1/asm_parser.y"
-                    { 
-                        add_statement(JMP_OP, JMP_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, NO_TYPE); 
+  case 44: /* move_stmt: MOVE REG COMMA REG  */
+#line 183 "Step1/asm_parser.y"
+                    {
+                        add_statement(ADD_OP, ADD_OPCODE, yyvsp[-2], yyvsp[0], 0, IMMEDIATE);
                     }
 #line 1378 "asm_parser.tab.c"
     break;
 
-  case 46: /* jump_stmt: JUMP_LINK REG COMMA REG COMMA CARDINAL NUMBER  */
-#line 191 "Step1/asm_parser.y"
-                    {
-                        add_statement(JMP_OP, JMP_OPCODE, yyvsp[-5], yyvsp[-3] , yyvsp[0], LINK);
+  case 45: /* jump_stmt: JUMP REG COMMA CARDINAL NUMBER  */
+#line 189 "Step1/asm_parser.y"
+                    { 
+                        add_statement(JMP_OP, JMP_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, NO_TYPE); 
                     }
 #line 1386 "asm_parser.tab.c"
     break;
 
-  case 47: /* load_stmt: LOAD_DIRECT REG COMMA CARDINAL NUMBER  */
-#line 198 "Step1/asm_parser.y"
-                    { 
-                        add_statement(LD_OP, LD_OPCODE, yyvsp[-3], NULL_ARG, yyvsp[0], NO_TYPE); 
+  case 46: /* jump_stmt: JUMP_LINK REG COMMA REG COMMA CARDINAL NUMBER  */
+#line 193 "Step1/asm_parser.y"
+                    {
+                        add_statement(JMP_OP, JMP_OPCODE, yyvsp[-5], yyvsp[-3] , yyvsp[0], LINK);
                     }
 #line 1394 "asm_parser.tab.c"
     break;
 
-  case 48: /* load_stmt: LOAD_IMMEDIATE REG COMMA CARDINAL NUMBER  */
-#line 203 "Step1/asm_parser.y"
-                    {
-                        add_statement(LDI_OP, LDI_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, NO_TYPE); 
+  case 47: /* load_stmt: LOAD_DIRECT REG COMMA CARDINAL NUMBER  */
+#line 200 "Step1/asm_parser.y"
+                    { 
+                        add_statement(LD_OP, LD_OPCODE, yyvsp[-3], NULL_ARG, yyvsp[0], NO_TYPE); 
                     }
 #line 1402 "asm_parser.tab.c"
     break;
 
-  case 49: /* load_stmt: LOAD_INDEXED REG COMMA REG COMMA CARDINAL NUMBER  */
-#line 207 "Step1/asm_parser.y"
-                    { 
-                        add_statement(LDX_OP, LDX_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], NO_TYPE); 
+  case 48: /* load_stmt: LOAD_IMMEDIATE REG COMMA CARDINAL NUMBER  */
+#line 205 "Step1/asm_parser.y"
+                    {
+                        add_statement(LDI_OP, LDI_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, NO_TYPE); 
                     }
 #line 1410 "asm_parser.tab.c"
     break;
 
-  case 50: /* store_stmt: STORE_DIRECT REG COMMA CARDINAL NUMBER  */
-#line 214 "Step1/asm_parser.y"
+  case 49: /* load_stmt: LOAD_INDEXED REG COMMA REG COMMA CARDINAL NUMBER  */
+#line 209 "Step1/asm_parser.y"
                     { 
-                        add_statement(ST_OP,ST_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, NO_TYPE); 
+                        add_statement(LDX_OP, LDX_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], NO_TYPE); 
                     }
 #line 1418 "asm_parser.tab.c"
     break;
 
-  case 51: /* store_stmt: STORE_INDEXED REG COMMA REG COMMA CARDINAL NUMBER  */
-#line 218 "Step1/asm_parser.y"
+  case 50: /* store_stmt: STORE_DIRECT REG COMMA CARDINAL NUMBER  */
+#line 216 "Step1/asm_parser.y"
                     { 
-                        add_statement(STX_OP, ST_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], NO_TYPE);
+                        add_statement(ST_OP,ST_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, NO_TYPE); 
                     }
 #line 1426 "asm_parser.tab.c"
     break;
 
-  case 52: /* push_stmt: PUSH REG  */
-#line 225 "Step1/asm_parser.y"
+  case 51: /* store_stmt: STORE_INDEXED REG COMMA REG COMMA CARDINAL NUMBER  */
+#line 220 "Step1/asm_parser.y"
                     { 
-                        add_statement(PUSH_OP,PUSH_OPCODE,yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
+                        add_statement(STX_OP, ST_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], NO_TYPE);
                     }
 #line 1434 "asm_parser.tab.c"
     break;
 
-  case 53: /* pop_stmt: POP REG  */
-#line 231 "Step1/asm_parser.y"
+  case 52: /* push_stmt: PUSH REG  */
+#line 227 "Step1/asm_parser.y"
                     { 
-                        add_statement(POP_OP, POP_OPCODE,yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
+                        add_statement(PUSH_OP,PUSH_OPCODE,yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
 #line 1442 "asm_parser.tab.c"
     break;
 
-  case 54: /* reti_stmt: RETI  */
-#line 237 "Step1/asm_parser.y"
-                    {
-                        add_statement(RETI_OP, RETI_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
+  case 53: /* pop_stmt: POP REG  */
+#line 233 "Step1/asm_parser.y"
+                    { 
+                        add_statement(POP_OP, POP_OPCODE,yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
 #line 1450 "asm_parser.tab.c"
     break;
 
-  case 55: /* halt_stmt: HALT  */
-#line 242 "Step1/asm_parser.y"
-                    { 
-                        add_statement(HLT_OP, HLT_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
+  case 54: /* reti_stmt: RETI  */
+#line 239 "Step1/asm_parser.y"
+                    {
+                        add_statement(RETI_OP, RETI_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     }
 #line 1458 "asm_parser.tab.c"
     break;
 
-  case 56: /* nop_stmt: NOP  */
-#line 248 "Step1/asm_parser.y"
+  case 55: /* halt_stmt: HALT  */
+#line 244 "Step1/asm_parser.y"
                     { 
-                        add_statement(NOP_OP, NOP_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
+                        add_statement(HLT_OP, HLT_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     }
 #line 1466 "asm_parser.tab.c"
     break;
 
-  case 57: /* byte_stmt: BYTE NUMBER  */
-#line 254 "Step1/asm_parser.y"
+  case 56: /* nop_stmt: NOP  */
+#line 250 "Step1/asm_parser.y"
                     { 
-                        add_statement(DOT_BYTE_OP, DOT_BYTE_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
+                        add_statement(NOP_OP, NOP_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     }
 #line 1474 "asm_parser.tab.c"
     break;
 
-  case 58: /* word_stmt: WORD NUMBER  */
-#line 260 "Step1/asm_parser.y"
+  case 57: /* byte_stmt: BYTE NUMBER  */
+#line 256 "Step1/asm_parser.y"
                     { 
-                        add_statement(DOT_WORD_OP, DOT_WORD_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
+                        add_statement(DOT_BYTE_OP, DOT_BYTE_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
 #line 1482 "asm_parser.tab.c"
     break;
 
-  case 59: /* alloc_stmt: ALLOC IDENTIFIER NUMBER  */
-#line 266 "Step1/asm_parser.y"
-                    {
-                        add_statement(DOT_ALLOC_OP, DOT_ALLOC_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
+  case 58: /* word_stmt: WORD NUMBER  */
+#line 262 "Step1/asm_parser.y"
+                    { 
+                        add_statement(DOT_WORD_OP, DOT_WORD_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
 #line 1490 "asm_parser.tab.c"
     break;
 
-  case 60: /* org_stmt: ORG NUMBER  */
-#line 272 "Step1/asm_parser.y"
+  case 59: /* alloc_stmt: ALLOC IDENTIFIER NUMBER  */
+#line 268 "Step1/asm_parser.y"
                     {
-                        add_statement(DOT_ORG_OP, DOT_ORG_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
+                        add_statement(DOT_ALLOC_OP, DOT_ALLOC_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
 #line 1498 "asm_parser.tab.c"
     break;
 
-  case 61: /* equ_stmt: EQU IDENTIFIER COMMA NUMBER  */
-#line 278 "Step1/asm_parser.y"
+  case 60: /* org_stmt: ORG NUMBER  */
+#line 274 "Step1/asm_parser.y"
                     {
-                         if(get_symbol_value(yyvsp[-3]) != UNINITIALIZED_VALUE){
+                        add_statement(DOT_ORG_OP, DOT_ORG_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
+                    }
+#line 1506 "asm_parser.tab.c"
+    break;
+
+  case 61: /* equ_stmt: EQU IDENTIFIER COMMA expression  */
+#line 280 "Step1/asm_parser.y"
+                    {
+                         if(get_symbol_value(yyvsp[-2]) != UNINITIALIZED_VALUE){
                             printf("ERROR: Constant redefinition: %s in line %ld\n", get_symbol_name(yyvsp[-3]), get_line_number());
                         }
                         else{
-                            set_symbol_value(yyvsp[-3], get_symbol_value(yyvsp[0]));
-                            yyval = yyvsp[-3];
+                            set_symbol_value(yyvsp[-2], yyvsp[0]);
+                            yyval = yyvsp[-2];
                         }
                     }
-#line 1512 "asm_parser.tab.c"
+#line 1520 "asm_parser.tab.c"
     break;
 
   case 62: /* label: IDENTIFIER COLON  */
-#line 290 "Step1/asm_parser.y"
+#line 292 "Step1/asm_parser.y"
                     { 
                         if(get_symbol_value(yyvsp[-1]) != UNINITIALIZED_VALUE){
                             printf("ERROR: Label redefinition: %s in line %ld\n", get_symbol_name(yyvsp[-1]), get_line_number());
@@ -1522,11 +1530,51 @@ yyreduce:
                             yyval = yyvsp[-1];
                         }
                     }
-#line 1526 "asm_parser.tab.c"
+#line 1534 "asm_parser.tab.c"
+    break;
+
+  case 63: /* expression: NUMBER  */
+#line 303 "Step1/asm_parser.y"
+                    {
+                        yyval = get_symbol_value(yyvsp[0]);
+                    }
+#line 1542 "asm_parser.tab.c"
+    break;
+
+  case 64: /* expression: PLUS NUMBER  */
+#line 307 "Step1/asm_parser.y"
+                    {
+                        yyval = get_symbol_value(yyvsp[0]);
+                    }
+#line 1550 "asm_parser.tab.c"
+    break;
+
+  case 65: /* expression: MINUS NUMBER  */
+#line 311 "Step1/asm_parser.y"
+                    {
+                        yyval = 0 - get_symbol_value(yyvsp[0]);
+                    }
+#line 1558 "asm_parser.tab.c"
+    break;
+
+  case 66: /* expression: expression PLUS NUMBER  */
+#line 315 "Step1/asm_parser.y"
+                    {
+                        yyval = yyval + get_symbol_value(yyvsp[0]);
+                    }
+#line 1566 "asm_parser.tab.c"
+    break;
+
+  case 67: /* expression: expression MINUS NUMBER  */
+#line 319 "Step1/asm_parser.y"
+                    {
+                        yyval = yyval - get_symbol_value(yyvsp[0]);
+                    }
+#line 1574 "asm_parser.tab.c"
     break;
 
 
-#line 1530 "asm_parser.tab.c"
+#line 1578 "asm_parser.tab.c"
 
       default: break;
     }
@@ -1719,7 +1767,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 299 "Step1/asm_parser.y"
+#line 323 "Step1/asm_parser.y"
 
 
 int yyerror(char *str)
