@@ -16,7 +16,6 @@ int yyerror(char *str);
 #define NULL_ARG    0
 
 static int bra_cond = 0;
-int set_branch_condition(int);
 
 %}
 
