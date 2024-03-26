@@ -162,11 +162,7 @@ cmp_stmt    :   CMP REG COMMA REG
 branch_stmt :   BRANCH IDENTIFIER             
                     {
                         add_statement(BXX_OP, yylval, $2, NULL_ARG, NULL_ARG, NO_TYPE); 
-                    };
-            /*|   BRANCH REG COMMA CARDINAL NUMBER   
-                    {
-                        add_statement(BXX_OP, yylval, $2, NULL_ARG, NULL_ARG, NO_TYPE); 
-                    };*/        
+                    };     
 
 
 move_stmt   :   MOVE REG COMMA REG                        

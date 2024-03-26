@@ -569,9 +569,9 @@ static const yytype_int16 yyrline[] =
       69,    70,    71,    72,    73,    74,    75,    76,    77,    78,
       79,    80,    81,    82,    83,    84,    85,    86,    91,    95,
      102,   106,   113,   117,   123,   127,   134,   138,   145,   149,
-     156,   162,   172,   178,   182,   189,   194,   198,   205,   209,
-     216,   222,   228,   233,   239,   245,   252,   259,   265,   271,
-     284
+     156,   162,   168,   174,   178,   185,   190,   194,   201,   205,
+     212,   218,   224,   229,   235,   241,   248,   255,   261,   267,
+     280
 };
 #endif
 
@@ -1339,7 +1339,7 @@ yyreduce:
     break;
 
   case 42: /* move_stmt: MOVE REG COMMA REG  */
-#line 173 "Step1/asm_parser.y"
+#line 169 "Step1/asm_parser.y"
                     {
                         add_statement(ADD_OP, ADD_OPCODE, yyvsp[-2], yyvsp[0], 0, IMMEDIATE);
                     }
@@ -1347,7 +1347,7 @@ yyreduce:
     break;
 
   case 43: /* jump_stmt: JUMP REG COMMA CARDINAL NUMBER  */
-#line 179 "Step1/asm_parser.y"
+#line 175 "Step1/asm_parser.y"
                     { 
                         add_statement(JMP_OP, JMP_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, NO_TYPE); 
                     }
@@ -1355,7 +1355,7 @@ yyreduce:
     break;
 
   case 44: /* jump_stmt: JUMP_LINK REG COMMA REG COMMA CARDINAL NUMBER  */
-#line 183 "Step1/asm_parser.y"
+#line 179 "Step1/asm_parser.y"
                     {
                         add_statement(JMP_OP, JMP_OPCODE, yyvsp[-5], yyvsp[-3] , yyvsp[0], LINK);
                     }
@@ -1363,7 +1363,7 @@ yyreduce:
     break;
 
   case 45: /* load_stmt: LOAD_DIRECT REG COMMA CARDINAL NUMBER  */
-#line 190 "Step1/asm_parser.y"
+#line 186 "Step1/asm_parser.y"
                     { 
                         add_statement(LD_OP, LD_OPCODE, yyvsp[-3], NULL_ARG, yyvsp[0], NO_TYPE); 
                     }
@@ -1371,7 +1371,7 @@ yyreduce:
     break;
 
   case 46: /* load_stmt: LOAD_IMMEDIATE REG COMMA CARDINAL NUMBER  */
-#line 195 "Step1/asm_parser.y"
+#line 191 "Step1/asm_parser.y"
                     {
                         add_statement(LDI_OP, LDI_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, NO_TYPE); 
                     }
@@ -1379,7 +1379,7 @@ yyreduce:
     break;
 
   case 47: /* load_stmt: LOAD_INDEXED REG COMMA REG COMMA CARDINAL NUMBER  */
-#line 199 "Step1/asm_parser.y"
+#line 195 "Step1/asm_parser.y"
                     { 
                         add_statement(LDX_OP, LDX_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], NO_TYPE); 
                     }
@@ -1387,7 +1387,7 @@ yyreduce:
     break;
 
   case 48: /* store_stmt: STORE_DIRECT REG COMMA CARDINAL NUMBER  */
-#line 206 "Step1/asm_parser.y"
+#line 202 "Step1/asm_parser.y"
                     { 
                         add_statement(ST_OP,ST_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, NO_TYPE); 
                     }
@@ -1395,7 +1395,7 @@ yyreduce:
     break;
 
   case 49: /* store_stmt: STORE_INDEXED REG COMMA REG COMMA CARDINAL NUMBER  */
-#line 210 "Step1/asm_parser.y"
+#line 206 "Step1/asm_parser.y"
                     { 
                         add_statement(STX_OP, ST_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], NO_TYPE);
                     }
@@ -1403,7 +1403,7 @@ yyreduce:
     break;
 
   case 50: /* push_stmt: PUSH REG  */
-#line 217 "Step1/asm_parser.y"
+#line 213 "Step1/asm_parser.y"
                     { 
                         add_statement(PUSH_OP,PUSH_OPCODE,yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
@@ -1411,7 +1411,7 @@ yyreduce:
     break;
 
   case 51: /* pop_stmt: POP REG  */
-#line 223 "Step1/asm_parser.y"
+#line 219 "Step1/asm_parser.y"
                     { 
                         add_statement(POP_OP, POP_OPCODE,yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
@@ -1419,7 +1419,7 @@ yyreduce:
     break;
 
   case 52: /* reti_stmt: RETI  */
-#line 229 "Step1/asm_parser.y"
+#line 225 "Step1/asm_parser.y"
                     {
                         add_statement(RETI_OP, RETI_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     }
@@ -1427,7 +1427,7 @@ yyreduce:
     break;
 
   case 53: /* halt_stmt: HALT  */
-#line 234 "Step1/asm_parser.y"
+#line 230 "Step1/asm_parser.y"
                     { 
                         add_statement(HLT_OP, HLT_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     }
@@ -1435,7 +1435,7 @@ yyreduce:
     break;
 
   case 54: /* nop_stmt: NOP  */
-#line 240 "Step1/asm_parser.y"
+#line 236 "Step1/asm_parser.y"
                     { 
                         add_statement(NOP_OP, NOP_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     }
@@ -1443,7 +1443,7 @@ yyreduce:
     break;
 
   case 55: /* byte_stmt: BYTE NUMBER  */
-#line 246 "Step1/asm_parser.y"
+#line 242 "Step1/asm_parser.y"
                     { 
                         /*sym_table[$1].value = sym_table[$3].value; 
                         $$ = $1;*/
@@ -1452,7 +1452,7 @@ yyreduce:
     break;
 
   case 56: /* word_stmt: WORD NUMBER  */
-#line 253 "Step1/asm_parser.y"
+#line 249 "Step1/asm_parser.y"
                     { 
                         /*sym_table[$1].value = sym_table[$3].value; 
                         $$ = $1;*/
@@ -1461,7 +1461,7 @@ yyreduce:
     break;
 
   case 57: /* alloc_stmt: ALLOC IDENTIFIER NUMBER  */
-#line 260 "Step1/asm_parser.y"
+#line 256 "Step1/asm_parser.y"
                     {
 
                     }
@@ -1469,7 +1469,7 @@ yyreduce:
     break;
 
   case 58: /* org_stmt: ORG NUMBER  */
-#line 266 "Step1/asm_parser.y"
+#line 262 "Step1/asm_parser.y"
                     {
                         add_statement(DOT_ORG_OP, DOT_ORG_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
@@ -1477,7 +1477,7 @@ yyreduce:
     break;
 
   case 59: /* equ_stmt: EQU IDENTIFIER COMMA NUMBER  */
-#line 272 "Step1/asm_parser.y"
+#line 268 "Step1/asm_parser.y"
                     {
                          if(get_symbol_value(yyvsp[-3]) != UNINITIALIZED_VALUE){
                             printf("ERROR: Constant redefinition: %s in line %ld\n", get_symbol_name(yyvsp[-3]), get_line_number());
@@ -1491,7 +1491,7 @@ yyreduce:
     break;
 
   case 60: /* label: IDENTIFIER COLON  */
-#line 285 "Step1/asm_parser.y"
+#line 281 "Step1/asm_parser.y"
                     { 
                         if(get_symbol_value(yyvsp[-1]) != UNINITIALIZED_VALUE){
                             printf("ERROR: Label redefinition: %s in line %ld\n", get_symbol_name(yyvsp[-1]), get_line_number());
@@ -1698,7 +1698,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 294 "Step1/asm_parser.y"
+#line 290 "Step1/asm_parser.y"
 
 
 

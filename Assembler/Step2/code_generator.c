@@ -18,8 +18,8 @@ static int check_immed(int value, int width, int i);
 static void clear_file(char *file_name);
 
 
-uint32_t generate_code(){
-    
+uint32_t generate_code()
+{    
     FILE *fp_hex;
     FILE *fp_bin;
     char *file_name_bin = "code.coe";
@@ -61,7 +61,7 @@ uint32_t generate_code(){
                 code |= (0x1f & get_symbol_value(current_statement.op1)) << 22;
                 code |= (0x1f & get_symbol_value(current_statement.op2)) << 17;
                 break;
-
+                
 
             case ADD_OP ... AND_OP:
             case XOR_OP ... CMP_OP:
@@ -165,8 +165,8 @@ uint32_t generate_code(){
 
 
 
-static void print_code(FILE *fp_hex, FILE *fp_bin, int code, uint8_t inst_size, uint32_t *lc, uint32_t i){
-   
+static void print_code(FILE *fp_hex, FILE *fp_bin, int code, uint8_t inst_size, uint32_t *lc, uint32_t i)
+{
     print_code_hex(fp_hex, code, inst_size, *lc);
 
     *lc += inst_size;
@@ -174,7 +174,8 @@ static void print_code(FILE *fp_hex, FILE *fp_bin, int code, uint8_t inst_size, 
 
 
 
-static void print_code_hex(FILE *fp, int code, uint8_t inst_size, uint32_t lc){
+static void print_code_hex(FILE *fp, int code, uint8_t inst_size, uint32_t lc)
+{
     fprintf(fp, "@%04x", lc);
 
     for(uint8_t j = inst_size; j > 0; j--){
@@ -186,8 +187,8 @@ static void print_code_hex(FILE *fp, int code, uint8_t inst_size, uint32_t lc){
 
 
 
-static int check_immed(int value, int width, int i){
-
+static int check_immed(int value, int width, int i)
+{
     int max_possible = 1 << (width-1);
 
     if((value >= max_possible) || (value <= -max_possible)){
