@@ -40,13 +40,12 @@ void init_statements_list(){
 
 /// @brief function to add a statement to the statements list
 /// @param list -> pointer to statement list
-/// @param op_type 
 /// @param op_code 
 /// @param op1 
 /// @param op2 
 /// @param op3 
 /// @param misc
-uint8_t add_statement(uint32_t op_type, uint32_t op_code, uint32_t op1, uint32_t op2, uint32_t op3, uint32_t misc){
+uint8_t add_statement(uint32_t op_code, uint32_t op1, uint32_t op2, uint32_t op3, uint32_t misc){
     if(curr_stmt >= stmt_list_size){
         stmt_list_size += INC_STMT_LIST;
         stmt_list = (statement_t*) realloc(stmt_list, sizeof(statement_t) * stmt_list_size);
@@ -58,7 +57,6 @@ uint8_t add_statement(uint32_t op_type, uint32_t op_code, uint32_t op1, uint32_t
         }
     }
 
-    stmt_list[curr_stmt].op_type    = op_type;
     stmt_list[curr_stmt].op_code    = op_code;
     stmt_list[curr_stmt].op1        = op1;
     stmt_list[curr_stmt].op2        = op2;
@@ -68,7 +66,7 @@ uint8_t add_statement(uint32_t op_type, uint32_t op_code, uint32_t op1, uint32_t
 
     curr_stmt++;
 
-    if(op_type == DOT_ORG_OP){
+    if(op_code == DOT_ORG_OP){
         location_counter = get_symbol_value(op2);
     }
     else{
@@ -99,20 +97,19 @@ const uint32_t get_current_stmt_index(){
 /// @brief function to print all statements list
 /// @param list 
 void print_statements(){
-    printf("\n\n***************INTERMEDIATE REPRESENTATION***************\n");
-    printf("LINE    TYPE    OPCODE      OP1     OP2     OP3     MISC\n");
+    printf("\n\n*************INTERMEDIATE REPRESENTATION*************\n");
+    printf("LINE    OPCODE      OP1     OP2     OP3     MISC\n");
     printf("----------------------------------------------------------\n");
    
     for (int i = 0; i < curr_stmt; i++){
-        printf("%02d       %02d       %02d        %03d     %03d     %03d      %d\n", stmt_list[i].line_num,
-                                                                                     stmt_list[i].op_type,
-                                                                                     stmt_list[i].op_code,
-                                                                                     stmt_list[i].op1,
-                                                                                     stmt_list[i].op2, 
-                                                                                     stmt_list[i].op3,
-                                                                                     stmt_list[i].misc);
+        printf("%02d       %02d        %03d     %03d     %03d      %d\n", stmt_list[i].line_num,
+                                                                          stmt_list[i].op_code,
+                                                                          stmt_list[i].op1,
+                                                                          stmt_list[i].op2, 
+                                                                          stmt_list[i].op3,
+                                                                          stmt_list[i].misc);
     }
 
-    printf("**********************************************************\n\n");
+    printf("******************************************************\n\n");
     printf("Location counter: %d", location_counter);
 }

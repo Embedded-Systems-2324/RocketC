@@ -9,7 +9,6 @@
 
 
 typedef struct{
-    uint32_t op_type;
     uint32_t op_code;
     uint32_t op1;
     uint32_t op2;
@@ -19,9 +18,8 @@ typedef struct{
 }statement_t;
 
 
-
 void init_statements_list();
-uint8_t add_statement(uint32_t op_type, uint32_t op_code, uint32_t op1, uint32_t op2, uint32_t op3, uint32_t misc);
+uint8_t add_statement(uint32_t op_code, uint32_t op1, uint32_t op2, uint32_t op3, uint32_t misc);
 
 const uint32_t get_location_counter();
 const uint32_t get_current_stmt_index();

@@ -6,5 +6,6 @@
 //int yyparse();
 void init_lexer();
 TokenType getToken(void);
+int set_branch_condition(int);
 
 #endif

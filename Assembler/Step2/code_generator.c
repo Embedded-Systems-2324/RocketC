@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <unistd.h>
 #include "../Step2/code_generator.h"
 #include "../Util/asm_operations.h"
 #include "../Util/symbol_table.h"
@@ -7,94 +8,88 @@
 #include "../Util/logger.h"
 #include "../main.h"
 
+
 #define IMMED16 16
 #define IMMED17 17
 #define IMMED22 22
 #define IMMED23 23
 
-static void print_code(FILE *fp_hex, FILE *fp_bin, int code, uint8_t inst_size, uint32_t *lc, uint32_t i);
-static void print_code_hex(FILE *fp, int code, uint8_t inst_size, uint32_t lc);
-static int check_immed(int value, int width, int i);
-static void clear_file(char *file_name);
+static FILE* fp_hex;
+
+/* Private module functions */
+static void print_code_hex(uint32_t code, uint8_t inst_size, uint32_t *lc);
+static int check_immed(uint32_t value, uint32_t width, uint32_t line);
 
 
-uint32_t generate_code()
+/// @brief Generates the binary code using statements list, symbol table and opcode table
+/// @return none
+void generate_code()
 {    
-    FILE *fp_hex;
-    FILE *fp_bin;
-    char *file_name_bin = "code.coe";
     uint32_t code = 0;
     statement_t current_statement;
     uint32_t lc = 0;
     uint8_t inst_size = 0;
     uint8_t error = 0;
 
-    fp_hex = fopen("out.hex", "w");
-    if (fp_hex == NULL) {
-        LOG_DEBUG("Error Opening File: \n", "out");
-        return 0;
-    }
-    
-    fp_bin = fopen(file_name_bin, "w");
-    if (fp_bin == NULL) {
-        LOG_DEBUG("Error Opening File: \n", file_name_bin);
-        return 0;
-    }
+    get_output_file(&fp_hex);
 
-    fprintf(fp_bin, "memory_initialization_radix=2;\n memory_initialization_vector=\n");
-
-    for (uint32_t i = 0; i < get_current_stmt_index(); i++){
-        
+    for (uint32_t i = 0; i < get_current_stmt_index(); i++)
+    {
         inst_size = 4;
         code = 0;
         current_statement = get_statement(i);
         
-        switch (current_statement.op_type){
-            case NOP_OP:
-            case HLT_OP:
+        switch (current_statement.op_code){
+            case NOP_OPCODE:
+            case HLT_OPCODE:
                 code |= (0x1f & current_statement.op_code) << 27;
                 break;
 
 
-            case NOT_OP:
+            case NOT_OPCODE:
                 code |= (0x1f & current_statement.op_code) << 27;
-                code |= (0x1f & get_symbol_value(current_statement.op1)) << 22;
-                code |= (0x1f & get_symbol_value(current_statement.op2)) << 17;
+                code |= (0x1f & current_statement.op1) << 22;
+                code |= (0x1f & current_statement.op2) << 17;
                 break;
                 
 
-            case ADD_OP ... AND_OP:
-            case XOR_OP ... CMP_OP:
+            case ADD_OPCODE:
+            case SUB_OPCODE:
+            case OR_OPCODE:
+            case AND_OPCODE:
+            case XOR_OPCODE:
+            case CMP_OPCODE:
                 code |= (0x1f & current_statement.op_code) << 27;
-                code |= (0x1f & get_symbol_value(current_statement.op1)) << 22;
-                code |= (0x1f & get_symbol_value(current_statement.op2)) << 17;
+                code |= (0x1f & current_statement.op1) << 22;
+                code |= (0x1f & current_statement.op2) << 17;
                 
                 if(current_statement.misc == IMMEDIATE){
-                    error = check_immed(get_symbol_value(current_statement.op3), IMMED16, i);
+                    error |= check_immed(current_statement.op3, IMMED16, i);
                     code |= 1 << 16;
-                    code |= (0xffff & get_symbol_value(current_statement.op3));
+                    code |= (0xffff & current_statement.op3);
                 }
                 else{
-                    code |= (0x1f & get_symbol_value(current_statement.op3)) << 11;
+                    code |= (0x1f & current_statement.op3) << 11;
                 }
                 break;
 
 
-            case BXX_OP:
+            case BXX_OPCODE:
                 code |= (0x1f & current_statement.op_code) << 27;
-                code |= (0xf & current_statement.op_type) << 23;
+                code |= (0xf & current_statement.misc) << 23;
                 
                 if(get_symbol_value(current_statement.op1) == 0){
-                    printf("Uninitialized symbol %d\n", get_symbol_value(current_statement.op1));
+                    LOG_ERROR("Uninitialized symbol %d\n", get_symbol_value(current_statement.op1));
+                    error |= 1;
                 }
                 int brx_displ = get_symbol_value(current_statement.op1) - (lc - 4);
-                error = check_immed(brx_displ, IMMED23, i);
+                error |= check_immed(brx_displ, IMMED23, i);
 
                 code |= (0x7fffff & brx_displ);
                 break;
 
 
-            case JMP_OP:
+            case JMP_OPCODE:
                 code |= (0x1f & current_statement.op_code) << 27;
                 
                 if(current_statement.misc == LINK){
@@ -106,27 +101,28 @@ uint32_t generate_code()
                 break;
 
 
-            case LD_OP ... LDI_OP:
-            case ST_OP:
+            case ST_OPCODE:
+            case LD_OPCODE:
+            case LDI_OPCODE:
                 code |= (0x1f & current_statement.op_code) << 27;
                 code |= (0x1f & get_symbol_value(current_statement.op1)) << 22;
                 
-                error = check_immed(get_symbol_value(current_statement.op2), IMMED22, i);
+                error |= check_immed(get_symbol_value(current_statement.op2), IMMED22, i);
                 code |= (0x3fffff & get_symbol_value(current_statement.op2));
                 break;
 
-            case LDX_OP:
-            case STX_OP:
+            case LDX_OPCODE:
+            case STX_OPCODE:
                 code |= (0x1f & current_statement.op_code) << 27;
                 code |= (0x1f & get_symbol_value(current_statement.op1)) << 22;
                 code |= (0x1f & get_symbol_value(current_statement.op2)) << 17;
-                error = check_immed(get_symbol_value(current_statement.op3), IMMED17, i);
+                error |= check_immed(get_symbol_value(current_statement.op3), IMMED17, i);
                 code |= (0x1ffff & get_symbol_value(current_statement.op3));
                 break;
 
 
             case DOT_BYTE_OP:
-                error = check_immed(get_symbol_value(current_statement.op1), 8, i);
+                error |= check_immed(get_symbol_value(current_statement.op1), 8, i);
                 code = get_symbol_value(current_statement.op1) & 0xff;
                 inst_size = 1;
                 break;
@@ -138,8 +134,9 @@ uint32_t generate_code()
 
 
             case DOT_ALLOC_OP:
-                for (int j = 1; j <= get_symbol_value(current_statement.op1); j++)
-                    print_code(fp_hex, fp_bin, 0, 1, &lc, i);
+                for (int j = 1; j <= get_symbol_value(current_statement.op1); j++){
+                    print_code_hex(0, 4, &lc);
+                }
                 break;
 
             case DOT_ORG_OP:
@@ -147,63 +144,53 @@ uint32_t generate_code()
                 break;    
 
             default:
+                LOG_ERROR("Invalid operation in statements list in %d line\n");
                 break;
         }
         
-        if (current_statement.op_type < DOT_ALLOC_OP)
-            print_code(fp_hex, fp_bin, code, inst_size, &lc, i);
+        if (current_statement.op_code != DOT_ALLOC_OP || current_statement.op_code != DOT_ORG_OP){
+            print_code_hex(code, inst_size, &lc);
+        }
     }
 
-    fclose(fp_hex);
-    fclose(fp_bin);
-
     if(error){
-        clear_file("out.hex");
-        //clear_file(file_name_bin);
+        int fd = fileno(fp_hex);
+        ftruncate(fd, 0);    //clear output file
     }
 }
 
 
-
-static void print_code(FILE *fp_hex, FILE *fp_bin, int code, uint8_t inst_size, uint32_t *lc, uint32_t i)
+/// @brief Prints the generated code to a file, in hexa format
+/// @param code 
+/// @param inst_size 
+/// @param lc 
+static void print_code_hex(uint32_t code, uint8_t inst_size, uint32_t *lc)
 {
-    print_code_hex(fp_hex, code, inst_size, *lc);
+    fprintf(fp_hex, "@%04x", *lc);
+
+    for(uint8_t j = inst_size; j > 0; j--){
+        fprintf(fp_hex, " %02x", (0xff & (code >> (8 * (j-1)))));
+    }
+    fprintf(fp_hex,"\n");
 
     *lc += inst_size;
 }
 
 
 
-static void print_code_hex(FILE *fp, int code, uint8_t inst_size, uint32_t lc)
-{
-    fprintf(fp, "@%04x", lc);
-
-    for(uint8_t j = inst_size; j > 0; j--){
-        fprintf(fp, " %02x", (0xff & (code >> (8 * (j-1)))));
-    }
-    fprintf(fp,"\n");
-}
-
-
-
-
-static int check_immed(int value, int width, int i)
+/// @brief Checks whether the immediate value is within the range defined by the number of bits
+/// @param value 
+/// @param width 
+/// @param line
+/// @return 1 if error and 0 if no error
+static int check_immed(uint32_t value, uint32_t width, uint32_t line)
 {
     int max_possible = 1 << (width-1);
 
     if((value >= max_possible) || (value <= -max_possible)){
-        printf("The value: %d, must be smaller than: %d", value, max_possible);
+        LOG_ERROR("ERROR in line %d: The value %d, must be smaller than %d\n", line, value, max_possible);
         return 1;
     }
 
     return 0;
 }
-
-
-
-static void clear_file(char *file_name) {
-    FILE *fp = fopen(file_name, "w");
-    if (fp != NULL) {
-        fclose(fp);
-    }
-}        

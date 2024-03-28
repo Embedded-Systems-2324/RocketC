@@ -1,14 +1,13 @@
 Terminais não usados na gramática
 
-    ERROR
-    DOLAR
+    TOKEN_ERROR
 
 
 Gramática
 
     0 $accept: prog $end
 
-    1 prog: prog ENDFILE
+    1 prog: prog TOKEN_ENDFILE
     2     | prog stmt
     3     | stmt
 
@@ -36,216 +35,234 @@ Gramática
    25     | equ_stmt
    26     | label
 
-   27 add_stmt: ADD REG COMMA REG COMMA REG
-   28         | ADD REG COMMA REG COMMA CARDINAL NUMBER
+   27 add_stmt: TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG
+   28         | TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-   29 sub_stmt: SUB REG COMMA REG COMMA REG
-   30         | SUB REG COMMA REG COMMA CARDINAL NUMBER
+   29 sub_stmt: TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG
+   30         | TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-   31 or_stmt: OR REG COMMA REG COMMA REG
-   32        | OR REG COMMA REG COMMA CARDINAL NUMBER
+   31 or_stmt: TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG
+   32        | TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-   33 and_stmt: AND REG COMMA REG COMMA REG
-   34         | AND REG COMMA REG COMMA CARDINAL NUMBER
+   33 and_stmt: TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG
+   34         | TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-   35 xor_stmt: XOR REG COMMA REG COMMA REG
-   36         | XOR REG COMMA REG COMMA CARDINAL NUMBER
+   35 xor_stmt: TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG
+   36         | TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-   37 not_stmt: NOT REG COMMA REG
-   38         | NOT REG COMMA CARDINAL NUMBER
+   37 not_stmt: TOKEN_NOT TOKEN_REG TOKEN_COMMA TOKEN_REG
+   38         | TOKEN_NOT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-   39 cmp_stmt: CMP REG COMMA REG
+   39 cmp_stmt: TOKEN_CMP TOKEN_REG TOKEN_COMMA TOKEN_REG
+   40         | TOKEN_CMP TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-   40 branch_stmt: BRANCH IDENTIFIER
+   41 branch_stmt: TOKEN_BRANCH TOKEN_IDENTIFIER
+   42            | TOKEN_BRANCH TOKEN_CARDINAL expression
+   43            | TOKEN_BRANCH TOKEN_DOLLAR
 
-   41 move_stmt: MOVE REG COMMA REG
+   44 move_stmt: TOKEN_MOVE TOKEN_REG TOKEN_COMMA TOKEN_REG
 
-   42 jump_stmt: JUMP REG COMMA CARDINAL NUMBER
-   43          | JUMP_LINK REG COMMA REG COMMA CARDINAL NUMBER
+   45 jump_stmt: TOKEN_JUMP TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
+   46          | TOKEN_JUMP_LINK TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-   44 load_stmt: LOAD_DIRECT REG COMMA CARDINAL NUMBER
-   45          | LOAD_IMMEDIATE REG COMMA CARDINAL NUMBER
-   46          | LOAD_INDEXED REG COMMA REG COMMA CARDINAL NUMBER
+   47 load_stmt: TOKEN_LOAD_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
+   48          | TOKEN_LOAD_IMMEDIATE TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
+   49          | TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-   47 store_stmt: STORE_DIRECT REG COMMA CARDINAL NUMBER
-   48           | STORE_INDEXED REG COMMA REG COMMA CARDINAL NUMBER
+   50 store_stmt: TOKEN_STORE_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
+   51           | TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-   49 push_stmt: PUSH REG
+   52 push_stmt: TOKEN_PUSH TOKEN_REG
 
-   50 pop_stmt: POP REG
+   53 pop_stmt: TOKEN_POP TOKEN_REG
 
-   51 reti_stmt: RETI
+   54 reti_stmt: TOKEN_RETI
 
-   52 halt_stmt: HALT
+   55 halt_stmt: TOKEN_HALT
 
-   53 nop_stmt: NOP
+   56 nop_stmt: TOKEN_NOP
 
-   54 byte_stmt: BYTE NUMBER
+   57 byte_stmt: TOKEN_BYTE TOKEN_NUMBER
 
-   55 word_stmt: WORD NUMBER
+   58 word_stmt: TOKEN_WORD TOKEN_NUMBER
 
-   56 alloc_stmt: ALLOC IDENTIFIER NUMBER
+   59 alloc_stmt: TOKEN_ALLOC TOKEN_IDENTIFIER TOKEN_NUMBER
 
-   57 org_stmt: ORG NUMBER
+   60 org_stmt: TOKEN_ORG TOKEN_NUMBER
 
-   58 equ_stmt: EQU IDENTIFIER COMMA NUMBER
+   61 equ_stmt: TOKEN_EQU TOKEN_IDENTIFIER TOKEN_COMMA expression
 
-   59 label: IDENTIFIER COLON
+   62 label: TOKEN_IDENTIFIER TOKEN_COLON
+
+   63 expression: TOKEN_LEFT_PAREN expression TOKEN_RIGHT_PAREN
+   64           | expression TOKEN_PLUS expression
+   65           | expression TOKEN_MINUS expression
+   66           | TOKEN_PLUS TOKEN_NUMBER
+   67           | TOKEN_MINUS TOKEN_NUMBER
+   68           | TOKEN_NUMBER
+   69           | TOKEN_IDENTIFIER
 
 
 Terminais, com regras onde aparecem
 
     $end (0) 0
     error (256)
-    ADD (258) 27 28
-    SUB (259) 29 30
-    OR (260) 31 32
-    AND (261) 33 34
-    NOT (262) 37 38
-    XOR (263) 35 36
-    CMP (264) 39
-    BRANCH (265) 40
-    JUMP (266) 42
-    JUMP_LINK (267) 43
-    MOVE (268) 41
-    LOAD_DIRECT (269) 44
-    LOAD_IMMEDIATE (270) 45
-    LOAD_INDEXED (271) 46
-    STORE_DIRECT (272) 47
-    STORE_INDEXED (273) 48
-    PUSH (274) 49
-    POP (275) 50
-    RETI (276) 51
-    HALT (277) 52
-    NOP (278) 53
-    NUMBER (279) 28 30 32 34 36 38 42 43 44 45 46 47 48 54 55 56 57 58
-    REG (280) 27 28 29 30 31 32 33 34 35 36 37 38 39 41 42 43 44 45 46 47 48 49 50
-    IDENTIFIER (281) 40 56 58 59
-    ENDFILE (282) 1
-    ERROR (283)
-    COMMA (284) 27 28 29 30 31 32 33 34 35 36 37 38 39 41 42 43 44 45 46 47 48 58
-    CARDINAL (285) 28 30 32 34 36 38 42 43 44 45 46 47 48
-    COLON (286) 59
-    DOLAR (287)
-    BYTE (288) 54
-    WORD (289) 55
-    ALLOC (290) 56
-    ORG (291) 57
-    EQU (292) 58
+    TOKEN_ADD (258) 27 28
+    TOKEN_SUB (259) 29 30
+    TOKEN_OR (260) 31 32
+    TOKEN_AND (261) 33 34
+    TOKEN_NOT (262) 37 38
+    TOKEN_XOR (263) 35 36
+    TOKEN_CMP (264) 39 40
+    TOKEN_BRANCH (265) 41 42 43
+    TOKEN_JUMP (266) 45
+    TOKEN_JUMP_LINK (267) 46
+    TOKEN_MOVE (268) 44
+    TOKEN_LOAD_DIRECT (269) 47
+    TOKEN_LOAD_IMMEDIATE (270) 48
+    TOKEN_LOAD_INDEXED (271) 49
+    TOKEN_STORE_DIRECT (272) 50
+    TOKEN_STORE_INDEXED (273) 51
+    TOKEN_PUSH (274) 52
+    TOKEN_POP (275) 53
+    TOKEN_RETI (276) 54
+    TOKEN_HALT (277) 55
+    TOKEN_NOP (278) 56
+    TOKEN_NUMBER (279) 57 58 59 60 66 67 68
+    TOKEN_REG (280) 27 28 29 30 31 32 33 34 35 36 37 38 39 40 44 45 46 47 48 49 50 51 52 53
+    TOKEN_IDENTIFIER (281) 41 59 61 62 69
+    TOKEN_ENDFILE (282) 1
+    TOKEN_ERROR (283)
+    TOKEN_COMMA (284) 27 28 29 30 31 32 33 34 35 36 37 38 39 40 44 45 46 47 48 49 50 51 61
+    TOKEN_CARDINAL (285) 28 30 32 34 36 38 40 42 45 46 47 48 49 50 51
+    TOKEN_COLON (286) 62
+    TOKEN_DOLLAR (287) 43
+    TOKEN_BYTE (288) 57
+    TOKEN_WORD (289) 58
+    TOKEN_ALLOC (290) 59
+    TOKEN_ORG (291) 60
+    TOKEN_EQU (292) 61
+    TOKEN_PLUS (293) 64 66
+    TOKEN_MINUS (294) 65 67
+    TOKEN_LEFT_PAREN (295) 63
+    TOKEN_RIGHT_PAREN (296) 63
 
 
 Não terminais, com regras onde aparecem
 
-    $accept (38)
+    $accept (42)
         à esquerda: 0
-    prog (39)
+    prog (43)
         à esquerda: 1 2 3
         à direita: 0 1 2
-    stmt (40)
+    stmt (44)
         à esquerda: 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26
         à direita: 2 3
-    add_stmt (41)
+    add_stmt (45)
         à esquerda: 27 28
         à direita: 4
-    sub_stmt (42)
+    sub_stmt (46)
         à esquerda: 29 30
         à direita: 5
-    or_stmt (43)
+    or_stmt (47)
         à esquerda: 31 32
         à direita: 6
-    and_stmt (44)
+    and_stmt (48)
         à esquerda: 33 34
         à direita: 7
-    xor_stmt (45)
+    xor_stmt (49)
         à esquerda: 35 36
         à direita: 9
-    not_stmt (46)
+    not_stmt (50)
         à esquerda: 37 38
         à direita: 8
-    cmp_stmt (47)
-        à esquerda: 39
+    cmp_stmt (51)
+        à esquerda: 39 40
         à direita: 10
-    branch_stmt (48)
-        à esquerda: 40
+    branch_stmt (52)
+        à esquerda: 41 42 43
         à direita: 11
-    move_stmt (49)
-        à esquerda: 41
+    move_stmt (53)
+        à esquerda: 44
         à direita: 12
-    jump_stmt (50)
-        à esquerda: 42 43
+    jump_stmt (54)
+        à esquerda: 45 46
         à direita: 13
-    load_stmt (51)
-        à esquerda: 44 45 46
+    load_stmt (55)
+        à esquerda: 47 48 49
         à direita: 14
-    store_stmt (52)
-        à esquerda: 47 48
+    store_stmt (56)
+        à esquerda: 50 51
         à direita: 15
-    push_stmt (53)
-        à esquerda: 49
-        à direita: 16
-    pop_stmt (54)
-        à esquerda: 50
-        à direita: 17
-    reti_stmt (55)
-        à esquerda: 51
-        à direita: 18
-    halt_stmt (56)
+    push_stmt (57)
         à esquerda: 52
-        à direita: 19
-    nop_stmt (57)
+        à direita: 16
+    pop_stmt (58)
         à esquerda: 53
-        à direita: 20
-    byte_stmt (58)
+        à direita: 17
+    reti_stmt (59)
         à esquerda: 54
-        à direita: 21
-    word_stmt (59)
+        à direita: 18
+    halt_stmt (60)
         à esquerda: 55
-        à direita: 22
-    alloc_stmt (60)
+        à direita: 19
+    nop_stmt (61)
         à esquerda: 56
-        à direita: 23
-    org_stmt (61)
+        à direita: 20
+    byte_stmt (62)
         à esquerda: 57
-        à direita: 24
-    equ_stmt (62)
+        à direita: 21
+    word_stmt (63)
         à esquerda: 58
-        à direita: 25
-    label (63)
+        à direita: 22
+    alloc_stmt (64)
         à esquerda: 59
+        à direita: 23
+    org_stmt (65)
+        à esquerda: 60
+        à direita: 24
+    equ_stmt (66)
+        à esquerda: 61
+        à direita: 25
+    label (67)
+        à esquerda: 62
         à direita: 26
+    expression (68)
+        à esquerda: 63 64 65 66 67 68 69
+        à direita: 28 30 32 34 36 38 40 42 45 46 47 48 49 50 51 61 63 64 65
 
 
 Estado 0
 
     0 $accept: • prog $end
 
-    ADD             troca e vai para estado 1
-    SUB             troca e vai para estado 2
-    OR              troca e vai para estado 3
-    AND             troca e vai para estado 4
-    NOT             troca e vai para estado 5
-    XOR             troca e vai para estado 6
-    CMP             troca e vai para estado 7
-    BRANCH          troca e vai para estado 8
-    JUMP            troca e vai para estado 9
-    JUMP_LINK       troca e vai para estado 10
-    MOVE            troca e vai para estado 11
-    LOAD_DIRECT     troca e vai para estado 12
-    LOAD_IMMEDIATE  troca e vai para estado 13
-    LOAD_INDEXED    troca e vai para estado 14
-    STORE_DIRECT    troca e vai para estado 15
-    STORE_INDEXED   troca e vai para estado 16
-    PUSH            troca e vai para estado 17
-    POP             troca e vai para estado 18
-    RETI            troca e vai para estado 19
-    HALT            troca e vai para estado 20
-    NOP             troca e vai para estado 21
-    IDENTIFIER      troca e vai para estado 22
-    BYTE            troca e vai para estado 23
-    WORD            troca e vai para estado 24
-    ALLOC           troca e vai para estado 25
-    ORG             troca e vai para estado 26
-    EQU             troca e vai para estado 27
+    TOKEN_ADD             troca e vai para estado 1
+    TOKEN_SUB             troca e vai para estado 2
+    TOKEN_OR              troca e vai para estado 3
+    TOKEN_AND             troca e vai para estado 4
+    TOKEN_NOT             troca e vai para estado 5
+    TOKEN_XOR             troca e vai para estado 6
+    TOKEN_CMP             troca e vai para estado 7
+    TOKEN_BRANCH          troca e vai para estado 8
+    TOKEN_JUMP            troca e vai para estado 9
+    TOKEN_JUMP_LINK       troca e vai para estado 10
+    TOKEN_MOVE            troca e vai para estado 11
+    TOKEN_LOAD_DIRECT     troca e vai para estado 12
+    TOKEN_LOAD_IMMEDIATE  troca e vai para estado 13
+    TOKEN_LOAD_INDEXED    troca e vai para estado 14
+    TOKEN_STORE_DIRECT    troca e vai para estado 15
+    TOKEN_STORE_INDEXED   troca e vai para estado 16
+    TOKEN_PUSH            troca e vai para estado 17
+    TOKEN_POP             troca e vai para estado 18
+    TOKEN_RETI            troca e vai para estado 19
+    TOKEN_HALT            troca e vai para estado 20
+    TOKEN_NOP             troca e vai para estado 21
+    TOKEN_IDENTIFIER      troca e vai para estado 22
+    TOKEN_BYTE            troca e vai para estado 23
+    TOKEN_WORD            troca e vai para estado 24
+    TOKEN_ALLOC           troca e vai para estado 25
+    TOKEN_ORG             troca e vai para estado 26
+    TOKEN_EQU             troca e vai para estado 27
 
     prog         vai para estado 28
     stmt         vai para estado 29
@@ -276,236 +293,241 @@ Estado 0
 
 Estado 1
 
-   27 add_stmt: ADD • REG COMMA REG COMMA REG
-   28         | ADD • REG COMMA REG COMMA CARDINAL NUMBER
+   27 add_stmt: TOKEN_ADD • TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG
+   28         | TOKEN_ADD • TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    REG  troca e vai para estado 53
+    TOKEN_REG  troca e vai para estado 53
 
 
 Estado 2
 
-   29 sub_stmt: SUB • REG COMMA REG COMMA REG
-   30         | SUB • REG COMMA REG COMMA CARDINAL NUMBER
+   29 sub_stmt: TOKEN_SUB • TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG
+   30         | TOKEN_SUB • TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    REG  troca e vai para estado 54
+    TOKEN_REG  troca e vai para estado 54
 
 
 Estado 3
 
-   31 or_stmt: OR • REG COMMA REG COMMA REG
-   32        | OR • REG COMMA REG COMMA CARDINAL NUMBER
+   31 or_stmt: TOKEN_OR • TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG
+   32        | TOKEN_OR • TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    REG  troca e vai para estado 55
+    TOKEN_REG  troca e vai para estado 55
 
 
 Estado 4
 
-   33 and_stmt: AND • REG COMMA REG COMMA REG
-   34         | AND • REG COMMA REG COMMA CARDINAL NUMBER
+   33 and_stmt: TOKEN_AND • TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG
+   34         | TOKEN_AND • TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    REG  troca e vai para estado 56
+    TOKEN_REG  troca e vai para estado 56
 
 
 Estado 5
 
-   37 not_stmt: NOT • REG COMMA REG
-   38         | NOT • REG COMMA CARDINAL NUMBER
+   37 not_stmt: TOKEN_NOT • TOKEN_REG TOKEN_COMMA TOKEN_REG
+   38         | TOKEN_NOT • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    REG  troca e vai para estado 57
+    TOKEN_REG  troca e vai para estado 57
 
 
 Estado 6
 
-   35 xor_stmt: XOR • REG COMMA REG COMMA REG
-   36         | XOR • REG COMMA REG COMMA CARDINAL NUMBER
+   35 xor_stmt: TOKEN_XOR • TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG
+   36         | TOKEN_XOR • TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    REG  troca e vai para estado 58
+    TOKEN_REG  troca e vai para estado 58
 
 
 Estado 7
 
-   39 cmp_stmt: CMP • REG COMMA REG
+   39 cmp_stmt: TOKEN_CMP • TOKEN_REG TOKEN_COMMA TOKEN_REG
+   40         | TOKEN_CMP • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    REG  troca e vai para estado 59
+    TOKEN_REG  troca e vai para estado 59
 
 
 Estado 8
 
-   40 branch_stmt: BRANCH • IDENTIFIER
+   41 branch_stmt: TOKEN_BRANCH • TOKEN_IDENTIFIER
+   42            | TOKEN_BRANCH • TOKEN_CARDINAL expression
+   43            | TOKEN_BRANCH • TOKEN_DOLLAR
 
-    IDENTIFIER  troca e vai para estado 60
+    TOKEN_IDENTIFIER  troca e vai para estado 60
+    TOKEN_CARDINAL    troca e vai para estado 61
+    TOKEN_DOLLAR      troca e vai para estado 62
 
 
 Estado 9
 
-   42 jump_stmt: JUMP • REG COMMA CARDINAL NUMBER
+   45 jump_stmt: TOKEN_JUMP • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    REG  troca e vai para estado 61
+    TOKEN_REG  troca e vai para estado 63
 
 
 Estado 10
 
-   43 jump_stmt: JUMP_LINK • REG COMMA REG COMMA CARDINAL NUMBER
+   46 jump_stmt: TOKEN_JUMP_LINK • TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    REG  troca e vai para estado 62
+    TOKEN_REG  troca e vai para estado 64
 
 
 Estado 11
 
-   41 move_stmt: MOVE • REG COMMA REG
+   44 move_stmt: TOKEN_MOVE • TOKEN_REG TOKEN_COMMA TOKEN_REG
 
-    REG  troca e vai para estado 63
+    TOKEN_REG  troca e vai para estado 65
 
 
 Estado 12
 
-   44 load_stmt: LOAD_DIRECT • REG COMMA CARDINAL NUMBER
+   47 load_stmt: TOKEN_LOAD_DIRECT • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    REG  troca e vai para estado 64
+    TOKEN_REG  troca e vai para estado 66
 
 
 Estado 13
 
-   45 load_stmt: LOAD_IMMEDIATE • REG COMMA CARDINAL NUMBER
+   48 load_stmt: TOKEN_LOAD_IMMEDIATE • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    REG  troca e vai para estado 65
+    TOKEN_REG  troca e vai para estado 67
 
 
 Estado 14
 
-   46 load_stmt: LOAD_INDEXED • REG COMMA REG COMMA CARDINAL NUMBER
+   49 load_stmt: TOKEN_LOAD_INDEXED • TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    REG  troca e vai para estado 66
+    TOKEN_REG  troca e vai para estado 68
 
 
 Estado 15
 
-   47 store_stmt: STORE_DIRECT • REG COMMA CARDINAL NUMBER
+   50 store_stmt: TOKEN_STORE_DIRECT • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    REG  troca e vai para estado 67
+    TOKEN_REG  troca e vai para estado 69
 
 
 Estado 16
 
-   48 store_stmt: STORE_INDEXED • REG COMMA REG COMMA CARDINAL NUMBER
+   51 store_stmt: TOKEN_STORE_INDEXED • TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    REG  troca e vai para estado 68
+    TOKEN_REG  troca e vai para estado 70
 
 
 Estado 17
 
-   49 push_stmt: PUSH • REG
+   52 push_stmt: TOKEN_PUSH • TOKEN_REG
 
-    REG  troca e vai para estado 69
+    TOKEN_REG  troca e vai para estado 71
 
 
 Estado 18
 
-   50 pop_stmt: POP • REG
+   53 pop_stmt: TOKEN_POP • TOKEN_REG
 
-    REG  troca e vai para estado 70
+    TOKEN_REG  troca e vai para estado 72
 
 
 Estado 19
 
-   51 reti_stmt: RETI •
+   54 reti_stmt: TOKEN_RETI •
 
-    $default  redução com regra 51 (reti_stmt)
+    $default  redução com regra 54 (reti_stmt)
 
 
 Estado 20
 
-   52 halt_stmt: HALT •
+   55 halt_stmt: TOKEN_HALT •
 
-    $default  redução com regra 52 (halt_stmt)
+    $default  redução com regra 55 (halt_stmt)
 
 
 Estado 21
 
-   53 nop_stmt: NOP •
+   56 nop_stmt: TOKEN_NOP •
 
-    $default  redução com regra 53 (nop_stmt)
+    $default  redução com regra 56 (nop_stmt)
 
 
 Estado 22
 
-   59 label: IDENTIFIER • COLON
+   62 label: TOKEN_IDENTIFIER • TOKEN_COLON
 
-    COLON  troca e vai para estado 71
+    TOKEN_COLON  troca e vai para estado 73
 
 
 Estado 23
 
-   54 byte_stmt: BYTE • NUMBER
+   57 byte_stmt: TOKEN_BYTE • TOKEN_NUMBER
 
-    NUMBER  troca e vai para estado 72
+    TOKEN_NUMBER  troca e vai para estado 74
 
 
 Estado 24
 
-   55 word_stmt: WORD • NUMBER
+   58 word_stmt: TOKEN_WORD • TOKEN_NUMBER
 
-    NUMBER  troca e vai para estado 73
+    TOKEN_NUMBER  troca e vai para estado 75
 
 
 Estado 25
 
-   56 alloc_stmt: ALLOC • IDENTIFIER NUMBER
+   59 alloc_stmt: TOKEN_ALLOC • TOKEN_IDENTIFIER TOKEN_NUMBER
 
-    IDENTIFIER  troca e vai para estado 74
+    TOKEN_IDENTIFIER  troca e vai para estado 76
 
 
 Estado 26
 
-   57 org_stmt: ORG • NUMBER
+   60 org_stmt: TOKEN_ORG • TOKEN_NUMBER
 
-    NUMBER  troca e vai para estado 75
+    TOKEN_NUMBER  troca e vai para estado 77
 
 
 Estado 27
 
-   58 equ_stmt: EQU • IDENTIFIER COMMA NUMBER
+   61 equ_stmt: TOKEN_EQU • TOKEN_IDENTIFIER TOKEN_COMMA expression
 
-    IDENTIFIER  troca e vai para estado 76
+    TOKEN_IDENTIFIER  troca e vai para estado 78
 
 
 Estado 28
 
     0 $accept: prog • $end
-    1 prog: prog • ENDFILE
+    1 prog: prog • TOKEN_ENDFILE
     2     | prog • stmt
 
-    $end            troca e vai para estado 77
-    ADD             troca e vai para estado 1
-    SUB             troca e vai para estado 2
-    OR              troca e vai para estado 3
-    AND             troca e vai para estado 4
-    NOT             troca e vai para estado 5
-    XOR             troca e vai para estado 6
-    CMP             troca e vai para estado 7
-    BRANCH          troca e vai para estado 8
-    JUMP            troca e vai para estado 9
-    JUMP_LINK       troca e vai para estado 10
-    MOVE            troca e vai para estado 11
-    LOAD_DIRECT     troca e vai para estado 12
-    LOAD_IMMEDIATE  troca e vai para estado 13
-    LOAD_INDEXED    troca e vai para estado 14
-    STORE_DIRECT    troca e vai para estado 15
-    STORE_INDEXED   troca e vai para estado 16
-    PUSH            troca e vai para estado 17
-    POP             troca e vai para estado 18
-    RETI            troca e vai para estado 19
-    HALT            troca e vai para estado 20
-    NOP             troca e vai para estado 21
-    IDENTIFIER      troca e vai para estado 22
-    ENDFILE         troca e vai para estado 78
-    BYTE            troca e vai para estado 23
-    WORD            troca e vai para estado 24
-    ALLOC           troca e vai para estado 25
-    ORG             troca e vai para estado 26
-    EQU             troca e vai para estado 27
+    $end                  troca e vai para estado 79
+    TOKEN_ADD             troca e vai para estado 1
+    TOKEN_SUB             troca e vai para estado 2
+    TOKEN_OR              troca e vai para estado 3
+    TOKEN_AND             troca e vai para estado 4
+    TOKEN_NOT             troca e vai para estado 5
+    TOKEN_XOR             troca e vai para estado 6
+    TOKEN_CMP             troca e vai para estado 7
+    TOKEN_BRANCH          troca e vai para estado 8
+    TOKEN_JUMP            troca e vai para estado 9
+    TOKEN_JUMP_LINK       troca e vai para estado 10
+    TOKEN_MOVE            troca e vai para estado 11
+    TOKEN_LOAD_DIRECT     troca e vai para estado 12
+    TOKEN_LOAD_IMMEDIATE  troca e vai para estado 13
+    TOKEN_LOAD_INDEXED    troca e vai para estado 14
+    TOKEN_STORE_DIRECT    troca e vai para estado 15
+    TOKEN_STORE_INDEXED   troca e vai para estado 16
+    TOKEN_PUSH            troca e vai para estado 17
+    TOKEN_POP             troca e vai para estado 18
+    TOKEN_RETI            troca e vai para estado 19
+    TOKEN_HALT            troca e vai para estado 20
+    TOKEN_NOP             troca e vai para estado 21
+    TOKEN_IDENTIFIER      troca e vai para estado 22
+    TOKEN_ENDFILE         troca e vai para estado 80
+    TOKEN_BYTE            troca e vai para estado 23
+    TOKEN_WORD            troca e vai para estado 24
+    TOKEN_ALLOC           troca e vai para estado 25
+    TOKEN_ORG             troca e vai para estado 26
+    TOKEN_EQU             troca e vai para estado 27
 
-    stmt         vai para estado 79
+    stmt         vai para estado 81
     add_stmt     vai para estado 30
     sub_stmt     vai para estado 31
     or_stmt      vai para estado 32
@@ -701,692 +723,1023 @@ Estado 52
 
 Estado 53
 
-   27 add_stmt: ADD REG • COMMA REG COMMA REG
-   28         | ADD REG • COMMA REG COMMA CARDINAL NUMBER
+   27 add_stmt: TOKEN_ADD TOKEN_REG • TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG
+   28         | TOKEN_ADD TOKEN_REG • TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    COMMA  troca e vai para estado 80
+    TOKEN_COMMA  troca e vai para estado 82
 
 
 Estado 54
 
-   29 sub_stmt: SUB REG • COMMA REG COMMA REG
-   30         | SUB REG • COMMA REG COMMA CARDINAL NUMBER
+   29 sub_stmt: TOKEN_SUB TOKEN_REG • TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG
+   30         | TOKEN_SUB TOKEN_REG • TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    COMMA  troca e vai para estado 81
+    TOKEN_COMMA  troca e vai para estado 83
 
 
 Estado 55
 
-   31 or_stmt: OR REG • COMMA REG COMMA REG
-   32        | OR REG • COMMA REG COMMA CARDINAL NUMBER
+   31 or_stmt: TOKEN_OR TOKEN_REG • TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG
+   32        | TOKEN_OR TOKEN_REG • TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    COMMA  troca e vai para estado 82
+    TOKEN_COMMA  troca e vai para estado 84
 
 
 Estado 56
 
-   33 and_stmt: AND REG • COMMA REG COMMA REG
-   34         | AND REG • COMMA REG COMMA CARDINAL NUMBER
+   33 and_stmt: TOKEN_AND TOKEN_REG • TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG
+   34         | TOKEN_AND TOKEN_REG • TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    COMMA  troca e vai para estado 83
+    TOKEN_COMMA  troca e vai para estado 85
 
 
 Estado 57
 
-   37 not_stmt: NOT REG • COMMA REG
-   38         | NOT REG • COMMA CARDINAL NUMBER
+   37 not_stmt: TOKEN_NOT TOKEN_REG • TOKEN_COMMA TOKEN_REG
+   38         | TOKEN_NOT TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    COMMA  troca e vai para estado 84
+    TOKEN_COMMA  troca e vai para estado 86
 
 
 Estado 58
 
-   35 xor_stmt: XOR REG • COMMA REG COMMA REG
-   36         | XOR REG • COMMA REG COMMA CARDINAL NUMBER
+   35 xor_stmt: TOKEN_XOR TOKEN_REG • TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG
+   36         | TOKEN_XOR TOKEN_REG • TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    COMMA  troca e vai para estado 85
+    TOKEN_COMMA  troca e vai para estado 87
 
 
 Estado 59
 
-   39 cmp_stmt: CMP REG • COMMA REG
+   39 cmp_stmt: TOKEN_CMP TOKEN_REG • TOKEN_COMMA TOKEN_REG
+   40         | TOKEN_CMP TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    COMMA  troca e vai para estado 86
+    TOKEN_COMMA  troca e vai para estado 88
 
 
 Estado 60
 
-   40 branch_stmt: BRANCH IDENTIFIER •
+   41 branch_stmt: TOKEN_BRANCH TOKEN_IDENTIFIER •
 
-    $default  redução com regra 40 (branch_stmt)
+    $default  redução com regra 41 (branch_stmt)
 
 
 Estado 61
 
-   42 jump_stmt: JUMP REG • COMMA CARDINAL NUMBER
+   42 branch_stmt: TOKEN_BRANCH TOKEN_CARDINAL • expression
 
-    COMMA  troca e vai para estado 87
+    TOKEN_NUMBER      troca e vai para estado 89
+    TOKEN_IDENTIFIER  troca e vai para estado 90
+    TOKEN_PLUS        troca e vai para estado 91
+    TOKEN_MINUS       troca e vai para estado 92
+    TOKEN_LEFT_PAREN  troca e vai para estado 93
+
+    expression  vai para estado 94
 
 
 Estado 62
 
-   43 jump_stmt: JUMP_LINK REG • COMMA REG COMMA CARDINAL NUMBER
+   43 branch_stmt: TOKEN_BRANCH TOKEN_DOLLAR •
 
-    COMMA  troca e vai para estado 88
+    $default  redução com regra 43 (branch_stmt)
 
 
 Estado 63
 
-   41 move_stmt: MOVE REG • COMMA REG
+   45 jump_stmt: TOKEN_JUMP TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    COMMA  troca e vai para estado 89
+    TOKEN_COMMA  troca e vai para estado 95
 
 
 Estado 64
 
-   44 load_stmt: LOAD_DIRECT REG • COMMA CARDINAL NUMBER
+   46 jump_stmt: TOKEN_JUMP_LINK TOKEN_REG • TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    COMMA  troca e vai para estado 90
+    TOKEN_COMMA  troca e vai para estado 96
 
 
 Estado 65
 
-   45 load_stmt: LOAD_IMMEDIATE REG • COMMA CARDINAL NUMBER
+   44 move_stmt: TOKEN_MOVE TOKEN_REG • TOKEN_COMMA TOKEN_REG
 
-    COMMA  troca e vai para estado 91
+    TOKEN_COMMA  troca e vai para estado 97
 
 
 Estado 66
 
-   46 load_stmt: LOAD_INDEXED REG • COMMA REG COMMA CARDINAL NUMBER
+   47 load_stmt: TOKEN_LOAD_DIRECT TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    COMMA  troca e vai para estado 92
+    TOKEN_COMMA  troca e vai para estado 98
 
 
 Estado 67
 
-   47 store_stmt: STORE_DIRECT REG • COMMA CARDINAL NUMBER
+   48 load_stmt: TOKEN_LOAD_IMMEDIATE TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    COMMA  troca e vai para estado 93
+    TOKEN_COMMA  troca e vai para estado 99
 
 
 Estado 68
 
-   48 store_stmt: STORE_INDEXED REG • COMMA REG COMMA CARDINAL NUMBER
+   49 load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG • TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    COMMA  troca e vai para estado 94
+    TOKEN_COMMA  troca e vai para estado 100
 
 
 Estado 69
 
-   49 push_stmt: PUSH REG •
+   50 store_stmt: TOKEN_STORE_DIRECT TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    $default  redução com regra 49 (push_stmt)
+    TOKEN_COMMA  troca e vai para estado 101
 
 
 Estado 70
 
-   50 pop_stmt: POP REG •
+   51 store_stmt: TOKEN_STORE_INDEXED TOKEN_REG • TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    $default  redução com regra 50 (pop_stmt)
+    TOKEN_COMMA  troca e vai para estado 102
 
 
 Estado 71
 
-   59 label: IDENTIFIER COLON •
+   52 push_stmt: TOKEN_PUSH TOKEN_REG •
 
-    $default  redução com regra 59 (label)
+    $default  redução com regra 52 (push_stmt)
 
 
 Estado 72
 
-   54 byte_stmt: BYTE NUMBER •
+   53 pop_stmt: TOKEN_POP TOKEN_REG •
 
-    $default  redução com regra 54 (byte_stmt)
+    $default  redução com regra 53 (pop_stmt)
 
 
 Estado 73
 
-   55 word_stmt: WORD NUMBER •
+   62 label: TOKEN_IDENTIFIER TOKEN_COLON •
 
-    $default  redução com regra 55 (word_stmt)
+    $default  redução com regra 62 (label)
 
 
 Estado 74
 
-   56 alloc_stmt: ALLOC IDENTIFIER • NUMBER
+   57 byte_stmt: TOKEN_BYTE TOKEN_NUMBER •
 
-    NUMBER  troca e vai para estado 95
+    $default  redução com regra 57 (byte_stmt)
 
 
 Estado 75
 
-   57 org_stmt: ORG NUMBER •
+   58 word_stmt: TOKEN_WORD TOKEN_NUMBER •
 
-    $default  redução com regra 57 (org_stmt)
+    $default  redução com regra 58 (word_stmt)
 
 
 Estado 76
 
-   58 equ_stmt: EQU IDENTIFIER • COMMA NUMBER
+   59 alloc_stmt: TOKEN_ALLOC TOKEN_IDENTIFIER • TOKEN_NUMBER
 
-    COMMA  troca e vai para estado 96
+    TOKEN_NUMBER  troca e vai para estado 103
 
 
 Estado 77
+
+   60 org_stmt: TOKEN_ORG TOKEN_NUMBER •
+
+    $default  redução com regra 60 (org_stmt)
+
+
+Estado 78
+
+   61 equ_stmt: TOKEN_EQU TOKEN_IDENTIFIER • TOKEN_COMMA expression
+
+    TOKEN_COMMA  troca e vai para estado 104
+
+
+Estado 79
 
     0 $accept: prog $end •
 
     $default  aceitar
 
 
-Estado 78
+Estado 80
 
-    1 prog: prog ENDFILE •
+    1 prog: prog TOKEN_ENDFILE •
 
     $default  redução com regra 1 (prog)
 
 
-Estado 79
+Estado 81
 
     2 prog: prog stmt •
 
     $default  redução com regra 2 (prog)
 
 
-Estado 80
-
-   27 add_stmt: ADD REG COMMA • REG COMMA REG
-   28         | ADD REG COMMA • REG COMMA CARDINAL NUMBER
-
-    REG  troca e vai para estado 97
-
-
-Estado 81
-
-   29 sub_stmt: SUB REG COMMA • REG COMMA REG
-   30         | SUB REG COMMA • REG COMMA CARDINAL NUMBER
-
-    REG  troca e vai para estado 98
-
-
 Estado 82
 
-   31 or_stmt: OR REG COMMA • REG COMMA REG
-   32        | OR REG COMMA • REG COMMA CARDINAL NUMBER
+   27 add_stmt: TOKEN_ADD TOKEN_REG TOKEN_COMMA • TOKEN_REG TOKEN_COMMA TOKEN_REG
+   28         | TOKEN_ADD TOKEN_REG TOKEN_COMMA • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    REG  troca e vai para estado 99
+    TOKEN_REG  troca e vai para estado 105
 
 
 Estado 83
 
-   33 and_stmt: AND REG COMMA • REG COMMA REG
-   34         | AND REG COMMA • REG COMMA CARDINAL NUMBER
+   29 sub_stmt: TOKEN_SUB TOKEN_REG TOKEN_COMMA • TOKEN_REG TOKEN_COMMA TOKEN_REG
+   30         | TOKEN_SUB TOKEN_REG TOKEN_COMMA • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    REG  troca e vai para estado 100
+    TOKEN_REG  troca e vai para estado 106
 
 
 Estado 84
 
-   37 not_stmt: NOT REG COMMA • REG
-   38         | NOT REG COMMA • CARDINAL NUMBER
+   31 or_stmt: TOKEN_OR TOKEN_REG TOKEN_COMMA • TOKEN_REG TOKEN_COMMA TOKEN_REG
+   32        | TOKEN_OR TOKEN_REG TOKEN_COMMA • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    REG       troca e vai para estado 101
-    CARDINAL  troca e vai para estado 102
+    TOKEN_REG  troca e vai para estado 107
 
 
 Estado 85
 
-   35 xor_stmt: XOR REG COMMA • REG COMMA REG
-   36         | XOR REG COMMA • REG COMMA CARDINAL NUMBER
+   33 and_stmt: TOKEN_AND TOKEN_REG TOKEN_COMMA • TOKEN_REG TOKEN_COMMA TOKEN_REG
+   34         | TOKEN_AND TOKEN_REG TOKEN_COMMA • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    REG  troca e vai para estado 103
+    TOKEN_REG  troca e vai para estado 108
 
 
 Estado 86
 
-   39 cmp_stmt: CMP REG COMMA • REG
+   37 not_stmt: TOKEN_NOT TOKEN_REG TOKEN_COMMA • TOKEN_REG
+   38         | TOKEN_NOT TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
-    REG  troca e vai para estado 104
+    TOKEN_REG       troca e vai para estado 109
+    TOKEN_CARDINAL  troca e vai para estado 110
 
 
 Estado 87
 
-   42 jump_stmt: JUMP REG COMMA • CARDINAL NUMBER
+   35 xor_stmt: TOKEN_XOR TOKEN_REG TOKEN_COMMA • TOKEN_REG TOKEN_COMMA TOKEN_REG
+   36         | TOKEN_XOR TOKEN_REG TOKEN_COMMA • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    CARDINAL  troca e vai para estado 105
+    TOKEN_REG  troca e vai para estado 111
 
 
 Estado 88
 
-   43 jump_stmt: JUMP_LINK REG COMMA • REG COMMA CARDINAL NUMBER
+   39 cmp_stmt: TOKEN_CMP TOKEN_REG TOKEN_COMMA • TOKEN_REG
+   40         | TOKEN_CMP TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
-    REG  troca e vai para estado 106
+    TOKEN_REG       troca e vai para estado 112
+    TOKEN_CARDINAL  troca e vai para estado 113
 
 
 Estado 89
 
-   41 move_stmt: MOVE REG COMMA • REG
+   68 expression: TOKEN_NUMBER •
 
-    REG  troca e vai para estado 107
+    $default  redução com regra 68 (expression)
 
 
 Estado 90
 
-   44 load_stmt: LOAD_DIRECT REG COMMA • CARDINAL NUMBER
+   69 expression: TOKEN_IDENTIFIER •
 
-    CARDINAL  troca e vai para estado 108
+    $default  redução com regra 69 (expression)
 
 
 Estado 91
 
-   45 load_stmt: LOAD_IMMEDIATE REG COMMA • CARDINAL NUMBER
+   66 expression: TOKEN_PLUS • TOKEN_NUMBER
 
-    CARDINAL  troca e vai para estado 109
+    TOKEN_NUMBER  troca e vai para estado 114
 
 
 Estado 92
 
-   46 load_stmt: LOAD_INDEXED REG COMMA • REG COMMA CARDINAL NUMBER
+   67 expression: TOKEN_MINUS • TOKEN_NUMBER
 
-    REG  troca e vai para estado 110
+    TOKEN_NUMBER  troca e vai para estado 115
 
 
 Estado 93
 
-   47 store_stmt: STORE_DIRECT REG COMMA • CARDINAL NUMBER
+   63 expression: TOKEN_LEFT_PAREN • expression TOKEN_RIGHT_PAREN
 
-    CARDINAL  troca e vai para estado 111
+    TOKEN_NUMBER      troca e vai para estado 89
+    TOKEN_IDENTIFIER  troca e vai para estado 90
+    TOKEN_PLUS        troca e vai para estado 91
+    TOKEN_MINUS       troca e vai para estado 92
+    TOKEN_LEFT_PAREN  troca e vai para estado 93
+
+    expression  vai para estado 116
 
 
 Estado 94
 
-   48 store_stmt: STORE_INDEXED REG COMMA • REG COMMA CARDINAL NUMBER
+   42 branch_stmt: TOKEN_BRANCH TOKEN_CARDINAL expression •
+   64 expression: expression • TOKEN_PLUS expression
+   65           | expression • TOKEN_MINUS expression
 
-    REG  troca e vai para estado 112
+    TOKEN_PLUS   troca e vai para estado 117
+    TOKEN_MINUS  troca e vai para estado 118
+
+    $default  redução com regra 42 (branch_stmt)
 
 
 Estado 95
 
-   56 alloc_stmt: ALLOC IDENTIFIER NUMBER •
+   45 jump_stmt: TOKEN_JUMP TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
-    $default  redução com regra 56 (alloc_stmt)
+    TOKEN_CARDINAL  troca e vai para estado 119
 
 
 Estado 96
 
-   58 equ_stmt: EQU IDENTIFIER COMMA • NUMBER
+   46 jump_stmt: TOKEN_JUMP_LINK TOKEN_REG TOKEN_COMMA • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    NUMBER  troca e vai para estado 113
+    TOKEN_REG  troca e vai para estado 120
 
 
 Estado 97
 
-   27 add_stmt: ADD REG COMMA REG • COMMA REG
-   28         | ADD REG COMMA REG • COMMA CARDINAL NUMBER
+   44 move_stmt: TOKEN_MOVE TOKEN_REG TOKEN_COMMA • TOKEN_REG
 
-    COMMA  troca e vai para estado 114
+    TOKEN_REG  troca e vai para estado 121
 
 
 Estado 98
 
-   29 sub_stmt: SUB REG COMMA REG • COMMA REG
-   30         | SUB REG COMMA REG • COMMA CARDINAL NUMBER
+   47 load_stmt: TOKEN_LOAD_DIRECT TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
-    COMMA  troca e vai para estado 115
+    TOKEN_CARDINAL  troca e vai para estado 122
 
 
 Estado 99
 
-   31 or_stmt: OR REG COMMA REG • COMMA REG
-   32        | OR REG COMMA REG • COMMA CARDINAL NUMBER
+   48 load_stmt: TOKEN_LOAD_IMMEDIATE TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
-    COMMA  troca e vai para estado 116
+    TOKEN_CARDINAL  troca e vai para estado 123
 
 
 Estado 100
 
-   33 and_stmt: AND REG COMMA REG • COMMA REG
-   34         | AND REG COMMA REG • COMMA CARDINAL NUMBER
+   49 load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    COMMA  troca e vai para estado 117
+    TOKEN_REG  troca e vai para estado 124
 
 
 Estado 101
 
-   37 not_stmt: NOT REG COMMA REG •
+   50 store_stmt: TOKEN_STORE_DIRECT TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
-    $default  redução com regra 37 (not_stmt)
+    TOKEN_CARDINAL  troca e vai para estado 125
 
 
 Estado 102
 
-   38 not_stmt: NOT REG COMMA CARDINAL • NUMBER
+   51 store_stmt: TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    NUMBER  troca e vai para estado 118
+    TOKEN_REG  troca e vai para estado 126
 
 
 Estado 103
 
-   35 xor_stmt: XOR REG COMMA REG • COMMA REG
-   36         | XOR REG COMMA REG • COMMA CARDINAL NUMBER
+   59 alloc_stmt: TOKEN_ALLOC TOKEN_IDENTIFIER TOKEN_NUMBER •
 
-    COMMA  troca e vai para estado 119
+    $default  redução com regra 59 (alloc_stmt)
 
 
 Estado 104
 
-   39 cmp_stmt: CMP REG COMMA REG •
+   61 equ_stmt: TOKEN_EQU TOKEN_IDENTIFIER TOKEN_COMMA • expression
 
-    $default  redução com regra 39 (cmp_stmt)
+    TOKEN_NUMBER      troca e vai para estado 89
+    TOKEN_IDENTIFIER  troca e vai para estado 90
+    TOKEN_PLUS        troca e vai para estado 91
+    TOKEN_MINUS       troca e vai para estado 92
+    TOKEN_LEFT_PAREN  troca e vai para estado 93
+
+    expression  vai para estado 127
 
 
 Estado 105
 
-   42 jump_stmt: JUMP REG COMMA CARDINAL • NUMBER
+   27 add_stmt: TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_REG
+   28         | TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    NUMBER  troca e vai para estado 120
+    TOKEN_COMMA  troca e vai para estado 128
 
 
 Estado 106
 
-   43 jump_stmt: JUMP_LINK REG COMMA REG • COMMA CARDINAL NUMBER
+   29 sub_stmt: TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_REG
+   30         | TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    COMMA  troca e vai para estado 121
+    TOKEN_COMMA  troca e vai para estado 129
 
 
 Estado 107
 
-   41 move_stmt: MOVE REG COMMA REG •
+   31 or_stmt: TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_REG
+   32        | TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    $default  redução com regra 41 (move_stmt)
+    TOKEN_COMMA  troca e vai para estado 130
 
 
 Estado 108
 
-   44 load_stmt: LOAD_DIRECT REG COMMA CARDINAL • NUMBER
+   33 and_stmt: TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_REG
+   34         | TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    NUMBER  troca e vai para estado 122
+    TOKEN_COMMA  troca e vai para estado 131
 
 
 Estado 109
 
-   45 load_stmt: LOAD_IMMEDIATE REG COMMA CARDINAL • NUMBER
+   37 not_stmt: TOKEN_NOT TOKEN_REG TOKEN_COMMA TOKEN_REG •
 
-    NUMBER  troca e vai para estado 123
+    $default  redução com regra 37 (not_stmt)
 
 
 Estado 110
 
-   46 load_stmt: LOAD_INDEXED REG COMMA REG • COMMA CARDINAL NUMBER
+   38 not_stmt: TOKEN_NOT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
 
-    COMMA  troca e vai para estado 124
+    TOKEN_NUMBER      troca e vai para estado 89
+    TOKEN_IDENTIFIER  troca e vai para estado 90
+    TOKEN_PLUS        troca e vai para estado 91
+    TOKEN_MINUS       troca e vai para estado 92
+    TOKEN_LEFT_PAREN  troca e vai para estado 93
+
+    expression  vai para estado 132
 
 
 Estado 111
 
-   47 store_stmt: STORE_DIRECT REG COMMA CARDINAL • NUMBER
+   35 xor_stmt: TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_REG
+   36         | TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    NUMBER  troca e vai para estado 125
+    TOKEN_COMMA  troca e vai para estado 133
 
 
 Estado 112
 
-   48 store_stmt: STORE_INDEXED REG COMMA REG • COMMA CARDINAL NUMBER
+   39 cmp_stmt: TOKEN_CMP TOKEN_REG TOKEN_COMMA TOKEN_REG •
 
-    COMMA  troca e vai para estado 126
+    $default  redução com regra 39 (cmp_stmt)
 
 
 Estado 113
 
-   58 equ_stmt: EQU IDENTIFIER COMMA NUMBER •
+   40 cmp_stmt: TOKEN_CMP TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
 
-    $default  redução com regra 58 (equ_stmt)
+    TOKEN_NUMBER      troca e vai para estado 89
+    TOKEN_IDENTIFIER  troca e vai para estado 90
+    TOKEN_PLUS        troca e vai para estado 91
+    TOKEN_MINUS       troca e vai para estado 92
+    TOKEN_LEFT_PAREN  troca e vai para estado 93
+
+    expression  vai para estado 134
 
 
 Estado 114
 
-   27 add_stmt: ADD REG COMMA REG COMMA • REG
-   28         | ADD REG COMMA REG COMMA • CARDINAL NUMBER
+   66 expression: TOKEN_PLUS TOKEN_NUMBER •
 
-    REG       troca e vai para estado 127
-    CARDINAL  troca e vai para estado 128
+    $default  redução com regra 66 (expression)
 
 
 Estado 115
 
-   29 sub_stmt: SUB REG COMMA REG COMMA • REG
-   30         | SUB REG COMMA REG COMMA • CARDINAL NUMBER
+   67 expression: TOKEN_MINUS TOKEN_NUMBER •
 
-    REG       troca e vai para estado 129
-    CARDINAL  troca e vai para estado 130
+    $default  redução com regra 67 (expression)
 
 
 Estado 116
 
-   31 or_stmt: OR REG COMMA REG COMMA • REG
-   32        | OR REG COMMA REG COMMA • CARDINAL NUMBER
+   63 expression: TOKEN_LEFT_PAREN expression • TOKEN_RIGHT_PAREN
+   64           | expression • TOKEN_PLUS expression
+   65           | expression • TOKEN_MINUS expression
 
-    REG       troca e vai para estado 131
-    CARDINAL  troca e vai para estado 132
+    TOKEN_PLUS         troca e vai para estado 117
+    TOKEN_MINUS        troca e vai para estado 118
+    TOKEN_RIGHT_PAREN  troca e vai para estado 135
 
 
 Estado 117
 
-   33 and_stmt: AND REG COMMA REG COMMA • REG
-   34         | AND REG COMMA REG COMMA • CARDINAL NUMBER
+   64 expression: expression TOKEN_PLUS • expression
 
-    REG       troca e vai para estado 133
-    CARDINAL  troca e vai para estado 134
+    TOKEN_NUMBER      troca e vai para estado 89
+    TOKEN_IDENTIFIER  troca e vai para estado 90
+    TOKEN_PLUS        troca e vai para estado 91
+    TOKEN_MINUS       troca e vai para estado 92
+    TOKEN_LEFT_PAREN  troca e vai para estado 93
+
+    expression  vai para estado 136
 
 
 Estado 118
 
-   38 not_stmt: NOT REG COMMA CARDINAL NUMBER •
+   65 expression: expression TOKEN_MINUS • expression
 
-    $default  redução com regra 38 (not_stmt)
+    TOKEN_NUMBER      troca e vai para estado 89
+    TOKEN_IDENTIFIER  troca e vai para estado 90
+    TOKEN_PLUS        troca e vai para estado 91
+    TOKEN_MINUS       troca e vai para estado 92
+    TOKEN_LEFT_PAREN  troca e vai para estado 93
+
+    expression  vai para estado 137
 
 
 Estado 119
 
-   35 xor_stmt: XOR REG COMMA REG COMMA • REG
-   36         | XOR REG COMMA REG COMMA • CARDINAL NUMBER
+   45 jump_stmt: TOKEN_JUMP TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
 
-    REG       troca e vai para estado 135
-    CARDINAL  troca e vai para estado 136
+    TOKEN_NUMBER      troca e vai para estado 89
+    TOKEN_IDENTIFIER  troca e vai para estado 90
+    TOKEN_PLUS        troca e vai para estado 91
+    TOKEN_MINUS       troca e vai para estado 92
+    TOKEN_LEFT_PAREN  troca e vai para estado 93
+
+    expression  vai para estado 138
 
 
 Estado 120
 
-   42 jump_stmt: JUMP REG COMMA CARDINAL NUMBER •
+   46 jump_stmt: TOKEN_JUMP_LINK TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    $default  redução com regra 42 (jump_stmt)
+    TOKEN_COMMA  troca e vai para estado 139
 
 
 Estado 121
 
-   43 jump_stmt: JUMP_LINK REG COMMA REG COMMA • CARDINAL NUMBER
+   44 move_stmt: TOKEN_MOVE TOKEN_REG TOKEN_COMMA TOKEN_REG •
 
-    CARDINAL  troca e vai para estado 137
+    $default  redução com regra 44 (move_stmt)
 
 
 Estado 122
 
-   44 load_stmt: LOAD_DIRECT REG COMMA CARDINAL NUMBER •
+   47 load_stmt: TOKEN_LOAD_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
 
-    $default  redução com regra 44 (load_stmt)
+    TOKEN_NUMBER      troca e vai para estado 89
+    TOKEN_IDENTIFIER  troca e vai para estado 90
+    TOKEN_PLUS        troca e vai para estado 91
+    TOKEN_MINUS       troca e vai para estado 92
+    TOKEN_LEFT_PAREN  troca e vai para estado 93
+
+    expression  vai para estado 140
 
 
 Estado 123
 
-   45 load_stmt: LOAD_IMMEDIATE REG COMMA CARDINAL NUMBER •
+   48 load_stmt: TOKEN_LOAD_IMMEDIATE TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
 
-    $default  redução com regra 45 (load_stmt)
+    TOKEN_NUMBER      troca e vai para estado 89
+    TOKEN_IDENTIFIER  troca e vai para estado 90
+    TOKEN_PLUS        troca e vai para estado 91
+    TOKEN_MINUS       troca e vai para estado 92
+    TOKEN_LEFT_PAREN  troca e vai para estado 93
+
+    expression  vai para estado 141
 
 
 Estado 124
 
-   46 load_stmt: LOAD_INDEXED REG COMMA REG COMMA • CARDINAL NUMBER
+   49 load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    CARDINAL  troca e vai para estado 138
+    TOKEN_COMMA  troca e vai para estado 142
 
 
 Estado 125
 
-   47 store_stmt: STORE_DIRECT REG COMMA CARDINAL NUMBER •
+   50 store_stmt: TOKEN_STORE_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
 
-    $default  redução com regra 47 (store_stmt)
+    TOKEN_NUMBER      troca e vai para estado 89
+    TOKEN_IDENTIFIER  troca e vai para estado 90
+    TOKEN_PLUS        troca e vai para estado 91
+    TOKEN_MINUS       troca e vai para estado 92
+    TOKEN_LEFT_PAREN  troca e vai para estado 93
+
+    expression  vai para estado 143
 
 
 Estado 126
 
-   48 store_stmt: STORE_INDEXED REG COMMA REG COMMA • CARDINAL NUMBER
+   51 store_stmt: TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    CARDINAL  troca e vai para estado 139
+    TOKEN_COMMA  troca e vai para estado 144
 
 
 Estado 127
 
-   27 add_stmt: ADD REG COMMA REG COMMA REG •
+   61 equ_stmt: TOKEN_EQU TOKEN_IDENTIFIER TOKEN_COMMA expression •
+   64 expression: expression • TOKEN_PLUS expression
+   65           | expression • TOKEN_MINUS expression
 
-    $default  redução com regra 27 (add_stmt)
+    TOKEN_PLUS   troca e vai para estado 117
+    TOKEN_MINUS  troca e vai para estado 118
+
+    $default  redução com regra 61 (equ_stmt)
 
 
 Estado 128
 
-   28 add_stmt: ADD REG COMMA REG COMMA CARDINAL • NUMBER
+   27 add_stmt: TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_REG
+   28         | TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
-    NUMBER  troca e vai para estado 140
+    TOKEN_REG       troca e vai para estado 145
+    TOKEN_CARDINAL  troca e vai para estado 146
 
 
 Estado 129
 
-   29 sub_stmt: SUB REG COMMA REG COMMA REG •
+   29 sub_stmt: TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_REG
+   30         | TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
-    $default  redução com regra 29 (sub_stmt)
+    TOKEN_REG       troca e vai para estado 147
+    TOKEN_CARDINAL  troca e vai para estado 148
 
 
 Estado 130
 
-   30 sub_stmt: SUB REG COMMA REG COMMA CARDINAL • NUMBER
+   31 or_stmt: TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_REG
+   32        | TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
-    NUMBER  troca e vai para estado 141
+    TOKEN_REG       troca e vai para estado 149
+    TOKEN_CARDINAL  troca e vai para estado 150
 
 
 Estado 131
 
-   31 or_stmt: OR REG COMMA REG COMMA REG •
+   33 and_stmt: TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_REG
+   34         | TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
-    $default  redução com regra 31 (or_stmt)
+    TOKEN_REG       troca e vai para estado 151
+    TOKEN_CARDINAL  troca e vai para estado 152
 
 
 Estado 132
 
-   32 or_stmt: OR REG COMMA REG COMMA CARDINAL • NUMBER
+   38 not_stmt: TOKEN_NOT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
+   64 expression: expression • TOKEN_PLUS expression
+   65           | expression • TOKEN_MINUS expression
 
-    NUMBER  troca e vai para estado 142
+    TOKEN_PLUS   troca e vai para estado 117
+    TOKEN_MINUS  troca e vai para estado 118
+
+    $default  redução com regra 38 (not_stmt)
 
 
 Estado 133
 
-   33 and_stmt: AND REG COMMA REG COMMA REG •
+   35 xor_stmt: TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_REG
+   36         | TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
-    $default  redução com regra 33 (and_stmt)
+    TOKEN_REG       troca e vai para estado 153
+    TOKEN_CARDINAL  troca e vai para estado 154
 
 
 Estado 134
 
-   34 and_stmt: AND REG COMMA REG COMMA CARDINAL • NUMBER
+   40 cmp_stmt: TOKEN_CMP TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
+   64 expression: expression • TOKEN_PLUS expression
+   65           | expression • TOKEN_MINUS expression
 
-    NUMBER  troca e vai para estado 143
+    TOKEN_PLUS   troca e vai para estado 117
+    TOKEN_MINUS  troca e vai para estado 118
+
+    $default  redução com regra 40 (cmp_stmt)
 
 
 Estado 135
 
-   35 xor_stmt: XOR REG COMMA REG COMMA REG •
+   63 expression: TOKEN_LEFT_PAREN expression TOKEN_RIGHT_PAREN •
 
-    $default  redução com regra 35 (xor_stmt)
+    $default  redução com regra 63 (expression)
 
 
 Estado 136
 
-   36 xor_stmt: XOR REG COMMA REG COMMA CARDINAL • NUMBER
+   64 expression: expression • TOKEN_PLUS expression
+   64           | expression TOKEN_PLUS expression •
+   65           | expression • TOKEN_MINUS expression
 
-    NUMBER  troca e vai para estado 144
+    $default  redução com regra 64 (expression)
 
 
 Estado 137
 
-   43 jump_stmt: JUMP_LINK REG COMMA REG COMMA CARDINAL • NUMBER
+   64 expression: expression • TOKEN_PLUS expression
+   65           | expression • TOKEN_MINUS expression
+   65           | expression TOKEN_MINUS expression •
 
-    NUMBER  troca e vai para estado 145
+    $default  redução com regra 65 (expression)
 
 
 Estado 138
 
-   46 load_stmt: LOAD_INDEXED REG COMMA REG COMMA CARDINAL • NUMBER
+   45 jump_stmt: TOKEN_JUMP TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
+   64 expression: expression • TOKEN_PLUS expression
+   65           | expression • TOKEN_MINUS expression
 
-    NUMBER  troca e vai para estado 146
+    TOKEN_PLUS   troca e vai para estado 117
+    TOKEN_MINUS  troca e vai para estado 118
+
+    $default  redução com regra 45 (jump_stmt)
 
 
 Estado 139
 
-   48 store_stmt: STORE_INDEXED REG COMMA REG COMMA CARDINAL • NUMBER
+   46 jump_stmt: TOKEN_JUMP_LINK TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
-    NUMBER  troca e vai para estado 147
+    TOKEN_CARDINAL  troca e vai para estado 155
 
 
 Estado 140
 
-   28 add_stmt: ADD REG COMMA REG COMMA CARDINAL NUMBER •
+   47 load_stmt: TOKEN_LOAD_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
+   64 expression: expression • TOKEN_PLUS expression
+   65           | expression • TOKEN_MINUS expression
 
-    $default  redução com regra 28 (add_stmt)
+    TOKEN_PLUS   troca e vai para estado 117
+    TOKEN_MINUS  troca e vai para estado 118
+
+    $default  redução com regra 47 (load_stmt)
 
 
 Estado 141
 
-   30 sub_stmt: SUB REG COMMA REG COMMA CARDINAL NUMBER •
+   48 load_stmt: TOKEN_LOAD_IMMEDIATE TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
+   64 expression: expression • TOKEN_PLUS expression
+   65           | expression • TOKEN_MINUS expression
 
-    $default  redução com regra 30 (sub_stmt)
+    TOKEN_PLUS   troca e vai para estado 117
+    TOKEN_MINUS  troca e vai para estado 118
+
+    $default  redução com regra 48 (load_stmt)
 
 
 Estado 142
 
-   32 or_stmt: OR REG COMMA REG COMMA CARDINAL NUMBER •
+   49 load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
-    $default  redução com regra 32 (or_stmt)
+    TOKEN_CARDINAL  troca e vai para estado 156
 
 
 Estado 143
 
-   34 and_stmt: AND REG COMMA REG COMMA CARDINAL NUMBER •
+   50 store_stmt: TOKEN_STORE_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
+   64 expression: expression • TOKEN_PLUS expression
+   65           | expression • TOKEN_MINUS expression
 
-    $default  redução com regra 34 (and_stmt)
+    TOKEN_PLUS   troca e vai para estado 117
+    TOKEN_MINUS  troca e vai para estado 118
+
+    $default  redução com regra 50 (store_stmt)
 
 
 Estado 144
 
-   36 xor_stmt: XOR REG COMMA REG COMMA CARDINAL NUMBER •
+   51 store_stmt: TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
-    $default  redução com regra 36 (xor_stmt)
+    TOKEN_CARDINAL  troca e vai para estado 157
 
 
 Estado 145
 
-   43 jump_stmt: JUMP_LINK REG COMMA REG COMMA CARDINAL NUMBER •
+   27 add_stmt: TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG •
 
-    $default  redução com regra 43 (jump_stmt)
+    $default  redução com regra 27 (add_stmt)
 
 
 Estado 146
 
-   46 load_stmt: LOAD_INDEXED REG COMMA REG COMMA CARDINAL NUMBER •
+   28 add_stmt: TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
 
-    $default  redução com regra 46 (load_stmt)
+    TOKEN_NUMBER      troca e vai para estado 89
+    TOKEN_IDENTIFIER  troca e vai para estado 90
+    TOKEN_PLUS        troca e vai para estado 91
+    TOKEN_MINUS       troca e vai para estado 92
+    TOKEN_LEFT_PAREN  troca e vai para estado 93
+
+    expression  vai para estado 158
 
 
 Estado 147
 
-   48 store_stmt: STORE_INDEXED REG COMMA REG COMMA CARDINAL NUMBER •
+   29 sub_stmt: TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG •
 
-    $default  redução com regra 48 (store_stmt)
+    $default  redução com regra 29 (sub_stmt)
+
+
+Estado 148
+
+   30 sub_stmt: TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
+
+    TOKEN_NUMBER      troca e vai para estado 89
+    TOKEN_IDENTIFIER  troca e vai para estado 90
+    TOKEN_PLUS        troca e vai para estado 91
+    TOKEN_MINUS       troca e vai para estado 92
+    TOKEN_LEFT_PAREN  troca e vai para estado 93
+
+    expression  vai para estado 159
+
+
+Estado 149
+
+   31 or_stmt: TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG •
+
+    $default  redução com regra 31 (or_stmt)
+
+
+Estado 150
+
+   32 or_stmt: TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
+
+    TOKEN_NUMBER      troca e vai para estado 89
+    TOKEN_IDENTIFIER  troca e vai para estado 90
+    TOKEN_PLUS        troca e vai para estado 91
+    TOKEN_MINUS       troca e vai para estado 92
+    TOKEN_LEFT_PAREN  troca e vai para estado 93
+
+    expression  vai para estado 160
+
+
+Estado 151
+
+   33 and_stmt: TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG •
+
+    $default  redução com regra 33 (and_stmt)
+
+
+Estado 152
+
+   34 and_stmt: TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
+
+    TOKEN_NUMBER      troca e vai para estado 89
+    TOKEN_IDENTIFIER  troca e vai para estado 90
+    TOKEN_PLUS        troca e vai para estado 91
+    TOKEN_MINUS       troca e vai para estado 92
+    TOKEN_LEFT_PAREN  troca e vai para estado 93
+
+    expression  vai para estado 161
+
+
+Estado 153
+
+   35 xor_stmt: TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG •
+
+    $default  redução com regra 35 (xor_stmt)
+
+
+Estado 154
+
+   36 xor_stmt: TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
+
+    TOKEN_NUMBER      troca e vai para estado 89
+    TOKEN_IDENTIFIER  troca e vai para estado 90
+    TOKEN_PLUS        troca e vai para estado 91
+    TOKEN_MINUS       troca e vai para estado 92
+    TOKEN_LEFT_PAREN  troca e vai para estado 93
+
+    expression  vai para estado 162
+
+
+Estado 155
+
+   46 jump_stmt: TOKEN_JUMP_LINK TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
+
+    TOKEN_NUMBER      troca e vai para estado 89
+    TOKEN_IDENTIFIER  troca e vai para estado 90
+    TOKEN_PLUS        troca e vai para estado 91
+    TOKEN_MINUS       troca e vai para estado 92
+    TOKEN_LEFT_PAREN  troca e vai para estado 93
+
+    expression  vai para estado 163
+
+
+Estado 156
+
+   49 load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
+
+    TOKEN_NUMBER      troca e vai para estado 89
+    TOKEN_IDENTIFIER  troca e vai para estado 90
+    TOKEN_PLUS        troca e vai para estado 91
+    TOKEN_MINUS       troca e vai para estado 92
+    TOKEN_LEFT_PAREN  troca e vai para estado 93
+
+    expression  vai para estado 164
+
+
+Estado 157
+
+   51 store_stmt: TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
+
+    TOKEN_NUMBER      troca e vai para estado 89
+    TOKEN_IDENTIFIER  troca e vai para estado 90
+    TOKEN_PLUS        troca e vai para estado 91
+    TOKEN_MINUS       troca e vai para estado 92
+    TOKEN_LEFT_PAREN  troca e vai para estado 93
+
+    expression  vai para estado 165
+
+
+Estado 158
+
+   28 add_stmt: TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
+   64 expression: expression • TOKEN_PLUS expression
+   65           | expression • TOKEN_MINUS expression
+
+    TOKEN_PLUS   troca e vai para estado 117
+    TOKEN_MINUS  troca e vai para estado 118
+
+    $default  redução com regra 28 (add_stmt)
+
+
+Estado 159
+
+   30 sub_stmt: TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
+   64 expression: expression • TOKEN_PLUS expression
+   65           | expression • TOKEN_MINUS expression
+
+    TOKEN_PLUS   troca e vai para estado 117
+    TOKEN_MINUS  troca e vai para estado 118
+
+    $default  redução com regra 30 (sub_stmt)
+
+
+Estado 160
+
+   32 or_stmt: TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
+   64 expression: expression • TOKEN_PLUS expression
+   65           | expression • TOKEN_MINUS expression
+
+    TOKEN_PLUS   troca e vai para estado 117
+    TOKEN_MINUS  troca e vai para estado 118
+
+    $default  redução com regra 32 (or_stmt)
+
+
+Estado 161
+
+   34 and_stmt: TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
+   64 expression: expression • TOKEN_PLUS expression
+   65           | expression • TOKEN_MINUS expression
+
+    TOKEN_PLUS   troca e vai para estado 117
+    TOKEN_MINUS  troca e vai para estado 118
+
+    $default  redução com regra 34 (and_stmt)
+
+
+Estado 162
+
+   36 xor_stmt: TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
+   64 expression: expression • TOKEN_PLUS expression
+   65           | expression • TOKEN_MINUS expression
+
+    TOKEN_PLUS   troca e vai para estado 117
+    TOKEN_MINUS  troca e vai para estado 118
+
+    $default  redução com regra 36 (xor_stmt)
+
+
+Estado 163
+
+   46 jump_stmt: TOKEN_JUMP_LINK TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
+   64 expression: expression • TOKEN_PLUS expression
+   65           | expression • TOKEN_MINUS expression
+
+    TOKEN_PLUS   troca e vai para estado 117
+    TOKEN_MINUS  troca e vai para estado 118
+
+    $default  redução com regra 46 (jump_stmt)
+
+
+Estado 164
+
+   49 load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
+   64 expression: expression • TOKEN_PLUS expression
+   65           | expression • TOKEN_MINUS expression
+
+    TOKEN_PLUS   troca e vai para estado 117
+    TOKEN_MINUS  troca e vai para estado 118
+
+    $default  redução com regra 49 (load_stmt)
+
+
+Estado 165
+
+   51 store_stmt: TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
+   64 expression: expression • TOKEN_PLUS expression
+   65           | expression • TOKEN_MINUS expression
+
+    TOKEN_PLUS   troca e vai para estado 117
+    TOKEN_MINUS  troca e vai para estado 118
+
+    $default  redução com regra 51 (store_stmt)

@@ -6,14 +6,13 @@
 #include <stdbool.h> 
 #include "../Util/asm_globals.h"
 #include "../Util/logger.h"
+#include "../Util/asm_operations.h"
+#include "../Util/symbol_table.h"
+#include "../Util/statements_list.h"
 #include "../Step1/asm_scanner.h"
 #include "../main.h"
 #include "../Output/asm_parser.tab.h"
-#include "../Util/symbol_table.h"
 
-#include "../Util/statements_list.h"
-
-int binaryToDecimal(char *binaryString);
 
 #define YY_BUFFER_SIZE 32                      // alter to define the value of the input buffer
 
@@ -21,8 +20,6 @@ static char yy_buffer[YY_BUFFER_SIZE];
 static char* yy_buf_pos = yy_buffer;
 static size_t yy_buf_size = 0;
 static int endOfFileReached = 0;
-
-static int value_to_insert = 0;
 
 /*
    1st IF: The macro checks if the current position (yy_buf_pos) in the buffer
@@ -74,132 +71,91 @@ whitespace      [ \t]+
 
 
 %%
-"BRA"   { printf(" BRANCH_ALWAYS");               yylval=BRA_COND;    return BRANCH;  }
-"BCC"   { printf(" BRANCH_CARRY_CLEAR");          yylval=BNE_COND;    return BRANCH;  }
-"BVC"   { printf(" BRANCH_OVERFLOW_CLEAR");       yylval=BVC_COND;    return BRANCH;  }
-"BEQ"   { printf(" BRANCH_EQUAL");                yylval=BEQ_COND;    return BRANCH;  }
-"BGE"   { printf(" BRANCH_GREATER_EQUAL");        yylval=BGE_COND;    return BRANCH;  }
-"BGT"   { printf(" BRANCH_GREATER");              yylval=BGT_COND;    return BRANCH;  }
-"BPL"   { printf(" BRANCH_PLUS");                 yylval=BPL_COND;    return BRANCH;  }
-"BNV"   { printf(" BRANCH_NEVER");                yylval=BNV_COND;    return BRANCH;  }
-"BCS"   { printf(" BRANCH_CARRY_SET");            yylval=BCS_COND;    return BRANCH;  }
-"BVS"   { printf(" BRANCH_OVERFLOW_SET");         yylval=BVS_COND;    return BRANCH;  }
-"BNE"   { printf(" BRANCH_NOT_EQUAL");            yylval=BNE_COND;    return BRANCH;  }
-"BLT"   { printf(" BRANCH_LESS");                 yylval=BLT_COND;    return BRANCH;  }
-"BLE"   { printf(" BRANCH_LESS_EQUAL");           yylval=BLE_COND;    return BRANCH;  }
-"BMI"   { printf(" BRANCH_MINUS");                yylval=BMI_COND;    return BRANCH;  }
+"BRA"   { LOG_DEBUG_SHORT(" BRANCH_ALWAYS");             yylval=BRA_COND;    return TOKEN_BRANCH;  }
+"BCC"   { LOG_DEBUG_SHORT(" BRANCH_CARRY_CLEAR");        yylval=BCC_COND;    return TOKEN_BRANCH;  }
+"BVC"   { LOG_DEBUG_SHORT(" BRANCH_OVERFLOW_CLEAR");     yylval=BVC_COND;    return TOKEN_BRANCH;  }
+"BEQ"   { LOG_DEBUG_SHORT(" BRANCH_EQUAL");              yylval=BEQ_COND;    return TOKEN_BRANCH;  }
+"BGE"   { LOG_DEBUG_SHORT(" BRANCH_GREATER_EQUAL");      yylval=BGE_COND;    return TOKEN_BRANCH;  }
+"BGT"   { LOG_DEBUG_SHORT(" BRANCH_GREATER");            yylval=BGT_COND;    return TOKEN_BRANCH;  }
+"BPL"   { LOG_DEBUG_SHORT(" BRANCH_PLUS");               yylval=BPL_COND;    return TOKEN_BRANCH;  }
+"BNV"   { LOG_DEBUG_SHORT(" BRANCH_NEVER");              yylval=BNV_COND;    return TOKEN_BRANCH;  }
+"BCS"   { LOG_DEBUG_SHORT(" BRANCH_CARRY_SET");          yylval=BCS_COND;    return TOKEN_BRANCH;  }
+"BVS"   { LOG_DEBUG_SHORT(" BRANCH_OVERFLOW_SET");       yylval=BVS_COND;    return TOKEN_BRANCH;  }
+"BNE"   { LOG_DEBUG_SHORT(" BRANCH_NOT_EQUAL");          yylval=BNE_COND;    return TOKEN_BRANCH;  }
+"BLT"   { LOG_DEBUG_SHORT(" BRANCH_LESS");               yylval=BLT_COND;    return TOKEN_BRANCH;  }
+"BLE"   { LOG_DEBUG_SHORT(" BRANCH_LESS_EQUAL");         yylval=BLE_COND;    return TOKEN_BRANCH;  }
+"BMI"   { LOG_DEBUG_SHORT(" BRANCH_MINUS");              yylval=BMI_COND;    return TOKEN_BRANCH;  }
 
-"ADD"   { printf(" ADD");                       return ADD;             }
-"SUB"   { printf(" SUB");                       return SUB;             }
-"OR"    { printf(" OR");                        return OR;              }
-"AND"   { printf(" AND");                       return AND;             }
-"NOT"   { printf(" NOT");                       return NOT;             }
-"XOR"   { printf(" XOR");                       return XOR;             }
-"CMP"   { printf(" CMP");                       return CMP;             }
+"ADD"   { LOG_DEBUG_SHORT(" ADD");                       return TOKEN_ADD;             }
+"SUB"   { LOG_DEBUG_SHORT(" SUB");                       return TOKEN_SUB;             }
+"OR"    { LOG_DEBUG_SHORT(" OR");                        return TOKEN_OR;              }
+"AND"   { LOG_DEBUG_SHORT(" AND");                       return TOKEN_AND;             }
+"NOT"   { LOG_DEBUG_SHORT(" NOT");                       return TOKEN_NOT;             }
+"XOR"   { LOG_DEBUG_SHORT(" XOR");                       return TOKEN_XOR;             }
+"CMP"   { LOG_DEBUG_SHORT(" CMP");                       return TOKEN_CMP;             }
 
-"MOV"   { printf(" MOVE");                      return MOVE;            }
-"JMP"   { printf(" JUMP");                      return JUMP;            }
-"JMPL"  { printf(" JUMP_LINK");                 return JUMP_LINK;       }
-"LD"    { printf(" LOAD_DIRECT");               return LOAD_DIRECT;     }
-"LDI"   { printf(" LOAD_IMMEDIATE");            return LOAD_IMMEDIATE;  }
-"LDX"   { printf(" LOAD_INDEXED ");             return LOAD_INDEXED;    }
-"ST"    { printf(" STORE_DIRECT");              return STORE_DIRECT;    }
-"STX"   { printf(" STORE_INDEXED");             return STORE_INDEXED;   }
-"PUSH"  { printf(" PUSH");                      return PUSH;            }
-"POP"   { printf(" POP");                       return POP;             }
+"MOV"   { LOG_DEBUG_SHORT(" MOVE");                      return TOKEN_MOVE;            }
+"JMP"   { LOG_DEBUG_SHORT(" JUMP");                      return TOKEN_JUMP;            }
+"JMPL"  { LOG_DEBUG_SHORT(" JUMP_LINK");                 return TOKEN_JUMP_LINK;       }
+"LD"    { LOG_DEBUG_SHORT(" LOAD_DIRECT");               return TOKEN_LOAD_DIRECT;     }
+"LDI"   { LOG_DEBUG_SHORT(" LOAD_IMMEDIATE");            return TOKEN_LOAD_IMMEDIATE;  }
+"LDX"   { LOG_DEBUG_SHORT(" LOAD_INDEXED ");             return TOKEN_LOAD_INDEXED;    }
+"ST"    { LOG_DEBUG_SHORT(" STORE_DIRECT");              return TOKEN_STORE_DIRECT;    }
+"STX"   { LOG_DEBUG_SHORT(" STORE_INDEXED");             return TOKEN_STORE_INDEXED;   }
+"PUSH"  { LOG_DEBUG_SHORT(" PUSH");                      return TOKEN_PUSH;            }
+"POP"   { LOG_DEBUG_SHORT(" POP");                       return TOKEN_POP;             }
 
-"RETI"  { printf(" RETI");                      return RETI;            }
-"HALT"  { printf(" HALT");                      return HALT;            }
-"NOP"   { printf(" NOP");                       return NOP;             }
+"RETI"  { LOG_DEBUG_SHORT(" RETI");                      return TOKEN_RETI;            }
+"HALT"  { LOG_DEBUG_SHORT(" HALT");                      return TOKEN_HALT;            }
+"NOP"   { LOG_DEBUG_SHORT(" NOP");                       return TOKEN_NOP;             }
 
-".byte"  { printf(" .byte");                    return BYTE;            }
-".word"  { printf(" .word");                    return WORD;            }
-".alloc" { printf(" .alloc");                   return ALLOC;           }
-".org"   { printf(" .org");                     return ORG;             }
-".equ"   { printf(" .equ");                     return EQU;             }
+".byte"  { LOG_DEBUG_SHORT(" .byte");                    return TOKEN_BYTE;            }
+".word"  { LOG_DEBUG_SHORT(" .word");                    return TOKEN_WORD;            }
+".alloc" { LOG_DEBUG_SHORT(" .alloc");                   return TOKEN_ALLOC;           }
+".org"   { LOG_DEBUG_SHORT(" .org");                     return TOKEN_ORG;             }
+".equ"   { LOG_DEBUG_SHORT(" .equ");                     return TOKEN_EQU;             }
 
-","      { printf(" COMMA");                    return COMMA;           }
-"#"      { printf(" CARDINAL");                 return CARDINAL;        }
-":"      { printf(" COLON");                    return COLON;           }
-"$"      { printf(" DOLAR");                    return DOLAR;           }
-"\0"     { return ENDFILE;} 
+","      { LOG_DEBUG_SHORT(" COMMA");                    return TOKEN_COMMA;           }
+"#"      { LOG_DEBUG_SHORT(" CARDINAL");                 return TOKEN_CARDINAL;        }
+":"      { LOG_DEBUG_SHORT(" COLON");                    return TOKEN_COLON;           }
+"+"      { LOG_DEBUG_SHORT(" PLUS");                     return TOKEN_PLUS;            }
+"("      { LOG_DEBUG_SHORT(" LEFT_PAREN ");              return TOKEN_LEFT_PAREN;      }
+")"      { LOG_DEBUG_SHORT(" RIGHT_PAREN ");             return TOKEN_RIGHT_PAREN;     }
+"-"      { LOG_DEBUG_SHORT(" MINUS");                    return TOKEN_MINUS;           } 
+"\0"     {                                      return TOKEN_ENDFILE;         } 
 
+"$"      {LOG_DEBUG_SHORT(" [DOLLAR]");                  yylval = get_location_counter();    return TOKEN_DOLLAR;    }
 
+{dec_number}    { LOG_DEBUG_SHORT(" [NUMBER]");          yylval = strtol(yytext, NULL, 10);  return TOKEN_NUMBER;    }
+{hex_number_x}  { LOG_DEBUG_SHORT(" [HEX_NUMBER]");      yylval = strtol(yytext, NULL, 16);  return TOKEN_NUMBER;    }
+{hex_number_h}  { LOG_DEBUG_SHORT(" [HEX_NUMBER]");      yylval = strtol(yytext, NULL, 16);  return TOKEN_NUMBER;    }
+{bin_number}    { LOG_DEBUG_SHORT(" [BIN_NUMBER]");      yylval = strtol(yytext, NULL, 2);   return TOKEN_NUMBER;    }
+{register}      { LOG_DEBUG_SHORT(" [REGISTER]");        sscanf(yytext, "R%d", &yylval);     return TOKEN_REG;       }
+{identifier}    { LOG_DEBUG_SHORT(" [IDENTIFIER]");      yylval = add_symbol(yytext);        return TOKEN_IDENTIFIER;}
 
-{dec_number} {   
-  printf(" [NUMBER]");          
-  yylval = add_symbol(yytext); 
-  sscanf(yytext, "%d", &value_to_insert);    
-  set_symbol_value(yylval, value_to_insert); 
-  return NUMBER;          
-}
-
-
-{hex_number_x}  { 
-  printf(" [HEX_NUMBER]");      
-  yylval = add_symbol(yytext); 
-  sscanf(yytext, "0x%x", &value_to_insert);  
-  set_symbol_value(yylval, value_to_insert); 
-  return NUMBER;          
-}
-
-
-{hex_number_h} { 
-  printf(" [HEX_NUMBER]");      
-  yylval = add_symbol(yytext); 
-  sscanf(yytext, "%xh", &value_to_insert);   
-  set_symbol_value(yylval, value_to_insert); 
-  return NUMBER;          
-}
-
-
-{bin_number} { 
-  printf(" [BIN_NUMBER]");      
-  yylval = add_symbol(yytext); 
-  set_symbol_value(yylval, 
-  binaryToDecimal(yytext)); 
-  return NUMBER;          
-}
-
-
-{register} { 
-  printf(" [REGISTER]");        
-  yylval = add_symbol(yytext); 
-  sscanf(yytext, "R%d", &value_to_insert);   
-  set_symbol_value(yylval, value_to_insert); 
-  return REG;             
-}
-
-
-{identifier} { 
-  printf(" [IDENTIFIER]");      
-  yylval = add_symbol(yytext); 
-  return IDENTIFIER;      
-}
-
-{newline}       { printf(" \n");   increment_line_number(1);}
+{newline}       { LOG_DEBUG_SHORT(" \n");   increment_line_number(1);}
 {whitespace}    { /*  ignore */}  
 {carriage}      { /*  ignore */}
 
-"//".*          { printf(" Comment "); /* When "//" is found, zero or more occurrences of any character are ignored */}
-";".*           { printf(" Comment "); /* When ";" is found, zero or more occurrences of any character are ignored */}
+"//".*          { LOG_DEBUG_SHORT(" Comment "); /* When "//" is found, zero or more occurrences of any character are ignored */}
+";".*           { LOG_DEBUG_SHORT(" Comment "); /* When ";" is found, zero or more occurrences of any character are ignored */}
 
 <INITIAL>{      // INITIAL Lexical state
-  "/*"          { printf(" [In comment]");} BEGIN(INCOMMENT);      
+  "/*"          { LOG_DEBUG_SHORT(" [In comment]");} BEGIN(INCOMMENT);      
 }
 
 <INCOMMENT>{    // INCOMMENT Lexical state
-  <<EOF>>       { printf(" Error: Unterminated comment\n");
-                  return ERROR; 
+  <<EOF>>       { LOG_ERROR(" Error: Unterminated comment\n");
+                  return TOKEN_ERROR; 
                 }
-  "*/"          { printf(" [Out comment]");} BEGIN(INITIAL);
+  "*/"          { LOG_DEBUG_SHORT(" [Out comment]");} BEGIN(INITIAL);
   "\n"          { increment_line_number(1);}
   [^*\n]+         ; // Consume characters within the comment block
 }
 
-<<EOF>>         {yyterminate();   return ENDFILE;}
+<<EOF>>         {yyterminate();   return TOKEN_ENDFILE;}
 
-. {printf("Error, [%s] is an invalid token\n",yytext); YY_FATAL_ERROR("Unrecoverable error in lexer"); return ERROR;}
+. {LOG_ERROR("Error, [%s] is an invalid token\n",yytext); YY_FATAL_ERROR("Unrecoverable error in lexer"); return TOKEN_ERROR;}
 %%
 
 
@@ -207,7 +163,6 @@ void init_lexer()
 {
     get_source_file(&yyin);
 }
-
 
 
 TokenType getToken(void)
@@ -222,19 +177,4 @@ TokenType getToken(void)
 
   currentToken = yylex();
   return currentToken;
-}
-
-
-
-int binaryToDecimal(char *binaryString) {
-    int result = 0;
-    while (*binaryString != ('\0' || 'b' )) {
-        if (*binaryString == '1') {
-            result = (result << 1) | 1;
-        } else if (*binaryString == '0') {
-            result = result << 1;
-        }
-        binaryString++;
-    }
-    return result;
 }

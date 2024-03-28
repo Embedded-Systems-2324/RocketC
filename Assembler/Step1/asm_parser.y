@@ -4,58 +4,64 @@
 #include "../Output/asm_parser.tab.h"
 #include "../Util/statements_list.h"
 #include "../Util/symbol_table.h"
-#include "../Util/opcodes.h"
 #include "../Util/asm_operations.h"
+#include "../Util/logger.h"
 #include "../main.h"
 
 int yylex();
 int yyerror(char *str);
 
-#define NULL_ARG    0
 
+#define NULL_ARG    0
 %}
 
 /* ---- TOKENS TYPES ----- */
-%token ADD
-%token SUB
-%token OR
-%token AND
-%token NOT
-%token XOR
-%token CMP
-%token BRANCH
-%token JUMP
-%token JUMP_LINK
-%token MOVE
-%token LOAD_DIRECT
-%token LOAD_IMMEDIATE
-%token LOAD_INDEXED
-%token STORE_DIRECT
-%token STORE_INDEXED
-%token PUSH
-%token POP
-%token RETI
-%token HALT
-%token NOP
-%token NUMBER
-%token REG
-%token IDENTIFIER
-%token ENDFILE
-%token ERROR
-%token COMMA
-%token CARDINAL
-%token COLON
-%token DOLAR  
-%token BYTE
-%token WORD
-%token ALLOC
-%token ORG
-%token EQU
+%token TOKEN_ADD
+%token TOKEN_SUB
+%token TOKEN_OR
+%token TOKEN_AND
+%token TOKEN_NOT
+%token TOKEN_XOR
+%token TOKEN_CMP
+%token TOKEN_BRANCH
+%token TOKEN_JUMP
+%token TOKEN_JUMP_LINK
+%token TOKEN_MOVE
+%token TOKEN_LOAD_DIRECT
+%token TOKEN_LOAD_IMMEDIATE
+%token TOKEN_LOAD_INDEXED
+%token TOKEN_STORE_DIRECT
+%token TOKEN_STORE_INDEXED
+%token TOKEN_PUSH
+%token TOKEN_POP
+%token TOKEN_RETI
+%token TOKEN_HALT
+%token TOKEN_NOP
+%token TOKEN_NUMBER
+%token TOKEN_REG
+%token TOKEN_IDENTIFIER
+%token TOKEN_ENDFILE
+%token TOKEN_ERROR
+%token TOKEN_COMMA
+%token TOKEN_CARDINAL
+%token TOKEN_COLON
+%token TOKEN_DOLLAR  
+%token TOKEN_BYTE
+%token TOKEN_WORD
+%token TOKEN_ALLOC
+%token TOKEN_ORG
+%token TOKEN_EQU
+%token TOKEN_PLUS
+%token TOKEN_MINUS
+%token TOKEN_LEFT_PAREN
+%token TOKEN_RIGHT_PAREN
 
+
+%left TOKEN_PLUS TOKEN_MINUS        //left-associativity
 %%
 
 /* Program */
-prog    :   prog ENDFILE
+prog    :   prog TOKEN_ENDFILE
         |   prog stmt
         |   stmt
         ;
@@ -87,211 +93,264 @@ stmt    :   add_stmt
         ;
 
 
-/* Instructions */
-add_stmt    :   ADD REG COMMA REG COMMA REG                
+/* ADD Operation */
+add_stmt    :   TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG                
                     {  
-                        add_statement(ADD_OP, ADD_OPCODE, $2, $4, $6, NO_TYPE); 
+                        add_statement(ADD_OPCODE, $2, $4, $6, NO_TYPE); 
                     } 
-            |   ADD REG COMMA REG COMMA CARDINAL NUMBER    
+            |   TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression    
                     {
-                        add_statement(ADD_OP, ADD_OPCODE, $2, $4, $7, IMMEDIATE); 
+                        add_statement(ADD_OPCODE, $2, $4, $7, IMMEDIATE); 
+                    }       
+            ;        
+
+/* SUB Operation */
+sub_stmt    :   TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG                
+                    { 
+                        add_statement(SUB_OPCODE, $2, $4, $6, NO_TYPE);  
+                    }
+            |   TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression    
+                    { 
+                        add_statement(SUB_OPCODE, $2, $4, $7, IMMEDIATE); 
                     }
             ;        
 
-
-sub_stmt    :   SUB REG COMMA REG COMMA REG                
+/* OR Operation */
+or_stmt     :   TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG                  
                     { 
-                        add_statement(SUB_OP, SUB_OPCODE, $2, $4, $6, NO_TYPE);  
+                        add_statement(OR_OPCODE, $2, $4, $6, NO_TYPE);    
                     }
-            |   SUB REG COMMA REG COMMA CARDINAL NUMBER    
+            |   TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression      
                     { 
-                        add_statement(SUB_OP, SUB_OPCODE, $2, $4, $7, IMMEDIATE); 
-                    }
-            ;        
-
-
-or_stmt     :   OR REG COMMA REG COMMA REG                  
-                    { 
-                        add_statement(OR_OP, OR_OPCODE, $2, $4, $6, NO_TYPE);    
-                    }
-            |   OR REG COMMA REG COMMA CARDINAL NUMBER      
-                    { 
-                        add_statement(OR_OP, OR_OPCODE, $2, $4, $7, IMMEDIATE);   
+                        add_statement(OR_OPCODE, $2, $4, $7, IMMEDIATE);   
                     } 
             ;
 
-and_stmt    :   AND REG COMMA REG COMMA REG                
+/* AND Operation */
+and_stmt    :   TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG                
                     { 
-                        add_statement(AND_OP, AND_OPCODE, $2, $4, $6, NO_TYPE);  
+                        add_statement(AND_OPCODE, $2, $4, $6, NO_TYPE);  
                     }
-            |   AND REG COMMA REG COMMA CARDINAL NUMBER    
+            |   TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression   
                     { 
-                        add_statement(AND_OP, AND_OPCODE, $2, $4, $7, IMMEDIATE); 
-                    }
-            ;
-
-
-xor_stmt    :   XOR REG COMMA REG COMMA REG                          
-                    { 
-                        add_statement(XOR_OP, XOR_OPCODE, $2, $4, $6, NO_TYPE);  
-                    }
-            |   XOR REG COMMA REG COMMA CARDINAL NUMBER              
-                    { 
-                        add_statement(XOR_OP, XOR_OPCODE, $2, $4, $7, IMMEDIATE); 
+                        add_statement(AND_OPCODE, $2, $4, $7, IMMEDIATE); 
                     }
             ;
 
-
-not_stmt    :   NOT REG COMMA REG                          
+/* XOR Operation */
+xor_stmt    :   TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG                          
                     { 
-                        add_statement(NOT_OP, NOT_OPCODE, $2, $4, NULL_ARG, NO_TYPE);   
+                        add_statement(XOR_OPCODE, $2, $4, $6, NO_TYPE);  
                     }
-            |   NOT REG COMMA CARDINAL NUMBER              
+            |   TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression              
                     { 
-                        add_statement(NOT_OP, NOT_OPCODE, $2, $5, NULL_ARG, IMMEDIATE); 
+                        add_statement(XOR_OPCODE, $2, $4, $7, IMMEDIATE); 
+                    }
+            ;
+
+/* NOT Operation */
+not_stmt    :   TOKEN_NOT TOKEN_REG TOKEN_COMMA TOKEN_REG                          
+                    { 
+                        add_statement(NOT_OPCODE, $2, $4, NULL_ARG, NO_TYPE);   
+                    }
+            |   TOKEN_NOT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression              
+                    { 
+                        add_statement(NOT_OPCODE, $2, $5, NULL_ARG, IMMEDIATE); 
                     }
             ;        
 
-
-cmp_stmt    :   CMP REG COMMA REG                          
+/* CMP Operation */
+cmp_stmt    :   TOKEN_CMP TOKEN_REG TOKEN_COMMA TOKEN_REG                          
                     { 
-                        add_statement(CMP_OP, CMP_OPCODE, $2, $4, NULL_ARG, NO_TYPE);
+                        add_statement(CMP_OPCODE, $2, $4, NULL_ARG, NO_TYPE);
                     };
+            |   TOKEN_CMP TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression                        
+                    { 
+                        add_statement(CMP_OPCODE, $2, $5, NULL_ARG, IMMEDIATE);
+                    }
+            ;
 
-
-branch_stmt :   BRANCH IDENTIFIER             
+/* BRANCH Operation */
+branch_stmt :   TOKEN_BRANCH TOKEN_IDENTIFIER             
                     {
-                        add_statement(BXX_OP, yylval, $2, NULL_ARG, NULL_ARG, NO_TYPE); 
+                        add_statement(BXX_OPCODE, $2, $1, NULL_ARG, NO_TYPE);
+                    };
+            |   TOKEN_BRANCH TOKEN_CARDINAL expression
+                    {
+                        add_statement(BXX_OPCODE, $3, $1, NULL_ARG, IMMEDIATE); 
+                    }        
+            |   TOKEN_BRANCH TOKEN_DOLLAR
+                    {
+                        add_statement(BXX_OPCODE, $2, $1, NULL_ARG, IMMEDIATE);
+                    }
+            ;    
+
+/* MOV Operation - Pseudo-instruction */
+move_stmt   :   TOKEN_MOVE TOKEN_REG TOKEN_COMMA TOKEN_REG                        
+                    {
+                        add_statement(ADD_OPCODE, $2, $4, 0, IMMEDIATE);
                     };     
 
 
-move_stmt   :   MOVE REG COMMA REG                        
-                    {
-                        add_statement(ADD_OP, ADD_OPCODE, $2, $4, 0, IMMEDIATE);
-                    };     
-
-
-jump_stmt   :   JUMP REG COMMA CARDINAL NUMBER                   
+/* JUMP and JUMP with link Operations */
+jump_stmt   :   TOKEN_JUMP TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression                  
                     { 
-                        add_statement(JMP_OP, JMP_OPCODE, $2, $5, NULL_ARG, NO_TYPE); 
+                        add_statement(JMP_OPCODE, $2, $5, NULL_ARG, NO_TYPE); 
                     }
-            |   JUMP_LINK REG COMMA REG COMMA CARDINAL NUMBER    
+            |   TOKEN_JUMP_LINK TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression    
                     {
-                        add_statement(JMP_OP, JMP_OPCODE, $2, $4 , $7, LINK);
+                        add_statement(JMP_OPCODE, $2, $4 , $7, LINK);
                     }
             ;        
 
-
-load_stmt   :   LOAD_DIRECT REG COMMA CARDINAL NUMBER               
+/* Direct, Immediate and Indexed Load operations */
+load_stmt   :   TOKEN_LOAD_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression               
                     { 
-                        add_statement(LD_OP, LD_OPCODE, $2, NULL_ARG, $5, NO_TYPE); 
+                        add_statement(LD_OPCODE, $2, NULL_ARG, $5, NO_TYPE); 
                     }
-
-            |   LOAD_IMMEDIATE REG COMMA CARDINAL NUMBER           
+            |   TOKEN_LOAD_IMMEDIATE TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression           
                     {
-                        add_statement(LDI_OP, LDI_OPCODE, $2, $5, NULL_ARG, NO_TYPE); 
+                        add_statement(LDI_OPCODE, $2, $5, NULL_ARG, NO_TYPE); 
                     }
-            |   LOAD_INDEXED REG COMMA REG COMMA CARDINAL NUMBER  
+            |   TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  
                     { 
-                        add_statement(LDX_OP, LDX_OPCODE, $2, $4, $7, NO_TYPE); 
+                        add_statement(LDX_OPCODE, $2, $4, $7, NO_TYPE); 
+                    }
+            ;
+
+/* Direct and Indexed Store operations */
+store_stmt  :   TOKEN_STORE_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression             
+                    { 
+                        add_statement(ST_OPCODE, $2, $5, NULL_ARG, NO_TYPE); 
+                    }
+            |   TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
+                    { 
+                        add_statement(STX_OPCODE, $2, $4, $7, NO_TYPE);
                     }
             ;        
 
-
-store_stmt  :   STORE_DIRECT REG COMMA CARDINAL NUMBER             
+/* Push operation */
+push_stmt   :   TOKEN_PUSH TOKEN_REG 
                     { 
-                        add_statement(ST_OP,ST_OPCODE, $2, $5, NULL_ARG, NO_TYPE); 
-                    }
-            |   STORE_INDEXED REG COMMA REG COMMA CARDINAL NUMBER
-                    { 
-                        add_statement(STX_OP, ST_OPCODE, $2, $4, $7, NO_TYPE);
-                    }
-            ;        
-
-
-push_stmt   :   PUSH REG 
-                    { 
-                        add_statement(PUSH_OP,PUSH_OPCODE,$2, NULL_ARG, NULL_ARG, NO_TYPE);
+                        add_statement(PUSH_OPCODE, $2, NULL_ARG, NULL_ARG, NO_TYPE);
                     };
 
-
-pop_stmt    :   POP REG   
+/* Pop operation */
+pop_stmt    :   TOKEN_POP TOKEN_REG   
                     { 
-                        add_statement(POP_OP, POP_OPCODE,$2, NULL_ARG, NULL_ARG, NO_TYPE);
+                        add_statement(POP_OPCODE,$2, NULL_ARG, NULL_ARG, NO_TYPE);
                     };
 
-
-reti_stmt   :   RETI     
+/* Reti operation */
+reti_stmt   :   TOKEN_RETI     
                     {
-                        add_statement(RETI_OP, RETI_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
+                        add_statement(RETI_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     };
 
-halt_stmt   :   HALT 
+/* Halt operation */
+halt_stmt   :   TOKEN_HALT 
                     { 
-                        add_statement(HLT_OP, HLT_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
+                        add_statement(HLT_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     };
 
-
-nop_stmt    :   NOP 
+/* Nop operation */
+nop_stmt    :   TOKEN_NOP 
                     { 
-                        add_statement(NOP_OP, NOP_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
+                        add_statement(NOP_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     };
 
-
-byte_stmt   :   BYTE NUMBER 
+/* Byte directive */
+byte_stmt   :   TOKEN_BYTE TOKEN_NUMBER 
                     { 
-                        /*sym_table[$1].value = sym_table[$3].value; 
-                        $$ = $1;*/
+                        add_statement(DOT_BYTE_OP, $2, NULL_ARG, NULL_ARG, NO_TYPE);
                     };
 
-
-word_stmt   :   WORD NUMBER 
+/* Word directive */
+word_stmt   :   TOKEN_WORD TOKEN_NUMBER 
                     { 
-                        /*sym_table[$1].value = sym_table[$3].value; 
-                        $$ = $1;*/
+                        add_statement(DOT_WORD_OP, $2, NULL_ARG, NULL_ARG, NO_TYPE);
                     };
 
-
-alloc_stmt  :   ALLOC IDENTIFIER NUMBER 
+/* Alloc directive */
+alloc_stmt  :   TOKEN_ALLOC TOKEN_IDENTIFIER TOKEN_NUMBER
                     {
-
+                        add_statement(DOT_ALLOC_OP, $3, NULL_ARG, NULL_ARG, NO_TYPE);
                     };
 
-
-org_stmt    :   ORG NUMBER 
+/* Org directive */
+org_stmt    :   TOKEN_ORG TOKEN_NUMBER 
                     {
-                        add_statement(DOT_ORG_OP, DOT_ORG_OP, $2, NULL_ARG, NULL_ARG, NO_TYPE);
+                        add_statement(DOT_ORG_OP, $2, NULL_ARG, NULL_ARG, NO_TYPE);
                     };
 
-
-equ_stmt    :   EQU IDENTIFIER COMMA NUMBER 
+/* Equ directive */
+equ_stmt    :   TOKEN_EQU TOKEN_IDENTIFIER TOKEN_COMMA expression 
                     {
-                         if(get_symbol_value($1) != UNINITIALIZED_VALUE){
-                            printf("ERROR: Constant redefinition: %s in line %ld\n", get_symbol_name($1), get_line_number());
+                        if(get_symbol_value($2) != UNINITIALIZED_VALUE){
+                            LOG_ERROR("ERROR: Constant redefinition: %s in line %ld\n", get_symbol_name($1), get_line_number());
                         }
                         else{
-                            set_symbol_value($1, get_symbol_value($4));
-                            $$ = $1;
+                            set_symbol_value($2, $4);
+                            $$ = $2;
                         }
                     };
 
-
 /* Labels */
-label       :   IDENTIFIER COLON 
+label       :   TOKEN_IDENTIFIER TOKEN_COLON 
                     { 
                         if(get_symbol_value($1) != UNINITIALIZED_VALUE){
-                            printf("ERROR: Label redefinition: %s in line %ld\n", get_symbol_name($1), get_line_number());
+                            LOG_ERROR("ERROR: Label redefinition: %s in line %ld\n", get_symbol_name($1), get_line_number());
                         }
                         else{
                             set_symbol_value($1, get_location_counter());
                             $$ = $1;
                         }
                     };
-%%
 
+/* Expression: calculations made at assembly time */
+expression  :   TOKEN_LEFT_PAREN expression TOKEN_RIGHT_PAREN
+                    {
+                        $$ = $2;
+                    }
+            |   expression TOKEN_PLUS expression
+                    {
+                        $$ = $$ + $3;
+                    }
+            |   expression TOKEN_MINUS expression
+                    {
+                        $$ = $$ - $3;
+                    }      
+            |   TOKEN_PLUS TOKEN_NUMBER
+                    {
+                        $$ = $2;
+                    }
+            |   TOKEN_MINUS TOKEN_NUMBER
+                    {
+                        $$ = 0 - $2;
+                    }        
+            |   TOKEN_NUMBER
+                    {
+                        $$ = $1;
+                    } 
+            |   TOKEN_IDENTIFIER
+                    {
+                        /* 
+                            Checks if the constant has already been defined using the Equ directive.
+                            The constant must be declared before use (SEMANTIC PART) 
+                        */
+                        int temp = get_symbol_value($1);
+
+                        if(temp == UNINITIALIZED_VALUE){
+                            LOG_ERROR("ERROR: Constant not defined: %s in line %ld\n", get_symbol_name($1), get_line_number());
+                        }
+
+                        $$ = temp;
+                    }             
+            ;
+%%
 
 int yyerror(char *str)
 {
-  	fprintf (stderr, "%s in line number : %ld\n", str, get_line_number());
-	return 1;
+  	LOG_ERROR ("ERROR: %s in line number : %ld\n", str, get_line_number());
+	return 0;
 }
