@@ -71,7 +71,6 @@ whitespace  [ \t]+
 "const"         { LOG_DEBUG_SHORT("CONST ");                 return TOKEN_CONSTANT;    }
 "continue"      { LOG_DEBUG_SHORT("CONTINUE ");              return TOKEN_CONTINUE;    }
 "default"       { LOG_DEBUG_SHORT("DEFAULT ");               return TOKEN_DEFAULT;     }
-"define"        { LOG_DEBUG_SHORT("DEFINE ");                return TOKEN_DEFINE;      }
 "do"            { LOG_DEBUG_SHORT("DO ");                    return TOKEN_DO;          }
 "double"        { LOG_DEBUG_SHORT("DOUBLE ");                return TOKEN_DOUBLE;      }
 "if"            { LOG_DEBUG_SHORT("IF ");                    return TOKEN_IF;          }
@@ -80,9 +79,9 @@ whitespace  [ \t]+
 "extern"        { LOG_DEBUG_SHORT("EXTERN ");                return TOKEN_EXTERN;      }
 "float"         { LOG_DEBUG_SHORT("FLOAT ");                 return TOKEN_FLOAT;       }
 "for"           { LOG_DEBUG_SHORT("FOR ");                   return TOKEN_FOR;         }
-"goto"          { LOG_DEBUG_SHORT("GOTO ");                  return TOKEN_GOTO;        }
-"int"           { LOG_DEBUG_SHORT("INT ");                   return TOKEN_INT;         }
-"long"          { LOG_DEBUG_SHORT("LONG ");                  return TOKEN_LONG;        }
+"goto"          { LOG_DEBUG_SHORT("GOTO ");                  return TOKEN_INT;         }
+"long"          { LOG_DEBUG_SHORT("LONG ");                  return TOKEN_GOTO;        }
+"int"           { LOG_DEBUG_SHORT("INT ");                   return TOKEN_LONG;        }
 "register"      { LOG_DEBUG_SHORT("REGISTER ");              return TOKEN_REGISTER;    }
 "return"        { LOG_DEBUG_SHORT("RETURN ");                return TOKEN_RETURN;      }
 "short"         { LOG_DEBUG_SHORT("SHORT ");                 return TOKEN_SHORT;       }
@@ -141,8 +140,8 @@ whitespace  [ \t]+
 "["             { LOG_DEBUG_SHORT("LEFT_BRACKET ");          return TOKEN_LEFT_BRACKET;          }
 "]"             { LOG_DEBUG_SHORT("RIGHT_BRACKET ");         return TOKEN_RIGHT_BRACKET;         }
 "?"             { LOG_DEBUG_SHORT("TERNARY ");               return TOKEN_TERNARY;               }
-"#"             { LOG_DEBUG_SHORT("CARDINAL ");              return TOKEN_CARDINAL;              }
 "->"            { LOG_DEBUG_SHORT("ARROW ");                 return TOKEN_ARROW;                 }
+"'"             { LOG_DEBUG_SHORT("QUOTE ");                 return TOKEN_QUOTE;                 }
 "\0"            { return TOKEN_EOF; }
 
 

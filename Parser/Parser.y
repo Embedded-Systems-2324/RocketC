@@ -24,7 +24,7 @@ const char* getTokenName(int tokenValue);
 //--------------------------------------------------------------------------------------------------------------------//
 %token TOKEN_IF
 %token TOKEN_EOF
-%token TOKEN_ERROR
+%token TOKEN_ERROR   
 %token TOKEN_ELSE
 %token TOKEN_DO
 %token TOKEN_WHILE
@@ -39,19 +39,19 @@ const char* getTokenName(int tokenValue);
 %token TOKEN_DOUBLE
 %token TOKEN_CHAR
 %token TOKEN_VOID
-%token TOKEN_STRUCT
-%token TOKEN_TYPEDEF
+%token TOKEN_STRUCT                 // delayed
+%token TOKEN_TYPEDEF                // delayed
 %token TOKEN_CONTINUE
 %token TOKEN_EXTERN
 %token TOKEN_GOTO
 %token TOKEN_LONG
-%token TOKEN_ENUM
-%token TOKEN_REGISTER
+%token TOKEN_ENUM                   // delayed
+%token TOKEN_REGISTER               
 %token TOKEN_SHORT
 %token TOKEN_SIZEOF
 %token TOKEN_STATIC
 %token TOKEN_SIGNED
-%token TOKEN_UNION
+%token TOKEN_UNION                  // delayed
 %token TOKEN_UNSIGNED
 %token TOKEN_VOLATILE
 %token TOKEN_ASSIGN
@@ -71,7 +71,7 @@ const char* getTokenName(int tokenValue);
 %token TOKEN_COMMA
 %token TOKEN_INCREMENT
 %token TOKEN_DECREMENT
-%token TOKEN_BITWISE_AND        // falta o operador &
+%token TOKEN_BITWISE_AND     
 %token TOKEN_BITWISE_OR
 %token TOKEN_LOGICAL_AND
 %token TOKEN_BITWISE_NOT
@@ -96,15 +96,12 @@ const char* getTokenName(int tokenValue);
 %token TOKEN_MULTIPLY_ASSIGN
 %token TOKEN_DIVIDE_ASSIGN
 %token TOKEN_MODULUS_ASSIGN
-%token TOKEN_CARDINAL
-%token TOKEN_ARROW
-%token TOKEN_DEFINE
+%token TOKEN_ARROW                  // delayed
 %token TOKEN_CONSTANT
 %token TOKEN_ASTERISK
-%token TOKEN_ADDRESS_OF
-%token TOKEN_OTHER
-%token TOKEN_DOT
-%token TOKEN_QUOTE
+%token TOKEN_ADDRESS_OF             // stone layer
+%token TOKEN_DOT                    // delayed
+%token TOKEN_QUOTE         
 %token TOKEN_FNUM
 %token TOKEN_NUM
 %token TOKEN_STR
@@ -210,17 +207,14 @@ R_IF_STATEMENT: TOKEN_IF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES  R
 
 // The returm statement can be used to return NULL or a value               // Examples:
 R_RETURN: TOKEN_RETURN TOKEN_SEMI                                           // return:
-        | TOKEN_RETURN R_EXP TOKEN_SEMI                                  // return var;
-        ;
+        | TOKEN_RETURN R_EXP TOKEN_SEMI;                                    // return var;
 
 //--------------------------------------------------------------------------------------------------------------------//
 // Loop Statements
 //--------------------------------------------------------------------------------------------------------------------//
 
 R_WHILE_LOOP: TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES R_LOCAL_STATEMENT
-{
-    LOG_DEBUG("While loop found!\n");
-};
+            | TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES TOKEN_SEMI;
 
 R_DO_WHILE_LOOP: TOKEN_DO R_LOCAL_STATEMENT TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES
 {
@@ -246,11 +240,12 @@ R_FOR_ASSIGNMENT_FIELD: %empty | TOKEN_ID R_ASSIGN_OPERATOR R_EXP | R_INC_DEC;
 // Expressions
 //--------------------------------------------------------------------------------------------------------------------//
 
-R_EXP: R_EXP R_ARITHMETIC_OPERATOR R_TERM
+R_EXP: TOKEN_MINUS R_EXP 
+     | R_EXP R_ARITHMETIC_OPERATOR R_TERM
      | R_EXP R_CONDITION_OPERATOR R_TERM
      | R_EXP R_BITWISE_OPERATOR R_TERM
      | R_EXP R_LOGIC_OPERATOR R_TERM
-     | R_EXP TOKEN_TERNARY R_EXP TOKEN_COLON R_EXP { LOG_DEBUG("TERNARY OPERATION found!\n");}
+     | R_EXP TOKEN_TERNARY R_EXP TOKEN_COLON R_EXP
      | R_TERM;
 
 R_EXP_LIST: %empty
@@ -264,12 +259,14 @@ R_OPERAND: R_INC_DEC
          | R_TYPE_CAST R_FACTOR
          | R_FACTOR;
 
-R_FACTOR:  TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES
-        |  TOKEN_NUM
-        |  TOKEN_ID
-        |  TOKEN_FNUM
-        |  TOKEN_STR;
-        // TODO: Add function call and sizeoff()
+R_FACTOR: TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES
+        | TOKEN_ID TOKEN_LEFT_BRACKET R_EXP TOKEN_RIGHT_BRACKET
+        | TOKEN_NUM
+        | TOKEN_ID
+        | TOKEN_FNUM
+        | TOKEN_STR
+        | TOKEN_BITWISE_AND TOKEN_ID
+        | R_SIZEOF;
 
 R_INC_DEC: R_PRE_INCREMENT | R_POST_INCREMENT | R_PRE_DECREMENT | R_POST_DECREMENT;
 
@@ -297,6 +294,12 @@ R_BITWISE_OPERATOR: TOKEN_BITWISE_AND | TOKEN_BITWISE_NOT | TOKEN_BITWISE_OR | T
 R_ASSIGN_OPERATOR: TOKEN_ASSIGN | TOKEN_PLUS_ASSIGN | TOKEN_MINUS_ASSIGN | TOKEN_MODULUS_ASSIGN | TOKEN_LEFT_SHIFT_ASSIGN
                  | TOKEN_RIGHT_SHIFT_ASSIGN | TOKEN_BITWISE_AND_ASSIGN | TOKEN_BITWISE_OR_ASSIGN | TOKEN_BITWISE_XOR_ASSIGN
                  | TOKEN_MULTIPLY_ASSIGN | TOKEN_DIVIDE_ASSIGN;
+
+R_SIZEOF: TOKEN_SIZEOF TOKEN_LEFT_PARENTHESES R_SIZEOF_BODY TOKEN_RIGHT_PARENTHESES       // sizeof(exp);
+
+R_SIZEOF_BODY: R_TYPE_ALL
+             | R_SIGN_QUALIFIER R_TYPE_ALL
+             | R_EXP;
 
 //--------------------------------------------------------------------------------------------------------------------//
 // Misc
@@ -343,32 +346,52 @@ R_ARG:R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID
 
 // Variable declarations can have a visibility qualifier (extern/static), a type qualifier (volatile/const), a sign qualifier
 // (signed/unsigned) and must explicitly specify a type (short, int, float...).                  //Examples:
-R_VAR_PREAMBLE: R_VISIBILITY_QUALIFIER R_TYPE_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID     //static const unsigned int var
-              | R_VISIBILITY_QUALIFIER R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID                      //static const int var
-              | R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                      //static signed int var
-              | R_TYPE_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                            //const signed int var
-              | R_VISIBILITY_QUALIFIER R_TYPE_ALL TOKEN_ID                                       //static int var
-              | R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID                                             //const int var
-              | R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                                             //signed int var
-              | R_TYPE_ALL TOKEN_ID;                                                             //int var
+R_VAR_PREAMBLE: TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_TYPE_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID     // register static const unsigned int var
+              | TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID                      // register static const int var
+              | TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                      // register static signed int var
+              | TOKEN_REGISTER R_TYPE_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                            // register const signed int var
+              | TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_TYPE_ALL TOKEN_ID                                       // register static int var
+              | TOKEN_REGISTER R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID                                             // register const int var
+              | TOKEN_REGISTER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                                             // register signed int var
+              | TOKEN_REGISTER R_TYPE_ALL TOKEN_ID                                                              // register int var         
+              | R_VISIBILITY_QUALIFIER R_TYPE_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                    //static const unsigned int var
+              | R_VISIBILITY_QUALIFIER R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID                                     //static const int var
+              | R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                                     //static signed int var
+              | R_TYPE_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                                           //const signed int var
+              | R_VISIBILITY_QUALIFIER R_TYPE_ALL TOKEN_ID                                                      //static int var
+              | R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID                                                            //const int var
+              | R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                                                            //signed int var
+              | R_TYPE_ALL TOKEN_ID;                                                                            //int var
 
-// Variable declaration (simple or followed by its assignment).         // Examples:
-R_VAR_DECLARATION: R_VAR_PREAMBLE TOKEN_SEMI                            // int var;  
-                 | R_VAR_PREAMBLE R_ASSIGN_OPERATOR R_EXP TOKEN_SEMI;   // int var = 1;
+// Variable declaration (simple or followed by its assignment).                                     // Examples:
+R_VAR_DECLARATION: R_VAR_PREAMBLE TOKEN_SEMI                                                        // int var;  
+                 | R_VAR_PREAMBLE R_ASSIGN_OPERATOR R_EXP TOKEN_SEMI;                               // int var = 1;
+                 | R_VAR_PREAMBLE R_ASSIGN_OPERATOR TOKEN_QUOTE TOKEN_ID TOKEN_QUOTE TOKEN_SEMI;    // char var = 'a';
 
-// Array declaration                                                                                // Examples:
-R_ARR_DECLARATION: R_VAR_PREAMBLE TOKEN_LEFT_BRACKET TOKEN_RIGHT_BRACKET TOKEN_SEMI                 // int var [];
-                 | R_VAR_PREAMBLE TOKEN_LEFT_BRACKET R_EXP TOKEN_RIGHT_BRACKET TOKEN_SEMI           // int var [2];
-                 | R_VAR_PREAMBLE TOKEN_LEFT_BRACKET TOKEN_RIGHT_BRACKET R_ASSIGN_OPERATOR          // int var [] = {1, 2, 3};
-                   TOKEN_LEFT_BRACE R_EXP_LIST TOKEN_RIGHT_BRACE TOKEN_SEMI 
-                 | R_VAR_PREAMBLE TOKEN_LEFT_BRACKET R_EXP TOKEN_RIGHT_BRACKET R_ASSIGN_OPERATOR    // int var [2] = {1, 2};    // nao verifica se o tamanho do array
-                   TOKEN_LEFT_BRACE R_EXP_LIST TOKEN_RIGHT_BRACE TOKEN_SEMI;                                                    // e o numero de valores é igual
+// Array declaration                                                                    // Examples:
+R_ARR_DECLARATION: R_VAR_PREAMBLE R_ARR_SIZE TOKEN_SEMI                                 // int var [2];
+                 | R_VAR_PREAMBLE R_ARR_SIZE R_ASSIGN_OPERATOR R_ARR_ARGS TOKEN_SEMI;   // var [] = {1, 2, 3};
+
+// Dimensions of the array                                              // Examples:
+R_ARR_SIZE: R_ARR_SIZE TOKEN_LEFT_BRACKET TOKEN_RIGHT_BRACKET           // [][][]
+          | R_ARR_SIZE TOKEN_LEFT_BRACKET R_EXP TOKEN_RIGHT_BRACKET     // [2][3]
+          | TOKEN_LEFT_BRACKET TOKEN_RIGHT_BRACKET                      // []
+          | TOKEN_LEFT_BRACKET R_EXP TOKEN_RIGHT_BRACKET                // [2]
+
+// Arguments of the array                                                           // Examples:
+R_ARR_ARGS: R_ARR_ARGS TOKEN_COMMA TOKEN_LEFT_BRACE R_ARR_ARGS TOKEN_RIGHT_BRACE    // {{{...},{...},{...}},{{...},{...}}}
+          | TOKEN_LEFT_BRACE R_ARR_ARGS TOKEN_RIGHT_BRACE                           // {...}
+          | R_ARR_ARGS TOKEN_COMMA TOKEN_LEFT_BRACE R_EXP_LIST TOKEN_RIGHT_BRACE    // {}
+          | TOKEN_LEFT_BRACE R_EXP_LIST TOKEN_RIGHT_BRACE;
+
+
 
 // Rule to assign a value to a variable                             // Example:
 R_VAR_ASSIGNMENT: TOKEN_ID R_ASSIGN_OPERATOR R_EXP TOKEN_SEMI;      // var = 1;
 
 // Rule to assign values to an array                // Example: var[1] = {1};
-R_ARR_ASSIGNMENT: TOKEN_ID TOKEN_LEFT_BRACKET R_EXP TOKEN_RIGHT_BRACKET R_ASSIGN_OPERATOR TOKEN_LEFT_BRACE R_EXP TOKEN_RIGHT_BRACE TOKEN_SEMI;
+R_ARR_ASSIGNMENT: TOKEN_ID R_ARR_SIZE R_ASSIGN_OPERATOR R_ARR_ARGS TOKEN_SEMI;
+
 
 // Standard C data types. Doesn't account for user defined types (aka typedefs), as this will need a symbol table
 //         char         short          int        long         float          double           long double
