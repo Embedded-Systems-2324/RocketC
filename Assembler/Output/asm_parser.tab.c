@@ -1385,7 +1385,7 @@ yyreduce:
   case 45: /* move_stmt: TOKEN_MOVE TOKEN_REG TOKEN_COMMA TOKEN_REG  */
 #line 190 "Step1/asm_parser.y"
                     {
-                        add_statement(ADD_OPCODE, yyvsp[-2], yyvsp[0], 0, IMMEDIATE);
+                        add_statement(ADD_OPCODE, yyvsp[-2], yyvsp[0], NULL_ARG, NO_TYPE);
                     }
 #line 1391 "asm_parser.tab.c"
     break;
@@ -1393,7 +1393,7 @@ yyreduce:
   case 46: /* jump_stmt: TOKEN_JUMP TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
 #line 197 "Step1/asm_parser.y"
                     { 
-                        add_statement(JMP_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, NO_TYPE); 
+                        add_statement(JMP_OPCODE, NULL_ARG, yyvsp[-3], yyvsp[0], IMMEDIATE); 
                     }
 #line 1399 "asm_parser.tab.c"
     break;

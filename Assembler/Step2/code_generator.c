@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>  
+#include <math.h>    
 #include <unistd.h>
 #include "../Step2/code_generator.h"
 #include "../Util/asm_operations.h"
@@ -18,7 +20,7 @@ static FILE* fp_hex;
 
 /* Private module functions */
 static void print_code_hex(uint32_t code, uint8_t inst_size, uint32_t *lc);
-static int check_immed(uint32_t value, uint32_t width, uint32_t line);
+static int check_immed(int32_t value, uint32_t width, uint32_t line);
 
 
 /// @brief Generates the binary code using statements list, symbol table and opcode table
@@ -42,6 +44,7 @@ void generate_code()
         switch (current_statement.op_code){
             case NOP_OPCODE:
             case HLT_OPCODE:
+            case RETI_OPCODE:
                 code |= (0x1f & current_statement.op_code) << 27;
                 break;
 
@@ -52,13 +55,11 @@ void generate_code()
                 code |= (0x1f & current_statement.op2) << 17;
                 break;
                 
-
             case ADD_OPCODE:
             case SUB_OPCODE:
             case OR_OPCODE:
             case AND_OPCODE:
             case XOR_OPCODE:
-            case CMP_OPCODE:
                 code |= (0x1f & current_statement.op_code) << 27;
                 code |= (0x1f & current_statement.op1) << 22;
                 code |= (0x1f & current_statement.op2) << 17;
@@ -73,19 +74,44 @@ void generate_code()
                 }
                 break;
 
+            case CMP_OPCODE:
+                code |= (0x1f & current_statement.op_code) << 27;
+                code |= (0x1f & current_statement.op1) << 17;
+                        
+                if(current_statement.misc == IMMEDIATE){
+                    error |= check_immed(current_statement.op2, IMMED16, i);
+                    code |= 1 << 16;
+                    code |= (0xffff & current_statement.op2);
+                }
+                else{
+                    code |= (0x1f & current_statement.op2) << 11;
+                }
+                break;
 
             case BXX_OPCODE:
                 code |= (0x1f & current_statement.op_code) << 27;
-                code |= (0xf & current_statement.misc) << 23;
+                code |= (0xf & current_statement.op2) << 23;  
                 
-                if(get_symbol_value(current_statement.op1) == 0){
-                    LOG_ERROR("Uninitialized symbol %d\n", get_symbol_value(current_statement.op1));
-                    error |= 1;
-                }
-                int brx_displ = get_symbol_value(current_statement.op1) - (lc - 4);
-                error |= check_immed(brx_displ, IMMED23, i);
+                if(current_statement.misc == NO_TYPE){
 
-                code |= (0x7fffff & brx_displ);
+                    if(get_symbol_value(current_statement.op1) == UNINITIALIZED_VALUE){
+
+                        LOG_ERROR("Uninitialized symbol %d\n", get_symbol_value(current_statement.op1));
+                        error |= 1;
+                    }
+
+                    int brx_displ = get_symbol_value(current_statement.op1) - (lc - 4);
+                    error |= check_immed(brx_displ, IMMED23, i);
+
+                    code |= (0x7fffff & brx_displ);
+                    break;
+                }
+                
+                    int brx_displ = current_statement.op1 - (lc - 4);
+                    error |= check_immed(brx_displ, IMMED23, i);
+
+                    code |= (0x7fffff & brx_displ);
+
                 break;
 
 
@@ -94,10 +120,11 @@ void generate_code()
                 
                 if(current_statement.misc == LINK){
                     code |= 1 << 16;
-                    code |= (0x1f & get_symbol_value(current_statement.op1)) << 22;
+                    code |= (0x1f & current_statement.op1) << 22;
                 }
-                code |= (0x1f & get_symbol_value(current_statement.op1)) << 17;
-                code |= (0xffff & get_symbol_value(current_statement.op3));
+    
+                code |= (0x1f & current_statement.op2) << 17;
+                code |= (0xffff & current_statement.op3);
                 break;
 
 
@@ -105,42 +132,46 @@ void generate_code()
             case LD_OPCODE:
             case LDI_OPCODE:
                 code |= (0x1f & current_statement.op_code) << 27;
-                code |= (0x1f & get_symbol_value(current_statement.op1)) << 22;
+                code |= (0x1f & current_statement.op1) << 22;
                 
-                error |= check_immed(get_symbol_value(current_statement.op2), IMMED22, i);
-                code |= (0x3fffff & get_symbol_value(current_statement.op2));
+                error |= check_immed((current_statement.op2), IMMED22, i);
+                code |= (0x3fffff & (current_statement.op2));
                 break;
 
             case LDX_OPCODE:
             case STX_OPCODE:
                 code |= (0x1f & current_statement.op_code) << 27;
-                code |= (0x1f & get_symbol_value(current_statement.op1)) << 22;
-                code |= (0x1f & get_symbol_value(current_statement.op2)) << 17;
-                error |= check_immed(get_symbol_value(current_statement.op3), IMMED17, i);
-                code |= (0x1ffff & get_symbol_value(current_statement.op3));
+                code |= (0x1f & (current_statement.op1)) << 22;
+                code |= (0x1f & (current_statement.op2)) << 17;
+
+                error |= check_immed((current_statement.op3), IMMED17, i);
+                code |= (0x1ffff & (current_statement.op3));
                 break;
 
+            case PUSH_OPCODE:
+            case POP_OPCODE:
+                code |= (0x1f & current_statement.op_code) << 27;
+                code |= (0x1f & (current_statement.op1)) << 17;
+                break;
 
             case DOT_BYTE_OP:
-                error |= check_immed(get_symbol_value(current_statement.op1), 8, i);
-                code = get_symbol_value(current_statement.op1) & 0xff;
+                error |= check_immed(current_statement.op1, 8, i);
+                code = (current_statement.op1 & 0xff);
                 inst_size = 1;
                 break;
 
-
             case DOT_WORD_OP:
-                code = get_symbol_value(current_statement.op1) & 0xffffffff;
+                code = (current_statement.op1 & 0xffffffff);
                 break;
 
-
             case DOT_ALLOC_OP:
-                for (int j = 1; j <= get_symbol_value(current_statement.op1); j++){
+                for (int j = 1; j <= current_statement.op1; j++){
                     print_code_hex(0, 4, &lc);
                 }
                 break;
 
             case DOT_ORG_OP:
-                lc = get_symbol_value(current_statement.op1);
+                lc = current_statement.op1;
                 break;    
 
             default:
@@ -158,7 +189,6 @@ void generate_code()
         ftruncate(fd, 0);    //clear output file
     }
 }
-
 
 /// @brief Prints the generated code to a file, in hexa format
 /// @param code 
@@ -178,17 +208,21 @@ static void print_code_hex(uint32_t code, uint8_t inst_size, uint32_t *lc)
 
 
 
+#include <stdint.h>
+
 /// @brief Checks whether the immediate value is within the range defined by the number of bits
 /// @param value 
 /// @param width 
 /// @param line
 /// @return 1 if error and 0 if no error
-static int check_immed(uint32_t value, uint32_t width, uint32_t line)
-{
-    int max_possible = 1 << (width-1);
 
-    if((value >= max_possible) || (value <= -max_possible)){
-        LOG_ERROR("ERROR in line %d: The value %d, must be smaller than %d\n", line, value, max_possible);
+static int check_immed(int32_t value, uint32_t width, uint32_t line)
+{
+    int32_t max_possible = (1 << (width - 1)) - 1;  
+    int32_t min_possible = -(1 << (width - 1));      
+
+    if (value >= max_possible || value <= min_possible) {
+        LOG_ERROR("ERROR in line %d: The value %d, must be within the range of [%d, %d]\n", line, value, min_possible, max_possible);
         return 1;
     }
 

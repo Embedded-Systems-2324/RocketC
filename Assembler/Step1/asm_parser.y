@@ -174,7 +174,7 @@ cmp_stmt    :   TOKEN_CMP TOKEN_REG TOKEN_COMMA TOKEN_REG
 branch_stmt :   TOKEN_BRANCH TOKEN_IDENTIFIER             
                     {
                         add_statement(BXX_OPCODE, $2, $1, NULL_ARG, NO_TYPE);
-                    };
+                    }
             |   TOKEN_BRANCH TOKEN_CARDINAL expression
                     {
                         add_statement(BXX_OPCODE, $3, $1, NULL_ARG, IMMEDIATE); 
@@ -188,14 +188,14 @@ branch_stmt :   TOKEN_BRANCH TOKEN_IDENTIFIER
 /* MOV Operation - Pseudo-instruction */
 move_stmt   :   TOKEN_MOVE TOKEN_REG TOKEN_COMMA TOKEN_REG                        
                     {
-                        add_statement(ADD_OPCODE, $2, $4, 0, IMMEDIATE);
+                        add_statement(ADD_OPCODE, $2, $4, NULL_ARG, NO_TYPE);
                     };     
 
 
 /* JUMP and JUMP with link Operations */
 jump_stmt   :   TOKEN_JUMP TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression                  
                     { 
-                        add_statement(JMP_OPCODE, $2, $5, NULL_ARG, NO_TYPE); 
+                        add_statement(JMP_OPCODE, NULL_ARG, $2, $5, IMMEDIATE); 
                     }
             |   TOKEN_JUMP_LINK TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression    
                     {
