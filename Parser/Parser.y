@@ -433,11 +433,12 @@ TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_TYPE_QUALIFIER R_SIGN_QUALIFIER R_TYPE_A
 | R_TYPE_ALL TOKEN_ID
 {
     TreeNode_st* pTemp;
+    LOG_DEBUG("ID: %s\n", $2.nodeData.sVal);
+    LOG_DEBUG("Type: %d\n", $1.nodeData.dVal);
 
     NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
     $$.treeNode->nodeData.sVal = $2.nodeData.sVal;
 
-    LOG_DEBUG("ID: %s\n", $2.nodeData.sVal);
 
     NodeAddNewChild($$.treeNode, &pTemp, NODE_TYPE);
     pTemp->nodeData.dVal = (long int) $1.nodeData.dVal;
@@ -500,6 +501,7 @@ TOKEN_CHAR
 }
 | TOKEN_LONG 
 {
+    LOG_DEBUG("Found Long\n");
     $$.nodeData.dVal = TYPE_LONG;
 }
 | TOKEN_FLOAT 
