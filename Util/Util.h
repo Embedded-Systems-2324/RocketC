@@ -3,7 +3,9 @@
 
 #include "Globals.h"
 
-int CreateNodeStatement(TreeNode_st** ppTreeNode, StatementType_et statementType);
-int CreateNodeExpression(TreeNode_st** ppTreeNode, ExpressionType_et expressionType);
+int NodeCreate(TreeNode_st** ppNewNode, NodeType_et nodeType);
+int NodeAddChild(TreeNode_st* pParent, TreeNode_st* pChild);
+int NodeAddNewChild(TreeNode_st* pParent, TreeNode_st** ppNewChild, NodeType_et nodeType);
+int NodeAddQualifier(TreeNode_st* pNode, QualifierType_et qualifierType);
 
 #endif

@@ -11,57 +11,65 @@
 
 typedef enum
 {
-    NODE_STATEMENT,
-    NODE_EXPRESSION
+    QUAL_NONE,
+    QUAL_STATIC,
+    QUAL_EXTERN,
+    QUAL_SIGNED,
+    QUAL_UNSIGNED,
+    QUAL_CONST,
+    QUAL_VOLATILE,
+    QUAL_REGISTER,
+}QualifierType_et;
+
+typedef enum
+{
+    TYPE_CHAR,
+    TYPE_SHORT,
+    TYPE_INT,
+    TYPE_LONG,
+    TYPE_FLOAT,
+    TYPE_DOUBLE,
+    TYPE_LONG_DOUBLE
+}VarType_et;
+
+typedef enum
+{
+    NODE_PROGRAM,
+    NODE_GLOBAL_STATEMENT,
+    NODE_IDENTIFIER,
+    NODE_QUALIFIER,
+    NODE_VAR_PREAMBLE,
+    NODE_VAR_DECLARATION,
+    NODE_TYPE,
+    NODE_FUNC_PROTOTYPE,
+    NODE_FUNC_DECLARATION,
 }NodeType_et;
 
-typedef enum
+typedef union
 {
-    STMT_VAR_DECL,
-    STMT_FUNC_IMPL,
-    STMT_FUNC_PROTOTYPE
-}StatementType_et;
-
-typedef enum
-{
-    EXP_CONST,
-    EXP_OPERATOR,
-    EXP_IDENTIFIER
-}ExpressionType_et;
+    double fVal;
+    long int dVal;
+    char* sVal;
+}NodeData_ut;
 
 typedef struct TreeNode
 {
-    struct TreeNode* child[TREE_MAX_CHILD];
+    struct TreeNode* child;
     struct TreeNode* sibling;
 
+    size_t nofChild;
+    size_t nofQualifiers;
     size_t lineNumber;
+
     NodeType_et nodeType;
-
-    union
-    {
-        StatementType_et statementType;
-        ExpressionType_et expressionType;
-    }nodeData;
-
-    union
-    {
-        int val;
-        char* name;
-    }nodeAttributes;
+    NodeData_ut nodeData;
 }
 TreeNode_st;
 
 typedef union
 {
     TreeNode_st* treeNode;
-    
-    union 
-    {
-        double fVal;
-        long int dVal;
-        char* sVal;
-        char* sId;
-    }tokenData;
+    NodeData_ut nodeData;
 }ParserObject_ut;
 
 #endif

@@ -11,7 +11,7 @@ parser:
 	mv Parser.* Output/
 
 src:
-	gcc -o Output/RocketC Util/Logger.c Output/Parser.tab.c Output/lex.yy.c main.c
+	gcc -o Output/RocketC Util/Util.c Util/Logger.c Output/Parser.tab.c Output/lex.yy.c main.c
 
 clean:
 	rm -r Output

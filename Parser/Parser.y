@@ -100,8 +100,7 @@ const char* getTokenName(int tokenValue);
 %token TOKEN_CONSTANT
 %token TOKEN_ASTERISK
 %token TOKEN_ADDRESS_OF             // stone layer
-%token TOKEN_DOT                    // delayed
-%token TOKEN_QUOTE         
+%token TOKEN_DOT                    // delayed  
 %token TOKEN_FNUM
 %token TOKEN_NUM
 %token TOKEN_STR
@@ -115,17 +114,43 @@ const char* getTokenName(int tokenValue);
 //--------------------------------------------------------------------------------------------------------------------//
 %%
 // Rules for the overall program
-R_PROGRAM: R_PROGRAM R_EOF | R_PROGRAM R_GLOBAL_STATEMENT | R_GLOBAL_STATEMENT;
+R_PROGRAM: R_PROGRAM R_EOF 
+{
 
-// TODO: Add missing cases: Func. Implementations
-R_GLOBAL_STATEMENT: R_VAR_DECLARATION | R_ARR_DECLARATION | R_FUNC_PROTOTYPE | R_FUNC_IMPL;
+}
+| R_PROGRAM R_GLOBAL_STATEMENT 
+{
+
+}
+| R_GLOBAL_STATEMENT
+{
+    $$.treeNode = $1.treeNode;
+};
+
+R_GLOBAL_STATEMENT: 
+R_VAR_DECLARATION 
+{
+    $$.treeNode = $1.treeNode;
+}
+| R_ARR_DECLARATION 
+{
+
+}
+| R_FUNC_PROTOTYPE 
+{
+
+}
+| R_FUNC_IMPL
+{
+
+};
 
 R_LOCAL_STATEMENT_LIST: R_LOCAL_STATEMENT_LIST R_LOCAL_STATEMENT
 {
     LOG_DEBUG("Local statement list found!\n");
 }
 | R_LOCAL_STATEMENT
-{
+{ 
     LOG_DEBUG("Single local statement found!\n");
 };
 
@@ -337,7 +362,7 @@ R_ARG_LIST: %empty | R_ARG | R_ARG_LIST TOKEN_COMMA R_ARG;
 // Function argument type. Example: int x | const char* pString
 R_ARG:R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID 
 {
-    LOG_DEBUG("Function argument found! | Name: %s\n", $2.tokenData.sId);
+    
 };
 
 //--------------------------------------------------------------------------------------------------------------------//
@@ -346,27 +371,92 @@ R_ARG:R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID
 
 // Variable declarations can have a visibility qualifier (extern/static), a type qualifier (volatile/const), a sign qualifier
 // (signed/unsigned) and must explicitly specify a type (short, int, float...).                  //Examples:
-R_VAR_PREAMBLE: TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_TYPE_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID     // register static const unsigned int var
-              | TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID                      // register static const int var
-              | TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                      // register static signed int var
-              | TOKEN_REGISTER R_TYPE_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                            // register const signed int var
-              | TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_TYPE_ALL TOKEN_ID                                       // register static int var
-              | TOKEN_REGISTER R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID                                             // register const int var
-              | TOKEN_REGISTER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                                             // register signed int var
-              | TOKEN_REGISTER R_TYPE_ALL TOKEN_ID                                                              // register int var         
-              | R_VISIBILITY_QUALIFIER R_TYPE_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                    //static const unsigned int var
-              | R_VISIBILITY_QUALIFIER R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID                                     //static const int var
-              | R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                                     //static signed int var
-              | R_TYPE_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                                           //const signed int var
-              | R_VISIBILITY_QUALIFIER R_TYPE_ALL TOKEN_ID                                                      //static int var
-              | R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID                                                            //const int var
-              | R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                                                            //signed int var
-              | R_TYPE_ALL TOKEN_ID;                                                                            //int var
+R_VAR_PREAMBLE:
 
-// Variable declaration (simple or followed by its assignment).                                     // Examples:
-R_VAR_DECLARATION: R_VAR_PREAMBLE TOKEN_SEMI                                                        // int var;  
-                 | R_VAR_PREAMBLE R_ASSIGN_OPERATOR R_EXP TOKEN_SEMI;                               // int var = 1;
-                 | R_VAR_PREAMBLE R_ASSIGN_OPERATOR TOKEN_QUOTE TOKEN_ID TOKEN_QUOTE TOKEN_SEMI;    // char var = 'a';
+// register static const unsigned int var
+TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_TYPE_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID 
+{
+    TreeNode_st* pTemp;
+
+    NodeCreate(&($$.treeNode), NODE_VAR_PREAMBLE);
+    
+    NodeAddNewChild($$.treeNode, &pTemp, NODE_QUALIFIER);
+    pTemp->nodeData.dVal = (long int) QUAL_REGISTER;
+
+/*
+    NodeAddChild($$.treeNode, $2);
+    NodeAddChild($$.treeNode, $3);
+    NodeAddChild($$.treeNode, $4);
+    NodeAddChild($$.treeNode, $5);
+*/
+
+    NodeAddNewChild($$, &pTemp, NODE_IDENTIFIER);
+    pTemp->nodeData.sVal = $6.nodeData.sVal;
+}
+// register static const int var
+| TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID             
+// register static signed int var        
+| TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID        
+// register const signed int var              
+| TOKEN_REGISTER R_TYPE_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID          
+// register static int var                  
+| TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_TYPE_ALL TOKEN_ID              
+// register const int var                         
+| TOKEN_REGISTER R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID                              
+// register signed int var               
+| TOKEN_REGISTER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                    
+// register int var                           
+| TOKEN_REGISTER R_TYPE_ALL TOKEN_ID                                                   
+//static const unsigned int var                  
+| R_VISIBILITY_QUALIFIER R_TYPE_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID
+//static const int var                    
+| R_VISIBILITY_QUALIFIER R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID                    
+//static signed int var                 
+| R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                    
+//const signed int var                 
+| R_TYPE_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID               
+//static int var                            
+| R_VISIBILITY_QUALIFIER R_TYPE_ALL TOKEN_ID           
+{
+}                 
+//const int var                          
+| R_TYPE_QUALIFIER R_TYPE_ALL TOKEN_ID
+{
+
+}                                                
+//signed int var            
+| R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID
+{
+
+}                                      
+ //int var                      
+| R_TYPE_ALL TOKEN_ID
+{
+    TreeNode_st* pTemp;
+
+    NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
+    $$.treeNode->nodeData.sVal = $2.nodeData.sVal;
+
+    LOG_DEBUG("ID: %s\n", $2.nodeData.sVal);
+
+    NodeAddNewChild($$.treeNode, &pTemp, NODE_TYPE);
+    pTemp->nodeData.dVal = (long int) $1.nodeData.dVal;
+};                                                                           
+
+// Variable declaration (simple or followed by its assignment).    
+ // int var;
+R_VAR_DECLARATION: R_VAR_PREAMBLE TOKEN_SEMI
+{
+    LOG_DEBUG("Found variable declaration!\n");
+    $$.treeNode = $1.treeNode;
+    $$.treeNode->nodeType = NODE_VAR_DECLARATION;
+    LOG_DEBUG("Var ID: %s\n", $$.treeNode->nodeData.sVal);
+}
+// int var = 1;                                                        
+| R_VAR_PREAMBLE R_ASSIGN_OPERATOR R_EXP TOKEN_SEMI
+{
+
+}                               
 
 // Array declaration                                                                    // Examples:
 R_ARR_DECLARATION: R_VAR_PREAMBLE R_ARR_SIZE TOKEN_SEMI                                 // int var [2];
@@ -395,13 +485,49 @@ R_ARR_ASSIGNMENT: TOKEN_ID R_ARR_SIZE R_ASSIGN_OPERATOR R_ARR_ARGS TOKEN_SEMI;
 
 // Standard C data types. Doesn't account for user defined types (aka typedefs), as this will need a symbol table
 //         char         short          int        long         float          double           long double
-R_TYPE: TOKEN_CHAR | TOKEN_SHORT | TOKEN_INT | TOKEN_LONG | TOKEN_FLOAT | TOKEN_DOUBLE | TOKEN_LONG TOKEN_DOUBLE;
+R_TYPE: 
+TOKEN_CHAR 
+{
+    $$.nodeData.dVal = TYPE_CHAR;
+}
+| TOKEN_SHORT
+{
+    $$.nodeData.dVal = TYPE_SHORT;
+}
+| TOKEN_INT 
+{
+    $$.nodeData.dVal = TYPE_INT;
+}
+| TOKEN_LONG 
+{
+    $$.nodeData.dVal = TYPE_LONG;
+}
+| TOKEN_FLOAT 
+{
+    $$.nodeData.dVal = TYPE_FLOAT;
+}
+| TOKEN_DOUBLE 
+{
+    $$.nodeData.dVal = TYPE_DOUBLE;
+}
+| TOKEN_LONG TOKEN_DOUBLE
+{
+    $$.nodeData.dVal = TYPE_LONG_DOUBLE;
+};
 
 // Standard C data types but with pointer. This rule implements support for pointers of n length. Example: int*** ...
 R_TYPE_PTR: R_TYPE_PTR TOKEN_ASTERISK | R_TYPE TOKEN_ASTERISK;
 
 // Union between the pointer and standard types.
-R_TYPE_ALL: R_TYPE | R_TYPE_PTR;
+R_TYPE_ALL: 
+R_TYPE 
+{
+    $$ = $1;
+}
+| R_TYPE_PTR
+{
+
+};
 
 // Functions and variables can be marked as either static or extern, never both at the same time.
 R_VISIBILITY_QUALIFIER: TOKEN_STATIC | TOKEN_EXTERN;

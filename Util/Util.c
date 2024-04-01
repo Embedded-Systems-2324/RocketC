@@ -3,123 +3,87 @@
 #include "Logger.h"
 #include "../main.h"
 
-int CreateNodeStatement(TreeNode_st** ppTreeNode, StatementType_et statementType)
+int NodeCreate(TreeNode_st** ppNewNode, NodeType_et nodeType)
 {
-    if (!ppTreeNode)
+    if (!ppNewNode)
         return -EINVAL;
 
-    *ppTreeNode = (TreeNode_st*) calloc(1, sizeof(TreeNode_st));
-    if (!(*ppTreeNode))
+    *ppNewNode = (TreeNode_st *) calloc(1, sizeof(TreeNode_st));
+    if (!(*ppNewNode))
     {
         LOG_ERROR("Failed to allocate memory!\n");
         return -ENOMEM;
     }
 
-    (*ppTreeNode)->nodeData.statementType = statementType;
-    (*ppTreeNode)->nodeType = NODE_STATEMENT;
-    (*ppTreeNode)->lineNumber = getLineNumber();
+    (*ppNewNode)->nodeType = nodeType;
+    (*ppNewNode)->lineNumber = getLineNumber();
 
     return 0;
 }
 
-int CreateNodeExpression(TreeNode_st** ppTreeNode, ExpressionType_et expressionType)
+int NodeAddChild(TreeNode_st* pParent, TreeNode_st* pChild)
 {
-    if (!ppTreeNode)
+    TreeNode_st* pTemp;
+
+    if (!pParent || !pChild)
         return -EINVAL;
 
-    *ppTreeNode = (TreeNode_st*) calloc(1, sizeof(TreeNode_st));
-    if (!(*ppTreeNode))
+    pTemp = reallocarray(pParent->child, pParent->nofChild + 1, sizeof(TreeNode_st));
+    if (!pTemp)
     {
-        LOG_ERROR("Failed to allocate memory!\n");
+        LOG_ERROR("Failed to allocate memory while trying to add a new child!\n");
         return -ENOMEM;
     }
 
-    (*ppTreeNode)->nodeData.expressionType = expressionType;
-    (*ppTreeNode)->nodeType = NODE_EXPRESSION;
-    (*ppTreeNode)->lineNumber = getLineNumber();
+    pParent->child = pTemp;
+    memcpy(&pParent->child[pParent->nofChild++], pChild, sizeof(TreeNode_st));
+    free(pChild);
 
     return 0;
 }
 
-int TreeLog(TreeNode_st* pTreeRoot)
+int NodeAddNewChild(TreeNode_st* pParent, TreeNode_st** ppNewChild, NodeType_et nodeType)
 {
-    TreeNode_st* pCurrentNode = pTreeRoot;
+    TreeNode_st* pTemp;
 
-    if (!pTreeRoot)
+    if (!pParent || !ppNewChild)
         return -EINVAL;
 
-    while (pCurrentNode)
+    pTemp = reallocarray(pParent->child, pParent->nofChild + 1, sizeof(TreeNode_st));
+    if (!pTemp)
     {
-        switch (pCurrentNode->nodeType)
-        {
-            case NODE_STATEMENT:
-                switch (pCurrentNode->nodeData.statementType)
-                {
-                    case STMT_IF:
-                        LOG_DEBUG("IF");
-                        break;
-                    case STMT_FOR:
-                        LOG_DEBUG("FOR");
-                        break;
-                    case STMT_GOTO:
-                        LOG_DEBUG("GOTO");
-                        break;
-                    case STMT_LABEL:
-                        LOG_DEBUG("LABEL");
-                        break;
-                    case STMT_WHILE:
-                        LOG_DEBUG("WHILE");
-                        break;
-                    case STMT_SWITCH:
-                        LOG_DEBUG("SWITCH");
-                        break;
-                    case STMT_RETURN:
-                        LOG_DEBUG("RETURN");
-                        break;
-                    case STMT_CONTINUE:
-                        LOG_DEBUG("CONTINUE");
-                        break;
-                    case STMT_DO_WHILE:
-                        LOG_DEBUG("DO_WHILE");
-                        break;
-                    case STMT_COMPOUND:
-                        LOG_DEBUG("COMPOUND");
-                        break;
-                    case STMT_ASSIGNMENT:
-                        LOG_DEBUG("ASSIGNMENT");
-                        break;
-                    case STMT_INVOCATION:
-                        LOG_DEBUG("INVOCATION");
-                        break;
-                    case STMT_DECLARATION:
-                        LOG_DEBUG("DECLARATION");
-                        break;
-                    case STMT_FUNC_DECLARATION:
-                        LOG_DEBUG("FUNC_DECLARATION");
-                        break;
-                }
-            case NODE_EXPRESSION:
-                switch (pCurrentNode->nodeData.expressionType)
-                {
-                    case EXP_CONST:
-                        LOG_DEBUG("CONST");
-                        break;
-                    case EXP_OPERATOR:
-                        LOG_DEBUG("OPERATOR");
-                        break;
-                    case EXP_IDENTIFIER:
-                        LOG_DEBUG("IDENTIFIER");
-                        break;
-                }
-            default:
-                LOG_ERROR("Received invalid node type!\n");
-        }
-
-        for (size_t i = 0; i < TREE_MAX_CHILD; ++i)
-            (void)TreeLog(pCurrentNode->child[i]);
-
-        pCurrentNode = pCurrentNode->sibling;
+        LOG_ERROR("Failed to allocate memory while trying to add a new child!\n");
+        return -ENOMEM;
     }
+
+    pParent->child = pTemp;
+    (*ppNewChild) = &pParent->child[pParent->nofChild++];
+
+    memset(*ppNewChild, 0, sizeof(TreeNode_st));
+    (*ppNewChild)->nodeType = nodeType;
+    (*ppNewChild)->lineNumber = getLineNumber();
 
     return 0;
 }
+/*
+int NodeAddQualifier(TreeNode_st* pNode, QualifierType_et qualifierType)
+{
+    QualifierType_et* pTemp;
+
+    if (!pNode)
+        return -EINVAL;
+
+    pTemp = reallocarray(pNode->qualifierList, pNode->nofQualifiers + 1, sizeof(QualifierType_et));
+    if (!pTemp)
+    {
+        LOG_ERROR("Failed to allocate memory while trying to add new qualifier!\n");
+        return -ENOMEM;
+    }
+
+    pNode->qualifierList = pTemp;
+    pNode->qualifierList[pNode->nofQualifiers++] = qualifierType;
+    pNode->nofQualifiers++;
+
+    return 0;
+}
+ */

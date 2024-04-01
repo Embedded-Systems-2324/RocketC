@@ -59,6 +59,7 @@ floatNumber {digit}*"."{digit}+({expo}{digit}+)?
 
 identifier  [a-zA-Z_][a-zA-Z0-9_]*
 string ["]([^"\\\n]|\\.|\\\n)*["]
+char '([^'\\\n]|\\.)'
 newline     \n
 sign        ([-+])
 expo        [eE]{sign}?
@@ -141,16 +142,15 @@ whitespace  [ \t]+
 "]"             { LOG_DEBUG_SHORT("RIGHT_BRACKET ");         return TOKEN_RIGHT_BRACKET;         }
 "?"             { LOG_DEBUG_SHORT("TERNARY ");               return TOKEN_TERNARY;               }
 "->"            { LOG_DEBUG_SHORT("ARROW ");                 return TOKEN_ARROW;                 }
-"'"             { LOG_DEBUG_SHORT("QUOTE ");                 return TOKEN_QUOTE;                 }
 "\0"            { return TOKEN_EOF; }
 
-
-{binNumber}     { LOG_DEBUG_SHORT("BIN_NUM "); yylval.tokenData.dVal = strtol(yytext, NULL, 2); return TOKEN_NUM;}
-{hexNumber}     { LOG_DEBUG_SHORT("HEX_NUM "); yylval.tokenData.dVal = strtol(yytext, NULL, 16); return TOKEN_NUM;}
-{number}        { LOG_DEBUG_SHORT("NUM ");     yylval.tokenData.dVal = strtol(yytext, NULL, 10); return TOKEN_NUM; }
-{string}        { LOG_DEBUG_SHORT("STR ");     yylval.tokenData.sVal = yytext; return TOKEN_STR; }
-{identifier}    { LOG_DEBUG_SHORT("ID ");      yylval.tokenData.sId = yytext; return TOKEN_ID;  }
-{floatNumber}   { LOG_DEBUG_SHORT("FNUM ");    yylval.tokenData.fVal = strtod(yytext, NULL); return TOKEN_FNUM;}
+{char}          { LOG_DEBUG_SHORT("CHAR "); yylval.nodeData.dVal = (long int) yytext[0]; return TOKEN_NUM;}
+{binNumber}     { LOG_DEBUG_SHORT("BIN_NUM "); yylval.nodeData.dVal = strtol(yytext, NULL, 2); return TOKEN_NUM;}
+{hexNumber}     { LOG_DEBUG_SHORT("HEX_NUM "); yylval.nodeData.dVal = strtol(yytext, NULL, 16); return TOKEN_NUM;}
+{number}        { LOG_DEBUG_SHORT("NUM ");     yylval.nodeData.dVal = strtol(yytext, NULL, 10); return TOKEN_NUM; }
+{string}        { LOG_DEBUG_SHORT("STR ");     yylval.nodeData.sVal = yytext; return TOKEN_STR; }
+{identifier}    { LOG_DEBUG_SHORT("ID ");      yylval.nodeData.sVal = yytext; return TOKEN_ID;  }
+{floatNumber}   { LOG_DEBUG_SHORT("FNUM ");    yylval.nodeData.fVal = strtod(yytext, NULL); return TOKEN_FNUM;}
 {newline}       { LOG_DEBUG_SHORT(" \n");      incrementLineNumber(1);}
 {whitespace}    { /*  ignore */}
 
