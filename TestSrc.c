@@ -1,1 +1,1 @@
-int myVar;
+static const int myVar;

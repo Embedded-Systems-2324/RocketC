@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "../main.h"
+#include "../Util/Util.h"
 #include "../Util/Globals.h"
 #include "../Util/Logger.h"
 #include "../Output/Parser.tab.h"
@@ -148,8 +149,8 @@ whitespace  [ \t]+
 {binNumber}     { LOG_DEBUG_SHORT("BIN_NUM "); yylval.nodeData.dVal = strtol(yytext, NULL, 2); return TOKEN_NUM;}
 {hexNumber}     { LOG_DEBUG_SHORT("HEX_NUM "); yylval.nodeData.dVal = strtol(yytext, NULL, 16); return TOKEN_NUM;}
 {number}        { LOG_DEBUG_SHORT("NUM ");     yylval.nodeData.dVal = strtol(yytext, NULL, 10); return TOKEN_NUM; }
-{string}        { LOG_DEBUG_SHORT("STR ");     yylval.nodeData.sVal = yytext; return TOKEN_STR; }
-{identifier}    { LOG_DEBUG_SHORT("ID ");      yylval.nodeData.sVal = yytext; return TOKEN_ID;  }
+{string}        { LOG_DEBUG_SHORT("STR "); StringCreateAndCopy(&(yylval.nodeData.sVal), yytext, 0); return TOKEN_STR; }
+{identifier}    { LOG_DEBUG_SHORT("ID "); StringCreateAndCopy(&(yylval.nodeData.sVal), yytext, 0); return TOKEN_ID;  }
 {floatNumber}   { LOG_DEBUG_SHORT("FNUM ");    yylval.nodeData.fVal = strtod(yytext, NULL); return TOKEN_FNUM;}
 {newline}       { LOG_DEBUG_SHORT(" \n");      incrementLineNumber(1);}
 {whitespace}    { /*  ignore */}

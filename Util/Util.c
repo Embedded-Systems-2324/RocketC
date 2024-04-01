@@ -65,6 +65,27 @@ int NodeAddNewChild(TreeNode_st* pParent, TreeNode_st** ppNewChild, NodeType_et 
 
     return 0;
 }
+
+int StringCreateAndCopy(char** ppDest, char* pSrc, size_t strLen)
+{
+    if (!ppDest || !pSrc)
+        return -EINVAL;
+
+    if (strLen == 0)
+        strLen = strlen(pSrc);
+
+    (*ppDest) = malloc(strLen * sizeof(char));
+    if (!(*ppDest))
+    {
+        LOG_ERROR("Failed to allocate memory while trying to create a new string!\n");
+        return -ENOMEM;
+    }
+    
+    memcpy(*ppDest, pSrc, strLen);
+
+    return 0;
+}
+
 /*
 int NodeAddQualifier(TreeNode_st* pNode, QualifierType_et qualifierType)
 {

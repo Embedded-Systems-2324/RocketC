@@ -34,6 +34,29 @@ typedef enum
 
 typedef enum
 {
+    SIGN_SIGNED,
+    SIGN_UNSIGNED
+}SignQualifier_et;
+
+typedef enum
+{
+    MOD_CONST,
+    MOD_VOLATILE
+}ModQualifier_et;
+
+typedef enum
+{
+    VIS_STATIC,
+    VIS_EXTERN,
+}VisQualifier_et;
+
+typedef enum
+{
+    MISC_REG_QUAL,
+}MiscData_et;
+
+typedef enum
+{
     NODE_PROGRAM,
     NODE_GLOBAL_STATEMENT,
     NODE_IDENTIFIER,
@@ -41,6 +64,10 @@ typedef enum
     NODE_VAR_PREAMBLE,
     NODE_VAR_DECLARATION,
     NODE_TYPE,
+    NODE_MOD_QUAL,
+    NODE_VIS_QUAL,
+    NODE_SIGN_QUAL,
+    NODE_MISC,
     NODE_FUNC_PROTOTYPE,
     NODE_FUNC_DECLARATION,
 }NodeType_et;
