@@ -85,26 +85,3 @@ int StringCreateAndCopy(char** ppDest, char* pSrc, size_t strLen)
 
     return 0;
 }
-
-/*
-int NodeAddQualifier(TreeNode_st* pNode, QualifierType_et qualifierType)
-{
-    QualifierType_et* pTemp;
-
-    if (!pNode)
-        return -EINVAL;
-
-    pTemp = reallocarray(pNode->qualifierList, pNode->nofQualifiers + 1, sizeof(QualifierType_et));
-    if (!pTemp)
-    {
-        LOG_ERROR("Failed to allocate memory while trying to add new qualifier!\n");
-        return -ENOMEM;
-    }
-
-    pNode->qualifierList = pTemp;
-    pNode->qualifierList[pNode->nofQualifiers++] = qualifierType;
-    pNode->nofQualifiers++;
-
-    return 0;
-}
- */

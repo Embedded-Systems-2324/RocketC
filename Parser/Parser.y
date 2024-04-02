@@ -1,4 +1,10 @@
 //--------------------------------------------------------------------------------------------------------------------//
+// TODO List:
+//  -Missing AST for variables of pointer type
+//--------------------------------------------------------------------------------------------------------------------//
+
+
+//--------------------------------------------------------------------------------------------------------------------//
 // Prologue
 //--------------------------------------------------------------------------------------------------------------------//
 
@@ -18,6 +24,7 @@
 int yylex();
 int yyerror(char* pStr);
 const char* getTokenName(int tokenValue);
+TreeNode_st* pTreeRoot;
 %}
 
 //--------------------------------------------------------------------------------------------------------------------//
@@ -114,6 +121,7 @@ const char* getTokenName(int tokenValue);
 // Grammar Rules
 //--------------------------------------------------------------------------------------------------------------------//
 %%
+
 // Rules for the overall program
 R_PROGRAM: R_PROGRAM R_EOF 
 {
@@ -148,6 +156,7 @@ R_VAR_DECLARATION
 
 R_LOCAL_STATEMENT_LIST: R_LOCAL_STATEMENT_LIST R_LOCAL_STATEMENT
 {
+
     LOG_DEBUG("Local statement list found!\n");
 }
 | R_LOCAL_STATEMENT
@@ -231,7 +240,7 @@ R_IF_STATEMENT: TOKEN_IF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES  R
   TOKEN_ELSE  R_LOCAL_STATEMENT_LIST 
 ;
 
-// The returm statement can be used to return NULL or a value               // Examples:
+// The return statement can be used to return void or a value               // Examples:
 R_RETURN: TOKEN_RETURN TOKEN_SEMI                                           // return:
         | TOKEN_RETURN R_EXP TOKEN_SEMI;                                    // return var;
 
@@ -239,8 +248,17 @@ R_RETURN: TOKEN_RETURN TOKEN_SEMI                                           // r
 // Loop Statements
 //--------------------------------------------------------------------------------------------------------------------//
 
-R_WHILE_LOOP: TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES R_LOCAL_STATEMENT
-            | TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES TOKEN_SEMI;
+R_WHILE_LOOP: 
+TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES R_LOCAL_STATEMENT
+{
+       
+
+}
+| TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES TOKEN_SEMI
+{
+    
+};
+
 
 R_DO_WHILE_LOOP: TOKEN_DO R_LOCAL_STATEMENT TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES
 {
@@ -266,13 +284,39 @@ R_FOR_ASSIGNMENT_FIELD: %empty | TOKEN_ID R_ASSIGN_OPERATOR R_EXP | R_INC_DEC;
 // Expressions
 //--------------------------------------------------------------------------------------------------------------------//
 
-R_EXP: TOKEN_MINUS R_EXP 
-     | R_EXP R_ARITHMETIC_OPERATOR R_TERM
-     | R_EXP R_CONDITION_OPERATOR R_TERM
-     | R_EXP R_BITWISE_OPERATOR R_TERM
-     | R_EXP R_LOGIC_OPERATOR R_TERM
-     | R_EXP TOKEN_TERNARY R_EXP TOKEN_COLON R_EXP
-     | R_TERM;
+R_EXP: 
+TOKEN_MINUS R_EXP
+{
+    
+}
+| 
+R_EXP R_ARITHMETIC_OPERATOR R_TERM
+{
+
+}
+| 
+R_EXP R_CONDITION_OPERATOR R_TERM
+{
+
+}
+| 
+R_EXP R_BITWISE_OPERATOR R_TERM
+{
+
+}
+| R_EXP R_LOGIC_OPERATOR R_TERM
+{
+
+}
+| 
+R_EXP TOKEN_TERNARY R_EXP TOKEN_COLON R_EXP
+{
+
+}
+| R_TERM
+{
+    
+};
 
 R_EXP_LIST: %empty
           | R_EXP
@@ -306,26 +350,158 @@ R_POST_DECREMENT: TOKEN_ID TOKEN_DECREMENT;
 // Operators
 //--------------------------------------------------------------------------------------------------------------------//
 
-R_ARITHMETIC_OPERATOR: TOKEN_PLUS | TOKEN_MINUS | TOKEN_RIGHT_SHIFT | TOKEN_LEFT_SHIFT;
+R_ARITHMETIC_OPERATOR: 
+TOKEN_PLUS
+{
+    $$.nodeData.dVal = OP_PLUS;
+} 
+| TOKEN_MINUS 
+{
+    $$.nodeData.dVal = OP_MINUS;
+}
+| TOKEN_RIGHT_SHIFT 
+{
+    $$.nodeData.dVal = OP_RIGHT_SHIFT;
+}
+| TOKEN_LEFT_SHIFT 
+{
+    $$.nodeData.dVal = OP_LEFT_RIGHT;
+}
+;
   
-R_PRIORITY_OPERATOR: TOKEN_ASTERISK | TOKEN_OVER | TOKEN_PERCENT;
+R_PRIORITY_OPERATOR: 
+TOKEN_ASTERISK 
+{
+    $$.nodeData.dVal =  OP_MULTIPLY;
+}
+| TOKEN_OVER 
+{
+    $$.nodeData.dVal = OP_DIVIDE;
+}
+| TOKEN_PERCENT
+{
+    $$.nodeData.dVal = OP_REMAIN;
+}
+;
 
-R_CONDITION_OPERATOR: TOKEN_GREATER_THAN | TOKEN_LESS_THAN_OR_EQUAL | TOKEN_GREATER_THAN_OR_EQUAL | TOKEN_LESS_THAN
-                    | TOKEN_EQUAL | TOKEN_NOT_EQUAL;
+R_CONDITION_OPERATOR: 
+TOKEN_GREATER_THAN 
+{
+    $$.nodeData.dVal = OP_GREATER_THAN;
+}
+| TOKEN_LESS_THAN_OR_EQUAL 
+{
+    $$.nodeData.dVal = OP_LESS_THAN_OR_EQUAL;
+}
+| TOKEN_GREATER_THAN_OR_EQUAL 
+{
+    $$.nodeData.dVal = OP_GREATER_THAN_OR_EQUAL;
+}
+| TOKEN_LESS_THAN 
+{
+    $$.nodeData.dVal = OP_LESS_THAN;
+}
+| TOKEN_EQUAL 
+{
+    $$.nodeData.dVal = OP_EQUAL;
+}
+| TOKEN_NOT_EQUAL
+{
+    $$.nodeData.dVal = OP_NOT_EQUAL;
+}
+;
 
-R_LOGIC_OPERATOR: TOKEN_LOGICAL_AND | TOKEN_LOGICAL_OR;
+R_LOGIC_OPERATOR: 
+TOKEN_LOGICAL_AND 
+{
+    $$.nodeData.dVal = OP_LOGICAL_AND;
+}
+| TOKEN_LOGICAL_OR 
+{
+    $$.nodeData.dVal = OP_LOGICAL_OR;
+}
+;
 
-R_BITWISE_OPERATOR: TOKEN_BITWISE_AND | TOKEN_BITWISE_NOT | TOKEN_BITWISE_OR | TOKEN_BITWISE_XOR;
+R_BITWISE_OPERATOR:
+TOKEN_BITWISE_AND 
+{
+    $$.nodeData.dVal = OP_BITWISE_AND;
+}
+| TOKEN_BITWISE_NOT 
+{
+    $$.nodeData.dVal = OP_BITWISE_NOT;
+}
+| TOKEN_BITWISE_OR 
+{
+    $$.nodeData.dVal = OP_BITWISE_OR;
+}
+| TOKEN_BITWISE_XOR
+{
+    $$.nodeData.dVal = OP_BITWISE_XOR;
+}
+;
 
-R_ASSIGN_OPERATOR: TOKEN_ASSIGN | TOKEN_PLUS_ASSIGN | TOKEN_MINUS_ASSIGN | TOKEN_MODULUS_ASSIGN | TOKEN_LEFT_SHIFT_ASSIGN
-                 | TOKEN_RIGHT_SHIFT_ASSIGN | TOKEN_BITWISE_AND_ASSIGN | TOKEN_BITWISE_OR_ASSIGN | TOKEN_BITWISE_XOR_ASSIGN
-                 | TOKEN_MULTIPLY_ASSIGN | TOKEN_DIVIDE_ASSIGN;
+R_ASSIGN_OPERATOR: 
+TOKEN_ASSIGN 
+{
+    $$.nodeData.dVal = OP_ASSIGN;
+}
+| TOKEN_PLUS_ASSIGN 
+{
+    $$.nodeData.dVal = OP_PLUS_ASSIGN;
+}
+| TOKEN_MINUS_ASSIGN 
+{
+    $$.nodeData.dVal = OP_MINUS_ASSIGN;
+}
+| TOKEN_MODULUS_ASSIGN 
+{
+    $$.nodeData.dVal = OP_MODULUS_ASSIGN;
+}
+| TOKEN_LEFT_SHIFT_ASSIGN 
+{
+    $$.nodeData.dVal = OP_LEFT_SHIFT_ASSIGN;
+}
+| TOKEN_RIGHT_SHIFT_ASSIGN 
+{
+    $$.nodeData.dVal = OP_RIGHT_SHIFT_ASSIGN;
+}
+| TOKEN_BITWISE_AND_ASSIGN 
+{
+    $$.nodeData.dVal = OP_BITWISE_AND_ASSIGN;
+}
+| TOKEN_BITWISE_OR_ASSIGN 
+{
+    $$.nodeData.dVal = OP_BITWISE_OR_ASSIGN;
+}
+| TOKEN_BITWISE_XOR_ASSIGN
+{
+    $$.nodeData.dVal = OP_BITWISE_XOR_ASSIGN;
+}
+| TOKEN_MULTIPLY_ASSIGN 
+{
+    $$.nodeData.dVal = OP_MULTIPLY_ASSIGN
+}
+| TOKEN_DIVIDE_ASSIGN 
+{
+    $$.nodeData.dVal = OP_DIVIDE_ASSIGN;
+}
+;
 
-R_SIZEOF: TOKEN_SIZEOF TOKEN_LEFT_PARENTHESES R_SIZEOF_BODY TOKEN_RIGHT_PARENTHESES       // sizeof(exp);
+R_SIZEOF: 
+TOKEN_SIZEOF TOKEN_LEFT_PARENTHESES R_SIZEOF_BODY TOKEN_RIGHT_PARENTHESES       // sizeof(exp);
+{
 
-R_SIZEOF_BODY: R_TYPE_ALL
-             | R_SIGN_QUALIFIER R_TYPE_ALL
-             | R_EXP;
+
+
+}
+;
+
+R_SIZEOF_BODY: 
+R_TYPE_ALL
+| R_SIGN_QUALIFIER R_TYPE_ALL
+| R_EXP
+;
 
 //--------------------------------------------------------------------------------------------------------------------//
 // Misc
@@ -341,10 +517,23 @@ R_TYPE_CAST: TOKEN_LEFT_PARENTHESES R_TYPE_ALL TOKEN_RIGHT_PARENTHESES;
 //--------------------------------------------------------------------------------------------------------------------//
 
 // Function signature i.e. the function format. Doesn't include the ; or the {. Example: int addNumbers(int x, int y)
-R_FUNC_SIGNATURE: R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
-                | R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
-                | R_VISIBILITY_QUALIFIER R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
-                | R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES;
+R_FUNC_SIGNATURE:
+ R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
+ {
+
+ }
+| R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
+{
+
+}
+| R_VISIBILITY_QUALIFIER R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
+{
+
+}
+| R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
+{
+    
+};
 
 // Function prototype is just a function signature followed by a semi
 R_FUNC_PROTOTYPE: R_FUNC_SIGNATURE TOKEN_SEMI 
@@ -440,7 +629,6 @@ TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_AL
 // register const signed int var              
 | TOKEN_REGISTER R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID       
 {
-
     TreeNode_st* pTemp;
     
     NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
@@ -658,11 +846,23 @@ R_VAR_DECLARATION: R_VAR_PREAMBLE TOKEN_SEMI
 | R_VAR_PREAMBLE R_ASSIGN_OPERATOR R_EXP TOKEN_SEMI
 {
 
-}                               
+}
+;                               
 
 // Array declaration                                                                    // Examples:
-R_ARR_DECLARATION: R_VAR_PREAMBLE R_ARR_SIZE TOKEN_SEMI                                 // int var [2];
-                 | R_VAR_PREAMBLE R_ARR_SIZE R_ASSIGN_OPERATOR R_ARR_ARGS TOKEN_SEMI;   // var [] = {1, 2, 3};
+R_ARR_DECLARATION: 
+R_VAR_PREAMBLE R_ARR_SIZE TOKEN_SEMI        // int var [2];
+{
+    $$.treeNode = $1.treeNode;
+    $$.treeNode->nodeType = NODE_ARR_DECLARATION;
+    $$.treeNode->nodeData.dVal = $2.nodeData.dVal;
+}                                 
+| 
+R_VAR_PREAMBLE R_ARR_SIZE R_ASSIGN_OPERATOR R_ARR_ARGS TOKEN_SEMI   // var [] = {1, 2, 3};
+{
+
+}
+;   
 
 // Dimensions of the array                                              // Examples:
 R_ARR_SIZE: R_ARR_SIZE TOKEN_LEFT_BRACKET TOKEN_RIGHT_BRACKET           // [][][]
@@ -679,10 +879,19 @@ R_ARR_ARGS: R_ARR_ARGS TOKEN_COMMA TOKEN_LEFT_BRACE R_ARR_ARGS TOKEN_RIGHT_BRACE
 
 
 // Rule to assign a value to a variable                             // Example:
-R_VAR_ASSIGNMENT: TOKEN_ID R_ASSIGN_OPERATOR R_EXP TOKEN_SEMI;      // var = 1;
+R_VAR_ASSIGNMENT: 
+TOKEN_ID R_ASSIGN_OPERATOR R_EXP TOKEN_SEMI
+{
+
+};      // var = 1;
 
 // Rule to assign values to an array                // Example: var[1] = {1};
-R_ARR_ASSIGNMENT: TOKEN_ID R_ARR_SIZE R_ASSIGN_OPERATOR R_ARR_ARGS TOKEN_SEMI;
+R_ARR_ASSIGNMENT: 
+TOKEN_ID 
+R_ARR_SIZE R_ASSIGN_OPERATOR R_ARR_ARGS TOKEN_SEMI
+{
+
+};
 
 
 // Standard C data types. Doesn't account for user defined types (aka typedefs), as this will need a symbol table
