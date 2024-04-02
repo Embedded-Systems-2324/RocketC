@@ -365,7 +365,7 @@ TOKEN_PLUS
 }
 | TOKEN_LEFT_SHIFT 
 {
-    $$.nodeData.dVal = OP_LEFT_RIGHT;
+    $$.nodeData.dVal = OP_LEFT_SHIFT;
 }
 ;
   
@@ -480,7 +480,7 @@ TOKEN_ASSIGN
 }
 | TOKEN_MULTIPLY_ASSIGN 
 {
-    $$.nodeData.dVal = OP_MULTIPLY_ASSIGN
+    $$.nodeData.dVal = OP_MULTIPLY_ASSIGN;
 }
 | TOKEN_DIVIDE_ASSIGN 
 {
@@ -491,8 +491,6 @@ TOKEN_ASSIGN
 R_SIZEOF: 
 TOKEN_SIZEOF TOKEN_LEFT_PARENTHESES R_SIZEOF_BODY TOKEN_RIGHT_PARENTHESES       // sizeof(exp);
 {
-
-
 
 }
 ;
