@@ -1110,27 +1110,27 @@ YY_RULE_SETUP
 case 35:
 YY_RULE_SETUP
 #line 112 "Step1/asm_lex.l"
-{ LOG_DEBUG_SHORT(" .byte");                    return TOKEN_BYTE;            }
+{ LOG_DEBUG_SHORT(" [.BYTE]");                  return TOKEN_BYTE;            }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
 #line 113 "Step1/asm_lex.l"
-{ LOG_DEBUG_SHORT(" .word");                    return TOKEN_WORD;            }
+{ LOG_DEBUG_SHORT(" [.WORD]");                  return TOKEN_WORD;            }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
 #line 114 "Step1/asm_lex.l"
-{ LOG_DEBUG_SHORT(" .alloc");                   return TOKEN_ALLOC;           }
+{ LOG_DEBUG_SHORT(" [.ALLOC]");                 return TOKEN_ALLOC;           }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
 #line 115 "Step1/asm_lex.l"
-{ LOG_DEBUG_SHORT(" .org");                     return TOKEN_ORG;             }
+{ LOG_DEBUG_SHORT(" [.ORG]");                   return TOKEN_ORG;             }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
 #line 116 "Step1/asm_lex.l"
-{ LOG_DEBUG_SHORT(" .equ");                     return TOKEN_EQU;             }
+{ LOG_DEBUG_SHORT(" [.EQU]");                   return TOKEN_EQU;             }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
@@ -1170,7 +1170,7 @@ YY_RULE_SETUP
 case 47:
 YY_RULE_SETUP
 #line 125 "Step1/asm_lex.l"
-{                                      return TOKEN_ENDFILE;         } 
+{                                               return TOKEN_ENDFILE;         } 
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
@@ -1243,7 +1243,7 @@ YY_RULE_SETUP
 // INCOMMENT Lexical state
 case YY_STATE_EOF(INCOMMENT):
 #line 148 "Step1/asm_lex.l"
-{ LOG_ERROR(" Error: Unterminated comment\n");
+{ LOG_ERROR("[ASSEMBLER] Error: Unterminated comment\n");
                   return TOKEN_ERROR; 
                 }
 	YY_BREAK
@@ -1271,7 +1271,7 @@ case YY_STATE_EOF(INITIAL):
 case 64:
 YY_RULE_SETUP
 #line 158 "Step1/asm_lex.l"
-{LOG_ERROR("Error, [%s] is an invalid token\n",yytext); YY_FATAL_ERROR("Unrecoverable error in lexer"); return TOKEN_ERROR;}
+{LOG_ERROR("[ASSEMBLER] Error, [%s] is an invalid token\n",yytext); YY_FATAL_ERROR("Unrecoverable error in lexer"); return TOKEN_ERROR;}
 	YY_BREAK
 case 65:
 YY_RULE_SETUP

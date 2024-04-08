@@ -31,7 +31,8 @@ static uint32_t hash(char *symbol_name);
 
 /// @brief function to initialize the symbol table
 /// @param table 
-void init_symbol_table(){
+void init_symbol_table()
+{
     //allocates memory for symbol table
     sym_table = (struct symbol_s*) malloc(sizeof(struct symbol_s) * INITIAL_SYMBOL_TABLE_SIZE);
     if(sym_table == NULL){
@@ -59,7 +60,8 @@ void init_symbol_table(){
 
 /// @brief function to delete the symbol table allocated memory
 /// @param table 
-void delete_symbol_table(){
+void delete_symbol_table()
+{
     free(sym_table);
 }
 
@@ -67,7 +69,8 @@ void delete_symbol_table(){
 /// @brief function to calculate the hash value
 /// @param symbol_name 
 /// @return hash value
-static uint32_t hash(char *symbol_name){
+static uint32_t hash(char *symbol_name)
+{
     uint32_t hash_value = 0;
     uint32_t index = 0;
 
@@ -84,7 +87,8 @@ static uint32_t hash(char *symbol_name){
 /// @param symbol_name 
 /// @param hash_value 
 /// @return position of added symbol
-static uint32_t insert_symbol(char *symbol_name, uint32_t hash_value){
+static uint32_t insert_symbol(char *symbol_name, uint32_t hash_value)
+{
     uint32_t index;
 
     index = next_free_index;
@@ -117,7 +121,8 @@ static uint32_t insert_symbol(char *symbol_name, uint32_t hash_value){
  * @param name The name of the symbol to be added
  * @return The index of the symbol in the symbol table
  */
-uint32_t add_symbol(char *name){
+uint32_t add_symbol(char *name)
+{
     uint32_t hash_value;
     uint32_t index;
     
@@ -153,7 +158,8 @@ uint32_t add_symbol(char *name){
 /// @param index 
 /// @param value 
 /// @return error handler
-uint32_t set_symbol_value(uint32_t index, int32_t value){
+uint32_t set_symbol_value(uint32_t index, int32_t value)
+{
     if(!ready){
         LOG_DEBUG("Symbol table uninitialized\n");
 
@@ -171,12 +177,14 @@ uint32_t set_symbol_value(uint32_t index, int32_t value){
 
 
 
-int32_t get_symbol_value(uint32_t index){
+int32_t get_symbol_value(uint32_t index)
+{
     return  sym_table[index].value;
 }
 
 
-char* get_symbol_name(uint32_t index){
+char* get_symbol_name(uint32_t index)
+{
     return sym_table[index].name;
 }
 
@@ -184,7 +192,8 @@ char* get_symbol_name(uint32_t index){
 
 /// @brief function to print the symbol table
 /// @param table
-void print_table(){
+void print_table()
+{
     printf("\n\n-------------SYMBOL TABLE-------------\n");
 
     for (int i = 1; i < next_free_index; i++){

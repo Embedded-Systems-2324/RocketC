@@ -1385,7 +1385,7 @@ yyreduce:
   case 45: /* move_stmt: TOKEN_MOVE TOKEN_REG TOKEN_COMMA TOKEN_REG  */
 #line 190 "Step1/asm_parser.y"
                     {
-                        add_statement(ADD_OPCODE, yyvsp[-2], yyvsp[0], NULL_ARG, NO_TYPE);
+                        add_statement(ADD_OPCODE, yyvsp[-2], yyvsp[0], 0, IMMEDIATE);
                     }
 #line 1391 "asm_parser.tab.c"
     break;
@@ -1522,7 +1522,7 @@ yyreduce:
 #line 288 "Step1/asm_parser.y"
                     {
                         if(get_symbol_value(yyvsp[-2]) != UNINITIALIZED_VALUE){
-                            LOG_ERROR("ERROR: Constant redefinition: %s in line %ld\n", get_symbol_name(yyvsp[-3]), get_line_number());
+                            LOG_ERROR("[ASSEMBLER] ERROR: Constant redefinition: %s in line %ld\n", get_symbol_name(yyvsp[-3]), get_line_number());
                         }
                         else{
                             set_symbol_value(yyvsp[-2], yyvsp[0]);
@@ -1536,7 +1536,7 @@ yyreduce:
 #line 300 "Step1/asm_parser.y"
                     { 
                         if(get_symbol_value(yyvsp[-1]) != UNINITIALIZED_VALUE){
-                            LOG_ERROR("ERROR: Label redefinition: %s in line %ld\n", get_symbol_name(yyvsp[-1]), get_line_number());
+                            LOG_ERROR("[ASSEMBLER] ERROR: Label redefinition: %s in line %ld\n", get_symbol_name(yyvsp[-1]), get_line_number());
                         }
                         else{
                             set_symbol_value(yyvsp[-1], get_location_counter());
@@ -1604,7 +1604,7 @@ yyreduce:
                         int temp = get_symbol_value(yyvsp[0]);
 
                         if(temp == UNINITIALIZED_VALUE){
-                            LOG_ERROR("ERROR: Constant not defined: %s in line %ld\n", get_symbol_name(yyvsp[0]), get_line_number());
+                            LOG_ERROR("[ASSEMBLER] ERROR: Constant not defined: %s in line %ld\n", get_symbol_name(yyvsp[0]), get_line_number());
                         }
 
                         yyval = temp;
@@ -1809,8 +1809,12 @@ yyreturnlab:
 #line 350 "Step1/asm_parser.y"
 
 
+
 int yyerror(char *str)
 {
-  	LOG_ERROR ("ERROR: %s in line number : %ld\n", str, get_line_number());
+  	LOG_ERROR ("[ASSEMBLER] ERROR: %s in line number : %ld\n", str, get_line_number());
 	return 0;
 }
+
+
+///hjh

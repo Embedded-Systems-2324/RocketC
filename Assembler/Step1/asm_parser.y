@@ -188,7 +188,7 @@ branch_stmt :   TOKEN_BRANCH TOKEN_IDENTIFIER
 /* MOV Operation - Pseudo-instruction */
 move_stmt   :   TOKEN_MOVE TOKEN_REG TOKEN_COMMA TOKEN_REG                        
                     {
-                        add_statement(ADD_OPCODE, $2, $4, NULL_ARG, NO_TYPE);
+                        add_statement(ADD_OPCODE, $2, $4, 0, IMMEDIATE);
                     };     
 
 
@@ -287,7 +287,7 @@ org_stmt    :   TOKEN_ORG TOKEN_NUMBER
 equ_stmt    :   TOKEN_EQU TOKEN_IDENTIFIER TOKEN_COMMA expression 
                     {
                         if(get_symbol_value($2) != UNINITIALIZED_VALUE){
-                            LOG_ERROR("ERROR: Constant redefinition: %s in line %ld\n", get_symbol_name($1), get_line_number());
+                            LOG_ERROR("[ASSEMBLER] ERROR: Constant redefinition: %s in line %ld\n", get_symbol_name($1), get_line_number());
                         }
                         else{
                             set_symbol_value($2, $4);
@@ -299,7 +299,7 @@ equ_stmt    :   TOKEN_EQU TOKEN_IDENTIFIER TOKEN_COMMA expression
 label       :   TOKEN_IDENTIFIER TOKEN_COLON 
                     { 
                         if(get_symbol_value($1) != UNINITIALIZED_VALUE){
-                            LOG_ERROR("ERROR: Label redefinition: %s in line %ld\n", get_symbol_name($1), get_line_number());
+                            LOG_ERROR("[ASSEMBLER] ERROR: Label redefinition: %s in line %ld\n", get_symbol_name($1), get_line_number());
                         }
                         else{
                             set_symbol_value($1, get_location_counter());
@@ -341,7 +341,7 @@ expression  :   TOKEN_LEFT_PAREN expression TOKEN_RIGHT_PAREN
                         int temp = get_symbol_value($1);
 
                         if(temp == UNINITIALIZED_VALUE){
-                            LOG_ERROR("ERROR: Constant not defined: %s in line %ld\n", get_symbol_name($1), get_line_number());
+                            LOG_ERROR("[ASSEMBLER] ERROR: Constant not defined: %s in line %ld\n", get_symbol_name($1), get_line_number());
                         }
 
                         $$ = temp;
@@ -349,8 +349,12 @@ expression  :   TOKEN_LEFT_PAREN expression TOKEN_RIGHT_PAREN
             ;
 %%
 
+
 int yyerror(char *str)
 {
-  	LOG_ERROR ("ERROR: %s in line number : %ld\n", str, get_line_number());
+  	LOG_ERROR ("[ASSEMBLER] ERROR: %s in line number : %ld\n", str, get_line_number());
 	return 0;
 }
+
+
+///hjh

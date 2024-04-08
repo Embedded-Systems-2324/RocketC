@@ -18,9 +18,9 @@ static statement_t* stmt_list;
 
 
 
-/// @brief function to init the statement list
-/// @param list 
-void init_statements_list(){
+/// @brief inits the statement list
+void init_statements_list()
+{
     curr_stmt = 0;
     location_counter = 0;
     
@@ -36,16 +36,22 @@ void init_statements_list(){
 }
 
 
+/// @brief deletes the statement list
+void delete_statements_list()
+{
+    free(stmt_list);
+}
 
 
-/// @brief function to add a statement to the statements list
+/// @brief adds a statement to the statements list
 /// @param list -> pointer to statement list
 /// @param op_code 
 /// @param op1 
 /// @param op2 
 /// @param op3 
 /// @param misc
-uint8_t add_statement(uint32_t op_code, uint32_t op1, uint32_t op2, uint32_t op3, uint32_t misc){
+uint8_t add_statement(uint32_t op_code, uint32_t op1, uint32_t op2, uint32_t op3, uint32_t misc)
+{
     if(curr_stmt >= stmt_list_size){
         stmt_list_size += INC_STMT_LIST;
         stmt_list = (statement_t*) realloc(stmt_list, sizeof(statement_t) * stmt_list_size);
@@ -67,7 +73,7 @@ uint8_t add_statement(uint32_t op_code, uint32_t op1, uint32_t op2, uint32_t op3
     curr_stmt++;
 
     if(op_code == DOT_ORG_OP){
-        location_counter = get_symbol_value(op2);
+        location_counter = op1;
     }
     else{
         location_counter += WORD_SIZE;
@@ -76,27 +82,30 @@ uint8_t add_statement(uint32_t op_code, uint32_t op1, uint32_t op2, uint32_t op3
 
 
 
-/// @brief function that return the location counter
-const uint32_t get_location_counter(){
+/// @brief returns the location counter
+const uint32_t get_location_counter()
+{
     return location_counter;
 }
 
-
-
-const statement_t get_statement(uint8_t index){
+ 
+const statement_t get_statement(uint8_t index)
+{
     return stmt_list[index];
 }
 
 
 
-const uint32_t get_current_stmt_index(){
+const uint32_t get_current_stmt_index()
+{
     return curr_stmt;
 }
 
 
-/// @brief function to print all statements list
+/// @brief prints all statements list
 /// @param list 
-void print_statements(){
+void print_statements()
+{
     printf("\n\n*************INTERMEDIATE REPRESENTATION*************\n");
     printf("LINE    OPCODE      OP1     OP2     OP3     MISC\n");
     printf("----------------------------------------------------------\n");

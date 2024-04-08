@@ -11,8 +11,10 @@ ADD R2, R0, R1
 
 .equ VAR2, - 40+10
 
-BYTE_ZONE :
-.byte 23
+//BYTE_ZONE :
+//.byte 23
+
+.org 0x2ff
 
 LOOP :      //Computing Loop 
 MOV R1, R0

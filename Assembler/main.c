@@ -144,9 +144,11 @@ int main(int argc, char *argv[]){
         print_table();
     }
 
+    delete_symbol_table();
+    delete_statements_list();
+
     fclose(pSourceFile);
     fclose(pOutputFile);
-
     return 0;
 }
 

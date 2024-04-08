@@ -109,11 +109,11 @@ whitespace      [ \t]+
 "HALT"  { LOG_DEBUG_SHORT(" HALT");                      return TOKEN_HALT;            }
 "NOP"   { LOG_DEBUG_SHORT(" NOP");                       return TOKEN_NOP;             }
 
-".byte"  { LOG_DEBUG_SHORT(" .byte");                    return TOKEN_BYTE;            }
-".word"  { LOG_DEBUG_SHORT(" .word");                    return TOKEN_WORD;            }
-".alloc" { LOG_DEBUG_SHORT(" .alloc");                   return TOKEN_ALLOC;           }
-".org"   { LOG_DEBUG_SHORT(" .org");                     return TOKEN_ORG;             }
-".equ"   { LOG_DEBUG_SHORT(" .equ");                     return TOKEN_EQU;             }
+".byte"  { LOG_DEBUG_SHORT(" [.BYTE]");                  return TOKEN_BYTE;            }
+".word"  { LOG_DEBUG_SHORT(" [.WORD]");                  return TOKEN_WORD;            }
+".alloc" { LOG_DEBUG_SHORT(" [.ALLOC]");                 return TOKEN_ALLOC;           }
+".org"   { LOG_DEBUG_SHORT(" [.ORG]");                   return TOKEN_ORG;             }
+".equ"   { LOG_DEBUG_SHORT(" [.EQU]");                   return TOKEN_EQU;             }
 
 ","      { LOG_DEBUG_SHORT(" COMMA");                    return TOKEN_COMMA;           }
 "#"      { LOG_DEBUG_SHORT(" CARDINAL");                 return TOKEN_CARDINAL;        }
@@ -122,7 +122,7 @@ whitespace      [ \t]+
 "("      { LOG_DEBUG_SHORT(" LEFT_PAREN ");              return TOKEN_LEFT_PAREN;      }
 ")"      { LOG_DEBUG_SHORT(" RIGHT_PAREN ");             return TOKEN_RIGHT_PAREN;     }
 "-"      { LOG_DEBUG_SHORT(" MINUS");                    return TOKEN_MINUS;           } 
-"\0"     {                                      return TOKEN_ENDFILE;         } 
+"\0"     {                                               return TOKEN_ENDFILE;         } 
 
 "$"      {LOG_DEBUG_SHORT(" [DOLLAR]");                  yylval = get_location_counter();    return TOKEN_DOLLAR;    }
 
@@ -145,7 +145,7 @@ whitespace      [ \t]+
 }
 
 <INCOMMENT>{    // INCOMMENT Lexical state
-  <<EOF>>       { LOG_ERROR(" Error: Unterminated comment\n");
+  <<EOF>>       { LOG_ERROR("[ASSEMBLER] Error: Unterminated comment\n");
                   return TOKEN_ERROR; 
                 }
   "*/"          { LOG_DEBUG_SHORT(" [Out comment]");} BEGIN(INITIAL);
@@ -155,7 +155,7 @@ whitespace      [ \t]+
 
 <<EOF>>         {yyterminate();   return TOKEN_ENDFILE;}
 
-. {LOG_ERROR("Error, [%s] is an invalid token\n",yytext); YY_FATAL_ERROR("Unrecoverable error in lexer"); return TOKEN_ERROR;}
+. {LOG_ERROR("[ASSEMBLER] Error, [%s] is an invalid token\n",yytext); YY_FATAL_ERROR("Unrecoverable error in lexer"); return TOKEN_ERROR;}
 %%
 
 
