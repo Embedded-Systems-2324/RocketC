@@ -100,7 +100,7 @@ void generate_code()
                 code |= (0x1f & current_statement.op_code)  << 27;
                 code |= (0xf & current_statement.op2)       << 23;  
                 
-                if(current_statement.misc != NO_TYPE)
+                if(current_statement.misc == NO_TYPE)
                 {
                     if(get_symbol_value(current_statement.op1) == UNINITIALIZED_VALUE)
                     {
@@ -110,12 +110,12 @@ void generate_code()
                     }
                     else
                     {
-                        bxx_value = get_symbol_value(current_statement.op1) - (lc - 4);
+                        bxx_value = get_symbol_value(current_statement.op1) - lc - 4;
                     }
                 }
                 else
                 {
-                    bxx_value = current_statement.op1 - (lc - 4);
+                    bxx_value = (current_statement.op1 - lc - 4);
                 }
                 
                 error |= check_immed(bxx_value, IMMED23, i);
@@ -136,7 +136,6 @@ void generate_code()
                 error |= check_immed((current_statement.op3), IMMED16, i);
                 code  |= (0xffff & current_statement.op3);
                 break;
-
 
             case ST_OPCODE:
             case LD_OPCODE:
