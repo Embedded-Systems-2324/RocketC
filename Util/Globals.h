@@ -10,6 +10,13 @@
 
 #define FLAG_REGISTER (1 << 0)
 
+#define NODE_BODY()                 \
+    struct TreeNode* pRightChild;   \
+    struct TreeNode* pLeftChild;    \
+    struct TreeNode* pSibling;      \
+    size_t lineNumber;              \
+    NodeType_et nodeType            \
+
 typedef enum
 {
     OP_PLUS,
@@ -105,24 +112,12 @@ typedef union
 
 typedef struct __attribute__((packed)) TreeNode
 {
-    struct TreeNode* pRightChild;
-    struct TreeNode* pLeftChild;
-    struct TreeNode* pSibling;
-    size_t nofChild;
-    size_t lineNumber;
-    NodeType_et nodeType;
+    NODE_BODY();
 }TreeNode_st;
 
 typedef struct __attribute__((packed)) TreeNodeVarDecl
 {
-    //Common fields do not edit
-    TreeNode_st* pRightChild;
-    TreeNode_st* pLeftChild;
-    TreeNode_st* pSibling;
-    size_t nofChild;
-    size_t lineNumber;
-    NodeType_et nodeType;
-    //Start editing here
+    NODE_BODY();
 
     char* varId;
     uint8_t miscFlags;
@@ -134,14 +129,8 @@ typedef struct __attribute__((packed)) TreeNodeVarDecl
 
 typedef struct __attribute__((packed)) TreeNodeFuncPrototype
 {
-    //Common fields do not edit
-    TreeNode_st* pRightChild;
-    TreeNode_st* pLeftChild;
-    TreeNode_st* pSibling;
-    size_t nofChild;
-    size_t lineNumber;
-    NodeType_et nodeType;
-    //Start editing here
+    NODE_BODY();
+
     char* funcId;
     uint8_t miscFlags;
     VarType_et returnType;
@@ -151,14 +140,8 @@ typedef struct __attribute__((packed)) TreeNodeFuncPrototype
 
 typedef struct __attribute__((packed)) TreeNodeParam
 {
-    //Common fields do not edit
-    TreeNode_st* pRightChild;
-    TreeNode_st* pLeftChild;
-    TreeNode_st* pSibling;
-    size_t nofChild;
-    size_t lineNumber;
-    NodeType_et nodeType;
-    //Start editing here
+    NODE_BODY();
+
     char* paramId;
     VarType_et paramType;
     ModQualifier_et modQualifier;
@@ -166,14 +149,7 @@ typedef struct __attribute__((packed)) TreeNodeParam
 
 typedef struct __attribute__((packed)) TreeNodeExpression
 {
-    //Common fields do not edit
-    TreeNode_st* pRightChild;
-    TreeNode_st* pLeftChild;
-    TreeNode_st* pSibling;
-    size_t nofChild;
-    size_t lineNumber;
-    NodeType_et nodeType;
-    //Start editing here
+    NODE_BODY();
 
     OperatorType_et opType;
 }TreeNodeExpression_st;
