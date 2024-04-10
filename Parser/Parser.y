@@ -284,21 +284,16 @@ R_FOR_ASSIGNMENT_FIELD: %empty | TOKEN_ID R_ASSIGN_OPERATOR R_EXP | R_INC_DEC;
 // Expressions
 //--------------------------------------------------------------------------------------------------------------------//
 
+
 R_EXP: 
 TOKEN_MINUS R_EXP
 {
-    /*
     TreeNodeExpression_st* pNode;
-    
-    NodeCreate((TreeNode_st**) &pNode, NODE_EXPRESSION);
-    
+
     pNode->opType = OP_MINUS;
+    pNode->pRightChild = $2.treeNode;
     
-    NodeAddNewChild(pNode, pNode.pRightChild, NODE_EXPRESSION);
-    
-    $$.treeNode = (TreeNode_st*) pNode;
-    */
-    
+    $$.treeNode = (TreeNode_st*) pNode;    
 }
 | 
 R_EXP R_ARITHMETIC_OPERATOR R_TERM
@@ -970,7 +965,6 @@ R_ARR_SIZE R_ASSIGN_OPERATOR R_ARR_ARGS TOKEN_SEMI
 {
 
 };
-
 
 // Standard C data types. Doesn't account for user defined types (aka typedefs), as this will need a symbol table
 //         char         short          int        long         float          double           long double
