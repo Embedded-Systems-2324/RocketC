@@ -1,9 +1,6 @@
-static const int var = 0;
+int var;
+static int foo;
+const int bar;
+const unsigned int myVar;
 
-int main()
-{
-    if (a > b)
-    {
-
-    }
-}
+int foobar(int var);

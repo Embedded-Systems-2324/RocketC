@@ -4,10 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <ctype.h>
 #include "Types.h"
 
-#define TREE_MAX_CHILD 5
+#define FLAG_REGISTER (1 << 0)
 
 typedef enum
 {
@@ -64,13 +65,15 @@ typedef enum
 typedef enum
 {
     MOD_CONST,
-    MOD_VOLATILE
+    MOD_VOLATILE,
+    MOD_NONE
 }ModQualifier_et;
 
 typedef enum
 {
     VIS_STATIC,
     VIS_EXTERN,
+    VIS_NONE
 }VisQualifier_et;
 
 typedef enum
@@ -88,25 +91,9 @@ typedef enum
 
 typedef enum
 {
-    NODE_PROGRAM,
-    NODE_GLOBAL_STATEMENT,
-    NODE_IDENTIFIER,
-    NODE_QUALIFIER,
-    NODE_VAR_PREAMBLE,
+    NODE_PARAM_DESC,
     NODE_VAR_DECLARATION,
-    NODE_ARR_DECLARATION,
-    NODE_TYPE,
-    NODE_MOD_QUAL,
-    NODE_VIS_QUAL,
-    NODE_SIGN_QUAL,
-    NODE_MISC,
     NODE_FUNC_PROTOTYPE,
-    NODE_FUNC_DECLARATION,
-    NODE_WHILE,
-    NODE_FOR,
-    NODE_DO_WHILE,
-    NODE_SIZEOF,
-    NODE_SIZEOF_BODY
 }NodeType_et;
 
 typedef union
@@ -116,34 +103,82 @@ typedef union
     char* sVal;
 }NodeData_ut;
 
-typedef struct TreeNode
+typedef struct __attribute__((packed)) TreeNode
 {
-    struct TreeNode* child;
-    struct TreeNode* sibling;
-
+    struct TreeNode* pRightChild;
+    struct TreeNode* pLeftChild;
+    struct TreeNode* pSibling;
     size_t nofChild;
-    size_t nofQualifiers;
     size_t lineNumber;
-
     NodeType_et nodeType;
-    NodeData_ut nodeData;
-}
-TreeNode_st;
+}TreeNode_st;
 
-
-typedef struct TreeNodeFunc
+typedef struct __attribute__((packed)) TreeNodeVarDecl
 {
-    struct TreeNode* child;
-    struct TreeNode* sibling;
-
+    //Common fields do not edit
+    TreeNode_st* pRightChild;
+    TreeNode_st* pLeftChild;
+    TreeNode_st* pSibling;
     size_t nofChild;
-    size_t nofQualifiers;
     size_t lineNumber;
-
     NodeType_et nodeType;
-    NodeData_ut nodeData;
+    //Start editing here
+
+    char* varId;
+    uint8_t miscFlags;
+    VarType_et varType;
+    ModQualifier_et modQualifier;
+    VisQualifier_et visQualifier;
+    SignQualifier_et signQualifier;
+}TreeNodeVarDecl_st;
+
+typedef struct __attribute__((packed)) TreeNodeFuncPrototype
+{
+    //Common fields do not edit
+    TreeNode_st* pRightChild;
+    TreeNode_st* pLeftChild;
+    TreeNode_st* pSibling;
+    size_t nofChild;
+    size_t lineNumber;
+    NodeType_et nodeType;
+    //Start editing here
+    char* funcId;
+    uint8_t miscFlags;
     VarType_et returnType;
-}TreeNodeFunc_st;
+    VisQualifier_et visQualifier;
+    SignQualifier_et signQualifier;
+}TreeNodeFuncPrototype_st;
+
+typedef struct __attribute__((packed)) TreeNodeParam
+{
+    //Common fields do not edit
+    TreeNode_st* pRightChild;
+    TreeNode_st* pLeftChild;
+    TreeNode_st* pSibling;
+    size_t nofChild;
+    size_t lineNumber;
+    NodeType_et nodeType;
+    //Start editing here
+    char* paramId;
+    VarType_et paramType;
+    ModQualifier_et modQualifier;
+}TreeNodeParam_st;
+
+typedef struct __attribute__((packed)) TreeNodeExpression
+{
+    //Common fields do not edit
+    TreeNode_st* pRightChild;
+    TreeNode_st* pLeftChild;
+    TreeNode_st* pSibling;
+    size_t nofChild;
+    size_t lineNumber;
+    NodeType_et nodeType;
+    //Start editing here
+
+    OperatorType_et opType;
+}TreeNodeExpression_st;
+
+
 
 typedef union
 {

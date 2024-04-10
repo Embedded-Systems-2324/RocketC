@@ -287,6 +287,17 @@ R_FOR_ASSIGNMENT_FIELD: %empty | TOKEN_ID R_ASSIGN_OPERATOR R_EXP | R_INC_DEC;
 R_EXP: 
 TOKEN_MINUS R_EXP
 {
+    /*
+    TreeNodeExpression_st* pNode;
+    
+    NodeCreate((TreeNode_st**) &pNode, NODE_EXPRESSION);
+    
+    pNode->opType = OP_MINUS;
+    
+    NodeAddNewChild(pNode, pNode.pRightChild, NODE_EXPRESSION);
+    
+    $$.treeNode = (TreeNode_st*) pNode;
+    */
     
 }
 | 
@@ -297,7 +308,7 @@ R_EXP R_ARITHMETIC_OPERATOR R_TERM
 | 
 R_EXP R_CONDITION_OPERATOR R_TERM
 {
-
+    
 }
 | 
 R_EXP R_BITWISE_OPERATOR R_TERM
@@ -492,6 +503,8 @@ R_SIZEOF:
 TOKEN_SIZEOF TOKEN_LEFT_PARENTHESES R_SIZEOF_BODY TOKEN_RIGHT_PARENTHESES       // sizeof(exp);
 {
 
+
+
 }
 ;
 
@@ -516,41 +529,128 @@ R_TYPE_CAST: TOKEN_LEFT_PARENTHESES R_TYPE_ALL TOKEN_RIGHT_PARENTHESES;
 
 // Function signature i.e. the function format. Doesn't include the ; or the {. Example: int addNumbers(int x, int y)
 R_FUNC_SIGNATURE:
- R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
- {
+R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
+{
+    TreeNodeFuncPrototype_st* pNode;
+ 
+    NodeCreate((TreeNode_st**) &pNode, NODE_FUNC_PROTOTYPE);
 
- }
+    pNode->pLeftChild = $6.treeNode;    
+    pNode->visQualifier = (VisQualifier_et) $1.nodeData.dVal;
+    pNode->signQualifier = (SignQualifier_et) $2.nodeData.dVal;
+    pNode->returnType = (VarType_et) $3.nodeData.dVal;
+    pNode->funcId = $4.nodeData.sVal;
+        
+    $$.treeNode = (TreeNode_st*) pNode;
+}
 | R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
 {
-
+    TreeNodeFuncPrototype_st* pNode;
+    
+    NodeCreate((TreeNode_st**) &pNode, NODE_FUNC_PROTOTYPE);
+    
+    pNode->pLeftChild = $5.treeNode;
+    pNode->visQualifier = (VisQualifier_et) $1.nodeData.dVal;
+    pNode->signQualifier = (SignQualifier_et) $2.nodeData.dVal;
+    pNode->returnType = (VarType_et) $3.nodeData.dVal;
+    pNode->funcId = $4.nodeData.sVal;
+    
+    $$.treeNode = (TreeNode_st*) pNode;
 }
 | R_VISIBILITY_QUALIFIER R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
 {
-
+    TreeNodeFuncPrototype_st* pNode;
+    
+    NodeCreate((TreeNode_st**) &pNode, NODE_FUNC_PROTOTYPE);
+    
+    pNode->pLeftChild = $5.treeNode;
+    pNode->visQualifier = (VisQualifier_et) $1.nodeData.dVal;
+    pNode->returnType = (VarType_et) $2.nodeData.dVal;
+    pNode->funcId = $3.nodeData.sVal;
+    
+    $$.treeNode = (TreeNode_st*) pNode;
 }
 | R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
 {
+    TreeNodeFuncPrototype_st* pNode;
     
+    NodeCreate((TreeNode_st**) &pNode, NODE_FUNC_PROTOTYPE);
+    
+    pNode->pLeftChild = $4.treeNode;
+    pNode->visQualifier = VIS_NONE;
+    pNode->returnType = (VarType_et) $1.nodeData.dVal;
+    pNode->funcId = $2.nodeData.sVal;
+    
+    $$.treeNode = (TreeNode_st*) pNode;
 };
 
 // Function prototype is just a function signature followed by a semi
-R_FUNC_PROTOTYPE: R_FUNC_SIGNATURE TOKEN_SEMI 
+R_FUNC_PROTOTYPE: 
+R_FUNC_SIGNATURE TOKEN_SEMI 
 {
-    LOG_DEBUG("Function prototype found!\n");
+    TreeNodeFuncPrototype_st* pNode = (TreeNodeFuncPrototype_st*) $1.treeNode;
+    
+    LOG_DEBUG("Function prototype found! Func Id: %s | Ret Type: %d | Func Vis: %d | Func Sign: %d | Var Flags: 0x%x\n",
+        pNode->funcId,
+        pNode->returnType,
+        pNode->visQualifier,
+        pNode->signQualifier,
+        pNode->miscFlags); 
 };
 
-R_FUNC_IMPL: R_FUNC_SIGNATURE R_COMPOUND_STATEMENT
+R_FUNC_IMPL: 
+R_FUNC_SIGNATURE R_COMPOUND_STATEMENT
 {
-    LOG_DEBUG("Function implementation found!\n");
+
 };
 
 // Function argument list. Note: The argument list can be empty. Example: int x | int x, int y
-R_ARG_LIST: %empty | R_ARG | R_ARG_LIST TOKEN_COMMA R_ARG;
+R_ARG_LIST: %empty 
+{
+    $$.treeNode = NULL;
+}
+| R_ARG_LIST_INTERNAL
+{
+    $$.treeNode = $1.treeNode;
+};
+
+R_ARG_LIST_INTERNAL: 
+R_ARG 
+{
+    $$.treeNode = $1.treeNode;
+}
+| R_ARG_LIST TOKEN_COMMA R_ARG
+{
+    $3.treeNode->pSibling = $1.treeNode->pSibling;
+    $1.treeNode->pSibling = $3.treeNode;
+    $$.treeNode = $1.treeNode;
+};
 
 // Function argument type. Example: int x | const char* pString
-R_ARG:R_MOD_QUALIFIER R_TYPE_ALL TOKEN_ID 
+R_ARG:
+R_MOD_QUALIFIER R_TYPE_ALL TOKEN_ID 
 {
+    TreeNodeParam_st* pNode;
+
+    NodeCreate((TreeNode_st**) &pNode, NODE_PARAM_DESC);
     
+    pNode->modQualifier = (ModQualifier_et) $1.nodeData.dVal;
+    pNode->paramType = (VarType_et) $2.nodeData.dVal;
+    pNode->paramId = $3.nodeData.sVal;
+
+    $$.treeNode = (TreeNode_st*) pNode;
+}
+| R_TYPE_ALL TOKEN_ID 
+{
+    TreeNodeParam_st* pNode;
+
+    NodeCreate((TreeNode_st**) &pNode, NODE_PARAM_DESC);
+    
+    pNode->modQualifier = MOD_NONE;
+    pNode->paramType = (VarType_et) $1.nodeData.dVal;
+    pNode->paramId = $2.nodeData.sVal;
+
+    $$.treeNode = (TreeNode_st*) pNode;
 };
 
 //--------------------------------------------------------------------------------------------------------------------//
@@ -563,282 +663,264 @@ R_VAR_PREAMBLE:
 
 // register static const unsigned int var
 TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID 
-{
-    TreeNode_st* pTemp;
+{   
+    TreeNodeVarDecl_st* pNode;
     
-    NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-    $$.treeNode->nodeData.sVal = $6.nodeData.sVal;
+    NodeCreate((TreeNode_st**)&pNode, NODE_VAR_DECLARATION);
+    
+    pNode->modQualifier = (ModQualifier_et) $3.nodeData.dVal;
+    pNode->visQualifier = (VisQualifier_et) $2.nodeData.dVal;
+    pNode->signQualifier = (SignQualifier_et) $4.nodeData.dVal;
+    pNode->varType = (VarType_et) $5.nodeData.dVal;
+    pNode->varId = $6.nodeData.sVal;
+    pNode->miscFlags |= FLAG_REGISTER;
 
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_MISC);
-    pTemp->nodeData.dVal = (long int) MISC_REG_QUAL;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_VIS_QUAL);
-    pTemp->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_MOD_QUAL);
-    pTemp->nodeData.dVal = (long int) $3.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_SIGN_QUAL);
-    pTemp->nodeData.dVal = (long int) $4.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_TYPE);
-    pTemp->nodeData.dVal = (long int) $5.nodeData.dVal;
+    $$.treeNode = (TreeNode_st*) pNode;
 }
 // register static const int var
 | TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_MOD_QUALIFIER R_TYPE_ALL TOKEN_ID     
 {
-   TreeNode_st* pTemp;
+    TreeNodeVarDecl_st* pNode;
     
-    NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-    $$.treeNode->nodeData.sVal = $5.nodeData.sVal;
+    NodeCreate((TreeNode_st**)&pNode, NODE_VAR_DECLARATION);
+    
+    pNode->modQualifier = (ModQualifier_et) $3.nodeData.dVal;
+    pNode->visQualifier = (VisQualifier_et) $2.nodeData.dVal;
+    pNode->signQualifier = SIGN_SIGNED;
+    pNode->varType = (VarType_et) $4.nodeData.dVal;
+    pNode->varId = $5.nodeData.sVal;
+    pNode->miscFlags |= FLAG_REGISTER;
 
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_MISC);
-    pTemp->nodeData.dVal = (long int) MISC_REG_QUAL;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_VIS_QUAL);
-    pTemp->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_MOD_QUAL);
-    pTemp->nodeData.dVal = (long int) $3.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_TYPE);
-    pTemp->nodeData.dVal = (long int) $4.nodeData.dVal;   
+    $$.treeNode = (TreeNode_st*) pNode;
 }        
 // register static signed int var        
 | TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID    
 {
-    TreeNode_st* pTemp;
+    TreeNodeVarDecl_st* pNode;
+    NodeCreate((TreeNode_st**)&pNode, NODE_VAR_DECLARATION);
     
-    NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-    $$.treeNode->nodeData.sVal = $4.nodeData.sVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_MISC);
-    pTemp->nodeData.dVal = (long int) MISC_REG_QUAL;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_VIS_QUAL);
-    pTemp->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_SIGN_QUAL);
-    pTemp->nodeData.dVal = (long int) $3.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_TYPE);
-    pTemp->nodeData.dVal = (long int) $4.nodeData.dVal;
+    pNode->modQualifier = MOD_NONE;
+    pNode->visQualifier = (VisQualifier_et) $2.nodeData.dVal;
+    pNode->signQualifier = (SignQualifier_et) $3.nodeData.dVal;
+    pNode->varType = (VarType_et) $4.nodeData.dVal;
+    pNode->varId = $5.nodeData.sVal;
+    pNode->miscFlags |= FLAG_REGISTER;
+    
+    $$.treeNode = (TreeNode_st*) pNode;
 }    
 // register const signed int var              
 | TOKEN_REGISTER R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID       
 {
-    TreeNode_st* pTemp;
+    TreeNodeVarDecl_st* pNode;
     
-    NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-    $$.treeNode->nodeData.sVal = $5.nodeData.sVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_MOD_QUAL);
-    pTemp->nodeData.dVal = (long int) $2.nodeData.dVal;
+    NodeCreate((TreeNode_st**)&pNode, NODE_VAR_DECLARATION);
     
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_SIGN_QUAL);
-    pTemp->nodeData.dVal = (long int) $3.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_TYPE);
-    pTemp->nodeData.dVal = (long int) $4.nodeData.dVal;
+    pNode->modQualifier = (ModQualifier_et) $2.nodeData.dVal;
+    pNode->visQualifier = VIS_NONE;
+    pNode->signQualifier = (SignQualifier_et) $3.nodeData.dVal;
+    pNode->varType = (VarType_et) $4.nodeData.dVal;
+    pNode->varId = $5.nodeData.sVal;
+    pNode->miscFlags |= FLAG_REGISTER;
+    
+    $$.treeNode = (TreeNode_st*) pNode;
 }   
 // register static int var                  
 | TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_TYPE_ALL TOKEN_ID           
 {
-    TreeNode_st* pTemp;
+    TreeNodeVarDecl_st* pNode;
     
-    NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-    $$.treeNode->nodeData.sVal = $4.nodeData.sVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_MISC);
-    pTemp->nodeData.dVal = (long int) MISC_REG_QUAL;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_VIS_QUAL);
-    pTemp->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_TYPE);
-    pTemp->nodeData.dVal = (long int) $3.nodeData.dVal;
+    NodeCreate((TreeNode_st**)&pNode, NODE_VAR_DECLARATION);
+    
+    pNode->modQualifier = MOD_NONE;
+    pNode->visQualifier = (VisQualifier_et) $2.nodeData.dVal;
+    pNode->signQualifier = SIGN_SIGNED;
+    pNode->varType = (VarType_et) $3.nodeData.dVal;
+    pNode->varId = $4.nodeData.sVal;
+    pNode->miscFlags |= FLAG_REGISTER;
+    
+    $$.treeNode = (TreeNode_st*) pNode;
 }   
 // register const int var                         
 | TOKEN_REGISTER R_MOD_QUALIFIER R_TYPE_ALL TOKEN_ID        
 {
-    TreeNode_st* pTemp;
+    TreeNodeVarDecl_st* pNode;
     
-    NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-    $$.treeNode->nodeData.sVal = $4.nodeData.sVal;
+    NodeCreate((TreeNode_st**)&pNode, NODE_VAR_DECLARATION);
+    
+    pNode->modQualifier = (ModQualifier_et) $2.nodeData.dVal;
+    pNode->visQualifier = VIS_NONE;
+    pNode->signQualifier = SIGN_SIGNED;
+    pNode->varType = (VarType_et) $3.nodeData.dVal;
+    pNode->varId = $4.nodeData.sVal;
+    pNode->miscFlags |= FLAG_REGISTER;
 
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_MISC);
-    pTemp->nodeData.dVal = (long int) MISC_REG_QUAL;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_MOD_QUAL);
-    pTemp->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_TYPE);
-    pTemp->nodeData.dVal = (long int) $3.nodeData.dVal;
+    $$.treeNode = (TreeNode_st*) pNode;
 }                      
 // register signed int var               
 | TOKEN_REGISTER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID             
 {
-    TreeNode_st* pTemp;
+    TreeNodeVarDecl_st* pNode;
     
-    NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-    $$.treeNode->nodeData.sVal = $4.nodeData.sVal;
+    NodeCreate((TreeNode_st**)&pNode, NODE_VAR_DECLARATION);
+    
+    pNode->modQualifier = MOD_NONE;
+    pNode->visQualifier = VIS_NONE;
+    pNode->signQualifier = (SignQualifier_et) $2.nodeData.dVal;
+    pNode->varType = (VarType_et) $3.nodeData.dVal;
+    pNode->varId = $4.nodeData.sVal;
+    pNode->miscFlags |= FLAG_REGISTER;
 
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_MISC);
-    pTemp->nodeData.dVal = (long int) MISC_REG_QUAL;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_SIGN_QUAL);
-    pTemp->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_TYPE);
-    pTemp->nodeData.dVal = (long int) $3.nodeData.dVal;
+    $$.treeNode = (TreeNode_st*) pNode;
 }       
 // register int var                           
 | TOKEN_REGISTER R_TYPE_ALL TOKEN_ID                    
 {
-    TreeNode_st* pTemp;
+    TreeNodeVarDecl_st* pNode;
     
-    NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-    $$.treeNode->nodeData.sVal = $3.nodeData.sVal;
+    NodeCreate((TreeNode_st**)&pNode, NODE_VAR_DECLARATION);
+    
+    pNode->modQualifier = MOD_NONE;
+    pNode->visQualifier = VIS_NONE;
+    pNode->signQualifier = SIGN_SIGNED;
+    pNode->varType = (VarType_et) $2.nodeData.dVal;
+    pNode->varId = $3.nodeData.sVal;
+    pNode->miscFlags |= FLAG_REGISTER;
 
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_MISC);
-    pTemp->nodeData.dVal = (long int) MISC_REG_QUAL;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_TYPE);
-    pTemp->nodeData.dVal = (long int) $2.nodeData.dVal;
+    $$.treeNode = (TreeNode_st*) pNode;
 }                               
 //static const unsigned int var                  
 | R_VISIBILITY_QUALIFIER R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID
 {
-    TreeNode_st* pTemp;
+    TreeNodeVarDecl_st* pNode;
     
-    NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-    $$.treeNode->nodeData.sVal = $5.nodeData.sVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_VIS_QUAL);
-    pTemp->nodeData.dVal = (long int) $1.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_MOD_QUAL);
-    pTemp->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_SIGN_QUAL);
-    pTemp->nodeData.dVal = (long int) $3.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_TYPE);
-    pTemp->nodeData.dVal = (long int) $4.nodeData.dVal;
+    NodeCreate((TreeNode_st**)&pNode, NODE_VAR_DECLARATION);
+    
+    pNode->modQualifier = (ModQualifier_et) $2.nodeData.dVal;
+    pNode->visQualifier = (VisQualifier_et) $1.nodeData.dVal;
+    pNode->signQualifier = (SignQualifier_et) $3.nodeData.dVal;
+    pNode->varType = (VarType_et) $3.nodeData.dVal;
+    pNode->varId = $4.nodeData.sVal;
+    
+    $$.treeNode = (TreeNode_st*) pNode;
 }
 //static const int var                    
 | R_VISIBILITY_QUALIFIER R_MOD_QUALIFIER R_TYPE_ALL TOKEN_ID   
 {
-    TreeNode_st* pTemp;
+    TreeNodeVarDecl_st* pNode;
     
-    NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-    $$.treeNode->nodeData.sVal = $4.nodeData.sVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_VIS_QUAL);
-    pTemp->nodeData.dVal = (long int) $1.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_MOD_QUAL);
-    pTemp->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_TYPE);
-    pTemp->nodeData.dVal = (long int) $3.nodeData.dVal;
+    NodeCreate((TreeNode_st**)&pNode, NODE_VAR_DECLARATION);
+    
+    pNode->modQualifier = (ModQualifier_et) $2.nodeData.dVal;
+    pNode->visQualifier = (VisQualifier_et) $1.nodeData.dVal;
+    pNode->signQualifier = SIGN_SIGNED;
+    pNode->varType = (VarType_et) $3.nodeData.dVal;
+    pNode->varId = $4.nodeData.sVal;
+    
+    $$.treeNode = (TreeNode_st*) pNode;
 }                 
 //static signed int var                 
 | R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID     
 {
-    TreeNode_st* pTemp;
+    TreeNodeVarDecl_st* pNode;
     
-    NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-    $$.treeNode->nodeData.sVal = $4.nodeData.sVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_VIS_QUAL);
-    pTemp->nodeData.dVal = (long int) $1.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_SIGN_QUAL);
-    pTemp->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_TYPE);
-    pTemp->nodeData.dVal = (long int) $4.nodeData.dVal;
+    NodeCreate((TreeNode_st**)&pNode, NODE_VAR_DECLARATION);
+    
+    pNode->modQualifier = MOD_NONE;
+    pNode->visQualifier = (VisQualifier_et) $1.nodeData.dVal;
+    pNode->signQualifier = (SignQualifier_et) $2.nodeData.dVal;
+    pNode->varType = (VarType_et) $3.nodeData.dVal;
+    pNode->varId = $4.nodeData.sVal;
+    
+    $$.treeNode = (TreeNode_st*) pNode;
 }               
 //const signed int var                 
 | R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID     
 {
-    TreeNode_st* pTemp;
+    TreeNodeVarDecl_st* pNode;
     
-    NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-    $$.treeNode->nodeData.sVal = $4.nodeData.sVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_MOD_QUAL);
-    pTemp->nodeData.dVal = (long int) $1.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_SIGN_QUAL);
-    pTemp->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_TYPE);
-    pTemp->nodeData.dVal = (long int) $3.nodeData.dVal;
+    NodeCreate((TreeNode_st**)&pNode, NODE_VAR_DECLARATION);
+    
+    pNode->modQualifier = (ModQualifier_et) $1.nodeData.dVal;
+    pNode->visQualifier = VIS_NONE;
+    pNode->signQualifier = (SignQualifier_et) $2.nodeData.dVal;
+    pNode->varType = (VarType_et) $3.nodeData.dVal;
+    pNode->varId = $4.nodeData.sVal;
+    
+    $$.treeNode = (TreeNode_st*) pNode;
 }          
 //static int var                            
 | R_VISIBILITY_QUALIFIER R_TYPE_ALL TOKEN_ID           
 {
-    TreeNode_st* pTemp;
+    TreeNodeVarDecl_st* pNode;
     
-    NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-    $$.treeNode->nodeData.sVal = $3.nodeData.sVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_VIS_QUAL);
-    pTemp->nodeData.dVal = (long int) $1.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_TYPE);
-    pTemp->nodeData.dVal = (long int) $2.nodeData.dVal;
+    NodeCreate((TreeNode_st**)&pNode, NODE_VAR_DECLARATION);
+    
+    pNode->modQualifier = MOD_NONE;
+    pNode->visQualifier = (VisQualifier_et) $1.nodeData.dVal;
+    pNode->signQualifier = SIGN_SIGNED;
+    pNode->varType = (VarType_et) $2.nodeData.dVal;
+    pNode->varId = $3.nodeData.sVal;
+    
+    $$.treeNode = (TreeNode_st*) pNode;
 }                 
 //const int var                          
 | R_MOD_QUALIFIER R_TYPE_ALL TOKEN_ID
 {
-    TreeNode_st* pTemp;
+    TreeNodeVarDecl_st* pNode;
     
-    NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-    $$.treeNode->nodeData.sVal = $3.nodeData.sVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_MOD_QUAL);
-    pTemp->nodeData.dVal = (long int) $1.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_TYPE);
-    pTemp->nodeData.dVal = (long int) $2.nodeData.dVal;
+    NodeCreate((TreeNode_st**)&pNode, NODE_VAR_DECLARATION);
+    
+    pNode->modQualifier = (ModQualifier_et) $1.nodeData.dVal;
+    pNode->visQualifier = VIS_NONE;
+    pNode->signQualifier = SIGN_SIGNED;
+    pNode->varType = (VarType_et) $2.nodeData.dVal;
+    pNode->varId = $3.nodeData.sVal;
+    
+    $$.treeNode = (TreeNode_st*) pNode;
 }                                                
 //signed int var            
 | R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID
 {
-    TreeNode_st* pTemp;
+    TreeNodeVarDecl_st* pNode;
     
-    NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-    $$.treeNode->nodeData.sVal = $3.nodeData.sVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_SIGN_QUAL);
-    pTemp->nodeData.dVal = (long int) $1.nodeData.dVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_TYPE);
-    pTemp->nodeData.dVal = (long int) $2.nodeData.dVal;
+    NodeCreate((TreeNode_st**)&pNode, NODE_VAR_DECLARATION);
+    
+    pNode->modQualifier = MOD_NONE;
+    pNode->visQualifier = VIS_NONE;
+    pNode->signQualifier = (SignQualifier_et) $1.nodeData.dVal;
+    pNode->varType = (VarType_et) $2.nodeData.dVal;
+    pNode->varId = $3.nodeData.sVal;
+    
+    $$.treeNode = (TreeNode_st*) pNode;
 }                                      
  //int var                      
 | R_TYPE_ALL TOKEN_ID
 {
-    TreeNode_st* pTemp;
+    TreeNodeVarDecl_st* pNode;
+    
+    NodeCreate((TreeNode_st**)&pNode, NODE_VAR_DECLARATION);
+    
+    pNode->modQualifier = MOD_NONE;
+    pNode->visQualifier = VIS_NONE;
+    pNode->signQualifier = SIGN_SIGNED;
+    pNode->varType = (VarType_et) $1.nodeData.dVal;
+    pNode->varId = $2.nodeData.sVal;
 
-    NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-    $$.treeNode->nodeData.sVal = $2.nodeData.sVal;
-
-    NodeAddNewChild($$.treeNode, &pTemp, NODE_TYPE);
-    pTemp->nodeData.dVal = (long int) $1.nodeData.dVal;
+    $$.treeNode = (TreeNode_st*) pNode;
 };                                                                           
 
 // Variable declaration (simple or followed by its assignment).    
  // int var;
 R_VAR_DECLARATION: R_VAR_PREAMBLE TOKEN_SEMI
 {
-    LOG_DEBUG("Found variable declaration!\n");
-    $$.treeNode = $1.treeNode;
-    $$.treeNode->nodeType = NODE_VAR_DECLARATION;
-    LOG_DEBUG("Var ID: %s\n", $$.treeNode->nodeData.sVal);
+    TreeNodeVarDecl_st* pNode = (TreeNodeVarDecl_st*) $1.treeNode;
+    LOG_DEBUG("Variable declaration found! Var Id: %s | Var Type: %d | Var Mod: %d | Var Vis: %d | Var Sign: %d | Var Flags: 0x%x\n", 
+        pNode->varId,
+        pNode->varType,
+        pNode->modQualifier,
+        pNode->visQualifier,
+        pNode->signQualifier,
+        pNode->miscFlags);
 }
 // int var = 1;                                                        
 | R_VAR_PREAMBLE R_ASSIGN_OPERATOR R_EXP TOKEN_SEMI
@@ -851,14 +933,12 @@ R_VAR_DECLARATION: R_VAR_PREAMBLE TOKEN_SEMI
 R_ARR_DECLARATION: 
 R_VAR_PREAMBLE R_ARR_SIZE TOKEN_SEMI        // int var [2];
 {
-    $$.treeNode = $1.treeNode;
-    $$.treeNode->nodeType = NODE_ARR_DECLARATION;
-    $$.treeNode->nodeData.dVal = $2.nodeData.dVal;
+
 }                                 
 | 
 R_VAR_PREAMBLE R_ARR_SIZE R_ASSIGN_OPERATOR R_ARR_ARGS TOKEN_SEMI   // var [] = {1, 2, 3};
 {
-
+     
 }
 ;   
 

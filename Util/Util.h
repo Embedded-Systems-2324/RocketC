@@ -4,8 +4,12 @@
 #include "Globals.h"
 
 int NodeCreate(TreeNode_st** ppNewNode, NodeType_et nodeType);
+
+#if 0
 int NodeAddChild(TreeNode_st* pParent, TreeNode_st* pChild);
 int NodeAddNewChild(TreeNode_st* pParent, TreeNode_st** ppNewChild, NodeType_et nodeType);
+#endif
+
 int StringCreateAndCopy(char** ppDest, char* pSrc, size_t strLen);
 
 #endif
