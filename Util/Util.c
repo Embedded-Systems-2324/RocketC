@@ -43,6 +43,12 @@ int NodeCreate(TreeNode_st** ppNewNode, NodeType_et nodeType)
         case NODE_VAR_DECLARATION:
             *ppNewNode = (TreeNode_st*) calloc(1, sizeof(TreeNodeVarDecl_st));
             break;
+        case NODE_EXPRESSION:
+            *ppNewNode = (TreeNode_st*) calloc(1, sizeof(TreeNodeExpression_st));
+            break;
+        case NODE_NUMBER:
+            *ppNewNode = (TreeNode_st*) calloc(1, sizeof(TreeNodeNumber_st));
+            break;
         default:
             LOG_ERROR("Received invalid node type! Unable to allocate new node!");
             break;

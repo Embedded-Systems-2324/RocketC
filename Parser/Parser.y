@@ -289,6 +289,7 @@ R_EXP:
 TOKEN_MINUS R_EXP
 {
     TreeNodeExpression_st* pNode;
+    NodeCreate((TreeNode_st**) &pNode, NODE_EXPRESSION);
 
     pNode->opType = OP_MINUS;
     pNode->pRightChild = $2.treeNode;
@@ -298,48 +299,116 @@ TOKEN_MINUS R_EXP
 | 
 R_EXP R_ARITHMETIC_OPERATOR R_TERM
 {
+    TreeNodeExpression_st* pNode;
+    NodeCreate((TreeNode_st**) &pNode, NODE_EXPRESSION);
 
+    pNode->opType = $2.nodeData.dVal;
+    pNode->pRightChild = $3.treeNode;
+    pNode->pLeftChild = $1.treeNode;
+    
+    $$.treeNode = (TreeNode_st*) pNode;    
 }
 | 
 R_EXP R_CONDITION_OPERATOR R_TERM
 {
+    TreeNodeExpression_st* pNode;
+    NodeCreate((TreeNode_st**) &pNode, NODE_EXPRESSION);
+
+    pNode->opType = $2.nodeData.dVal;
+    pNode->pRightChild = $3.treeNode;
+    pNode->pLeftChild = $1.treeNode;
     
+    $$.treeNode = (TreeNode_st*) pNode;    
 }
 | 
 R_EXP R_BITWISE_OPERATOR R_TERM
 {
+    TreeNodeExpression_st* pNode;
+    NodeCreate((TreeNode_st**) &pNode, NODE_EXPRESSION);
 
+    pNode->opType = $2.nodeData.dVal;
+    pNode->pRightChild = $3.treeNode;
+    pNode->pLeftChild = $1.treeNode;
+    
+    $$.treeNode = (TreeNode_st*) pNode;  
 }
 | R_EXP R_LOGIC_OPERATOR R_TERM
 {
+    TreeNodeExpression_st* pNode;
+    NodeCreate((TreeNode_st**) &pNode, NODE_EXPRESSION);
 
+    pNode->opType = $2.nodeData.dVal;
+    pNode->pRightChild = $3.treeNode;
+    pNode->pLeftChild = $1.treeNode;
+    
+    $$.treeNode = (TreeNode_st*) pNode;  
 }
 | 
 R_EXP TOKEN_TERNARY R_EXP TOKEN_COLON R_EXP
 {
-
+ 
 }
 | R_TERM
 {
-    
+    $$.treeNode =  $1.treeNode;
 };
 
 R_EXP_LIST: %empty
           | R_EXP
           | R_EXP_LIST TOKEN_COMMA R_EXP;
 
-R_TERM: R_TERM R_PRIORITY_OPERATOR R_OPERAND | R_OPERAND;
+
+R_TERM: 
+R_TERM R_PRIORITY_OPERATOR R_OPERAND 
+{
+    TreeNodeExpression_st* pNode;
+    NodeCreate((TreeNode_st**) &pNode, NODE_EXPRESSION);
+
+    pNode->opType = $2.nodeData.dVal;
+    pNode->pRightChild = $3.treeNode;
+    pNode->pLeftChild = $1.treeNode;
+    
+    $$.treeNode = (TreeNode_st*) pNode;  
+}
+| 
+R_OPERAND
+{
+    $$.treeNode =  $1.treeNode;
+};
+
 
 R_OPERAND: R_INC_DEC
          | TOKEN_LOGICAL_NOT R_FACTOR
          | R_TYPE_CAST R_FACTOR
-         | R_FACTOR;
+         | R_FACTOR
+         {
+            $$.treeNode =  $1.treeNode; 
+         };
 
 R_FACTOR: TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES
         | TOKEN_ID TOKEN_LEFT_BRACKET R_EXP TOKEN_RIGHT_BRACKET
         | TOKEN_NUM
+        {
+            TreeNodeNumber_st* pNode;
+            NodeCreate((TreeNode_st**) &pNode, NODE_NUMBER);
+
+            pNode->numberType = TYPE_INT;
+            pNode->number_u.dVal = $1.nodeData.dVal;
+            
+            $$.treeNode = (TreeNode_st*) pNode;
+        }
         | TOKEN_ID
         | TOKEN_FNUM
+        {
+            TreeNodeNumber_st* pNode;
+
+            NodeCreate((TreeNode_st**) &pNode, NODE_NUMBER);
+
+            pNode->numberType = TYPE_INT;
+            pNode->number_u.dVal = $1.nodeData.fVal;
+            
+            $$.treeNode = (TreeNode_st*) pNode;
+        }        
         | TOKEN_STR
         | TOKEN_BITWISE_AND TOKEN_ID
         | R_SIZEOF;
@@ -497,8 +566,6 @@ TOKEN_ASSIGN
 R_SIZEOF: 
 TOKEN_SIZEOF TOKEN_LEFT_PARENTHESES R_SIZEOF_BODY TOKEN_RIGHT_PARENTHESES       // sizeof(exp);
 {
-
-
 
 }
 ;
@@ -920,7 +987,9 @@ R_VAR_DECLARATION: R_VAR_PREAMBLE TOKEN_SEMI
 // int var = 1;                                                        
 | R_VAR_PREAMBLE R_ASSIGN_OPERATOR R_EXP TOKEN_SEMI
 {
+    TreeNodeVarDecl_st* pNode = (TreeNodeVarDecl_st*) $1.treeNode;
 
+    pNode->pRightChild = $3.treeNode;
 }
 ;                               
 

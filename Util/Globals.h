@@ -101,6 +101,8 @@ typedef enum
     NODE_PARAM_DESC,
     NODE_VAR_DECLARATION,
     NODE_FUNC_PROTOTYPE,
+    NODE_EXPRESSION, 
+    NODE_NUMBER
 }NodeType_et;
 
 typedef union
@@ -153,6 +155,19 @@ typedef struct __attribute__((packed)) TreeNodeExpression
 
     OperatorType_et opType;
 }TreeNodeExpression_st;
+
+
+typedef struct __attribute__((packed)) TreeNodeNumber
+{
+    NODE_BODY();
+
+    VarType_et numberType;   //criar um enum numberTYpe???
+                             //se sim, mudar tb na regra R_FACTOR
+    union{
+        long int dVal;
+        double fVal;
+    }number_u;
+}TreeNodeNumber_st;
 
 
 
