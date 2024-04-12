@@ -1,4 +1,4 @@
  [In comment] [Out comment] 
  
  
-INT ID ASSIGN NUM PLUS NUM ASTERISK NUM SEMI  
+INT ID ASSIGN NUM PLUS NUM SEMI  

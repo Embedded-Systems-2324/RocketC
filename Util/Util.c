@@ -135,10 +135,70 @@ int StringCreateAndCopy(char** ppDest, char* pSrc, size_t strLen)
     return 0;
 }
 
-int PrintNode(TreeNode_st* pNode)
+
+void PrintNode(TreeNode_st* pNode, int depth)
 {
-    if (!pNode)
-        return -EINVAL;
+    if (pNode == NULL)
+    {
+        LOG_ERROR("NULL Node!!\n");
+    }
+    for (int i = 0; i < depth; i++) 
+    {
+        LOG_DEBUG("    ");
+    }
+
+    switch (pNode->nodeType)
+    {
+        case NODE_PARAM_DESC:
+            TreeNodeParam_st* cNode1 = (TreeNodeParam_st*)pNode;
+            LOG_DEBUG("%d %d %s", &cNode1->modQualifier, &cNode1->paramType, &cNode1->paramId);
+        case NODE_VAR_DECLARATION: 
+            TreeNodeVarDecl_st* cNode2 = (TreeNodeVarDecl_st*)pNode;
+            if(&cNode2->miscFlags != NULL)
+            {
+                LOG_DEBUG("%d ", &cNode2->miscFlags);
+            }
+            LOG_DEBUG("%d, %d, %d, %d, %d", &cNode2->visQualifier, &cNode2->modQualifier, &cNode2->signQualifier, &cNode2->varType, &cNode2->varId);
+            break;
+        case NODE_FUNC_PROTOTYPE:
+            TreeNodeFuncPrototype_st* cNode3 = (TreeNodeFuncPrototype_st*) cNode3;
+            
+            break;
+        case NODE_EXPRESSION:
+            break;
+        case NODE_NUMBER:
+            break;
+        default:
+            break;
+    }
 
 
+    if (pNode->pLeftChild != NULL)
+    {
+        PrintNode(pNode->pLeftChild, depth+1);
+    }
+    if (pNode->pRightChild != NULL)
+    {
+        PrintNode(pNode->pRightChild, depth+1);
+    }    
+
+    if(pNode->pSibling != NULL) 
+    {
+        PrintNode(pNode->pSibling, depth);
+    }
 }
+
+
+/*
+
+typedef struct __attribute__((packed)) TreeNodeParam
+{
+    NODE_BODY();
+
+    char* paramId;
+    VarType_et paramType;
+    ModQualifier_et modQualifier;
+}TreeNodeParam_st;
+
+
+*/

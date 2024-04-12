@@ -102,7 +102,12 @@ typedef enum
     NODE_VAR_DECLARATION,
     NODE_FUNC_PROTOTYPE,
     NODE_EXPRESSION, 
-    NODE_NUMBER
+    NODE_NUMBER,
+    NODE_IF,
+    NODE_WHILE,
+    NODE_DO_WHILE,
+    NODE_FOR,
+    NODE_RETURN
 }NodeType_et;
 
 typedef union
@@ -134,7 +139,7 @@ typedef struct __attribute__((packed)) TreeNodeFuncPrototype
     NODE_BODY();
 
     char* funcId;
-    uint8_t miscFlags;
+    //uint8_t miscFlags;
     VarType_et returnType;
     VisQualifier_et visQualifier;
     SignQualifier_et signQualifier;
@@ -157,6 +162,14 @@ typedef struct __attribute__((packed)) TreeNodeExpression
 }TreeNodeExpression_st;
 
 
+typedef struct __attribute__((packed)) TreeNodeCondition
+{
+    NODE_BODY();
+
+    struct TreeNode* pCondition;
+}TreeNodeCondition_st;
+
+
 typedef struct __attribute__((packed)) TreeNodeNumber
 {
     NODE_BODY();
@@ -168,7 +181,6 @@ typedef struct __attribute__((packed)) TreeNodeNumber
         double fVal;
     }number_u;
 }TreeNodeNumber_st;
-
 
 
 typedef union
