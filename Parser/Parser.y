@@ -160,7 +160,12 @@ R_GLOBAL_STATEMENT      :   R_VAR_DECLARATION
                         ;
 
 // Local statement list
-R_LOCAL_STATEMENT_LIST  :   R_LOCAL_STATEMENT_LIST R_LOCAL_STATEMENT
+R_LOCAL_STATEMENT_LIST  :   %empty
+                            {
+                                $$.treeNode = NULL;
+                            }
+                        |
+                            R_LOCAL_STATEMENT_LIST R_LOCAL_STATEMENT
                             {
                                 $1.treeNode->pSibling = $2.treeNode;
                                 $$.treeNode = $1.treeNode;
@@ -270,38 +275,50 @@ R_COMPOUND_STATEMENT    :   TOKEN_LEFT_BRACE R_LOCAL_STATEMENT_LIST TOKEN_RIGHT_
 // Flow control statements                      // Examples:
 R_CONTINUE  :   TOKEN_CONTINUE TOKEN_SEMI       // continue;
                 {
-                    TreeNode_st* pNode = $1.treeNode;
+                    TreeNode_st* pNode;
+                    NodeCreate((TreeNode_st**) &pNode, NODE_CONTINUE);
+                    $$.treeNode = (TreeNode_st*) pNode;  
                 }
             ;
 
 R_BREAK     :   TOKEN_BREAK TOKEN_SEMI          // break;
                 {
-
+                    TreeNode_st* pNode;
+                    NodeCreate((TreeNode_st**) &pNode, NODE_BREAK);
+                    $$.treeNode = (TreeNode_st*) pNode;  
                 }
             ;
 
 R_GOTO      :   TOKEN_GOTO R_LABEL TOKEN_SEMI   // goto label;
                 {
-
+                    TreeNode_st* pNode;
+                    NodeCreate((TreeNode_st**) &pNode, NODE_GOTO);
+                    pNode->pRightChild = $2.treeNode; 
+                    $$.treeNode = (TreeNode_st*) pNode;  
                 }
             ;
 
 // Rule to any SWITCH CASE implementation                               // Example: switch(var) { ... }                                                              
 R_SWITCH    :   TOKEN_SWITCH TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES TOKEN_LEFT_BRACE R_SWITCH_BODY TOKEN_RIGHT_BRACE    
                 {
-                    
+                    TreeNode_st* pNode;
+                    NodeCreate((TreeNode_st**) &pNode, NODE_SWITCH);
+                    pNode->pLeftChild = $3.treeNode; 
+                    pNode->pRightChild = $6.treeNode; 
+
+                    $$.treeNode = (TreeNode_st*) pNode;
                 }
             ;
 
 // A SWITCH body can be composed by: a list of cases, a default only, or a list of cases and a default 
 R_SWITCH_BODY   :   R_CASE_LIST                             //Examples:     // case 0:  ... case 1: ...
                     {
-
+                        
                     }
 
                 |   R_DEFAULT                                // default: ...
                     {
-
+                        
                     }
 
                 |   R_CASE_LIST R_DEFAULT                    // case 0:  ... default: ...
@@ -318,16 +335,22 @@ R_CASE_LIST     :   R_CASE                 // case 0: ...
 
                 |   R_CASE_LIST R_CASE     // case 0: ... case 1: ... case 2: ...
                     {
-
+                        
                     }
                 ;
 
 // CASE format - case 1: stmts
 R_CASE          :   TOKEN_CASE TOKEN_NUM TOKEN_COLON R_LOCAL_STATEMENT_LIST
                     {
-                        LOG_DEBUG("Case statement found!\n");
+                        TreeNodeCase_st* pNode;
+                        NodeCreate((TreeNode_st**) &pNode, NODE_CASE);
+                        pNode->pRightChild = $4.treeNode; 
+                        pNode->caseVal = $2.nodeData.dVal;
+
+                        $$.treeNode = (TreeNode_st*)pNode;
                     }
                 ;
+                
 
 // CASE "default" format - default: stmts    
 R_DEFAULT       :   TOKEN_DEFAULT TOKEN_COLON R_LOCAL_STATEMENT_LIST
@@ -360,7 +383,7 @@ R_IF_STATEMENT  :   TOKEN_IF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESE
                     }
                 ;
 
-// The return statement can be used to return void or a value               // Examples:
+// The return statement can be used to return void or a value                         // Examples:
 R_RETURN        :   TOKEN_RETURN TOKEN_SEMI                                           // return:
                     {
                         TreeNode_st* pNode;
@@ -382,7 +405,7 @@ R_RETURN        :   TOKEN_RETURN TOKEN_SEMI                                     
 // Loop Statements
 //--------------------------------------------------------------------------------------------------------------------//
 
-R_WHILE_LOOP    :   TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES R_LOCAL_STATEMENT 
+R_WHILE_LOOP        :   TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES R_LOCAL_STATEMENT 
                         {
                             TreeNodeCondition_st* pNode;
                             NodeCreate((TreeNode_st**) &pNode, NODE_WHILE);
@@ -392,17 +415,18 @@ R_WHILE_LOOP    :   TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTH
                             $$.treeNode = (TreeNode_st*) pNode;   
                         }
                         
-                |   TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES TOKEN_SEMI
+                    |   TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES TOKEN_SEMI
                         {
                             TreeNodeCondition_st* pNode;
                             NodeCreate((TreeNode_st**) &pNode, NODE_WHILE);
                             pNode-> pCondition = $3.treeNode;          //condition  
 
                             $$.treeNode = (TreeNode_st*) pNode; 
-                        };
+                        }
+                    ;
 
 
-R_DO_WHILE_LOOP :   TOKEN_DO R_LOCAL_STATEMENT TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES
+R_DO_WHILE_LOOP     :   TOKEN_DO R_LOCAL_STATEMENT TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES
                         {
                             TreeNodeCondition_st* pNode;
                             NodeCreate((TreeNode_st**) &pNode, NODE_DO_WHILE);
@@ -410,10 +434,11 @@ R_DO_WHILE_LOOP :   TOKEN_DO R_LOCAL_STATEMENT TOKEN_WHILE TOKEN_LEFT_PARENTHESE
                             pNode-> pLeftChild = $2.treeNode;          //if true
 
                             $$.treeNode = (TreeNode_st*) pNode;  
-                        };
+                        }
+                    ;
 
 
-R_FOR_LOOP      :   TOKEN_FOR TOKEN_LEFT_PARENTHESES R_FOR_INIT_FIELD TOKEN_SEMI R_FOR_CONDITION_FIELD TOKEN_SEMI R_FOR_ASSIGNMENT_FIELD TOKEN_RIGHT_PARENTHESES R_LOCAL_STATEMENT                     //for(int i=0;i<10;i++)
+R_FOR_LOOP          :   TOKEN_FOR TOKEN_LEFT_PARENTHESES R_FOR_INIT_FIELD TOKEN_SEMI R_FOR_CONDITION_FIELD TOKEN_SEMI R_FOR_ASSIGNMENT_FIELD TOKEN_RIGHT_PARENTHESES R_LOCAL_STATEMENT                     //for(int i=0;i<10;i++)
                         {
                             
                         };
@@ -465,6 +490,7 @@ R_FOR_ASSIGNMENT_FIELD  :   TOKEN_ID R_ASSIGN_OPERATOR R_EXP
 // Expressions
 //--------------------------------------------------------------------------------------------------------------------//
 
+// Main expression rule
 R_EXP       :   TOKEN_MINUS R_EXP
                 {
                     TreeNodeExpression_st* pNode;
@@ -541,7 +567,9 @@ R_EXP       :   TOKEN_MINUS R_EXP
                 }
             ;
 
+
 R_EXP_LIST  :   %empty
+
             |   R_EXP
                 {
                     $$.treeNode = $1.treeNode;
@@ -576,12 +604,12 @@ R_TERM      :   R_TERM R_PRIORITY_OPERATOR R_OPERAND
 
 R_OPERAND   :   R_INC_DEC
                 {
-
+                    $$.treeNode =  $1.treeNode;
                 }
 
             |   TOKEN_LOGICAL_NOT R_FACTOR
                 {
-
+                    
                 }
 
             |   R_TYPE_CAST R_FACTOR
@@ -632,8 +660,6 @@ R_FACTOR    :   TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES
                     pNode->number_u.fVal = $1.nodeData.fVal;
                     
                     $$.treeNode = (TreeNode_st*) pNode;
-
-
                 }       
 
             |   TOKEN_STR
@@ -706,160 +732,163 @@ R_POST_DECREMENT    :   TOKEN_ID TOKEN_DECREMENT
 // Operators
 //--------------------------------------------------------------------------------------------------------------------//
 
-R_ARITHMETIC_OPERATOR   :   TOKEN_PLUS
+// Arithmetic operators                                             // Operators
+R_ARITHMETIC_OPERATOR   :   TOKEN_PLUS                              // +    
                             {
-                                $$.nodeData.dVal = OP_PLUS;
+                                $$.nodeData.dVal = OP_PLUS; 
                             } 
 
-                        |   TOKEN_MINUS 
+                        |   TOKEN_MINUS                             // -
                             {
                                 $$.nodeData.dVal = OP_MINUS;
                             }
 
-                        |   TOKEN_RIGHT_SHIFT 
+                        |   TOKEN_RIGHT_SHIFT                       // >>
                             {
                                 $$.nodeData.dVal = OP_RIGHT_SHIFT;
                             }
 
-                        |   TOKEN_LEFT_SHIFT 
+                        |   TOKEN_LEFT_SHIFT                        // <<
                             {
                                 $$.nodeData.dVal = OP_LEFT_SHIFT;
                             }
                         ;
-  
 
-R_PRIORITY_OPERATOR     :   TOKEN_ASTERISK 
+// Priority operators                                               // Operators
+R_PRIORITY_OPERATOR     :   TOKEN_ASTERISK                          // *
                             {
                                 $$.nodeData.dVal =  OP_MULTIPLY;
                             }
-                        |   TOKEN_OVER 
+
+                        |   TOKEN_OVER                              // /
                             {
                                 $$.nodeData.dVal = OP_DIVIDE;
                             }
-                        |   TOKEN_PERCENT
+
+                        |   TOKEN_PERCENT                           // %
                             {
                                 $$.nodeData.dVal = OP_REMAIN;
                             }
                         ;
 
-
-R_CONDITION_OPERATOR    :   TOKEN_GREATER_THAN 
+// Condition operators                                              // Operators
+R_CONDITION_OPERATOR    :   TOKEN_GREATER_THAN                      // >
                             {
                                 $$.nodeData.dVal = OP_GREATER_THAN;
                             }
 
-                        |   TOKEN_LESS_THAN_OR_EQUAL 
+                        |   TOKEN_LESS_THAN_OR_EQUAL                // <=
                             {
                                 $$.nodeData.dVal = OP_LESS_THAN_OR_EQUAL;
                             }
 
-                        |   TOKEN_GREATER_THAN_OR_EQUAL 
+                        |   TOKEN_GREATER_THAN_OR_EQUAL             // >=
                             {
                                 $$.nodeData.dVal = OP_GREATER_THAN_OR_EQUAL;
                             }
 
-                        |   TOKEN_LESS_THAN 
+                        |   TOKEN_LESS_THAN                         // <
                             {
                                 $$.nodeData.dVal = OP_LESS_THAN;
                             }
 
-                        |   TOKEN_EQUAL 
+                        |   TOKEN_EQUAL                             // ==
                             {
                                 $$.nodeData.dVal = OP_EQUAL;
                             }
 
-                        |   TOKEN_NOT_EQUAL
+                        |   TOKEN_NOT_EQUAL                         // !=
                             {
                                 $$.nodeData.dVal = OP_NOT_EQUAL;
                             }
                         ;
 
-
-R_LOGIC_OPERATOR        :   TOKEN_LOGICAL_AND 
+// Logic operators                                                  // Operators
+R_LOGIC_OPERATOR        :   TOKEN_LOGICAL_AND                       // &&
                             {
                                 $$.nodeData.dVal = OP_LOGICAL_AND;
                             }
 
-                        |   TOKEN_LOGICAL_OR 
+                        |   TOKEN_LOGICAL_OR                        // ||
                             {
                                 $$.nodeData.dVal = OP_LOGICAL_OR;
                             }
                         ;
 
-
-R_BITWISE_OPERATOR      :   TOKEN_BITWISE_AND 
+// Bitwise operators                                                // Operators
+R_BITWISE_OPERATOR      :   TOKEN_BITWISE_AND                       // &
                             {
                                 $$.nodeData.dVal = OP_BITWISE_AND;
                             }
 
-                        |   TOKEN_BITWISE_NOT 
+                        |   TOKEN_BITWISE_NOT                       // ~
                             {
                                 $$.nodeData.dVal = OP_BITWISE_NOT;
                             }
 
-                        |   TOKEN_BITWISE_OR 
+                        |   TOKEN_BITWISE_OR                        // |
                             {
                                 $$.nodeData.dVal = OP_BITWISE_OR;
                             }
 
-                        |   TOKEN_BITWISE_XOR
+                        |   TOKEN_BITWISE_XOR                       // ^
                             {
                                 $$.nodeData.dVal = OP_BITWISE_XOR;
                             }
                         ;
 
-
-R_ASSIGN_OPERATOR       :   TOKEN_ASSIGN 
+// Assign operators                                                 // Operators
+R_ASSIGN_OPERATOR       :   TOKEN_ASSIGN                            // =
                             {
                                 $$.nodeData.dVal = OP_ASSIGN;
                             }
 
-                        |   TOKEN_PLUS_ASSIGN 
+                        |   TOKEN_PLUS_ASSIGN                       // +=
                             {
                                 $$.nodeData.dVal = OP_PLUS_ASSIGN;
                             }
 
-                        |   TOKEN_MINUS_ASSIGN 
+                        |   TOKEN_MINUS_ASSIGN                      // -=
                             {
                                 $$.nodeData.dVal = OP_MINUS_ASSIGN;
                             }
                             
-                        |   TOKEN_MODULUS_ASSIGN 
+                        |   TOKEN_MODULUS_ASSIGN                    // %=
                             {
                                 $$.nodeData.dVal = OP_MODULUS_ASSIGN;
                             }
                             
-                        |   TOKEN_LEFT_SHIFT_ASSIGN 
+                        |   TOKEN_LEFT_SHIFT_ASSIGN                 //<<=
                             {
                                 $$.nodeData.dVal = OP_LEFT_SHIFT_ASSIGN;
                             }
 
-                        |   TOKEN_RIGHT_SHIFT_ASSIGN 
+                        |   TOKEN_RIGHT_SHIFT_ASSIGN                // >>=
                             {
                                 $$.nodeData.dVal = OP_RIGHT_SHIFT_ASSIGN;
                             }
                             
-                        |   TOKEN_BITWISE_AND_ASSIGN 
+                        |   TOKEN_BITWISE_AND_ASSIGN                // &=
                             {
                                 $$.nodeData.dVal = OP_BITWISE_AND_ASSIGN;
                             }
 
-                        |   TOKEN_BITWISE_OR_ASSIGN 
+                        |   TOKEN_BITWISE_OR_ASSIGN                 // |=
                             {
                                 $$.nodeData.dVal = OP_BITWISE_OR_ASSIGN;
                             }
 
-                        |   TOKEN_BITWISE_XOR_ASSIGN
+                        |   TOKEN_BITWISE_XOR_ASSIGN                // ^=
                             {
                                 $$.nodeData.dVal = OP_BITWISE_XOR_ASSIGN;
                             }
 
-                        |   TOKEN_MULTIPLY_ASSIGN 
+                        |   TOKEN_MULTIPLY_ASSIGN                   // *=
                             {
                                 $$.nodeData.dVal = OP_MULTIPLY_ASSIGN;
                             }
 
-                        |   TOKEN_DIVIDE_ASSIGN 
+                        |   TOKEN_DIVIDE_ASSIGN                     // /=
                             {
                                 $$.nodeData.dVal = OP_DIVIDE_ASSIGN;
                             }
@@ -893,13 +922,14 @@ R_SIZEOF_BODY           :   R_TYPE_ALL
 // Misc
 //--------------------------------------------------------------------------------------------------------------------//
 
-// Label definition for the goto statement.     Example: primaDoFredo: 
-R_LABEL                 :   TOKEN_ID TOKEN_COLON
+// Label definition for the goto statement.             // Example: 
+R_LABEL                 :   TOKEN_ID TOKEN_COLON        // primaDoFredo:
                             {
                                 
                             }
                         ;
 
+// Type cast
 R_TYPE_CAST             :   TOKEN_LEFT_PARENTHESES R_TYPE_ALL TOKEN_RIGHT_PARENTHESES
                             {
                                 
@@ -983,18 +1013,19 @@ R_FUNC_PROTOTYPE        :   R_FUNC_SIGNATURE TOKEN_SEMI
                             }
                         ;
 
-
+// Function implementation containing the function signature and a compound statement where it is implemented
 R_FUNC_IMPL             :   R_FUNC_SIGNATURE R_COMPOUND_STATEMENT
                             {
 
                             }
                         ;
 
+// TODO: CHECK R_ARG_LIST AND R_ARG_LIST_INTERNAL
 // Function argument list. Note: The argument list can be empty. Example: int x | int x, int y
 R_ARG_LIST              :   %empty 
-                            {
-                                $$.treeNode = NULL;
-                            }
+//                            {
+//                                $$.treeNode = NULL;
+//                            }
 
                         |   R_ARG_LIST_INTERNAL
                             {
@@ -1012,13 +1043,12 @@ R_ARG_LIST_INTERNAL     :   R_ARG
                             {
                                 $3.treeNode->pSibling = $1.treeNode->pSibling;
                                 $1.treeNode->pSibling = $3.treeNode;
-
                                 
                                 $$.treeNode = $1.treeNode;
                             }
                         ;
 
-// Function argument type. Example: int x | const char* pString
+// Function argument type. Example: int x | const char* pString.
 R_ARG                   :   R_MOD_QUALIFIER R_TYPE_ALL TOKEN_ID 
                             {
                                 TreeNodeParam_st* pNode;
@@ -1050,7 +1080,7 @@ R_ARG                   :   R_MOD_QUALIFIER R_TYPE_ALL TOKEN_ID
 // Variable Related Rules
 //--------------------------------------------------------------------------------------------------------------------//
 
-// Variable declarations can have a visibility qualifier (extern/static), a type qualifier (volatile/const), a sign qualifier
+// Variable declarations can have a visibility qualifier (extern/static), a type qualifier (volatile/const), a sign qualifier.
 // (signed/unsigned) and must explicitly specify a type (short, int, float...).                                             // Examples:
 R_VAR_PREAMBLE          :   TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID      // register static const unsigned int var
                             {   
@@ -1375,14 +1405,14 @@ R_ARR_ARGS                  :   R_ARR_ARGS TOKEN_COMMA TOKEN_LEFT_BRACE R_ARR_AR
                                 }
                             ;
 
-// Rule to assign a value to a variable                                         // Example:
-R_VAR_ASSIGNMENT            :   TOKEN_ID R_ASSIGN_OPERATOR R_EXP TOKEN_SEMI     // var = 1;
+// Rule to assign a value to a variable.                                                        // Example:
+R_VAR_ASSIGNMENT            :   TOKEN_ID R_ASSIGN_OPERATOR R_EXP TOKEN_SEMI                     // var = 1;
                                 {
 
                                 }
                             ;      
 
-// Rule to assign values to an array                                                            // Example: 
+// Rule to assign values to an array.                                                           // Example: 
 R_ARR_ASSIGNMENT            :   TOKEN_ID R_ARR_SIZE R_ASSIGN_OPERATOR R_ARR_ARGS TOKEN_SEMI     // var[1] = {1};
                                 {
 
@@ -1390,96 +1420,111 @@ R_ARR_ASSIGNMENT            :   TOKEN_ID R_ARR_SIZE R_ASSIGN_OPERATOR R_ARR_ARGS
                             ;
 
 // Standard C data types. 
-// Doesn't account for user defined types (aka typedefs), as this will need a symbol table      // Data Types:
-R_TYPE                      :   TOKEN_CHAR                                                      //   
+// Doesn't account for user defined types (aka typedefs), as this will need a symbol table.     // Data Types:
+R_TYPE                      :   TOKEN_CHAR                                                      // Char  
                                 {
                                     $$.nodeData.dVal = TYPE_CHAR;
                                 }
 
-                            |   TOKEN_SHORT
+                            |   TOKEN_SHORT                                                     // Short
                                 {
                                     $$.nodeData.dVal = TYPE_SHORT;
                                 }
 
-                            |   TOKEN_INT 
+                            |   TOKEN_INT                                                       // Int
                                 {
                                     $$.nodeData.dVal = TYPE_INT;
                                 }
 
-                            |   TOKEN_LONG 
+                            |   TOKEN_LONG                                                      // Long
                                 {
                                     $$.nodeData.dVal = TYPE_LONG;
                                 }
 
-                            |   TOKEN_FLOAT 
+                            |   TOKEN_FLOAT                                                     // Float
                                 {
                                     $$.nodeData.dVal = TYPE_FLOAT;
                                 }
                                 
-                            |   TOKEN_DOUBLE 
+                            |   TOKEN_DOUBLE                                                    // Double
                                 {
                                     $$.nodeData.dVal = TYPE_DOUBLE;
                                 }
 
-                            |   TOKEN_LONG TOKEN_DOUBLE
+                            |   TOKEN_LONG TOKEN_DOUBLE                                         // Long Double
                                 {
                                     $$.nodeData.dVal = TYPE_LONG_DOUBLE;
                                 }
                             ;
 
 // Standard C data types but with pointer. This rule implements support for pointers of n length. Example: int*** ...
-R_TYPE_PTR: R_TYPE_PTR TOKEN_ASTERISK | R_TYPE TOKEN_ASTERISK;
+R_TYPE_PTR                  :   R_TYPE_PTR TOKEN_ASTERISK
+                                {
+
+                                }
+
+                            |   R_TYPE TOKEN_ASTERISK
+                                {
+
+                                }
+                            ;
 
 // Union between the pointer and standard types.
-R_TYPE_ALL: 
-R_TYPE 
-{
-    $$ = $1;
-}
-| R_TYPE_PTR
-{
+R_TYPE_ALL                  :   R_TYPE 
+                                {
+                                    $$ = $1;
+                                }
+                                
+                            |   R_TYPE_PTR
+                                {
 
-};
+                                }
+                            ;
 
 // Functions and variables can be marked as either static or extern, never both at the same time.
-R_VISIBILITY_QUALIFIER: 
-TOKEN_STATIC
-{
-    $$.nodeData.dVal = (long int) VIS_STATIC;     
-}
-| TOKEN_EXTERN
-{
-    $$.nodeData.dVal = (long int) VIS_EXTERN;     
-};
+R_VISIBILITY_QUALIFIER      :   TOKEN_STATIC
+                                {
+                                    $$.nodeData.dVal = (long int) VIS_STATIC;     
+                                }
+
+                            |   TOKEN_EXTERN
+                                {
+                                    $$.nodeData.dVal = (long int) VIS_EXTERN;     
+                                }
+                            ;
 
 // Types can be marked as constant, volatile, or have no type qualifier.
-// here is also some other more advanced qualifiers not being considered.
-R_MOD_QUALIFIER: 
-TOKEN_CONSTANT
-{
-    $$.nodeData.dVal = (long int) MOD_CONST;  
-} 
-| TOKEN_VOLATILE
-{
-    $$.nodeData.dVal = (long int) MOD_VOLATILE;  
-};
+// Here is also some other more advanced qualifiers not being considered.
+R_MOD_QUALIFIER             :   TOKEN_CONSTANT
+                                {
+                                    $$.nodeData.dVal = (long int) MOD_CONST;  
+                                } 
+
+                            |   TOKEN_VOLATILE
+                                {
+                                    $$.nodeData.dVal = (long int) MOD_VOLATILE;  
+                                }
+                            ;
 
 // Types can be marked as signed or unsigned, in C, if none is specified, the type defaults to signed.
-R_SIGN_QUALIFIER: 
-TOKEN_SIGNED 
-{
-    $$.nodeData.dVal = (long int) SIGN_SIGNED;
-}
-| TOKEN_UNSIGNED
-{
-    $$.nodeData.dVal = (long int) SIGN_UNSIGNED;
-};
+R_SIGN_QUALIFIER            :   TOKEN_SIGNED 
+                                {
+                                    $$.nodeData.dVal = (long int) SIGN_SIGNED;
+                                }
 
-R_EOF: TOKEN_EOF
-{
-    LOG_DEBUG("Reached end of file!\n");
-    return 0;
-};
+                            |   TOKEN_UNSIGNED
+                                {
+                                    $$.nodeData.dVal = (long int) SIGN_UNSIGNED;
+                                }
+                            ;
+
+// End of file (EOF).
+R_EOF                       :   TOKEN_EOF
+                                {
+                                    LOG_DEBUG("Reached end of file!\n");
+                                    return 0;
+                                }
+                            ;
 %%
 
 //--------------------------------------------------------------------------------------------------------------------//

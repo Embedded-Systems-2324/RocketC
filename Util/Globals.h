@@ -107,7 +107,13 @@ typedef enum
     NODE_WHILE,
     NODE_DO_WHILE,
     NODE_FOR,
-    NODE_RETURN
+    NODE_RETURN,
+    NODE_CONTINUE, 
+    NODE_BREAK,
+    NODE_GOTO,
+    NODE_SWITCH,
+    NODE_CASE,
+    NODE_DEFAULT
 }NodeType_et;
 
 typedef union
@@ -168,6 +174,14 @@ typedef struct __attribute__((packed)) TreeNodeCondition
 
     struct TreeNode* pCondition;
 }TreeNodeCondition_st;
+
+
+typedef struct __attribute__((packed)) TreeNodeCase
+{
+    NODE_BODY();
+
+    int caseVal;
+}TreeNodeCase_st;
 
 
 typedef struct __attribute__((packed)) TreeNodeNumber
