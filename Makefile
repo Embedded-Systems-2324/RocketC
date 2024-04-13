@@ -1,5 +1,4 @@
 default:all
-
 setup:
 	mkdir -p Output
 

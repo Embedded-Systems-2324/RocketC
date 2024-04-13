@@ -4,6 +4,6 @@
 #include "../Util/Globals.h"
 
 int yyerror(char* pStr);
-int executeParser(TreeNode_st* pTreeRoot);
+int executeParser(TreeNode_st** ppTreeRoot);
 
 #endif
