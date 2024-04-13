@@ -9,7 +9,8 @@
 #include "Parser/Parser.h"
 #include "Output/Parser.tab.h"
 
-static TreeNode_st pTreeRoot;
+
+static TreeNode_st treeRoot;
 static FILE* pSourceFile;
 static size_t lineNumber = 1;
 static bool bReady = 0;
@@ -69,7 +70,7 @@ int main(int argc, char *argv[])
         }
         else if (strcmp(pMode, "--parse") == 0)
         {
-            (void) executeParser(&pTreeRoot);
+            (void) executeParser(&treeRoot);
         }
     }
     else

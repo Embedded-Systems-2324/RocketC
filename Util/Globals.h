@@ -8,14 +8,7 @@
 #include <ctype.h>
 #include "Types.h"
 
-#define FLAG_REGISTER (1 << 0)
-
-#define NODE_BODY()                 \
-    struct TreeNode* pRightChild;   \
-    struct TreeNode* pLeftChild;    \
-    struct TreeNode* pSibling;      \
-    size_t lineNumber;              \
-    NodeType_et nodeType            \
+#define FLAG_REGISTER 1
 
 typedef enum
 {
@@ -83,10 +76,6 @@ typedef enum
     VIS_NONE
 }VisQualifier_et;
 
-typedef enum
-{
-    MISC_REG_QUAL,
-}MiscData_et;
 
 typedef enum
 {
@@ -98,11 +87,26 @@ typedef enum
 
 typedef enum
 {
-    NODE_PARAM_DESC,
+    NODE_PARAM,
+
     NODE_VAR_DECLARATION,
+    NODE_VAR_NAME,
+    NODE_MISC,
+    NODE_VISIBILITY,
+    NODE_MODIFIER,
+    NODE_SIGN,
+    NODE_TYPE,
+    NODE_OP_TYPE,
+    NODE_TERNARY,
+    NODE_ARRAY_INDEX,
+    NODE_TYPE_CAST,
+    NODE_ID,
+
+    NODE_VAR_ASSIGNMENT,
     NODE_FUNC_PROTOTYPE,
     NODE_EXPRESSION, 
-    NODE_NUMBER,
+    NODE_INTEGER,
+    NODE_FLOAT,
     NODE_IF,
     NODE_WHILE,
     NODE_DO_WHILE,
@@ -113,7 +117,13 @@ typedef enum
     NODE_GOTO,
     NODE_SWITCH,
     NODE_CASE,
-    NODE_DEFAULT
+    NODE_DEFAULT,
+    NODE_POINTER,
+
+    NODE_POST_DEC,
+    NODE_PRE_DEC,
+    NODE_POST_INC,
+    NODE_PRE_INC
 }NodeType_et;
 
 typedef union
@@ -123,78 +133,18 @@ typedef union
     char* sVal;
 }NodeData_ut;
 
-typedef struct __attribute__((packed)) TreeNode
+
+typedef struct TreeNode
 {
-    NODE_BODY();
+    struct TreeNode* pChilds;
+    struct TreeNode* pSibling;
+    size_t childNumber;
+    size_t lineNumber;
+
+    NodeType_et nodeType;
+    NodeData_ut nodeData;
+
 }TreeNode_st;
-
-typedef struct __attribute__((packed)) TreeNodeVarDecl
-{
-    NODE_BODY();
-
-    char* varId;
-    uint8_t miscFlags;
-    VarType_et varType;
-    ModQualifier_et modQualifier;
-    VisQualifier_et visQualifier;
-    SignQualifier_et signQualifier;
-}TreeNodeVarDecl_st;
-
-typedef struct __attribute__((packed)) TreeNodeFuncPrototype
-{
-    NODE_BODY();
-
-    char* funcId;
-    //uint8_t miscFlags;
-    VarType_et returnType;
-    VisQualifier_et visQualifier;
-    SignQualifier_et signQualifier;
-}TreeNodeFuncPrototype_st;
-
-typedef struct __attribute__((packed)) TreeNodeParam
-{
-    NODE_BODY();
-
-    char* paramId;
-    VarType_et paramType;
-    ModQualifier_et modQualifier;
-}TreeNodeParam_st;
-
-typedef struct __attribute__((packed)) TreeNodeExpression
-{
-    NODE_BODY();
-
-    OperatorType_et opType;
-}TreeNodeExpression_st;
-
-
-typedef struct __attribute__((packed)) TreeNodeCondition
-{
-    NODE_BODY();
-
-    struct TreeNode* pCondition;
-}TreeNodeCondition_st;
-
-
-typedef struct __attribute__((packed)) TreeNodeCase
-{
-    NODE_BODY();
-
-    int caseVal;
-}TreeNodeCase_st;
-
-
-typedef struct __attribute__((packed)) TreeNodeNumber
-{
-    NODE_BODY();
-
-    VarType_et numberType;   //criar um enum numberTYpe???
-                             //se sim, mudar tb na regra R_FACTOR
-    union{
-        long int dVal;
-        double fVal;
-    }number_u;
-}TreeNodeNumber_st;
 
 
 typedef union

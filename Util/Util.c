@@ -32,27 +32,7 @@ int NodeCreate(TreeNode_st** ppNewNode, NodeType_et nodeType)
     if (!ppNewNode)
         return -EINVAL;
 
-    switch (nodeType)
-    {
-        case NODE_PARAM_DESC:
-            *ppNewNode = (TreeNode_st*) calloc(1, sizeof(TreeNodeParam_st));
-            break;
-        case NODE_FUNC_PROTOTYPE:
-            *ppNewNode = (TreeNode_st*) calloc(1, sizeof(TreeNodeFuncPrototype_st));
-            break;
-        case NODE_VAR_DECLARATION:
-            *ppNewNode = (TreeNode_st*) calloc(1, sizeof(TreeNodeVarDecl_st));
-            break;
-        case NODE_EXPRESSION:
-            *ppNewNode = (TreeNode_st*) calloc(1, sizeof(TreeNodeExpression_st));
-            break;
-        case NODE_NUMBER:
-            *ppNewNode = (TreeNode_st*) calloc(1, sizeof(TreeNodeNumber_st));
-            break;
-        default:
-            LOG_ERROR("Received invalid node type! Unable to allocate new node!");
-            break;
-    }
+    *ppNewNode = (TreeNode_st*) calloc(1, sizeof(TreeNode_st));
 
     if (!(*ppNewNode))
     {
@@ -68,7 +48,7 @@ int NodeCreate(TreeNode_st** ppNewNode, NodeType_et nodeType)
     return 0;
 }
 
-#if 0
+
 int NodeAddChild(TreeNode_st* pParent, TreeNode_st* pChild)
 {
     TreeNode_st* pTemp;
@@ -76,19 +56,20 @@ int NodeAddChild(TreeNode_st* pParent, TreeNode_st* pChild)
     if (!pParent || !pChild)
         return -EINVAL;
 
-    pTemp = reallocarray(pParent->child, pParent->nofChild + 1, sizeof(TreeNode_st));
+    pTemp = reallocarray(pParent->pChilds, pParent->childNumber + 1, sizeof(TreeNode_st));
     if (!pTemp)
     {
         LOG_ERROR("Failed to allocate memory while trying to add a new child!\n");
         return -ENOMEM;
     }
 
-    pParent->child = pTemp;
-    memcpy(&pParent->child[pParent->nofChild++], pChild, sizeof(TreeNode_st));
+    pParent->pChilds = pTemp;
+    memcpy(&pParent->pChilds[pParent->childNumber++], pChild, sizeof(TreeNode_st));
     free(pChild);
 
     return 0;
 }
+
 
 int NodeAddNewChild(TreeNode_st* pParent, TreeNode_st** ppNewChild, NodeType_et nodeType)
 {
@@ -97,15 +78,15 @@ int NodeAddNewChild(TreeNode_st* pParent, TreeNode_st** ppNewChild, NodeType_et 
     if (!pParent || !ppNewChild)
         return -EINVAL;
 
-    pTemp = reallocarray(pParent->child, pParent->nofChild + 1, sizeof(TreeNode_st));
+    pTemp = reallocarray(pParent->pChilds, pParent->childNumber + 1, sizeof(TreeNode_st));
     if (!pTemp)
     {
         LOG_ERROR("Failed to allocate memory while trying to add a new child!\n");
         return -ENOMEM;
     }
 
-    pParent->child = pTemp;
-    (*ppNewChild) = &pParent->child[pParent->nofChild++];
+    pParent->pChilds = pTemp;
+    (*ppNewChild) = &pParent->pChilds[pParent->childNumber++];
 
     memset(*ppNewChild, 0, sizeof(TreeNode_st));
     (*ppNewChild)->nodeType = nodeType;
@@ -113,7 +94,7 @@ int NodeAddNewChild(TreeNode_st* pParent, TreeNode_st** ppNewChild, NodeType_et 
 
     return 0;
 }
-#endif
+
 
 int StringCreateAndCopy(char** ppDest, char* pSrc, size_t strLen)
 {
@@ -136,7 +117,7 @@ int StringCreateAndCopy(char** ppDest, char* pSrc, size_t strLen)
 }
 
 
-void PrintNode(TreeNode_st* pNode, int depth)
+/*void PrintNode(TreeNode_st* pNode, int depth)
 {
     if (pNode == NULL)
     {
@@ -186,7 +167,7 @@ void PrintNode(TreeNode_st* pNode, int depth)
     {
         PrintNode(pNode->pSibling, depth);
     }
-}
+}*/
 
 
 /*
