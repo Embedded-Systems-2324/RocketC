@@ -180,6 +180,95 @@ typedef struct __attribute__((packed)) TreeNodeParam
     VarType_et paramType;
     ModQualifier_et modQualifier;
 }TreeNodeParam_st;
-
-
 */
+
+void PrintNode(TreeNode_st* pNode, int depth)
+{
+    if (pNode == NULL)
+    {
+        LOG_ERROR("NULL Node!!\n");
+        return;
+    }
+
+    LOG_DEBUG("\ndebug\n");
+
+    LOG_DEBUG("\n NODE TYPE -> %d \n", pNode->nodeType);
+
+    LOG_DEBUG("\ndebug\n");
+
+    switch (pNode->nodeType) {
+        case NODE_PARAM:
+            break;
+        case NODE_VAR_DECLARATION:
+            //PrintNode(pNode->pChilds[0], depth);
+            break;
+        case NODE_VAR_NAME:
+            break;
+        case NODE_MISC:
+            break;
+        case NODE_VISIBILITY:
+            break;
+        case NODE_MODIFIER:
+            break;
+        case NODE_SIGN:
+            break;
+        case NODE_TYPE:
+            break;
+        case NODE_OP_TYPE:
+            break;
+        case NODE_TERNARY:
+            break;
+        case NODE_ARRAY_INDEX:
+            break;
+        case NODE_TYPE_CAST:
+            break;
+        case NODE_ID:
+            break;
+        case NODE_VAR_ASSIGNMENT:
+            break;
+        case NODE_FUNC_PROTOTYPE:
+            break;
+        case NODE_EXPRESSION:
+            break;
+        case NODE_INTEGER:
+            break;
+        case NODE_FLOAT:
+            break;
+        case NODE_IF:
+            break;
+        case NODE_WHILE:
+            break;
+        case NODE_DO_WHILE:
+            break;
+        case NODE_FOR:
+            break;
+        case NODE_RETURN:
+            break;
+        case NODE_CONTINUE:
+            break;
+        case NODE_BREAK:
+            break;
+        case NODE_GOTO:
+            break;
+        case NODE_SWITCH:
+            break;
+        case NODE_CASE:
+            break;
+        case NODE_DEFAULT:
+            break;
+        case NODE_POINTER:
+            break;
+        case NODE_POST_DEC:
+            break;
+        case NODE_PRE_DEC:
+            break;
+        case NODE_POST_INC:
+            break;
+        case NODE_PRE_INC:
+            break;
+        default:
+            LOG_ERROR("\nUNKNOWN NODE TYPE!\n");
+            break;
+    }
+    return;
+}

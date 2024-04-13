@@ -24,7 +24,7 @@
 int yylex();
 int yyerror(char* pStr);
 const char* getTokenName(int tokenValue);
-TreeNode_st** ppTreeRoot;
+TreeNode_st* pTreeRoot;
 
 
 %}
@@ -127,15 +127,17 @@ TreeNode_st** ppTreeRoot;
 // Rules for the overall program
 R_PROGRAM               :   R_PROGRAM R_EOF 
                             {
-                                *ppTreeRoot = $1.treeNode;
+                                pTreeRoot = $1.treeNode;
                             }
                         |   R_PROGRAM R_GLOBAL_STATEMENT 
                             {
                                 $$.treeNode = $2.treeNode;
+                                pTreeRoot = $$.treeNode;
                             }
                         |   R_GLOBAL_STATEMENT
                             {
                                 $$.treeNode = $1.treeNode;
+                                pTreeRoot = $$.treeNode;
                             }
                         ;
 
@@ -1559,11 +1561,11 @@ R_EOF                       :   TOKEN_EOF
 //--------------------------------------------------------------------------------------------------------------------//
 // Code
 //--------------------------------------------------------------------------------------------------------------------//
-int executeParser(TreeNode_st** _ppTreeRoot)
+int executeParser(TreeNode_st** ppTreeRoot)
 {
     int ret;
 
-    if (!_ppTreeRoot)
+    if (!ppTreeRoot)
         return -EINVAL;
     
     ret = initLexer();
@@ -1575,9 +1577,11 @@ int executeParser(TreeNode_st** _ppTreeRoot)
 
     LOG_WARNING("\n--------------Parser Start--------------\n");
 
-    ppTreeRoot = _ppTreeRoot;
+    ret = yyparse();
 
-    return yyparse();
+    *ppTreeRoot = pTreeRoot;
+
+    return ret;
 }
 
 int yyerror(char* pStr)

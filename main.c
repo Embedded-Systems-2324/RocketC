@@ -8,6 +8,7 @@
 #include "Lexer/Lexer.h"
 #include "Parser/Parser.h"
 #include "Output/Parser.tab.h"
+#include "Util/Util.h"
 
 
 static TreeNode_st* pTreeRoot;
@@ -71,6 +72,7 @@ int main(int argc, char *argv[])
         else if (strcmp(pMode, "--parse") == 0)
         {
             (void) executeParser(&pTreeRoot);
+            PrintNode(pTreeRoot, 0);
         }
     }
     else
