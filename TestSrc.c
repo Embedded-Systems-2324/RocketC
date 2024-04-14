@@ -6,4 +6,4 @@ const unsigned int myVar;
 int foobar(int var);*/
 
 
-int x = 2+2;
+static double qwerty = 4;

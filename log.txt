@@ -1,4 +1,9 @@
  [In comment] [Out comment] 
  
  
-INT ID ASSIGN NUM PLUS NUM SEMI  
+STATIC DOUBLE ID ASSIGN NUM SEMI 
+-------------------AST-------------------
+
+
+
+-----------------AST END-----------------

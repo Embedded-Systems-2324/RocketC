@@ -933,7 +933,7 @@ R_LABEL                 :   TOKEN_ID TOKEN_COLON        // primaDoFredo:
                         ;
 
 // Type cast
-R_TYPE_CAST             :   TOKEN_LEFT_PARENTHESES R_TYPE_ALL TOKEN_RIGHT_PARENTHESES
+R_TYPE_CAST             :   TOKEN_LEFT_PARENTHESES R_TYPE_ALL TOKEN_RIGHT_PARENTHESES                   
                             {
                                 NodeCreate(&($$.treeNode), NODE_TYPE_CAST);
                                 $$.treeNode->nodeData.dVal = OP_DIVIDE_ASSIGN;
@@ -1363,6 +1363,8 @@ R_VAR_DECLARATION       :   R_VAR_PREAMBLE TOKEN_SEMI                           
                                 NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
                             
                                 NodeAddChild($$.treeNode, $1.treeNode);
+
+                                NodeAddChild($$.treeNode, $2.treeNode);         // added by Bóias, sem este child, como sei que assign operator é?
 
                                 NodeAddChild($$.treeNode, $3.treeNode);
                             }

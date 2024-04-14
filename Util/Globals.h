@@ -12,37 +12,38 @@
 
 typedef enum
 {
-    OP_PLUS,
-    OP_MINUS,
-    OP_RIGHT_SHIFT,
-    OP_LEFT_SHIFT,
-    OP_MULTIPLY,
-    OP_DIVIDE,
-    OP_REMAIN,
-    OP_GREATER_THAN,
-    OP_LESS_THAN_OR_EQUAL,
-    OP_GREATER_THAN_OR_EQUAL,
-    OP_LESS_THAN,
-    OP_EQUAL,
-    OP_NOT_EQUAL,
-    OP_LOGICAL_AND,
-    OP_LOGICAL_OR,
-    OP_BITWISE_AND,
-    OP_BITWISE_NOT,
-    OP_BITWISE_OR,
-    OP_BITWISE_XOR,
-    OP_ASSIGN,
-    OP_PLUS_ASSIGN,
-    OP_MINUS_ASSIGN,
-    OP_MODULUS_ASSIGN,
-    OP_LEFT_SHIFT_ASSIGN,
-    OP_RIGHT_SHIFT_ASSIGN,
-    OP_BITWISE_AND_ASSIGN,
-    OP_BITWISE_OR_ASSIGN,
-    OP_BITWISE_XOR_ASSIGN,
-    OP_MULTIPLY_ASSIGN,
-    OP_DIVIDE_ASSIGN,
-    OP_SIZEOF
+    OP_PLUS,                    // 0
+    OP_MINUS,                   // 1
+    OP_RIGHT_SHIFT,             // 2
+    OP_LEFT_SHIFT,              // 3
+    OP_MULTIPLY,                // 4
+    OP_DIVIDE,                  // 5
+    OP_REMAIN,                  // 6
+    OP_GREATER_THAN,            // 7
+    OP_LESS_THAN_OR_EQUAL,      // 8
+    OP_GREATER_THAN_OR_EQUAL,   // 9
+    OP_LESS_THAN,               // 10
+    OP_EQUAL,                   // 11
+    OP_NOT_EQUAL,               // 12
+    OP_LOGICAL_AND,             // 13
+    OP_LOGICAL_OR,              // 14
+    OP_LOGICAL_NOT,             // 15
+    OP_BITWISE_AND,             // 16
+    OP_BITWISE_NOT,             // 17
+    OP_BITWISE_OR,              // 18
+    OP_BITWISE_XOR,             // 19
+    OP_ASSIGN,                  // 20
+    OP_PLUS_ASSIGN,             // 21
+    OP_MINUS_ASSIGN,            // 22
+    OP_MODULUS_ASSIGN,          // 23
+    OP_LEFT_SHIFT_ASSIGN,       // 24
+    OP_RIGHT_SHIFT_ASSIGN,      // 25
+    OP_BITWISE_AND_ASSIGN,      // 26
+    OP_BITWISE_OR_ASSIGN,       // 27
+    OP_BITWISE_XOR_ASSIGN,      // 28
+    OP_MULTIPLY_ASSIGN,         // 29
+    OP_DIVIDE_ASSIGN,           // 30
+    OP_SIZEOF                   // 31
 }OperatorType_et;
 
 typedef enum
@@ -87,43 +88,43 @@ typedef enum
 
 typedef enum
 {
-    NODE_PARAM,
+    NODE_PARAM,              // 0
 
-    NODE_VAR_DECLARATION,
-    NODE_VAR_NAME,
-    NODE_MISC,
-    NODE_VISIBILITY,
-    NODE_MODIFIER,
-    NODE_SIGN,
-    NODE_TYPE,
-    NODE_OP_TYPE,
-    NODE_TERNARY,
-    NODE_ARRAY_INDEX,
-    NODE_TYPE_CAST,
-    NODE_ID,
+    NODE_VAR_DECLARATION,    // 1
+    NODE_VAR_NAME,           // 2
+    NODE_MISC,               // 3
+    NODE_VISIBILITY,         // 4
+    NODE_MODIFIER,           // 5
+    NODE_SIGN,               // 6
+    NODE_TYPE,               // 7
+    NODE_OP_TYPE,            // 8
+    NODE_TERNARY,            // 9
+    NODE_ARRAY_INDEX,        // 10
+    NODE_TYPE_CAST,          // 11
+    NODE_ID,                 // 12
 
-    NODE_VAR_ASSIGNMENT,
-    NODE_FUNC_PROTOTYPE,
-    NODE_EXPRESSION, 
-    NODE_INTEGER,
-    NODE_FLOAT,
-    NODE_IF,
-    NODE_WHILE,
-    NODE_DO_WHILE,
-    NODE_FOR,
-    NODE_RETURN,
-    NODE_CONTINUE, 
-    NODE_BREAK,
-    NODE_GOTO,
-    NODE_SWITCH,
-    NODE_CASE,
-    NODE_DEFAULT,
-    NODE_POINTER,
+    NODE_VAR_ASSIGNMENT,     // 13
+    NODE_FUNC_PROTOTYPE,     // 14
+    NODE_EXPRESSION,         // 15
+    NODE_INTEGER,            // 16
+    NODE_FLOAT,              // 17
+    NODE_IF,                 // 18
+    NODE_WHILE,              // 19
+    NODE_DO_WHILE,           // 20
+    NODE_FOR,                // 21
+    NODE_RETURN,             // 22
+    NODE_CONTINUE,           // 23
+    NODE_BREAK,              // 24
+    NODE_GOTO,               // 25
+    NODE_SWITCH,             // 26
+    NODE_CASE,               // 27
+    NODE_DEFAULT,            // 28
+    NODE_POINTER,            // 29
 
-    NODE_POST_DEC,
-    NODE_PRE_DEC,
-    NODE_POST_INC,
-    NODE_PRE_INC
+    NODE_POST_DEC,           // 30
+    NODE_PRE_DEC,            // 31
+    NODE_POST_INC,           // 32
+    NODE_PRE_INC             // 33
 }NodeType_et;
 
 typedef union

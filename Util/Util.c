@@ -1,4 +1,5 @@
 #include <errno.h>
+#include "Util.h"
 #include "Globals.h"
 #include "Logger.h"
 #include "../main.h"
@@ -117,71 +118,6 @@ int StringCreateAndCopy(char** ppDest, char* pSrc, size_t strLen)
 }
 
 
-/*void PrintNode(TreeNode_st* pNode, int depth)
-{
-    if (pNode == NULL)
-    {
-        LOG_ERROR("NULL Node!!\n");
-    }
-    for (int i = 0; i < depth; i++) 
-    {
-        LOG_DEBUG("    ");
-    }
-
-    switch (pNode->nodeType)
-    {
-        case NODE_PARAM_DESC:
-            TreeNodeParam_st* cNode1 = (TreeNodeParam_st*)pNode;
-            LOG_DEBUG("%d %d %s", &cNode1->modQualifier, &cNode1->paramType, &cNode1->paramId);
-        case NODE_VAR_DECLARATION: 
-            TreeNodeVarDecl_st* cNode2 = (TreeNodeVarDecl_st*)pNode;
-            if(&cNode2->miscFlags != NULL)
-            {
-                LOG_DEBUG("%d ", &cNode2->miscFlags);
-            }
-            LOG_DEBUG("%d, %d, %d, %d, %d", &cNode2->visQualifier, &cNode2->modQualifier, &cNode2->signQualifier, &cNode2->varType, &cNode2->varId);
-            break;
-        case NODE_FUNC_PROTOTYPE:
-            TreeNodeFuncPrototype_st* cNode3 = (TreeNodeFuncPrototype_st*) cNode3;
-            
-            break;
-        case NODE_EXPRESSION:
-            break;
-        case NODE_NUMBER:
-            break;
-        default:
-            break;
-    }
-
-
-    if (pNode->pLeftChild != NULL)
-    {
-        PrintNode(pNode->pLeftChild, depth+1);
-    }
-    if (pNode->pRightChild != NULL)
-    {
-        PrintNode(pNode->pRightChild, depth+1);
-    }    
-
-    if(pNode->pSibling != NULL) 
-    {
-        PrintNode(pNode->pSibling, depth);
-    }
-}*/
-
-
-/*
-
-typedef struct __attribute__((packed)) TreeNodeParam
-{
-    NODE_BODY();
-
-    char* paramId;
-    VarType_et paramType;
-    ModQualifier_et modQualifier;
-}TreeNodeParam_st;
-*/
-
 void PrintNode(TreeNode_st* pNode, int depth)
 {
     if (pNode == NULL)
@@ -190,82 +126,156 @@ void PrintNode(TreeNode_st* pNode, int depth)
         return;
     }
 
-    LOG_DEBUG("\ndebug\n");
-
-    LOG_DEBUG("\n NODE TYPE -> %d \n", pNode->nodeType);
-
-    LOG_DEBUG("\ndebug\n");
-
     switch (pNode->nodeType) {
         case NODE_PARAM:
             break;
-        case NODE_VAR_DECLARATION:
-            //PrintNode(pNode->pChilds[0], depth);
+        case NODE_VAR_DECLARATION:                                      // tested
+            for (int i=0; i<pNode->childNumber; i++)
+            {
+                PrintNode(&pNode->pChilds[i], depth);
+            }
             break;
-        case NODE_VAR_NAME:
+
+        case NODE_VAR_NAME:                                             // tested
+            for (int i=0; i<pNode->childNumber; i++)
+            {
+                PrintNode(&pNode->pChilds[i], depth);
+            }
+            printf("%s ", pNode->nodeData.sVal);
             break;
-        case NODE_MISC:
+
+        case NODE_MISC:                                                 // tested
+            printf("%s ", MiscDataStrings[pNode->nodeData.dVal]);
             break;
-        case NODE_VISIBILITY:
+
+        case NODE_VISIBILITY:                                           // tested
+            printf("%s ", VisQualifierStrings[pNode->nodeData.dVal]);
             break;
-        case NODE_MODIFIER:
+
+        case NODE_MODIFIER:                                             // tested
+            printf("%s ", ModQualifierStrings[pNode->nodeData.dVal]);
             break;
-        case NODE_SIGN:
+
+        case NODE_SIGN:                                                 // tested
+            printf("%s ", SignQualifierStrings[pNode->nodeData.dVal]);
             break;
-        case NODE_TYPE:
+
+        case NODE_TYPE:                                                 // tested
+            printf("%s ", VarTypeStrings[pNode->nodeData.dVal]);
             break;
-        case NODE_OP_TYPE:
+
+        case NODE_OP_TYPE:                                              
+            printf("%s ", OperatorStrings[pNode->nodeData.dVal]);
             break;
-        case NODE_TERNARY:
+
+        case NODE_TERNARY:                                     
+            PrintNode(&pNode->pChilds[0], depth);
+            printf("? ");
+            PrintNode(&pNode->pChilds[1], depth);
+            printf(": ");
+            PrintNode(&pNode->pChilds[2], depth);
             break;
-        case NODE_ARRAY_INDEX:
+
+        case NODE_ARRAY_INDEX:                                  
+            PrintNode(&pNode->pChilds[0], depth);
+            printf("[");
+            PrintNode(&pNode->pChilds[1], depth);
+            printf("]");
             break;
-        case NODE_TYPE_CAST:
+
+        case NODE_TYPE_CAST:                                        // geração nós de TYPECAST estão bem??? 
             break;
-        case NODE_ID:
+
+        case NODE_ID:                                                       
+            printf("%s ", pNode->nodeData.sVal);
             break;
+
         case NODE_VAR_ASSIGNMENT:
+            printf("%s ", pNode->nodeData.sVal);
+            for (int i=0; i<pNode->childNumber; i++)
+            {
+                PrintNode(&pNode->pChilds[i], depth);
+            }            
             break;
+
         case NODE_FUNC_PROTOTYPE:
             break;
+
         case NODE_EXPRESSION:
+            for (int i=0; i<pNode->childNumber; i++)
+            {
+                PrintNode(&pNode->pChilds[i], depth);
+            }
             break;
+
         case NODE_INTEGER:
+            printf("%ld ", pNode->nodeData.dVal);
             break;
+
         case NODE_FLOAT:
+            printf("%.10g ", pNode->nodeData.fVal);
             break;
+
         case NODE_IF:
             break;
+
         case NODE_WHILE:
             break;
+
         case NODE_DO_WHILE:
             break;
+
         case NODE_FOR:
             break;
+
         case NODE_RETURN:
+            printf("return ");
+            for (int i=0; i<pNode->childNumber; i++)
+            {
+                PrintNode(&pNode->pChilds[i], depth);
+            }
             break;
+
         case NODE_CONTINUE:
+            printf("continue \n");
             break;
+
         case NODE_BREAK:
+            printf("break \n");
             break;
+
         case NODE_GOTO:
+            printf("goto %s", pNode->nodeData.sVal);
             break;
+
         case NODE_SWITCH:
             break;
+
         case NODE_CASE:
             break;
+
         case NODE_DEFAULT:
             break;
+
         case NODE_POINTER:
             break;
+
         case NODE_POST_DEC:
+            printf("%s--", pNode->nodeData.sVal);
             break;
+
         case NODE_PRE_DEC:
+            printf("--%s", pNode->nodeData.sVal);
             break;
+
         case NODE_POST_INC:
+            printf("%s++ ", pNode->nodeData.sVal);
             break;
+
         case NODE_PRE_INC:
+            printf("++%s", pNode->nodeData.sVal);
             break;
+
         default:
             LOG_ERROR("\nUNKNOWN NODE TYPE!\n");
             break;
