@@ -131,13 +131,25 @@ R_PROGRAM               :   R_PROGRAM R_EOF
                             }
                         |   R_PROGRAM R_GLOBAL_STATEMENT 
                             {
-                                $$.treeNode = $2.treeNode;
-                                pTreeRoot = $$.treeNode;
+                                TreeNode_st* pNode = $1.treeNode;
+
+                                if (pNode != NULL)
+                                { 
+                                    while (pNode->pSibling != NULL)
+                                    {
+                                        pNode = pNode->pSibling;    
+                                    }                                        
+                                    pNode->pSibling = $2.treeNode;
+                                    $$.treeNode = $1.treeNode; 
+                                }
+                                else
+                                {
+                                    $$.treeNode = $2.treeNode;
+                                }
                             }
                         |   R_GLOBAL_STATEMENT
                             {
                                 $$.treeNode = $1.treeNode;
-                                pTreeRoot = $$.treeNode;
                             }
                         ;
 
@@ -172,8 +184,21 @@ R_LOCAL_STATEMENT_LIST  :   %empty
                         |
                             R_LOCAL_STATEMENT_LIST R_LOCAL_STATEMENT
                             {
-                                $1.treeNode->pSibling = $2.treeNode;
-                                $$.treeNode = $1.treeNode;
+                                TreeNode_st* pNode = $1.treeNode;
+
+                                if (pNode != NULL)
+                                { 
+                                    while (pNode->pSibling != NULL)
+                                    {
+                                        pNode = pNode->pSibling;    
+                                    }                                        
+                                    pNode->pSibling = $2.treeNode;
+                                    $$.treeNode = $1.treeNode; 
+                                }
+                                else
+                                {
+                                    $$.treeNode = $2.treeNode;
+                                }
                             }
 
                         |   R_LOCAL_STATEMENT
@@ -362,6 +387,7 @@ R_DEFAULT       :   TOKEN_DEFAULT TOKEN_COLON R_LOCAL_STATEMENT_LIST
 R_IF_STATEMENT  :   TOKEN_IF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES R_LOCAL_STATEMENT_LIST       // if (var==1) { stmts }
                     {
                         NodeCreate(&($$.treeNode), NODE_IF);
+
                         NodeAddChild($$.treeNode, $3.treeNode);                      // Condition:
                         NodeAddChild($$.treeNode, $5.treeNode);                      // if true
                     }
@@ -369,6 +395,7 @@ R_IF_STATEMENT  :   TOKEN_IF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESE
                 |   TOKEN_IF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES R_LOCAL_STATEMENT_LIST TOKEN_ELSE  R_LOCAL_STATEMENT_LIST     // if (var==1) { stmts } else { stmts }
                     {
                         NodeCreate(&($$.treeNode), NODE_IF);
+
                         NodeAddChild($$.treeNode, $3.treeNode);                      // Condition:
                         NodeAddChild($$.treeNode, $5.treeNode);                      // if true
                         NodeAddChild($$.treeNode, $7.treeNode);                      // else 
@@ -398,9 +425,7 @@ R_WHILE_LOOP        :   TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PAR
                             NodeCreate(&($$.treeNode), NODE_WHILE);
                         
                             NodeAddChild($$.treeNode, $3.treeNode);      // Condition
-
                             NodeAddChild($$.treeNode, $5.treeNode);      // if true
-
                         }
                         
                     |   TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES TOKEN_SEMI
@@ -416,51 +441,66 @@ R_WHILE_LOOP        :   TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PAR
 
 R_DO_WHILE_LOOP     :   TOKEN_DO R_LOCAL_STATEMENT TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES
                         {
-
                             NodeCreate(&($$.treeNode), NODE_DO_WHILE);
                         
                             NodeAddChild($$.treeNode, $2.treeNode);      // Condition
-
                             NodeAddChild($$.treeNode, $5.treeNode);      // if true
-                            
                         }
                     ;
 
 
-R_FOR_LOOP          :   TOKEN_FOR TOKEN_LEFT_PARENTHESES R_FOR_INIT_FIELD TOKEN_SEMI R_FOR_CONDITION_FIELD TOKEN_SEMI R_FOR_ASSIGNMENT_FIELD TOKEN_RIGHT_PARENTHESES R_LOCAL_STATEMENT                     //for(int i=0;i<10;i++)
+R_FOR_LOOP          :   TOKEN_FOR TOKEN_LEFT_PARENTHESES R_FOR_INIT_FIELD TOKEN_SEMI R_EXP TOKEN_SEMI R_FOR_ASSIGNMENT_FIELD TOKEN_RIGHT_PARENTHESES R_LOCAL_STATEMENT                    
                         {
                             
+                            TreeNode_st* pNode = $9.treeNode;
+                            TreeNode_st* pNodeWhile;
+
+                            if (pNode != NULL)
+                            { 
+                                while (pNode->pSibling != NULL)
+                                {
+                                    pNode = pNode->pSibling;    
+                                }                                        
+                                pNode->pSibling = $7.treeNode;
+                            }
+                            else
+                            {
+                                $$.treeNode = $7.treeNode;
+                            }
+
+                            NodeCreate(&pNodeWhile, NODE_WHILE);
+                        
+                            NodeAddChild(pNodeWhile, $5.treeNode);      // Condition
+                            NodeAddChild(pNodeWhile, $9.treeNode);      // if true
+                            
+                            $3.treeNode->pSibling = pNodeWhile;
+                            $$.treeNode = $3.treeNode;
                         };
 
 
-R_FOR_INIT_FIELD    :   R_VAR_PREAMBLE TOKEN_ID R_ASSIGN_OPERATOR R_EXP  //static int i = 1+1;
+R_FOR_INIT_FIELD    :   TOKEN_ID R_ASSIGN_OPERATOR R_EXP // i = 0;
                         {
+                            NodeCreate(&($$.treeNode), NODE_ASSIGN);
+                            $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
 
-                        }
-
-                    |   TOKEN_ID R_ASSIGN_OPERATOR R_EXP // i = 0;
-                        {
-                            
+                            NodeAddChild($$.treeNode, $3.treeNode);
                         }
                     ;
 
                     
 
-R_FOR_CONDITION_FIELD   :   R_EXP
-                            {
-                                $$ = $1;
-                            }
-                        ;
-
 
 R_FOR_ASSIGNMENT_FIELD  :   TOKEN_ID R_ASSIGN_OPERATOR R_EXP 
                             {
+                                NodeCreate(&($$.treeNode), NODE_ASSIGN);
+                                $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
 
+                                NodeAddChild($$.treeNode, $3.treeNode);
                             }
 
                         |   R_INC_DEC
                             {
-
+                                $$.treeNode = $1.treeNode;
                             }
                         ; 
 
@@ -476,46 +516,47 @@ R_FOR_ASSIGNMENT_FIELD  :   TOKEN_ID R_ASSIGN_OPERATOR R_EXP
 // Main expression rule
 R_EXP       :   TOKEN_MINUS R_EXP
                 {           
-                    NodeCreate(&($$.treeNode), NODE_EXPRESSION);
+                    TreeNode_st *pNode;
+                    NodeCreate(&($$.treeNode), NODE_OPERATOR);
                     $$.treeNode->nodeData.dVal = OP_MINUS;
 
+                    NodeAddNewChild($$.treeNode, &pNode, NODE_INTEGER);
+                    pNode->nodeData.dVal = 0;
+
+                    NodeAddChild($$.treeNode, pNode);  
                     NodeAddChild($$.treeNode, $2.treeNode);  
                 }
 
             |   R_EXP R_ARITHMETIC_OPERATOR R_TERM
                 {
-                    NodeCreate(&($$.treeNode), NODE_EXPRESSION);
+                    NodeAddChild($2.treeNode, $1.treeNode); 
+                    NodeAddChild($2.treeNode, $3.treeNode); 
 
-                    NodeAddChild($$.treeNode, $2.treeNode); 
-
-                    NodeAddChild($$.treeNode, $3.treeNode); 
+                    $$.treeNode = $2.treeNode;
                 }
 
             |   R_EXP R_CONDITION_OPERATOR R_TERM
                 {
-                    NodeCreate(&($$.treeNode), NODE_EXPRESSION);
+                    NodeAddChild($2.treeNode, $1.treeNode); 
+                    NodeAddChild($2.treeNode, $3.treeNode); 
 
-                    NodeAddChild($$.treeNode, $2.treeNode); 
-
-                    NodeAddChild($$.treeNode, $3.treeNode);    
+                    $$.treeNode = $2.treeNode;
                 }
 
             |   R_EXP R_BITWISE_OPERATOR R_TERM
                 {
-                    NodeCreate(&($$.treeNode), NODE_EXPRESSION);
+                    NodeAddChild($2.treeNode, $1.treeNode); 
+                    NodeAddChild($2.treeNode, $3.treeNode); 
 
-                    NodeAddChild($$.treeNode, $2.treeNode); 
-
-                    NodeAddChild($$.treeNode, $3.treeNode); 
+                    $$.treeNode = $2.treeNode; 
                 }
 
             |   R_EXP R_LOGIC_OPERATOR R_TERM
                 {
-                    NodeCreate(&($$.treeNode), NODE_EXPRESSION);
+                    NodeAddChild($2.treeNode, $1.treeNode); 
+                    NodeAddChild($2.treeNode, $3.treeNode); 
 
-                    NodeAddChild($$.treeNode, $2.treeNode); 
-
-                    NodeAddChild($$.treeNode, $3.treeNode); 
+                    $$.treeNode = $2.treeNode;
                 }
 
             |   R_EXP TOKEN_TERNARY R_EXP TOKEN_COLON R_EXP
@@ -523,9 +564,7 @@ R_EXP       :   TOKEN_MINUS R_EXP
                     NodeCreate(&($$.treeNode), NODE_TERNARY);
 
                     NodeAddChild($$.treeNode, $1.treeNode); 
-
                     NodeAddChild($$.treeNode, $2.treeNode); 
-
                     NodeAddChild($$.treeNode, $3.treeNode);   
                 }
 
@@ -553,14 +592,10 @@ R_EXP_LIST  :   %empty                                      //
 // Prioritize operators, and minimize rule duplication
 R_TERM      :   R_TERM R_PRIORITY_OPERATOR R_OPERAND 
                 {
-                    TreeNode_st* pNode;
-
-                    NodeAddNewChild($$.treeNode, &pNode, NODE_OPERATOR);
-                    pNode->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-                    NodeAddChild($$.treeNode, $3.treeNode);
-                    NodeAddChild($$.treeNode, $1.treeNode);
-
+                    NodeAddChild($2.treeNode, $1.treeNode); 
+                    NodeAddChild($2.treeNode, $3.treeNode); 
+                    
+                    $$.treeNode = $2.treeNode;
                 }
                 
             |   R_OPERAND
@@ -577,14 +612,16 @@ R_OPERAND   :   R_INC_DEC
 
             |   TOKEN_LOGICAL_NOT R_FACTOR
                 {
-                    
-                    
+                    NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                    $$.treeNode->nodeData.dVal = OP_LOGICAL_NOT;
+
+                    NodeAddChild($$.treeNode, $2.treeNode);
                 }
 
-            |   R_TYPE_CAST R_FACTOR
+            /*|   R_TYPE_CAST R_FACTOR
                 {
-
-                }
+                    
+                }*/
 
             |   R_FACTOR
                 {
@@ -600,12 +637,9 @@ R_FACTOR    :   TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES            
 
             |   TOKEN_ID TOKEN_LEFT_BRACKET R_EXP TOKEN_RIGHT_BRACKET           // a[x]
                 {
-                    TreeNode_st* pNode;
 
-                    NodeCreate(&($$.treeNode), NODE_ARRAY_INDEX);
-
-                    NodeAddNewChild($$.treeNode, &pNode, NODE_IDENTIFIER);
-                    pNode->nodeData.sVal = $1.nodeData.sVal;
+                    NodeCreate(&($$.treeNode), NODE_ARRAY_VALUE);
+                    $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
 
                     NodeAddChild($$.treeNode, $3.treeNode);  
                 }
@@ -634,11 +668,11 @@ R_FACTOR    :   TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES            
 
             |   TOKEN_STR                                                       // "abc"
                 {
-                    NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                    NodeCreate(&($$.treeNode), NODE_STRING);
                     $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
                 }
 
-            |   TOKEN_BITWISE_AND TOKEN_ID                                      // &a
+            /*|   TOKEN_BITWISE_AND TOKEN_ID                                      // &a
                 {
                     NodeCreate(&($$.treeNode), NODE_OPERATOR);
                     $$.treeNode->nodeData.dVal = OP_BITWISE_AND;
@@ -649,7 +683,7 @@ R_FACTOR    :   TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES            
             |   R_SIZEOF                                                        // sizeof(type)
                 {
                     
-                }
+                }*/
             ;
 
 // Increment/Decrement group
@@ -735,9 +769,8 @@ R_SIZEOF_BODY           :   R_TYPE_ALL
 //--------------------------------------------------------------------------------------------------------------------//
 // Misc
 //--------------------------------------------------------------------------------------------------------------------//
-
 // Label definition for the goto statement.             // Example: 
-R_LABEL                 :   TOKEN_ID TOKEN_COLON        // primaDoFredo:
+R_LABEL                 :   TOKEN_ID TOKEN_COLON        // TESTE:
                             {
                                 
                             }
@@ -855,8 +888,6 @@ R_ARG                   :   R_MOD_QUALIFIER R_TYPE_ALL TOKEN_ID
 
                         |   R_TYPE_ALL TOKEN_ID 
                             {
-                                LOG_ERROR("TOKEnnnnn\n\n");
-
                                 TreeNode_st* pNode;
                                 
                                 NodeCreate(&($$.treeNode), NODE_PARAM);
@@ -875,7 +906,7 @@ R_ARG                   :   R_MOD_QUALIFIER R_TYPE_ALL TOKEN_ID
 // Array declaration                                                                                // Examples:
 R_ARR_DECLARATION           :   R_VAR_PREAMBLE TOKEN_ID R_ARR_SIZE TOKEN_SEMI                                // int var [2];
                                 {
-                                    $$.treeNode->nodeType = NODE_ARRAY;
+                                    $$.treeNode->nodeType = NODE_ARRAY_DECLARATION;
                                 }      
 
                             |   R_VAR_PREAMBLE TOKEN_ID R_ARR_SIZE R_ASSIGN_OPERATOR R_ARR_ARGS TOKEN_SEMI   // var [] = {1, 2, 3};
@@ -930,7 +961,6 @@ R_ARR_ASSIGNMENT            :   TOKEN_ID R_ARR_SIZE R_ASSIGN_OPERATOR R_ARR_ARGS
 // Variable declaration (simple or followed by its assignment).                         // Examples:
 R_VAR_DECLARATION       :   R_VAR_PREAMBLE R_ID_LIST TOKEN_SEMI                                   // int var1, var2;
                             {   
-                                LOG_ERROR("DECLARATION\n\n");
                                 TreeNode_st* pNode =  $2.treeNode;
 
                                 while($2.treeNode->pSibling != NULL){
@@ -973,8 +1003,6 @@ R_VAR_DECLARATION       :   R_VAR_PREAMBLE R_ID_LIST TOKEN_SEMI                 
 
 R_ID_LIST      :   R_ID_LIST TOKEN_COMMA TOKEN_ID
                     {
-                        LOG_ERROR("IDDD1\n\n");
-
                         NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
                         $$.nodeData.sVal = $3.nodeData.sVal;
 
@@ -982,8 +1010,6 @@ R_ID_LIST      :   R_ID_LIST TOKEN_COMMA TOKEN_ID
                     }
                 |   TOKEN_ID
                     {
-                        LOG_ERROR("IDDD2\n\n");
-
                         NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
                         $$.nodeData.sVal = $1.nodeData.sVal;
                     } 
@@ -1104,8 +1130,8 @@ R_VAR_PREAMBLE          :   TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_MOD_QUALIFIE
                                                     
                         |   R_MOD_QUALIFIER R_TYPE_ALL                                                             // const int var  
                             {
-                                //$1.treeNode->pSibling = $2.treeNode;
-                                //$$.treeNode = $1.treeNode;
+                                $1.treeNode->pSibling = $2.treeNode;
+                                $$.treeNode = $1.treeNode;
                             }                                                
                                       
                         |   R_SIGN_QUALIFIER R_TYPE_ALL                                                            // signed int var  
@@ -1116,7 +1142,6 @@ R_VAR_PREAMBLE          :   TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_MOD_QUALIFIE
                                                  
                         |   R_TYPE_ALL                                                                           // int var 
                             {
-                                LOG_ERROR("xxx\n\n");
                                 $$.treeNode = $1.treeNode; 
                             }
                         ;                                                                                                
@@ -1325,7 +1350,6 @@ R_ASSIGN_OPERATOR       :   TOKEN_ASSIGN                            // =
 // Union between the pointer and standard types.
 R_TYPE_ALL                  :   R_TYPE 
                                 {
-                                    LOG_ERROR("11x\n\n");
                                     $$.treeNode = $1.treeNode;  
                                 }
                                 
@@ -1422,13 +1446,13 @@ R_VISIBILITY_QUALIFIER      :   TOKEN_STATIC
 R_MOD_QUALIFIER             :   TOKEN_CONSTANT
                                 {
                                     NodeCreate(&($$.treeNode), NODE_MODIFIER);
-                                    $$.nodeData.dVal = (long int) MOD_CONST;
+                                    $$.treeNode->nodeData.dVal = (long int) MOD_CONST;
                                 } 
 
                             |   TOKEN_VOLATILE
                                 {
                                     NodeCreate(&($$.treeNode), NODE_MODIFIER);
-                                    $$.nodeData.dVal = (long int) MOD_VOLATILE; 
+                                    $$.treeNode->nodeData.dVal = (long int) MOD_VOLATILE; 
                                 }
                             ;
 
@@ -1436,7 +1460,7 @@ R_MOD_QUALIFIER             :   TOKEN_CONSTANT
 R_SIGN_QUALIFIER            :   TOKEN_SIGNED 
                                 {
                                     NodeCreate(&($$.treeNode), NODE_SIGN);
-                                    $$.nodeData.dVal = (long int) SIGN_SIGNED; 
+                                    $$.treeNode->nodeData.dVal = (long int) SIGN_SIGNED; 
                                 }
 
                             |   TOKEN_UNSIGNED

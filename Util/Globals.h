@@ -88,7 +88,7 @@ typedef enum
 
 typedef enum
 {
-    NODE_PARAM,              // 0
+    NODE_PARAM = 0,          // 0
 
     NODE_VAR_DECLARATION,    // 1
     NODE_VAR_NAME,           // 2
@@ -97,15 +97,15 @@ typedef enum
     NODE_MODIFIER,           // 5
     NODE_SIGN,               // 6
     NODE_TYPE,               // 7
-    NODE_OPERATOR,            // 8
+    NODE_OPERATOR,           // 8
     NODE_TERNARY,            // 9
     NODE_ARRAY_INDEX,        // 10
     NODE_TYPE_CAST,          // 11
     NODE_IDENTIFIER,         // 12
+    NODE_STRING,
 
-    NODE_ASSIGN,     // 13
-    NODE_FUNCTION,     // 14
-    NODE_EXPRESSION,         // 15
+    NODE_ASSIGN,             // 13
+    NODE_FUNCTION,           // 14
     NODE_INTEGER,            // 16
     NODE_FLOAT,              // 17
     NODE_IF,                 // 18
@@ -124,8 +124,9 @@ typedef enum
     NODE_POST_DEC,           // 30
     NODE_PRE_DEC,            // 31
     NODE_POST_INC,           // 32
-    NODE_PRE_INC,             // 33
-    NODE_ARRAY
+    NODE_PRE_INC,            // 33
+    NODE_ARRAY_DECLARATION,
+    NODE_ARRAY_VALUE
 }NodeType_et;
 
 typedef union
