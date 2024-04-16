@@ -6,7 +6,7 @@ lexer:
 	flex -l --outfile="Output/lex.yy.c" Lexer/LexScanner.l
 
 parser:
-	bison -dv -k --graph Parser/Parser.y;
+	bison -dv -k --graph Parser/Parser.y
 	mv Parser.* Output/
 
 src:

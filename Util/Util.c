@@ -118,7 +118,7 @@ int StringCreateAndCopy(char** ppDest, char* pSrc, size_t strLen)
 }
 
 
-void PrintNode(TreeNode_st* pNode, int depth)
+/*void PrintNode(TreeNode_st* pNode, int depth)
 {
     if (pNode == NULL)
     {
@@ -198,7 +198,7 @@ void PrintNode(TreeNode_st* pNode, int depth)
             }            
             break;
 
-        case NODE_FUNC_PROTOTYPE:
+        case NODE_FUNCTION:
             break;
 
         case NODE_EXPRESSION:
@@ -281,4 +281,4 @@ void PrintNode(TreeNode_st* pNode, int depth)
             break;
     }
     return;
-}
+}*/

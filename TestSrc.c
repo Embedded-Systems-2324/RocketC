@@ -5,5 +5,6 @@ const unsigned int myVar;
 
 int foobar(int var);*/
 
+const int x, y;
 
-static double qwerty = 4;
+static int z;

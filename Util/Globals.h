@@ -97,14 +97,14 @@ typedef enum
     NODE_MODIFIER,           // 5
     NODE_SIGN,               // 6
     NODE_TYPE,               // 7
-    NODE_OP_TYPE,            // 8
+    NODE_OPERATOR,            // 8
     NODE_TERNARY,            // 9
     NODE_ARRAY_INDEX,        // 10
     NODE_TYPE_CAST,          // 11
-    NODE_ID,                 // 12
+    NODE_IDENTIFIER,         // 12
 
-    NODE_VAR_ASSIGNMENT,     // 13
-    NODE_FUNC_PROTOTYPE,     // 14
+    NODE_ASSIGN,     // 13
+    NODE_FUNCTION,     // 14
     NODE_EXPRESSION,         // 15
     NODE_INTEGER,            // 16
     NODE_FLOAT,              // 17
@@ -119,12 +119,13 @@ typedef enum
     NODE_SWITCH,             // 26
     NODE_CASE,               // 27
     NODE_DEFAULT,            // 28
-    NODE_POINTER,            // 29
+    NODE_POINTER,            // 29   visto
 
     NODE_POST_DEC,           // 30
     NODE_PRE_DEC,            // 31
     NODE_POST_INC,           // 32
-    NODE_PRE_INC             // 33
+    NODE_PRE_INC,             // 33
+    NODE_ARRAY
 }NodeType_et;
 
 typedef union

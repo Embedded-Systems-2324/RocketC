@@ -163,6 +163,7 @@ R_GLOBAL_STATEMENT      :   R_VAR_DECLARATION
                             }
                         ;
 
+
 // Local statement list
 R_LOCAL_STATEMENT_LIST  :   %empty
                             {
@@ -432,7 +433,7 @@ R_FOR_LOOP          :   TOKEN_FOR TOKEN_LEFT_PARENTHESES R_FOR_INIT_FIELD TOKEN_
                         };
 
 
-R_FOR_INIT_FIELD    :   R_VAR_PREAMBLE R_ASSIGN_OPERATOR R_EXP  //static int i = 1+1;
+R_FOR_INIT_FIELD    :   R_VAR_PREAMBLE TOKEN_ID R_ASSIGN_OPERATOR R_EXP  //static int i = 1+1;
                         {
 
                         }
@@ -554,7 +555,7 @@ R_TERM      :   R_TERM R_PRIORITY_OPERATOR R_OPERAND
                 {
                     TreeNode_st* pNode;
 
-                    NodeAddNewChild($$.treeNode, &pNode, NODE_OP_TYPE);
+                    NodeAddNewChild($$.treeNode, &pNode, NODE_OPERATOR);
                     pNode->nodeData.dVal = (long int) $2.nodeData.dVal;
 
                     NodeAddChild($$.treeNode, $3.treeNode);
@@ -603,7 +604,7 @@ R_FACTOR    :   TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES            
 
                     NodeCreate(&($$.treeNode), NODE_ARRAY_INDEX);
 
-                    NodeAddNewChild($$.treeNode, &pNode, NODE_ID);
+                    NodeAddNewChild($$.treeNode, &pNode, NODE_IDENTIFIER);
                     pNode->nodeData.sVal = $1.nodeData.sVal;
 
                     NodeAddChild($$.treeNode, $3.treeNode);  
@@ -617,10 +618,14 @@ R_FACTOR    :   TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES            
 
             |   TOKEN_ID                                                        // a
                 {
-                    NodeCreate(&($$.treeNode), NODE_ID);
+                    NodeCreate(&($$.treeNode), NODE_IDENTIFIER);
                     $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
                 }
-                
+            /*|   R_TYPE_PTR TOKEN_ID                                             // int* a
+                {
+                    NodeCreate(&($$.treeNode), NODE_IDENTIFIER);
+                    $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
+                }*/
             |   TOKEN_FNUM                                                      // 1.5
                 {
                     NodeCreate(&($$.treeNode), NODE_FLOAT);
@@ -629,13 +634,13 @@ R_FACTOR    :   TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES            
 
             |   TOKEN_STR                                                       // "abc"
                 {
-                    NodeCreate(&($$.treeNode), NODE_OP_TYPE);
+                    NodeCreate(&($$.treeNode), NODE_OPERATOR);
                     $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
                 }
 
             |   TOKEN_BITWISE_AND TOKEN_ID                                      // &a
                 {
-                    NodeCreate(&($$.treeNode), NODE_OP_TYPE);
+                    NodeCreate(&($$.treeNode), NODE_OPERATOR);
                     $$.treeNode->nodeData.dVal = OP_BITWISE_AND;
 
                     NodeAddChild($$.treeNode, $2.treeNode);
@@ -701,201 +706,7 @@ R_POST_DECREMENT    :   TOKEN_ID TOKEN_DECREMENT                        // a--
                         }
                     ;
 
-//--------------------------------------------------------------------------------------------------------------------//
-// Operators
-//--------------------------------------------------------------------------------------------------------------------//
 
-// Arithmetic operators                                             // Operators:
-R_ARITHMETIC_OPERATOR   :   TOKEN_PLUS                              // +    
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_PLUS;
-                            } 
-
-                        |   TOKEN_MINUS                             // -
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_MINUS;
-                            }
-
-                        |   TOKEN_RIGHT_SHIFT                       // >>
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_RIGHT_SHIFT;
-                            }
-
-                        |   TOKEN_LEFT_SHIFT                        // <<
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_LEFT_SHIFT;
-                            }
-                        ;
-
-// Priority operators                                               // Operators:
-R_PRIORITY_OPERATOR     :   TOKEN_ASTERISK                          // *
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_MULTIPLY;
-                            }
-
-                        |   TOKEN_OVER                              // /
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_DIVIDE;
-                            }
-
-                        |   TOKEN_PERCENT                           // %
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_REMAIN;
-                            }
-                        ;
-
-// Condition operators                                              // Operators:
-R_CONDITION_OPERATOR    :   TOKEN_GREATER_THAN                      // >
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_GREATER_THAN;
-                            }
-
-                        |   TOKEN_LESS_THAN_OR_EQUAL                // <=
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_LESS_THAN_OR_EQUAL;
-                            }
-
-                        |   TOKEN_GREATER_THAN_OR_EQUAL             // >=
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_GREATER_THAN_OR_EQUAL;
-                            }
-
-                        |   TOKEN_LESS_THAN                         // <
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_LESS_THAN;
-                            }
-
-                        |   TOKEN_EQUAL                             // ==
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_EQUAL;
-                            }
-
-                        |   TOKEN_NOT_EQUAL                         // !=
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_NOT_EQUAL;
-                            }
-                        ;
-
-// Logic operators                                                  // Operators:
-R_LOGIC_OPERATOR        :   TOKEN_LOGICAL_AND                       // &&
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_LOGICAL_AND;
-                            }
-
-                        |   TOKEN_LOGICAL_OR                        // ||
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_LOGICAL_OR;
-                            }
-                        ;
-
-// Bitwise operators                                                // Operators:
-R_BITWISE_OPERATOR      :   TOKEN_BITWISE_AND                       // &
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_BITWISE_AND;
-                            }
-
-                        |   TOKEN_BITWISE_NOT                       // ~
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_BITWISE_NOT;
-                            }
-
-                        |   TOKEN_BITWISE_OR                        // |
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_BITWISE_OR;
-                            }
-
-                        |   TOKEN_BITWISE_XOR                       // ^
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_BITWISE_XOR;
-                            }
-                        ;
-
-// Assign operators                                                 // Operators:
-R_ASSIGN_OPERATOR       :   TOKEN_ASSIGN                            // =
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_ASSIGN;
-                            }
-
-                        |   TOKEN_PLUS_ASSIGN                       // +=
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_PLUS_ASSIGN;
-                            }
-
-                        |   TOKEN_MINUS_ASSIGN                      // -=
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_MINUS_ASSIGN;
-                            }
-                            
-                        |   TOKEN_MODULUS_ASSIGN                    // %=
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_MODULUS_ASSIGN;
-                            }
-                            
-                        |   TOKEN_LEFT_SHIFT_ASSIGN                 //<<=
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_LEFT_SHIFT_ASSIGN;
-                            }
-
-                        |   TOKEN_RIGHT_SHIFT_ASSIGN                // >>=
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_RIGHT_SHIFT_ASSIGN;
-                            }
-                            
-                        |   TOKEN_BITWISE_AND_ASSIGN                // &=
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_BITWISE_AND_ASSIGN;
-                            }
-
-                        |   TOKEN_BITWISE_OR_ASSIGN                 // |=
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_BITWISE_OR_ASSIGN;
-                            }
-
-                        |   TOKEN_BITWISE_XOR_ASSIGN                // ^=
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_BITWISE_XOR_ASSIGN;
-                            }
-
-                        |   TOKEN_MULTIPLY_ASSIGN                   // *=
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_MULTIPLY_ASSIGN;
-                            }
-
-                        |   TOKEN_DIVIDE_ASSIGN                     // /=
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OP_TYPE);
-                                $$.treeNode->nodeData.dVal = OP_DIVIDE_ASSIGN;
-                            }
-                        ;
 
 // Sizeof rule
 R_SIZEOF                :   TOKEN_SIZEOF TOKEN_LEFT_PARENTHESES R_SIZEOF_BODY TOKEN_RIGHT_PARENTHESES       // sizeof(exp);
@@ -947,103 +758,71 @@ R_TYPE_CAST             :   TOKEN_LEFT_PARENTHESES R_TYPE_ALL TOKEN_RIGHT_PARENT
 // Function signature i.e. the function format. Doesn't include the ; or the {. Example: int addNumbers(int x, int y)
 R_FUNC_SIGNATURE        :   R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
                             {
-                                TreeNode_st* pNode;
-
-                                NodeCreate(&($$.treeNode), NODE_FUNC_PROTOTYPE);
+                                NodeCreate(&($$.treeNode), NODE_FUNCTION);
                                 $$.treeNode->nodeData.sVal = $4.nodeData.sVal;
 
                                 NodeAddChild($$.treeNode, $6.treeNode);
-                                
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_VISIBILITY);
-                                pNode->nodeData.dVal = $1.nodeData.dVal;
+                                NodeAddChild($$.treeNode, $1.treeNode); 
 
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_SIGN);
-                                pNode->nodeData.dVal = $2.nodeData.dVal;
-                               
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_TYPE);
-                                pNode->nodeData.dVal = $3.nodeData.dVal;
-
+                                $1.treeNode->pSibling = $2.treeNode;
+                                $2.treeNode->pSibling = $3.treeNode;
                             }
 
                         |   R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
                             {
-                                TreeNode_st* pNode;
-                                
-                                NodeCreate(&($$.treeNode), NODE_FUNC_PROTOTYPE);
+                                NodeCreate(&($$.treeNode), NODE_FUNCTION);
                                 $$.treeNode->nodeData.sVal = $3.nodeData.sVal;
 
                                 NodeAddChild($$.treeNode, $5.treeNode);
+                                NodeAddChild($$.treeNode, $1.treeNode); 
 
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_SIGN);
-                                pNode->nodeData.dVal = $1.nodeData.dVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_TYPE);
-                                pNode->nodeData.dVal = $2.nodeData.dVal;
-                             
+                                $1.treeNode->pSibling = $2.treeNode;
                             }
 
-                        |   R_VISIBILITY_QUALIFIER R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
-                            {
-                                TreeNode_st* pNode;
-                                
-                                NodeCreate(&($$.treeNode), NODE_FUNC_PROTOTYPE);
+                        /*|   R_VISIBILITY_QUALIFIER R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
+                            {                               
+                                NodeCreate(&($$.treeNode), NODE_FUNCTION);
                                 $$.treeNode->nodeData.sVal = $3.nodeData.sVal;
-                                
+
                                 NodeAddChild($$.treeNode, $5.treeNode);
+                                NodeAddChild($$.treeNode, $1.treeNode); 
 
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_VISIBILITY);
-                                pNode->nodeData.dVal = $1.nodeData.dVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_TYPE);
-                                pNode->nodeData.dVal = $2.nodeData.dVal;
-                          
+                                $1.treeNode->pSibling = $2.treeNode;
                             }
 
                         |   R_TYPE_ALL TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG_LIST TOKEN_RIGHT_PARENTHESES
                             {
-
-                                TreeNode_st* pNode;
-                                
-                                NodeCreate(&($$.treeNode), NODE_FUNC_PROTOTYPE);
+                                NodeCreate(&($$.treeNode), NODE_FUNCTION);
                                 $$.treeNode->nodeData.sVal = $2.nodeData.sVal;
                                 
                                 NodeAddChild($$.treeNode, $4.treeNode);
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_VISIBILITY);
-                                pNode->nodeData.dVal = $1.nodeData.dVal;
-
-                            }
+                                NodeAddChild($$.treeNode, $1.treeNode); 
+                           }*/
                         ;
+
 
 // Function prototype is just a function signature followed by a semi
 R_FUNC_PROTOTYPE        :   R_FUNC_SIGNATURE TOKEN_SEMI 
                             {
-                                
+                                $$.treeNode = $1.treeNode;
                             }
                         ;
 
 // Function implementation containing the function signature and a compound statement where it is implemented
 R_FUNC_IMPL             :   R_FUNC_SIGNATURE R_COMPOUND_STATEMENT
                             {
-
+                                $$.treeNode = $1.treeNode;
+                                NodeAddChild($$.treeNode, $2.treeNode);
                             }
                         ;
 
-// TODO: CHECK R_ARG_LIST AND R_ARG_LIST_INTERNAL
 // Function argument list. Note: The argument list can be empty. Example: int x | int x, int y
 R_ARG_LIST              :   %empty 
-//                            {
-//                                $$.treeNode = NULL;
-//                            }
-
-                        |   R_ARG_LIST_INTERNAL
                             {
-                                $$.treeNode = $1.treeNode;
+                                // leave this empty (probably)
                             }
-                        ;
 
-
-R_ARG_LIST_INTERNAL     :   R_ARG 
+                        |   R_ARG 
                             {
                                 $$.treeNode = $1.treeNode;
                             }
@@ -1076,6 +855,8 @@ R_ARG                   :   R_MOD_QUALIFIER R_TYPE_ALL TOKEN_ID
 
                         |   R_TYPE_ALL TOKEN_ID 
                             {
+                                LOG_ERROR("TOKEnnnnn\n\n");
+
                                 TreeNode_st* pNode;
                                 
                                 NodeCreate(&($$.treeNode), NODE_PARAM);
@@ -1088,314 +869,25 @@ R_ARG                   :   R_MOD_QUALIFIER R_TYPE_ALL TOKEN_ID
                         ;
 
 //--------------------------------------------------------------------------------------------------------------------//
-// Variable Related Rules
+// ARRAYS
 //--------------------------------------------------------------------------------------------------------------------//
 
-// Variable declarations can have a visibility qualifier (extern/static), a type qualifier (volatile/const), a sign qualifier.
-// (signed/unsigned) and must explicitly specify a type (short, int, float...).                                             // Examples:
-R_VAR_PREAMBLE          :   TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID      // register static const unsigned int var
-                            {   
-                                TreeNode_st* pNode;
-                                
-                                NodeCreate(&($$.treeNode), NODE_VAR_NAME);
-                                $$.treeNode->nodeData.sVal = $6.nodeData.sVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_MISC);
-                                pNode->nodeData.dVal = (long int) FLAG_REGISTER;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_VISIBILITY);
-                                pNode->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_MODIFIER);
-                                pNode->nodeData.dVal = (long int) $3.nodeData.dVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_SIGN);
-                                pNode->nodeData.dVal = (long int) $4.nodeData.dVal;
-
-                                NodeAddChild($$.treeNode, $5.treeNode); 
-                            }
-
-                        |   TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_MOD_QUALIFIER R_TYPE_ALL TOKEN_ID                       // register static const int var
-                            {
-                                TreeNode_st* pNode;
-                                
-                                NodeCreate(&($$.treeNode), NODE_VAR_NAME);
-                                $$.treeNode->nodeData.sVal = $5.nodeData.sVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_MISC);
-                                pNode->nodeData.dVal = (long int) FLAG_REGISTER;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_VISIBILITY);
-                                pNode->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_MODIFIER);
-                                pNode->nodeData.dVal = (long int) $3.nodeData.dVal;
-
-                                NodeAddChild($$.treeNode, $4.treeNode); 
-                            }        
-                                   
-                        |   TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                      // register static signed int var 
-                            {
-                                TreeNode_st* pNode;
-                                
-                                NodeCreate(&($$.treeNode), NODE_VAR_NAME);
-                                $$.treeNode->nodeData.sVal = $5.nodeData.sVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_MISC);
-                                pNode->nodeData.dVal = (long int) FLAG_REGISTER;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_VISIBILITY);
-                                pNode->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_SIGN);
-                                pNode->nodeData.dVal = (long int) $3.nodeData.dVal;
-
-                                NodeAddChild($$.treeNode, $4.treeNode); 
-                            }    
-                                         
-                        |   TOKEN_REGISTER R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                             // register const signed int var     
-                            {
-                                TreeNode_st* pNode;
-                                
-                                NodeCreate(&($$.treeNode), NODE_VAR_NAME);
-                                $$.treeNode->nodeData.sVal = $5.nodeData.sVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_MISC);
-                                pNode->nodeData.dVal = (long int) FLAG_REGISTER;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_MODIFIER);
-                                pNode->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_SIGN);
-                                pNode->nodeData.dVal = (long int) $3.nodeData.dVal;
-
-                                NodeAddChild($$.treeNode, $4.treeNode); 
-                            }   
-                                             
-                        |   TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_TYPE_ALL TOKEN_ID                                       // register static int var 
-                            {
-                                TreeNode_st* pNode;
-                                
-                                NodeCreate(&($$.treeNode), NODE_VAR_NAME);
-                                $$.treeNode->nodeData.sVal = $4.nodeData.sVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_MISC);
-                                pNode->nodeData.dVal = (long int) FLAG_REGISTER;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_VISIBILITY);
-                                pNode->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-                                NodeAddChild($$.treeNode, $4.treeNode); 
-                            }   
-                                                     
-                        |   TOKEN_REGISTER R_MOD_QUALIFIER R_TYPE_ALL TOKEN_ID                                              // register const int var    
-                            {
-                                TreeNode_st* pNode;
-                                
-                                NodeCreate(&($$.treeNode), NODE_VAR_NAME);
-                                $$.treeNode->nodeData.sVal = $4.nodeData.sVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_MISC);
-                                pNode->nodeData.dVal = (long int) FLAG_REGISTER;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_MODIFIER);
-                                pNode->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-                                NodeAddChild($$.treeNode, $3.treeNode); 
-                            }                      
-                                         
-                        |   TOKEN_REGISTER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                                             // register signed int var         
-                            {
-                                TreeNode_st* pNode;
-                                
-                                NodeCreate(&($$.treeNode), NODE_VAR_NAME);
-                                $$.treeNode->nodeData.sVal = $4.nodeData.sVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_MISC);
-                                pNode->nodeData.dVal = (long int) FLAG_REGISTER;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_SIGN);
-                                pNode->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-                                NodeAddChild($$.treeNode, $3.treeNode); 
-                            }       
-                                                       
-                        |   TOKEN_REGISTER R_TYPE_ALL TOKEN_ID                                                              // register int var
-                            {
-                                TreeNode_st* pNode;
-                                
-                                NodeCreate(&($$.treeNode), NODE_VAR_NAME);
-                                $$.treeNode->nodeData.sVal = $3.nodeData.sVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_MISC);
-                                pNode->nodeData.dVal = (long int) FLAG_REGISTER;
-
-                                NodeAddChild($$.treeNode, $2.treeNode); 
-                            }                               
-                                             
-                        |   R_VISIBILITY_QUALIFIER R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                     // static const unsigned int var 
-                            {
-                                TreeNode_st* pNode;
-                                
-                                NodeCreate(&($$.treeNode), NODE_VAR_NAME);
-                                $$.treeNode->nodeData.sVal = $5.nodeData.sVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_VISIBILITY);
-                                pNode->nodeData.dVal = (long int) $1.nodeData.dVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_MODIFIER);
-                                pNode->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_SIGN);
-                                pNode->nodeData.dVal = (long int) $3.nodeData.dVal;
-
-                                NodeAddChild($$.treeNode, $4.treeNode); 
-                            }
-                                                
-                        |   R_VISIBILITY_QUALIFIER R_MOD_QUALIFIER R_TYPE_ALL TOKEN_ID                                      // static const int var
-                            {
-                                TreeNode_st* pNode;
-                                
-                                NodeCreate(&($$.treeNode), NODE_VAR_NAME);
-                                $$.treeNode->nodeData.sVal = $4.nodeData.sVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_VISIBILITY);
-                                pNode->nodeData.dVal = (long int) $1.nodeData.dVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_MODIFIER);
-                                pNode->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-                                NodeAddChild($$.treeNode, $3.treeNode); 
-                            }                 
-                                            
-                        |   R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                                     // static signed int var 
-                            {
-                                TreeNode_st* pNode;
-                                
-                                NodeCreate(&($$.treeNode), NODE_VAR_NAME);
-                                $$.treeNode->nodeData.sVal = $4.nodeData.sVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_VISIBILITY);
-                                pNode->nodeData.dVal = (long int) $1.nodeData.dVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_SIGN);
-                                pNode->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-                                NodeAddChild($$.treeNode, $3.treeNode); 
-                            }               
-                                            
-                        |   R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                                            // const signed int var 
-                            {
-                                TreeNode_st* pNode;
-                                
-                                NodeCreate(&($$.treeNode), NODE_VAR_NAME);
-                                $$.treeNode->nodeData.sVal = $4.nodeData.sVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_MODIFIER);
-                                pNode->nodeData.dVal = (long int) $1.nodeData.dVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_SIGN);
-                                pNode->nodeData.dVal = (long int) $2.nodeData.dVal;
-
-                                NodeAddChild($$.treeNode, $3.treeNode); 
-                            }          
-                                                       
-                        |   R_VISIBILITY_QUALIFIER R_TYPE_ALL TOKEN_ID                                                      // static int var 
-                            {
-                                TreeNode_st* pNode;
-                                
-                                NodeCreate(&($$.treeNode), NODE_VAR_NAME);
-                                $$.treeNode->nodeData.sVal = $3.nodeData.sVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_VISIBILITY);
-                                pNode->nodeData.dVal = (long int) $1.nodeData.dVal;
-
-                                NodeAddChild($$.treeNode, $2.treeNode); 
-                            }                 
-                                                    
-                        |   R_MOD_QUALIFIER R_TYPE_ALL TOKEN_ID                                                             // const int var  
-                            {
-                                TreeNode_st* pNode;
-                                
-                                NodeCreate(&($$.treeNode), NODE_VAR_NAME);
-                                $$.treeNode->nodeData.sVal = $3.nodeData.sVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_MODIFIER);
-                                pNode->nodeData.dVal = (long int) $1.nodeData.dVal;
-
-                                NodeAddChild($$.treeNode, $2.treeNode); 
-                            }                                                
-                                      
-                        |   R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID                                                            // signed int var  
-                            {
-                                TreeNode_st* pNode;
-                                
-                                NodeCreate(&($$.treeNode), NODE_VAR_NAME);
-                                $$.treeNode->nodeData.sVal = $3.nodeData.sVal;
-
-                                NodeAddNewChild($$.treeNode, &pNode, NODE_SIGN);
-                                pNode->nodeData.dVal = (long int) $1.nodeData.dVal;
-
-                                NodeAddChild($$.treeNode, $2.treeNode); 
-                            }                                      
-                                                 
-                        |   R_TYPE_ALL TOKEN_ID                                                                             // int var 
-                            {
-                                TreeNode_st* pNode;
-                                
-                                NodeCreate(&($$.treeNode), NODE_VAR_NAME);
-                                $$.treeNode->nodeData.sVal = $2.nodeData.sVal;
-
-                                NodeAddChild($$.treeNode, $1.treeNode); 
-                            }
-                        ;                                                                           
-
-// Variable declaration (simple or followed by its assignment).                         // Examples:
-R_VAR_DECLARATION       :   R_VAR_PREAMBLE TOKEN_SEMI                                   // int var;
-                            {   
-                                NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-                                
-                                NodeAddChild($$.treeNode, $1.treeNode);
-                            }
-                                                      
-                        |   R_VAR_PREAMBLE R_ASSIGN_OPERATOR R_EXP TOKEN_SEMI       // int var = 1;  
-                            {
-                                NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-                            
-                                NodeAddChild($$.treeNode, $1.treeNode);
-
-                                NodeAddChild($$.treeNode, $2.treeNode);         // added by Bóias, sem este child, como sei que assign operator é?
-
-                                NodeAddChild($$.treeNode, $3.treeNode);
-                            }
-                        ;                               
-
 // Array declaration                                                                                // Examples:
-R_ARR_DECLARATION           :   R_VAR_PREAMBLE R_ARR_SIZE TOKEN_SEMI                                // int var [2];
+R_ARR_DECLARATION           :   R_VAR_PREAMBLE TOKEN_ID R_ARR_SIZE TOKEN_SEMI                                // int var [2];
                                 {
-
+                                    $$.treeNode->nodeType = NODE_ARRAY;
                                 }      
 
-                            |   R_VAR_PREAMBLE R_ARR_SIZE R_ASSIGN_OPERATOR R_ARR_ARGS TOKEN_SEMI   // var [] = {1, 2, 3};
+                            |   R_VAR_PREAMBLE TOKEN_ID R_ARR_SIZE R_ASSIGN_OPERATOR R_ARR_ARGS TOKEN_SEMI   // var [] = {1, 2, 3};
                                 {
                                     
                                 }
                             ;   
 
 // Dimensions of the array                                                                  // Examples:
-R_ARR_SIZE                  :   R_ARR_SIZE TOKEN_LEFT_BRACKET TOKEN_RIGHT_BRACKET           // [][][]
+R_ARR_SIZE                  :   TOKEN_LEFT_BRACKET TOKEN_RIGHT_BRACKET                      // []
                                 {
-
-                                }
-
-                            |   R_ARR_SIZE TOKEN_LEFT_BRACKET R_EXP TOKEN_RIGHT_BRACKET     // [2][3]
-                                {
-
-                                }
-
-                            |   TOKEN_LEFT_BRACKET TOKEN_RIGHT_BRACKET                      // []
-                                {
-
+                                    
                                 }
 
                             |   TOKEN_LEFT_BRACKET R_EXP TOKEN_RIGHT_BRACKET                // [2]
@@ -1405,22 +897,7 @@ R_ARR_SIZE                  :   R_ARR_SIZE TOKEN_LEFT_BRACKET TOKEN_RIGHT_BRACKE
                             ;
 
 // Arguments of the array                                                                               // Examples:
-R_ARR_ARGS                  :   R_ARR_ARGS TOKEN_COMMA TOKEN_LEFT_BRACE R_ARR_ARGS TOKEN_RIGHT_BRACE    // {{{...},{...},{...}},{{...},{...}}}
-                                {
-
-                                }
-                                
-                            |   TOKEN_LEFT_BRACE R_ARR_ARGS TOKEN_RIGHT_BRACE                           // {...}
-                                {
-                                    
-                                }
-
-                            |   R_ARR_ARGS TOKEN_COMMA TOKEN_LEFT_BRACE R_EXP_LIST TOKEN_RIGHT_BRACE    // {}
-                                {
-
-                                }
-                                
-                            |   TOKEN_LEFT_BRACE R_EXP_LIST TOKEN_RIGHT_BRACE
+R_ARR_ARGS                  :   TOKEN_LEFT_BRACE R_EXP_LIST TOKEN_RIGHT_BRACE
                                 {
                                     
                                 }
@@ -1429,7 +906,7 @@ R_ARR_ARGS                  :   R_ARR_ARGS TOKEN_COMMA TOKEN_LEFT_BRACE R_ARR_AR
 // Rule to assign a value to a variable.                                                        // Example:
 R_VAR_ASSIGNMENT            :   TOKEN_ID R_ASSIGN_OPERATOR R_EXP TOKEN_SEMI                     // var = 1;
                                 {
-                                    NodeCreate(&($$.treeNode), NODE_VAR_ASSIGNMENT);
+                                    NodeCreate(&($$.treeNode), NODE_ASSIGN);
                                     $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
 
                                     NodeAddChild($$.treeNode, $3.treeNode);
@@ -1439,115 +916,533 @@ R_VAR_ASSIGNMENT            :   TOKEN_ID R_ASSIGN_OPERATOR R_EXP TOKEN_SEMI     
 // Rule to assign values to an array.                                                           // Example: 
 R_ARR_ASSIGNMENT            :   TOKEN_ID R_ARR_SIZE R_ASSIGN_OPERATOR R_ARR_ARGS TOKEN_SEMI     // var[1] = {1};
                                 {
-                                    
+                                    NodeCreate(&($$.treeNode), NODE_POINTER);   // pointer?
+                                    $$.treeNode->nodeData.dVal = 1;
                                 }
                             ;
 
-// Standard C data types. 
-// Doesn't account for user defined types (aka typedefs), as this will need a symbol table.     // Data Types:
-R_TYPE                      :   TOKEN_CHAR                                                      // Char  
-                                {
-                                    $$.nodeData.dVal = TYPE_CHAR;
+
+
+//--------------------------------------------------------------------------------------------------------------------//
+// Variable Related Rules
+//--------------------------------------------------------------------------------------------------------------------//
+
+// Variable declaration (simple or followed by its assignment).                         // Examples:
+R_VAR_DECLARATION       :   R_VAR_PREAMBLE R_ID_LIST TOKEN_SEMI                                   // int var1, var2;
+                            {   
+                                LOG_ERROR("DECLARATION\n\n");
+                                TreeNode_st* pNode =  $2.treeNode;
+
+                                while($2.treeNode->pSibling != NULL){
+                                    pNode->pSibling = $1.treeNode;
+
+                                    pNode = pNode->pSibling;
                                 }
 
-                            |   TOKEN_SHORT                                                     // Short
-                                {
-                                    $$.nodeData.dVal = TYPE_SHORT;
-                                }
+                                NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
 
-                            |   TOKEN_INT                                                       // Int
-                                {
-                                    $$.nodeData.dVal = TYPE_INT;
-                                }
+                                NodeAddChild($$.treeNode, $1.treeNode);
+                                $$.treeNode->pSibling = $2.treeNode;
+                            }
+                                                      
+                        |   R_VAR_PREAMBLE TOKEN_ID TOKEN_ASSIGN R_EXP TOKEN_SEMI       // int var = 1;      int var; var = 1;
+                            {
+                                NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
+                                $$.nodeData.sVal = $2.nodeData.sVal;
 
-                            |   TOKEN_LONG                                                      // Long
-                                {
-                                    $$.nodeData.dVal = TYPE_LONG;
-                                }
+                                NodeAddChild($$.treeNode, $1.treeNode);
 
-                            |   TOKEN_FLOAT                                                     // Float
-                                {
-                                    $$.nodeData.dVal = TYPE_FLOAT;
-                                }
-                                
-                            |   TOKEN_DOUBLE                                                    // Double
-                                {
-                                    $$.nodeData.dVal = TYPE_DOUBLE;
-                                }
+                                TreeNode_st* pNode;
 
-                            |   TOKEN_LONG TOKEN_DOUBLE                                         // Long Double
-                                {
-                                    $$.nodeData.dVal = TYPE_LONG_DOUBLE;
-                                }
-                            ;
+                                NodeCreate(&pNode, NODE_ASSIGN);
+                                pNode->nodeData.sVal = $2.nodeData.sVal;
 
-// Standard C data types but with pointer. This rule implements support for pointers of n length. Example: int*** ...
-R_TYPE_PTR                  :   R_TYPE_PTR TOKEN_ASTERISK
-                                {
-                                    TreeNode_st* pNode;
+                                NodeAddChild($$.treeNode, $4.treeNode);
+                            }
+                        ;       
 
-                                    NodeAddNewChild($1.treeNode, &pNode, NODE_POINTER);    
 
-                                    $$.treeNode = $1.treeNode;   
-                                }
+ /*:   R_VAR_PREAMBLE TOKEN_ID TOKEN_SEMI                                   // int var;
+    {   
+        NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
+        $$.treeNode->nodeData.sVal = $2.nodeData.sVal;
 
-                            |   R_TYPE TOKEN_ASTERISK
-                                {  
-                                    TreeNode_st* pNode;
+        NodeAddChild($$.treeNode, $1.treeNode);
+    }*/
 
-                                    NodeAddNewChild($1.treeNode, &pNode, NODE_POINTER);    
 
-                                    $$.treeNode = $1.treeNode;                              
-                                }
-                            ;
+R_ID_LIST      :   R_ID_LIST TOKEN_COMMA TOKEN_ID
+                    {
+                        LOG_ERROR("IDDD1\n\n");
+
+                        NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
+                        $$.nodeData.sVal = $3.nodeData.sVal;
+
+                        $1.treeNode->pSibling = $$.treeNode;
+                    }
+                |   TOKEN_ID
+                    {
+                        LOG_ERROR("IDDD2\n\n");
+
+                        NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
+                        $$.nodeData.sVal = $1.nodeData.sVal;
+                    } 
+                ;
+
+// Variable declarations can have a visibility qualifier (extern/static), a type qualifier (volatile/const), a sign qualifier.
+// (signed/unsigned) and must explicitly specify a type (short, int, float...).                                             // Examples:
+R_VAR_PREAMBLE          :   TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL       // register static const unsigned int var
+                            {   
+                                NodeCreate(&($$.treeNode), NODE_MISC);
+                                $$.treeNode->nodeData.dVal = (long int) FLAG_REGISTER;
+
+                                $1.treeNode->pSibling = $2.treeNode;
+                                $2.treeNode->pSibling = $3.treeNode;
+                                $3.treeNode->pSibling = $4.treeNode;
+                                $4.treeNode->pSibling = $5.treeNode;
+                            }
+
+                        |   TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_MOD_QUALIFIER R_TYPE_ALL                       // register static const int var
+                            {
+                                NodeCreate(&($$.treeNode), NODE_MISC);
+                                $$.treeNode->nodeData.dVal = (long int) FLAG_REGISTER;
+
+                                $1.treeNode->pSibling = $2.treeNode;
+                                $2.treeNode->pSibling = $3.treeNode;
+                                $3.treeNode->pSibling = $4.treeNode;
+                            }        
+                                   
+                        |   TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL                      // register static signed int var 
+                            {
+                                NodeCreate(&($$.treeNode), NODE_MISC);
+                                $$.treeNode->nodeData.dVal = (long int) FLAG_REGISTER;
+
+                                $1.treeNode->pSibling = $2.treeNode;
+                                $2.treeNode->pSibling = $3.treeNode;
+                                $3.treeNode->pSibling = $4.treeNode;
+                            }    
+                                         
+                        |   TOKEN_REGISTER R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL                             // register const signed int var     
+                            {
+                                NodeCreate(&($$.treeNode), NODE_MISC);
+                                $$.treeNode->nodeData.dVal = (long int) FLAG_REGISTER;
+
+                                $1.treeNode->pSibling = $2.treeNode;
+                                $2.treeNode->pSibling = $3.treeNode;
+                                $3.treeNode->pSibling = $4.treeNode;
+                            }   
+                                             
+                        |   TOKEN_REGISTER R_VISIBILITY_QUALIFIER R_TYPE_ALL                                       // register static int var 
+                            {
+                                NodeCreate(&($$.treeNode), NODE_MISC);
+                                $$.treeNode->nodeData.dVal = (long int) FLAG_REGISTER;
+
+                                $1.treeNode->pSibling = $2.treeNode;
+                                $2.treeNode->pSibling = $3.treeNode;
+                            }   
+                                                     
+                        |   TOKEN_REGISTER R_MOD_QUALIFIER R_TYPE_ALL                                              // register const int var    
+                            {
+                                NodeCreate(&($$.treeNode), NODE_MISC);
+                                $$.treeNode->nodeData.dVal = (long int) FLAG_REGISTER;
+
+                                $1.treeNode->pSibling = $2.treeNode;
+                                $2.treeNode->pSibling = $3.treeNode;
+                            }                      
+                                         
+                        |   TOKEN_REGISTER R_SIGN_QUALIFIER R_TYPE_ALL                                             // register signed int var         
+                            {
+                                NodeCreate(&($$.treeNode), NODE_MISC);
+                                $$.treeNode->nodeData.dVal = (long int) FLAG_REGISTER;
+
+                                $1.treeNode->pSibling = $2.treeNode;
+                                $2.treeNode->pSibling = $3.treeNode;
+                            }       
+                                                       
+                        |   TOKEN_REGISTER R_TYPE_ALL                                                               // register int var
+                            {
+                                NodeCreate(&($$.treeNode), NODE_MISC);
+                                $$.treeNode->nodeData.dVal = (long int) FLAG_REGISTER;
+
+                                $1.treeNode->pSibling = $2.treeNode;
+                            }                               
+                                             
+                        |   R_VISIBILITY_QUALIFIER R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL                     // static const unsigned int var 
+                            {
+                                $1.treeNode->pSibling = $2.treeNode;
+                                $2.treeNode->pSibling = $3.treeNode;
+                                $3.treeNode->pSibling = $4.treeNode;
+                                $$.treeNode = $1.treeNode;
+                            }
+                                                
+                        |   R_VISIBILITY_QUALIFIER R_MOD_QUALIFIER R_TYPE_ALL                                      // static const int var
+                            {
+                                $1.treeNode->pSibling = $2.treeNode;
+                                $2.treeNode->pSibling = $3.treeNode;
+                                $$.treeNode = $1.treeNode;
+                            }                 
+                                            
+                        |   R_VISIBILITY_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL                                     // static signed int var 
+                            {
+                                $1.treeNode->pSibling = $2.treeNode;
+                                $2.treeNode->pSibling = $3.treeNode;
+                                $$.treeNode = $1.treeNode;
+                            }               
+                                            
+                        |   R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL                                            // const signed int var 
+                            {
+                                $1.treeNode->pSibling = $2.treeNode;
+                                $2.treeNode->pSibling = $3.treeNode;
+                                $$.treeNode = $1.treeNode;
+                            }          
+                                                       
+                        |   R_VISIBILITY_QUALIFIER R_TYPE_ALL                                                      // static int var 
+                            {
+                                $1.treeNode->pSibling = $2.treeNode;
+                                $$.treeNode = $1.treeNode;
+                            }                 
+                                                    
+                        |   R_MOD_QUALIFIER R_TYPE_ALL                                                             // const int var  
+                            {
+                                //$1.treeNode->pSibling = $2.treeNode;
+                                //$$.treeNode = $1.treeNode;
+                            }                                                
+                                      
+                        |   R_SIGN_QUALIFIER R_TYPE_ALL                                                            // signed int var  
+                            {
+                                $1.treeNode->pSibling = $2.treeNode;
+                                $$.treeNode = $1.treeNode; 
+                            }                                      
+                                                 
+                        |   R_TYPE_ALL                                                                           // int var 
+                            {
+                                LOG_ERROR("xxx\n\n");
+                                $$.treeNode = $1.treeNode; 
+                            }
+                        ;                                                                                                
+
+//--------------------------------------------------------------------------------------------------------------------//
+// Operators
+//--------------------------------------------------------------------------------------------------------------------//
+
+// Arithmetic operators                                             // Operators:
+R_ARITHMETIC_OPERATOR   :   TOKEN_PLUS                              // +    
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_PLUS;
+                            } 
+
+                        |   TOKEN_MINUS                             // -
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_MINUS;
+                            }
+
+                        |   TOKEN_RIGHT_SHIFT                       // >>
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_RIGHT_SHIFT;
+                            }
+
+                        |   TOKEN_LEFT_SHIFT                        // <<
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_LEFT_SHIFT;
+                            }
+                        ;
+
+// Priority operators                                               // Operators:
+R_PRIORITY_OPERATOR     :   TOKEN_ASTERISK                          // *
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_MULTIPLY;
+                            }
+
+                        |   TOKEN_OVER                              // /
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_DIVIDE;
+                            }
+
+                        |   TOKEN_PERCENT                           // %
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_REMAIN;
+                            }
+                        ;
+
+// Condition operators                                              // Operators:
+R_CONDITION_OPERATOR    :   TOKEN_GREATER_THAN                      // >
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_GREATER_THAN;
+                            }
+
+                        |   TOKEN_LESS_THAN_OR_EQUAL                // <=
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_LESS_THAN_OR_EQUAL;
+                            }
+
+                        |   TOKEN_GREATER_THAN_OR_EQUAL             // >=
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_GREATER_THAN_OR_EQUAL;
+                            }
+
+                        |   TOKEN_LESS_THAN                         // <
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_LESS_THAN;
+                            }
+
+                        |   TOKEN_EQUAL                             // ==
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_EQUAL;
+                            }
+
+                        |   TOKEN_NOT_EQUAL                         // !=
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_NOT_EQUAL;
+                            }
+                        ;
+
+// Logic operators                                                  // Operators:
+R_LOGIC_OPERATOR        :   TOKEN_LOGICAL_AND                       // &&
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_LOGICAL_AND;
+                            }
+
+                        |   TOKEN_LOGICAL_OR                        // ||
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_LOGICAL_OR;
+                            }
+                        ;
+
+// Bitwise operators                                                // Operators:
+R_BITWISE_OPERATOR      :   TOKEN_BITWISE_AND                       // &
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_BITWISE_AND;
+                            }
+
+                        |   TOKEN_BITWISE_NOT                       // ~
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_BITWISE_NOT;
+                            }
+
+                        |   TOKEN_BITWISE_OR                        // |
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_BITWISE_OR;
+                            }
+
+                        |   TOKEN_BITWISE_XOR                       // ^
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_BITWISE_XOR;
+                            }
+                        ;
+
+// Assign operators                                                 // Operators:
+R_ASSIGN_OPERATOR       :   TOKEN_ASSIGN                            // =
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_ASSIGN;
+                            }
+
+                        |   TOKEN_PLUS_ASSIGN                       // +=
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_PLUS_ASSIGN;
+                            }
+
+                        |   TOKEN_MINUS_ASSIGN                      // -=
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_MINUS_ASSIGN;
+                            }
+                            
+                        |   TOKEN_MODULUS_ASSIGN                    // %=
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_MODULUS_ASSIGN;
+                            }
+                            
+                        |   TOKEN_LEFT_SHIFT_ASSIGN                 //<<=
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_LEFT_SHIFT_ASSIGN;
+                            }
+
+                        |   TOKEN_RIGHT_SHIFT_ASSIGN                // >>=
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_RIGHT_SHIFT_ASSIGN;
+                            }
+                            
+                        |   TOKEN_BITWISE_AND_ASSIGN                // &=
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_BITWISE_AND_ASSIGN;
+                            }
+
+                        |   TOKEN_BITWISE_OR_ASSIGN                 // |=
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_BITWISE_OR_ASSIGN;
+                            }
+
+                        |   TOKEN_BITWISE_XOR_ASSIGN                // ^=
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_BITWISE_XOR_ASSIGN;
+                            }
+
+                        |   TOKEN_MULTIPLY_ASSIGN                   // *=
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_MULTIPLY_ASSIGN;
+                            }
+
+                        |   TOKEN_DIVIDE_ASSIGN                     // /=
+                            {
+                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                                $$.treeNode->nodeData.dVal = OP_DIVIDE_ASSIGN;
+                            }
+                        ;
+
+
+//--------------------------------------------------------------------------------------------------------------------//
+// TYPPES (VARIABLES AND FUNCTIONS)
+//--------------------------------------------------------------------------------------------------------------------//
 
 // Union between the pointer and standard types.
 R_TYPE_ALL                  :   R_TYPE 
                                 {
-                                    NodeCreate(&($$.treeNode), NODE_TYPE);
-                                    $$.treeNode->nodeData.dVal = $1.nodeData.dVal;   
+                                    LOG_ERROR("11x\n\n");
+                                    $$.treeNode = $1.treeNode;  
                                 }
                                 
                             |   R_TYPE_PTR
                                 {
-                                    $$.nodeData.dVal = $1.nodeData.dVal;
+                                    $$.treeNode = $1.treeNode;
                                 }
                             ;
+
+
+/* ---------------PTR ABAIXO NÃO IMPLEMENTADO ---------------*/ 
+
+// Standard C data types but with pointer. This rule implements support for pointers of n length. Example: int*** ...
+R_TYPE_PTR                  :   R_TYPE_PTR TOKEN_ASTERISK
+                                {
+                                    $$.treeNode->nodeData.dVal++;
+                                }
+
+                            |   R_TYPE TOKEN_ASTERISK
+                                {  
+                                    NodeCreate(&($$.treeNode), NODE_POINTER);
+                                    $$.treeNode->nodeData.dVal = 1;
+
+                                    NodeAddChild($$.treeNode, $1.treeNode);                                
+                                }
+                            ;                            
+
+/* ---------------PTR ACIMA NÃO IMPLEMENTADO ---------------*/            
+           
+            
+// Standard C data types. 
+// Doesn't account for user defined types (aka typedefs), as this will need a symbol table.     // Data Types:
+R_TYPE                      :   TOKEN_CHAR                                                      // Char  
+                                {
+                                    NodeCreate(&($$.treeNode), NODE_TYPE);
+                                    $$.treeNode->nodeData.dVal = TYPE_CHAR;
+                                }
+
+                            |   TOKEN_SHORT                                                     // Short
+                                {
+                                    NodeCreate(&($$.treeNode), NODE_TYPE);
+                                    $$.treeNode->nodeData.dVal = TYPE_SHORT;
+                                }
+
+                            |   TOKEN_INT                                                       // Int
+                                {
+                                    NodeCreate(&($$.treeNode), NODE_TYPE);
+                                    $$.treeNode->nodeData.dVal = TYPE_INT;
+                                }
+
+                            |   TOKEN_LONG                                                      // Long
+                                {
+                                    NodeCreate(&($$.treeNode), NODE_TYPE);
+                                    $$.treeNode->nodeData.dVal = TYPE_LONG;
+                                }
+
+                            |   TOKEN_FLOAT                                                     // Float
+                                {
+                                    NodeCreate(&($$.treeNode), NODE_TYPE);
+                                    $$.treeNode->nodeData.dVal = TYPE_FLOAT;
+                                }
+                                
+                            |   TOKEN_DOUBLE                                                    // Double
+                                {
+                                    NodeCreate(&($$.treeNode), NODE_TYPE);
+                                    $$.treeNode->nodeData.dVal = TYPE_DOUBLE;
+                                }
+
+                            |   TOKEN_LONG TOKEN_DOUBLE                                         // Long Double
+                                {
+                                    NodeCreate(&($$.treeNode), NODE_TYPE);
+                                    $$.treeNode->nodeData.dVal = TYPE_LONG_DOUBLE;
+                                }
+                            ;
+
 
 // Functions and variables can be marked as either static or extern, never both at the same time.
 R_VISIBILITY_QUALIFIER      :   TOKEN_STATIC
                                 {
-                                    $$.nodeData.dVal = (long int) VIS_STATIC;     
+                                    NodeCreate(&($$.treeNode), NODE_VISIBILITY);
+                                    $$.treeNode->nodeData.dVal = (long int) VIS_STATIC;    
                                 }
 
                             |   TOKEN_EXTERN
                                 {
-                                    $$.nodeData.dVal = (long int) VIS_EXTERN;     
+                                    NodeCreate(&($$.treeNode), NODE_VISIBILITY);
+                                    $$.treeNode->nodeData.dVal = (long int) VIS_EXTERN;     
                                 }
                             ;
+
 
 // Types can be marked as constant, volatile, or have no type qualifier.
 // Here is also some other more advanced qualifiers not being considered.
 R_MOD_QUALIFIER             :   TOKEN_CONSTANT
                                 {
-                                    $$.nodeData.dVal = (long int) MOD_CONST;  
+                                    NodeCreate(&($$.treeNode), NODE_MODIFIER);
+                                    $$.nodeData.dVal = (long int) MOD_CONST;
                                 } 
 
                             |   TOKEN_VOLATILE
                                 {
-                                    $$.nodeData.dVal = (long int) MOD_VOLATILE;  
+                                    NodeCreate(&($$.treeNode), NODE_MODIFIER);
+                                    $$.nodeData.dVal = (long int) MOD_VOLATILE; 
                                 }
                             ;
 
 // Types can be marked as signed or unsigned, in C, if none is specified, the type defaults to signed.
 R_SIGN_QUALIFIER            :   TOKEN_SIGNED 
                                 {
-                                    $$.nodeData.dVal = (long int) SIGN_SIGNED;
+                                    NodeCreate(&($$.treeNode), NODE_SIGN);
+                                    $$.nodeData.dVal = (long int) SIGN_SIGNED; 
                                 }
 
                             |   TOKEN_UNSIGNED
                                 {
-                                    $$.nodeData.dVal = (long int) SIGN_UNSIGNED;
+                                    NodeCreate(&($$.treeNode), NODE_SIGN);
+                                    $$.treeNode->nodeData.dVal = (long int) SIGN_UNSIGNED;
                                 }
                             ;
 
@@ -1559,6 +1454,7 @@ R_EOF                       :   TOKEN_EOF
                                 }
                             ;
 %%
+
 
 //--------------------------------------------------------------------------------------------------------------------//
 // Code
@@ -1586,6 +1482,7 @@ int executeParser(TreeNode_st** ppTreeRoot)
     return ret;
 }
 
+
 int yyerror(char* pStr)
 {
     if (!pStr)
@@ -1595,6 +1492,7 @@ int yyerror(char* pStr)
 
     return 0;
 }
+
 
 const char* getTokenName(int tokenValue) 
 {

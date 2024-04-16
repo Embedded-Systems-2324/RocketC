@@ -1,9 +1,5 @@
  [In comment] [Out comment] 
  
+CONST INT ID COMMA ID SEMI  
  
-STATIC DOUBLE ID ASSIGN NUM SEMI 
--------------------AST-------------------
-
-
-
------------------AST END-----------------
+STATIC INT ID SEMI 
