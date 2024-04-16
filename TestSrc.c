@@ -1,9 +1,11 @@
-int var;
+int var,x,y,w;
 static int foo;
 const int bar;
 const unsigned int myVar;
 
-//int foobar(int var);
+static int a = 99;
+
+int foobar(int var, char arroz);
 
 const int x, y;
 

@@ -194,9 +194,6 @@ void PrintNode(TreeNode_st* pNode)
         case NODE_FUNCTION:
             printf("Function: %s \n", pNode->nodeData.sVal);
             break;
-
-        case NODE_EXPRESSION:
-            break;
         
         case NODE_INTEGER:
             printf("Integer: %ld \n", pNode->nodeData.dVal);
@@ -273,10 +270,6 @@ void PrintNode(TreeNode_st* pNode)
 
         case NODE_PRE_INC:
             printf("Pre incrementation: ++%s", pNode->nodeData.sVal);
-            break;
-
-        case NODE_ARRAY:            // review
-            printf("ARRAY \n");
             break;
 
         default:
