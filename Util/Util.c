@@ -4,6 +4,11 @@
 #include "Logger.h"
 #include "../main.h"
 
+static int depth = 0;
+
+#define INDENT depth += 4
+#define UNINDENT depth -= 4
+
 static const char* nodeNameLut[] =
 {
     "PROGRAM",
@@ -117,168 +122,173 @@ int StringCreateAndCopy(char** ppDest, char* pSrc, size_t strLen)
     return 0;
 }
 
-
-/*void PrintNode(TreeNode_st* pNode, int depth)
-{
-    if (pNode == NULL)
+static void Indentation()
+{ 
+    for (int i = 0; i < depth; i++)
     {
-        LOG_ERROR("NULL Node!!\n");
-        return;
+        printf(" ");
     }
+}
 
-    switch (pNode->nodeType) {
+void PrintNode(TreeNode_st* pNode)
+{
+    INDENT;
+    while (pNode != NULL)
+    {
+        Indentation();
+        
+        switch (pNode->nodeType) {
         case NODE_PARAM:
             break;
-        case NODE_VAR_DECLARATION:                                      // tested
-            for (int i=0; i<pNode->childNumber; i++)
-            {
-                PrintNode(&pNode->pChilds[i], depth);
-            }
+        case NODE_VAR_DECLARATION:                              
+            printf("Var Declaration: %s \n", pNode->nodeData.sVal);
             break;
 
-        case NODE_VAR_NAME:                                             // tested
-            for (int i=0; i<pNode->childNumber; i++)
-            {
-                PrintNode(&pNode->pChilds[i], depth);
-            }
-            printf("%s ", pNode->nodeData.sVal);
+        case NODE_VAR_NAME:                                     
+            printf("Var Name: %s \n", pNode->nodeData.sVal);
             break;
 
-        case NODE_MISC:                                                 // tested
-            printf("%s ", MiscDataStrings[pNode->nodeData.dVal]);
+        case NODE_MISC:                                               
+            printf("Storage Qualifier: %s \n", pNode->nodeData.sVal);
             break;
 
-        case NODE_VISIBILITY:                                           // tested
-            printf("%s ", VisQualifierStrings[pNode->nodeData.dVal]);
+        case NODE_VISIBILITY:                                          
+            printf("Storage Qualifier: %s \n", VisQualifierStrings[pNode->nodeData.dVal]);
             break;
 
-        case NODE_MODIFIER:                                             // tested
-            printf("%s ", ModQualifierStrings[pNode->nodeData.dVal]);
+        case NODE_MODIFIER:                                           
+            printf("Mod Qualifier: %s \n", ModQualifierStrings[pNode->nodeData.dVal]);
             break;
 
-        case NODE_SIGN:                                                 // tested
-            printf("%s ", SignQualifierStrings[pNode->nodeData.dVal]);
+        case NODE_SIGN:                                              
+            printf("Sign Qualifier: %s \n", SignQualifierStrings[pNode->nodeData.dVal]);
             break;
 
-        case NODE_TYPE:                                                 // tested
-            printf("%s ", VarTypeStrings[pNode->nodeData.dVal]);
+        case NODE_TYPE:               
+            printf("Type: %s \n", VarTypeStrings[pNode->nodeData.dVal]);
             break;
 
-        case NODE_OP_TYPE:                                              
-            printf("%s ", OperatorStrings[pNode->nodeData.dVal]);
+        case NODE_OPERATOR:                                              
+            printf("Operator: %s \n", OperatorStrings[pNode->nodeData.dVal]);
             break;
 
-        case NODE_TERNARY:                                     
-            PrintNode(&pNode->pChilds[0], depth);
-            printf("? ");
-            PrintNode(&pNode->pChilds[1], depth);
-            printf(": ");
-            PrintNode(&pNode->pChilds[2], depth);
+        case NODE_TERNARY:    
+            printf("Ternary Op \n");
             break;
 
-        case NODE_ARRAY_INDEX:                                  
-            PrintNode(&pNode->pChilds[0], depth);
-            printf("[");
-            PrintNode(&pNode->pChilds[1], depth);
-            printf("]");
+        case NODE_ARRAY_INDEX:          // review
+            printf("ARRAY INDEX \n");                              
             break;
 
-        case NODE_TYPE_CAST:                                        // geração nós de TYPECAST estão bem??? 
+        case NODE_TYPE_CAST:                                    
             break;
 
-        case NODE_ID:                                                       
-            printf("%s ", pNode->nodeData.sVal);
+        case NODE_IDENTIFIER:
+            printf("Identifier: %s \n", pNode->nodeData.sVal);
             break;
 
-        case NODE_VAR_ASSIGNMENT:
-            printf("%s ", pNode->nodeData.sVal);
-            for (int i=0; i<pNode->childNumber; i++)
-            {
-                PrintNode(&pNode->pChilds[i], depth);
-            }            
+        case NODE_ASSIGN:
+            printf("Assign: %s \n", pNode->nodeData.sVal);
             break;
 
         case NODE_FUNCTION:
+            printf("Function: %s \n", pNode->nodeData.sVal);
             break;
 
         case NODE_EXPRESSION:
-            for (int i=0; i<pNode->childNumber; i++)
-            {
-                PrintNode(&pNode->pChilds[i], depth);
-            }
             break;
-
+        
         case NODE_INTEGER:
-            printf("%ld ", pNode->nodeData.dVal);
+            printf("Integer: %ld \n", pNode->nodeData.dVal);
             break;
 
         case NODE_FLOAT:
-            printf("%.10g ", pNode->nodeData.fVal);
+            printf("Float: %.10g \n", pNode->nodeData.fVal);
             break;
 
         case NODE_IF:
+            printf("IF \n");
             break;
 
         case NODE_WHILE:
+            printf("WHILE \n");
             break;
 
         case NODE_DO_WHILE:
+            printf("DO WHILE \n");
             break;
 
         case NODE_FOR:
+            printf("FOR \n");
             break;
 
         case NODE_RETURN:
-            printf("return ");
-            for (int i=0; i<pNode->childNumber; i++)
-            {
-                PrintNode(&pNode->pChilds[i], depth);
-            }
+            printf("RETURN \n");
             break;
 
         case NODE_CONTINUE:
-            printf("continue \n");
+            printf("Continue \n");
             break;
 
         case NODE_BREAK:
-            printf("break \n");
+            printf("Break \n");
             break;
 
         case NODE_GOTO:
-            printf("goto %s", pNode->nodeData.sVal);
+            printf("Goto %s", pNode->nodeData.sVal);
             break;
 
         case NODE_SWITCH:
+            printf("SWITCH \n");
             break;
 
         case NODE_CASE:
+            printf("CASE: %ld", pNode->nodeData.dVal);
             break;
 
         case NODE_DEFAULT:
+            printf("DEFAULT \n");
             break;
 
         case NODE_POINTER:
+            printf("POINTER: ");
+            for(int i = 0; i<pNode->nodeData.dVal; i++)
+            {
+                printf("*");
+            }
+            printf("\n");
             break;
 
         case NODE_POST_DEC:
-            printf("%s--", pNode->nodeData.sVal);
+            printf("Post decrementation: %s--", pNode->nodeData.sVal);
             break;
 
         case NODE_PRE_DEC:
-            printf("--%s", pNode->nodeData.sVal);
+            printf("Pre decrementation: --%s", pNode->nodeData.sVal);
             break;
 
         case NODE_POST_INC:
-            printf("%s++ ", pNode->nodeData.sVal);
+            printf("Post incrementation: %s++ ", pNode->nodeData.sVal);
             break;
 
         case NODE_PRE_INC:
-            printf("++%s", pNode->nodeData.sVal);
+            printf("Pre incrementation: ++%s", pNode->nodeData.sVal);
+            break;
+
+        case NODE_ARRAY:            // review
+            printf("ARRAY \n");
             break;
 
         default:
             LOG_ERROR("\nUNKNOWN NODE TYPE!\n");
             break;
+        }
+        for (int i = 0; i < pNode->childNumber; i++)
+        {
+            PrintNode(&pNode->pChilds[i]);
+        }
+        pNode = pNode->pSibling;
     }
+    UNINDENT;
     return;
-}*/
+}

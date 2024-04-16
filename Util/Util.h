@@ -85,6 +85,8 @@ int NodeAddNewChild(TreeNode_st* pParent, TreeNode_st** ppNewChild, NodeType_et 
 
 int StringCreateAndCopy(char** ppDest, char* pSrc, size_t strLen);
 
-void PrintNode(TreeNode_st* pNode, int depth);
+static void Indentation(void);
+
+void PrintNode(TreeNode_st* pNode);
 
 #endif
