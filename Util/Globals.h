@@ -92,47 +92,47 @@ typedef enum
     NODE_MISC,
     NODE_VISIBILITY,  
     NODE_MODIFIER, 
-    NODE_TYPE,            
+    NODE_TYPE,                        
 
+    NODE_OPERATOR,         
+    NODE_TERNARY,                         
+    NODE_IDENTIFIER,        
+    NODE_STRING,          
+    NODE_INTEGER,           
+    NODE_FLOAT,
+    NODE_STRUCT,
 
-    NODE_PARAM,          // 0
+    NODE_IF,               
+    NODE_WHILE,            
+    NODE_DO_WHILE,           
+    NODE_FOR,                
+    NODE_RETURN,             
+    NODE_CONTINUE,           
+    NODE_BREAK,
 
-    NODE_VAR_DECLARATION,    // 1
-    NODE_VAR_NAME,           // 2
-
-    
-                 // 7
-    NODE_OPERATOR,           // 8
-    NODE_TERNARY,            // 9
-    NODE_ARRAY_INDEX,        // 10
-    NODE_TYPE_CAST,          // 11
-    NODE_IDENTIFIER,         // 12
-    NODE_STRING,
-
-    NODE_ASSIGN,             // 13
-    NODE_FUNCTION,           // 14
-    NODE_INTEGER,            // 16
-    NODE_FLOAT,              // 17
-    NODE_IF,                 // 18
-    NODE_WHILE,              // 19
-    NODE_DO_WHILE,           // 20
-    NODE_FOR,                // 21
-    NODE_RETURN,             // 22
-    NODE_CONTINUE,           // 23
-    NODE_BREAK,              // 24
     NODE_GOTO,
-    NODE_LABEL,               // 25
-    NODE_SWITCH,             // 26
-    NODE_CASE,               // 27
-    NODE_DEFAULT,            // 28
-    NODE_POINTER,            // 29   visto
+    NODE_LABEL,
 
-    NODE_POST_DEC,           // 30
-    NODE_PRE_DEC,            // 31
-    NODE_POST_INC,           // 32
-    NODE_PRE_INC,            // 33
+    NODE_SWITCH,            
+    NODE_CASE,               
+    NODE_DEFAULT, 
+
+    NODE_REFERENCE,           
+    NODE_POINTER,              
+    NODE_POINTER_CONTENT,
+    NODE_TYPE_CAST,           
+
+    NODE_POST_DEC,           
+    NODE_PRE_DEC,            
+    NODE_POST_INC,           
+    NODE_PRE_INC,  
+
+    NODE_VAR_DECLARATION,
     NODE_ARRAY_DECLARATION,
-    NODE_ARRAY_VALUE
+    NODE_ARRAY_INDEX,
+
+    NODE_FUNCTION,
+    NODE_FUNCTION_CALL
 }NodeType_et;
 
 typedef union

@@ -138,14 +138,8 @@ void PrintNode(TreeNode_st* pNode)
         Indentation();
         
         switch (pNode->nodeType) {
-        case NODE_PARAM:
-            break;
         case NODE_VAR_DECLARATION:                              
             printf("Var Declaration: %s \n", pNode->nodeData.sVal);
-            break;
-
-        case NODE_VAR_NAME:                                     
-            printf("Var Name: %s \n", pNode->nodeData.sVal);
             break;
 
         case NODE_MISC:                                               
@@ -185,10 +179,6 @@ void PrintNode(TreeNode_st* pNode)
 
         case NODE_IDENTIFIER:
             printf("Identifier: %s \n", pNode->nodeData.sVal);
-            break;
-
-        case NODE_ASSIGN:
-            printf("Assign: %s \n", pNode->nodeData.sVal);
             break;
 
         case NODE_FUNCTION:

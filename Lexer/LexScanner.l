@@ -84,7 +84,6 @@ whitespace  [ \t]+
 "goto"          { LOG_DEBUG_SHORT("GOTO ");                  return TOKEN_GOTO;         }
 "long"          { LOG_DEBUG_SHORT("LONG ");                  return TOKEN_LONG;         }
 "int"           { LOG_DEBUG_SHORT("INT ");                   return TOKEN_INT;          }
-"register"      { LOG_DEBUG_SHORT("REGISTER ");              return TOKEN_REGISTER;     }
 "return"        { LOG_DEBUG_SHORT("RETURN ");                return TOKEN_RETURN;       }
 "short"         { LOG_DEBUG_SHORT("SHORT ");                 return TOKEN_SHORT;        }
 "signed"        { LOG_DEBUG_SHORT("SIGNED ");                return TOKEN_SIGNED;       }
