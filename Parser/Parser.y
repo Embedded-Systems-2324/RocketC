@@ -145,10 +145,12 @@ R_PROGRAM               :   R_PROGRAM R_EOF
                                 {
                                     $$.treeNode = $2.treeNode;
                                 }
+                                pTreeRoot = $$.treeNode;
                             }
                         |   R_GLOBAL_STATEMENT
                             {
                                 $$.treeNode = $1.treeNode;
+                                pTreeRoot = $$.treeNode;
                             }
                         ;
 
@@ -175,8 +177,8 @@ R_LOCAL_STATEMENT_LIST  :   %empty
                             {
                                 $$.treeNode = NULL;
                             }
-                        |
-                            R_LOCAL_STATEMENT_LIST R_LOCAL_STATEMENT
+                            
+                        |   R_LOCAL_STATEMENT_LIST R_LOCAL_STATEMENT
                             {
                                 TreeNode_st* pNode = $1.treeNode;
 
@@ -435,7 +437,7 @@ R_WHILE_LOOP        :   TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PAR
                     ;
 
 
-R_DO_WHILE_LOOP     :   TOKEN_DO R_LOCAL_STATEMENT TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES
+R_DO_WHILE_LOOP     :   TOKEN_DO R_LOCAL_STATEMENT TOKEN_WHILE TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES TOKEN_SEMI
                         {
                             NodeCreate(&($$.treeNode), NODE_DO_WHILE);
                         
@@ -461,7 +463,7 @@ R_FOR_LOOP          :   TOKEN_FOR TOKEN_LEFT_PARENTHESES R_FOR_INIT_FIELD TOKEN_
                             {
                                 $$.treeNode = $7.treeNode;
                             }
-
+                            
                             NodeCreate(&pNodeWhile, NODE_WHILE);
                         
                             NodeAddChild(pNodeWhile, $5.treeNode);      // Condition
@@ -475,10 +477,11 @@ R_FOR_LOOP          :   TOKEN_FOR TOKEN_LEFT_PARENTHESES R_FOR_INIT_FIELD TOKEN_
 R_FOR_INIT_FIELD    :   TOKEN_ID TOKEN_ASSIGN R_EXP                             // for(x=0; ; )  
                         {
                             TreeNode_st *pNode;
+
                             NodeCreate(&($$.treeNode), NODE_OPERATOR);
                             $$.treeNode->nodeData.dVal = OP_ASSIGN;
 
-                            NodeAddNewChild($2.treeNode, &pNode, NODE_IDENTIFIER);
+                            NodeAddNewChild($$.treeNode, &pNode, NODE_IDENTIFIER);
                             pNode->nodeData.sVal = $1.nodeData.sVal;
 
                             NodeAddChild($$.treeNode, $3.treeNode);
@@ -486,8 +489,6 @@ R_FOR_INIT_FIELD    :   TOKEN_ID TOKEN_ASSIGN R_EXP                             
                     ;
 
                     
-
-
 R_FOR_ASSIGNMENT_FIELD  :   R_SIMPLE_VAR_ASSIGN           //for( ; ;x++)
                             {
                                 $$.treeNode = $1.treeNode;
@@ -1457,6 +1458,9 @@ R_EOF                       :   TOKEN_EOF
                                     return 0;
                                 }
                             ;
+
+
+
 %%
 
 

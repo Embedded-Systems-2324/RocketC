@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
         {
             (void) executeParser(&pTreeRoot);
             //LOG_WARNING_SHORT("\n-------------------AST-------------------\n\n");
-            //PrintNode(pTreeRoot, 0);
+            //PrintNode(pTreeRoot);
             //LOG_WARNING_SHORT("\n\n-----------------AST END-----------------\n");
         }
     }

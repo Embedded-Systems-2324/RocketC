@@ -170,16 +170,25 @@ void PrintNode(TreeNode_st* pNode)
             printf("Ternary Op \n");
             break;
 
-        case NODE_ARRAY_INDEX:          // review
-            printf("ARRAY INDEX \n");                              
+        case NODE_ARRAY_INDEX:          
+            printf("ARRAY: %s \n", pNode->nodeData.sVal);                              
             break;
 
-        case NODE_TYPE_CAST:                                    
+        case NODE_TYPE_CAST:           
+            printf("TYPECAST \n");                         
+            break;
+
+        case NODE_STRING:
+            printf("STRING: %s", pNode->nodeData.sVal);   
             break;
 
         case NODE_IDENTIFIER:
             printf("Identifier: %s \n", pNode->nodeData.sVal);
             break;
+
+        case NODE_FUNCTION_CALL:
+            printf("Function Call: %s \n", pNode->nodeData.sVal);
+	        break;
 
         case NODE_FUNCTION:
             printf("Function: %s \n", pNode->nodeData.sVal);
@@ -222,7 +231,7 @@ void PrintNode(TreeNode_st* pNode)
             break;
 
         case NODE_GOTO:
-            printf("Goto %s", pNode->nodeData.sVal);
+            printf("Goto %s \n", pNode->nodeData.sVal);
             break;
 
         case NODE_SWITCH:
@@ -230,7 +239,7 @@ void PrintNode(TreeNode_st* pNode)
             break;
 
         case NODE_CASE:
-            printf("CASE: %ld", pNode->nodeData.dVal);
+            printf("CASE: %ld \n", pNode->nodeData.dVal);
             break;
 
         case NODE_DEFAULT:
@@ -245,21 +254,29 @@ void PrintNode(TreeNode_st* pNode)
             }
             printf("\n");
             break;
+        
+        case NODE_POINTER_CONTENT:
+            printf("POINTER CONTENT: %s \n", pNode->nodeData.sVal);
+            break;
+
+        case NODE_REFERENCE:
+            printf("REFERENCE: %s \n", pNode->nodeData.sVal);
+            break;
 
         case NODE_POST_DEC:
-            printf("Post decrementation: %s--", pNode->nodeData.sVal);
+            printf("Post decrementation: %s-- \n", pNode->nodeData.sVal);
             break;
 
         case NODE_PRE_DEC:
-            printf("Pre decrementation: --%s", pNode->nodeData.sVal);
+            printf("Pre decrementation: --%s \n", pNode->nodeData.sVal);
             break;
 
         case NODE_POST_INC:
-            printf("Post incrementation: %s++ ", pNode->nodeData.sVal);
+            printf("Post incrementation: %s++ \n", pNode->nodeData.sVal);
             break;
 
         case NODE_PRE_INC:
-            printf("Pre incrementation: ++%s", pNode->nodeData.sVal);
+            printf("Pre incrementation: ++%s \n", pNode->nodeData.sVal);
             break;
 
         default:
