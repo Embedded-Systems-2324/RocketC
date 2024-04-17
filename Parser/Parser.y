@@ -652,6 +652,7 @@ R_FACTOR    :   TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES            
 
             |   TOKEN_ID                                                        // a
                 {
+                    LOG_WARNING("IDENTIFIER\n");
                     NodeCreate(&($$.treeNode), NODE_IDENTIFIER);
                     $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
                 }
@@ -884,6 +885,17 @@ R_ARR_DECLARATION           :   R_VAR_PREAMBLE TOKEN_ID R_ARR_SIZE TOKEN_SEMI   
                                 }
                             ;   
 
+
+// Rule to assign values to an array.                                                           // Example: 
+R_ARR_ASSIGNMENT            :   TOKEN_ID R_ARR_SIZE R_ASSIGN_OPERATOR R_ARR_ARGS TOKEN_SEMI     // var[1] = {1};
+                                {
+                                    NodeCreate(&($$.treeNode), NODE_POINTER);   // pointer?
+                                    $$.treeNode->nodeData.dVal = 1;
+                                }
+                            ;
+
+
+
 // Dimensions of the array                                                                  // Examples:
 R_ARR_SIZE                  :   TOKEN_LEFT_BRACKET TOKEN_RIGHT_BRACKET                      // []
                                 {
@@ -903,32 +915,13 @@ R_ARR_ARGS                  :   TOKEN_LEFT_BRACE R_EXP_LIST TOKEN_RIGHT_BRACE
                                 }
                             ;
 
-// Rule to assign a value to a variable.                                                        // Example:
-R_VAR_ASSIGNMENT            :   TOKEN_ID R_ASSIGN_OPERATOR R_EXP TOKEN_SEMI                     // var = 1;
-                                {
-                                    NodeCreate(&($$.treeNode), NODE_ASSIGN);
-                                    $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
-
-                                    NodeAddChild($$.treeNode, $3.treeNode);
-                                }
-                            ;      
-
-// Rule to assign values to an array.                                                           // Example: 
-R_ARR_ASSIGNMENT            :   TOKEN_ID R_ARR_SIZE R_ASSIGN_OPERATOR R_ARR_ARGS TOKEN_SEMI     // var[1] = {1};
-                                {
-                                    NodeCreate(&($$.treeNode), NODE_POINTER);   // pointer?
-                                    $$.treeNode->nodeData.dVal = 1;
-                                }
-                            ;
-
-
 
 //--------------------------------------------------------------------------------------------------------------------//
 // Variable Related Rules
 //--------------------------------------------------------------------------------------------------------------------//
 
 // Variable declaration (simple or followed by its assignment).                         // Examples:
-R_VAR_DECLARATION       :   R_VAR_PREAMBLE R_ID_LIST TOKEN_SEMI                                   // int var1, var2;
+R_VAR_DECLARATION       :   R_VAR_PREAMBLE R_ID_LIST TOKEN_SEMI                                   // int var1, var2;    -> int var1, var2;
                             {   
                                 TreeNode_st* pNode =  $2.treeNode;
 
@@ -970,10 +963,51 @@ R_ID_LIST      :   R_ID_LIST TOKEN_COMMA TOKEN_ID
                     }
                 |   TOKEN_ID
                     {
+                        LOG_WARNING("DECLARATION\n");
                         NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
                         $$.nodeData.sVal = $1.nodeData.sVal;
-                    } 
+                    }
                 ;
+
+//--------------------------------------------------------------------------------------------------------------------//
+// VARIABLE ASSIGN
+//--------------------------------------------------------------------------------------------------------------------//           
+
+// Rule to assign a value to a variable.                                                // Example:
+R_VAR_ASSIGNMENT    :   R_SIMPLE_VAR_ASSIGN TOKEN_SEMI
+                        {
+                            $$.treeNode = $1.treeNode;
+                        }
+
+                    |   R_COMPOUND_VAR_ASSIGN TOKEN_SEMI
+                        {
+                            $$.treeNode = $1.treeNode;
+                        }   
+                    ;
+
+
+R_SIMPLE_VAR_ASSIGN :   TOKEN_ID R_ASSIGN_OPERATOR R_EXP                                // var = 1;
+                        {
+                            NodeCreate(&($$.treeNode), NODE_ASSIGN);
+                            $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
+
+                            NodeAddChild($$.treeNode, $3.treeNode);
+                        }
+                    ;
+
+
+R_COMPOUND_VAR_ASSIGN:  TOKEN_ID TOKEN_ASSIGN R_EXP                                     // var &= 1 or += ....;
+                        {
+                            NodeCreate(&($$.treeNode), NODE_ASSIGN);
+                            $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
+
+                            NodeAddChild($$.treeNode, $3.treeNode);
+                        }
+                    ;                                                         
+
+/* ----------------------------------------------------------------- */
+/* ------------------- AFINADO PARA BAIXO -------------------------- */
+/* ----------------------------------------------------------------- */
 
 // Variable declarations can have a visibility qualifier (extern/static), a type qualifier (volatile/const), a sign qualifier.
 // (signed/unsigned) and must explicitly specify a type (short, int, float...).                                             // Examples:
@@ -1158,14 +1192,8 @@ R_BITWISE_OPERATOR      :   TOKEN_BITWISE_AND                       // &
                             }
                         ;
 
-// Assign operators                                                 // Operators:
-R_ASSIGN_OPERATOR       :   TOKEN_ASSIGN                            // =
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
-                                $$.treeNode->nodeData.dVal = OP_ASSIGN;
-                            }
-
-                        |   TOKEN_PLUS_ASSIGN                       // +=
+// Assign operators                                                  // Operators:
+R_COMPOUND_ASSIGN_OPERATOR :TOKEN_PLUS_ASSIGN                       // +=
                             {
                                 NodeCreate(&($$.treeNode), NODE_OPERATOR);
                                 $$.treeNode->nodeData.dVal = OP_PLUS_ASSIGN;
@@ -1244,24 +1272,14 @@ R_TYPE_ALL                  :   R_TYPE
                             ;
 
 
-/* ---------------PTR ABAIXO NÃO IMPLEMENTADO ---------------*/ 
-
-// Standard C data types but with pointer. This rule implements support for pointers of n length. Example: int*** ...
-R_TYPE_PTR                  :   R_TYPE_PTR TOKEN_ASTERISK
-                                {
-                                    $$.treeNode->nodeData.dVal++;
-                                }
-
-                            |   R_TYPE TOKEN_ASTERISK
+// Standard C data types but with pointer.
+R_TYPE_PTR                  :   R_TYPE TOKEN_ASTERISK
                                 {  
                                     NodeCreate(&($$.treeNode), NODE_POINTER);
-                                    $$.treeNode->nodeData.dVal = 1;
 
                                     NodeAddChild($$.treeNode, $1.treeNode);                                
                                 }
-                            ;                            
-
-/* ---------------PTR ACIMA NÃO IMPLEMENTADO ---------------*/            
+                            ;                                      
            
             
 // Standard C data types. 

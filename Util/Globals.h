@@ -88,15 +88,20 @@ typedef enum
 
 typedef enum
 {
-    NODE_PARAM = 0,          // 0
+    NODE_SIGN = 0,
+    NODE_MISC,
+    NODE_VISIBILITY,  
+    NODE_MODIFIER, 
+    NODE_TYPE,            
+
+
+    NODE_PARAM,          // 0
 
     NODE_VAR_DECLARATION,    // 1
     NODE_VAR_NAME,           // 2
-    NODE_MISC,               // 3
-    NODE_VISIBILITY,         // 4
-    NODE_MODIFIER,           // 5
-    NODE_SIGN,               // 6
-    NODE_TYPE,               // 7
+
+    
+                 // 7
     NODE_OPERATOR,           // 8
     NODE_TERNARY,            // 9
     NODE_ARRAY_INDEX,        // 10
