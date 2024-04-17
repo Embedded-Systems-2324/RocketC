@@ -120,7 +120,8 @@ typedef enum
     NODE_RETURN,             // 22
     NODE_CONTINUE,           // 23
     NODE_BREAK,              // 24
-    NODE_GOTO,               // 25
+    NODE_GOTO,
+    NODE_LABEL,               // 25
     NODE_SWITCH,             // 26
     NODE_CASE,               // 27
     NODE_DEFAULT,            // 28

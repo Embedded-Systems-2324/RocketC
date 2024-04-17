@@ -67,55 +67,55 @@ expo        [eE]{sign}?
 whitespace  [ \t]+
 
 %%
-"break"         { LOG_DEBUG_SHORT("BREAK ");                 return TOKEN_BREAK;}
-"case"          { LOG_DEBUG_SHORT("CASE ");                  return TOKEN_CASE;        }
-"char"          { LOG_DEBUG_SHORT("CHAR ");                  return TOKEN_CHAR;        }
-"const"         { LOG_DEBUG_SHORT("CONST ");                 return TOKEN_CONSTANT;    }
-"continue"      { LOG_DEBUG_SHORT("CONTINUE ");              return TOKEN_CONTINUE;    }
-"default"       { LOG_DEBUG_SHORT("DEFAULT ");               return TOKEN_DEFAULT;     }
-"do"            { LOG_DEBUG_SHORT("DO ");                    return TOKEN_DO;          }
-"double"        { LOG_DEBUG_SHORT("DOUBLE ");                return TOKEN_DOUBLE;      }
-"if"            { LOG_DEBUG_SHORT("IF ");                    return TOKEN_IF;          }
-"else"          { LOG_DEBUG_SHORT("ELSE ");                  return TOKEN_ELSE;        }
-"enum"          { LOG_DEBUG_SHORT("ENUM ");                  return TOKEN_ENUM;        }
-"extern"        { LOG_DEBUG_SHORT("EXTERN ");                return TOKEN_EXTERN;      }
-"float"         { LOG_DEBUG_SHORT("FLOAT ");                 return TOKEN_FLOAT;       }
-"for"           { LOG_DEBUG_SHORT("FOR ");                   return TOKEN_FOR;         }
-"goto"          { LOG_DEBUG_SHORT("GOTO ");                  return TOKEN_GOTO;        }
-"long"          { LOG_DEBUG_SHORT("LONG ");                  return TOKEN_LONG;        }
-"int"           { LOG_DEBUG_SHORT("INT ");                   return TOKEN_INT;         }
-"register"      { LOG_DEBUG_SHORT("REGISTER ");              return TOKEN_REGISTER;    }
-"return"        { LOG_DEBUG_SHORT("RETURN ");                return TOKEN_RETURN;      }
-"short"         { LOG_DEBUG_SHORT("SHORT ");                 return TOKEN_SHORT;       }
-"signed"        { LOG_DEBUG_SHORT("SIGNED ");                return TOKEN_SIGNED;      }
-"sizeof"        { LOG_DEBUG_SHORT("SIZEOF ");                return TOKEN_SIZEOF;      }
-"static"        { LOG_DEBUG_SHORT("STATIC ");                return TOKEN_STATIC;      }
-"struct"        { LOG_DEBUG_SHORT("STRUCT ");                return TOKEN_STRUCT;      }
-"switch"        { LOG_DEBUG_SHORT("SWITCH ");                return TOKEN_SWITCH;      }
-"typedef"       { LOG_DEBUG_SHORT("TYPEDEF ");               return TOKEN_TYPEDEF;     }
-"union"         { LOG_DEBUG_SHORT("UNION ");                 return TOKEN_UNION;       }
-"unsigned"      { LOG_DEBUG_SHORT("UNSIGNED ");              return TOKEN_UNSIGNED;    }
-"void"          { LOG_DEBUG_SHORT("VOID ");                  return TOKEN_VOID;        }
-"volatile"      { LOG_DEBUG_SHORT("VOLATILE ");              return TOKEN_VOLATILE;    }
-"while"         { LOG_DEBUG_SHORT("WHILE ");                 return TOKEN_WHILE;       }
-"+"             { LOG_DEBUG_SHORT("PLUS ");                  return TOKEN_PLUS;        }
-"-"             { LOG_DEBUG_SHORT("MINUS ");                 return TOKEN_MINUS;       }
-"*"             { LOG_DEBUG_SHORT("ASTERISK ");              return TOKEN_ASTERISK;    }
-"/"             { LOG_DEBUG_SHORT("OVER ");                  return TOKEN_OVER;        }
-"%"             { LOG_DEBUG_SHORT("PERCENT ");               return TOKEN_PERCENT;     }
-"++"            { LOG_DEBUG_SHORT("INCREMENT ");             return TOKEN_INCREMENT;   }
-"--"            { LOG_DEBUG_SHORT("DECREMENT ");             return TOKEN_DECREMENT;   }
-"&"             { LOG_DEBUG_SHORT("BITWISE_AND ");           return TOKEN_BITWISE_AND; }
-"|"             { LOG_DEBUG_SHORT("BITWISE_OR ");            return TOKEN_BITWISE_OR;  }
-"~"             { LOG_DEBUG_SHORT("BITWISE_NOT ");           return TOKEN_BITWISE_NOT; }
-"^"             { LOG_DEBUG_SHORT("BITWISE_XOR ");           return TOKEN_BITWISE_XOR; }
-"!"             { LOG_DEBUG_SHORT("LOGICAL_NOT ");           return TOKEN_LOGICAL_NOT; }
-"&&"            { LOG_DEBUG_SHORT("LOGICAL_AND ");           return TOKEN_LOGICAL_AND; }
-"||"            { LOG_DEBUG_SHORT("LOGICAL_OR ");            return TOKEN_LOGICAL_OR;  }
-"=="            { LOG_DEBUG_SHORT("EQUAL ");                 return TOKEN_EQUAL;       }
-"!="            { LOG_DEBUG_SHORT("NOT_EQUAL ");             return TOKEN_NOT_EQUAL;   }
-"<"             { LOG_DEBUG_SHORT("LESS_THAN ");             return TOKEN_LESS_THAN;   }
-">"             { LOG_DEBUG_SHORT("GREATER_THAN ");          return TOKEN_GREATER_THAN;}
+"break"         { LOG_DEBUG_SHORT("BREAK ");                 return TOKEN_BREAK;        }
+"case"          { LOG_DEBUG_SHORT("CASE ");                  return TOKEN_CASE;         }
+"char"          { LOG_DEBUG_SHORT("CHAR ");                  return TOKEN_CHAR;         }
+"const"         { LOG_DEBUG_SHORT("CONST ");                 return TOKEN_CONSTANT;     }
+"continue"      { LOG_DEBUG_SHORT("CONTINUE ");              return TOKEN_CONTINUE;     }
+"default"       { LOG_DEBUG_SHORT("DEFAULT ");               return TOKEN_DEFAULT;      }
+"do"            { LOG_DEBUG_SHORT("DO ");                    return TOKEN_DO;           }
+"double"        { LOG_DEBUG_SHORT("DOUBLE ");                return TOKEN_DOUBLE;       }
+"if"            { LOG_DEBUG_SHORT("IF ");                    return TOKEN_IF;           }
+"else"          { LOG_DEBUG_SHORT("ELSE ");                  return TOKEN_ELSE;         }
+"enum"          { LOG_DEBUG_SHORT("ENUM ");                  return TOKEN_ENUM;         }
+"extern"        { LOG_DEBUG_SHORT("EXTERN ");                return TOKEN_EXTERN;       }    
+"float"         { LOG_DEBUG_SHORT("FLOAT ");                 return TOKEN_FLOAT;        }
+"for"           { LOG_DEBUG_SHORT("FOR ");                   return TOKEN_FOR;          }
+"goto"          { LOG_DEBUG_SHORT("GOTO ");                  return TOKEN_GOTO;         }
+"long"          { LOG_DEBUG_SHORT("LONG ");                  return TOKEN_LONG;         }
+"int"           { LOG_DEBUG_SHORT("INT ");                   return TOKEN_INT;          }
+"register"      { LOG_DEBUG_SHORT("REGISTER ");              return TOKEN_REGISTER;     }
+"return"        { LOG_DEBUG_SHORT("RETURN ");                return TOKEN_RETURN;       }
+"short"         { LOG_DEBUG_SHORT("SHORT ");                 return TOKEN_SHORT;        }
+"signed"        { LOG_DEBUG_SHORT("SIGNED ");                return TOKEN_SIGNED;       }
+"sizeof"        { LOG_DEBUG_SHORT("SIZEOF ");                return TOKEN_SIZEOF;       }
+"static"        { LOG_DEBUG_SHORT("STATIC ");                return TOKEN_STATIC;       }
+"struct"        { LOG_DEBUG_SHORT("STRUCT ");                return TOKEN_STRUCT;       }
+"switch"        { LOG_DEBUG_SHORT("SWITCH ");                return TOKEN_SWITCH;       }
+"typedef"       { LOG_DEBUG_SHORT("TYPEDEF ");               return TOKEN_TYPEDEF;      }
+"union"         { LOG_DEBUG_SHORT("UNION ");                 return TOKEN_UNION;        }
+"unsigned"      { LOG_DEBUG_SHORT("UNSIGNED ");              return TOKEN_UNSIGNED;     }
+"void"          { LOG_DEBUG_SHORT("VOID ");                  return TOKEN_VOID;         }
+"volatile"      { LOG_DEBUG_SHORT("VOLATILE ");              return TOKEN_VOLATILE;     }
+"while"         { LOG_DEBUG_SHORT("WHILE ");                 return TOKEN_WHILE;        }
+"+"             { LOG_DEBUG_SHORT("PLUS ");                  return TOKEN_PLUS;         }
+"-"             { LOG_DEBUG_SHORT("MINUS ");                 return TOKEN_MINUS;        }
+"*"             { LOG_DEBUG_SHORT("ASTERISK ");              return TOKEN_ASTERISK;     }
+"/"             { LOG_DEBUG_SHORT("OVER ");                  return TOKEN_OVER;         }
+"%"             { LOG_DEBUG_SHORT("PERCENT ");               return TOKEN_PERCENT;      }
+"++"            { LOG_DEBUG_SHORT("INCREMENT ");             return TOKEN_INCREMENT;    }
+"--"            { LOG_DEBUG_SHORT("DECREMENT ");             return TOKEN_DECREMENT;    }
+"&"             { LOG_DEBUG_SHORT("BITWISE_AND ");           return TOKEN_BITWISE_AND;  }
+"|"             { LOG_DEBUG_SHORT("BITWISE_OR ");            return TOKEN_BITWISE_OR;   }
+"~"             { LOG_DEBUG_SHORT("BITWISE_NOT ");           return TOKEN_BITWISE_NOT;  }
+"^"             { LOG_DEBUG_SHORT("BITWISE_XOR ");           return TOKEN_BITWISE_XOR;  }
+"!"             { LOG_DEBUG_SHORT("LOGICAL_NOT ");           return TOKEN_LOGICAL_NOT;  }
+"&&"            { LOG_DEBUG_SHORT("LOGICAL_AND ");           return TOKEN_LOGICAL_AND;  }
+"||"            { LOG_DEBUG_SHORT("LOGICAL_OR ");            return TOKEN_LOGICAL_OR;   }
+"=="            { LOG_DEBUG_SHORT("EQUAL ");                 return TOKEN_EQUAL;        }
+"!="            { LOG_DEBUG_SHORT("NOT_EQUAL ");             return TOKEN_NOT_EQUAL;    }
+"<"             { LOG_DEBUG_SHORT("LESS_THAN ");             return TOKEN_LESS_THAN;    }
+">"             { LOG_DEBUG_SHORT("GREATER_THAN ");          return TOKEN_GREATER_THAN; }
 "<="            { LOG_DEBUG_SHORT("LESS_THAN_OR_EQUAL ");    return TOKEN_LESS_THAN_OR_EQUAL;    }
 ">="            { LOG_DEBUG_SHORT("GREATER_THAN_OR_EQUAL "); return TOKEN_GREATER_THAN_OR_EQUAL; }
 ">>"            { LOG_DEBUG_SHORT("RIGHT_SHIFT ");           return TOKEN_RIGHT_SHIFT;           }
@@ -145,27 +145,27 @@ whitespace  [ \t]+
 "->"            { LOG_DEBUG_SHORT("ARROW ");                 return TOKEN_ARROW;                 }
 "\0"            { return TOKEN_EOF; }
 
-{char}          { LOG_DEBUG_SHORT("CHAR "); yylval.nodeData.dVal = (long int) yytext[0]; return TOKEN_NUM;}
-{binNumber}     { LOG_DEBUG_SHORT("BIN_NUM "); yylval.nodeData.dVal = strtol(yytext, NULL, 2); return TOKEN_NUM;}
-{hexNumber}     { LOG_DEBUG_SHORT("HEX_NUM "); yylval.nodeData.dVal = strtol(yytext, NULL, 16); return TOKEN_NUM;}
-{number}        { LOG_DEBUG_SHORT("NUM ");     yylval.nodeData.dVal = strtol(yytext, NULL, 10); return TOKEN_NUM; }
-{string}        { LOG_DEBUG_SHORT("STR "); StringCreateAndCopy(&(yylval.nodeData.sVal), yytext, 0); return TOKEN_STR; }
-{identifier}    { LOG_DEBUG_SHORT("ID "); StringCreateAndCopy(&(yylval.nodeData.sVal), yytext, 0); return TOKEN_ID;  }
-{floatNumber}   { LOG_DEBUG_SHORT("FNUM ");    yylval.nodeData.fVal = strtod(yytext, NULL); return TOKEN_FNUM;}
-{newline}       { LOG_DEBUG_SHORT(" \n");      incrementLineNumber(1);}
+{char}          { LOG_DEBUG_SHORT("CHAR ");     yylval.nodeData.dVal = (long int) yytext[0];            return TOKEN_NUM; }
+{binNumber}     { LOG_DEBUG_SHORT("BIN_NUM ");  yylval.nodeData.dVal = strtol(yytext, NULL, 2);         return TOKEN_NUM; }
+{hexNumber}     { LOG_DEBUG_SHORT("HEX_NUM ");  yylval.nodeData.dVal = strtol(yytext, NULL, 16);        return TOKEN_NUM; }
+{number}        { LOG_DEBUG_SHORT("NUM ");      yylval.nodeData.dVal = strtol(yytext, NULL, 10);        return TOKEN_NUM; }
+{string}        { LOG_DEBUG_SHORT("STR ");      StringCreateAndCopy(&(yylval.nodeData.sVal),yytext,0);  return TOKEN_STR; }
+{identifier}    { LOG_DEBUG_SHORT("ID ");       StringCreateAndCopy(&(yylval.nodeData.sVal),yytext,0);  return TOKEN_ID;  }
+{floatNumber}   { LOG_DEBUG_SHORT("FNUM ");     yylval.nodeData.fVal = strtod(yytext, NULL);            return TOKEN_FNUM;}
+{newline}       { LOG_DEBUG_SHORT(" \n");       incrementLineNumber(1);}
 {whitespace}    { /*  ignore */}
 
-"//".*         { /* When "//" is found, zero or more occurrences of any character are ignored */}
+"//".*          { /* When "//" is found, zero or more occurrences of any character are ignored */}
 
 <INITIAL>{      // INITIAL Lexical state
-  "/*"          { LOG_DEBUG_SHORT(" [In comment]");} BEGIN(INCOMMENT);
+  "/*"          { LOG_DEBUG_SHORT(" [In comment]");}    BEGIN(INCOMMENT);
 }
 
 <INCOMMENT>{    // INCOMMENT Lexical state
   <<EOF>>       { LOG_DEBUG_SHORT(" Error: Unterminated comment\n");
                   return TOKEN_ERROR;
                 }
-  "*/"          { LOG_DEBUG_SHORT(" [Out comment]");}BEGIN(INITIAL);
+  "*/"          { LOG_DEBUG_SHORT(" [Out comment]");}   BEGIN(INITIAL);
   "\n"          { incrementLineNumber(1);};
   [^*\n]+       ; // Consume characters within the comment block
 }
