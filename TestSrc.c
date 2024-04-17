@@ -1,49 +1,83 @@
+int ze = 0;
 
-static int foo;
-const int bar;
-const unsigned int myVar;
-int var,x,y,w;
-
-static int a = 99;
-
-int ze(){
-    int x;
-    int a[2];
-}
-
-int *ptr = a;
-
-
-
-
-int foobar(int var, char arroz)
+unsigned int Zelensky (int ze)
 {
-    int i;
-    for (i=0;i>10;i++)
+    int i = 0;
+    for ( i = 0; i < 10; i++)
     {
-        a+=i;
+        ze ++;
     }
-
-    do{
-        a = 1;
-    }
-    while(i < 9);
-
-    ze(2, x, &t);
-
-    switch (x)
-    {
-    case 2:
-        ze();
-        break;
     
-    default:
-        //continue;
-        ze();
-        break;
+    return ze;
+}
+
+
+float print()
+{
+    int x = 0;
+    
+    float y;
+
+    if(x == 0){
+        f = 0;
+        
+        switch(d){
+            case 2:
+                g(f, f, f, 4+5);
+                Zelensky (ze);
+                break;
+
+            default:
+                break;
+        }
+
+        while(1);
     }
 }
 
-const int x, y;
 
-static int z;
+float print()
+{
+    int x = 0;
+    
+    float y;
+
+    if(x == 0){
+        f = 0;
+        
+        switch(d){
+            case 2:
+                g(f, f, f, 4+5);
+                break;
+
+            default:
+                break;
+        }
+
+        while(1);
+    }
+}
+
+
+
+float print()
+{
+    int x = 0;
+    
+    float y;
+
+    if(x == 0){
+        f = 0;
+        
+        switch(d){
+            case 2:
+                g(f, f, f, 4+5);
+                break;
+
+            default:
+                break;
+        }
+
+        while(1);
+    }
+}

@@ -49,6 +49,7 @@ int NodeCreate(TreeNode_st** ppNewNode, NodeType_et nodeType)
     pNode = (TreeNode_st*) (*(ppNewNode));
 
     pNode->nodeType = nodeType;
+
     pNode->lineNumber = getLineNumber();
 
     return 0;
@@ -140,6 +141,10 @@ void PrintNode(TreeNode_st* pNode)
         switch (pNode->nodeType) {
         case NODE_VAR_DECLARATION:                              
             printf("Var Declaration: %s \n", pNode->nodeData.sVal);
+            break;
+
+        case NODE_ARRAY_DECLARATION:
+            printf("Array Declaration: %s \n", pNode->nodeData.sVal);
             break;
 
         case NODE_MISC:                                               

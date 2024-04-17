@@ -124,9 +124,11 @@ TreeNode_st* pTreeRoot;
 %%
 
 // Rules for the overall program
-R_PROGRAM               :   R_PROGRAM R_EOF 
+R_PROGRAM               :   R_PROGRAM TOKEN_EOF 
                             {
                                 pTreeRoot = $1.treeNode;
+                                LOG_DEBUG("Reached end of file!\n");
+                                return 0;
                             }
                         |   R_PROGRAM R_GLOBAL_STATEMENT 
                             {
@@ -150,7 +152,6 @@ R_PROGRAM               :   R_PROGRAM R_EOF
                         |   R_GLOBAL_STATEMENT
                             {
                                 $$.treeNode = $1.treeNode;
-                                pTreeRoot = $$.treeNode;
                             }
                         ;
 
@@ -277,7 +278,12 @@ R_LOCAL_STATEMENT       :   R_IF_STATEMENT
                         |   R_FUNC_CALL   
                             {
                                 $$.treeNode = $1.treeNode;
-                            }                      
+                            }   
+
+                        |   R_INC_DEC TOKEN_SEMI
+                            {
+                                $$.treeNode = $1.treeNode;
+                            }                       
                         ;
 
 
@@ -314,7 +320,7 @@ R_BREAK     :   TOKEN_BREAK TOKEN_SEMI          // break;
 R_GOTO      :   TOKEN_GOTO R_LABEL TOKEN_SEMI   // goto label;
                 {
                     NodeCreate(&($$.treeNode), NODE_GOTO);
-                    $$.nodeData.sVal = $2.nodeData.sVal;
+                    $$.treeNode->nodeData.sVal = $2.nodeData.sVal;
                 }
             ;
 
@@ -331,7 +337,21 @@ R_SWITCH    :   TOKEN_SWITCH TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESE
 // A SWITCH body can be composed by: a list of cases, a default only, or a list of cases and a default 
 R_SWITCH_BODY   :   R_CASE_LIST R_DEFAULT                    // case 0:  ... default: ...
                     {
-                        $1.treeNode->pSibling = $2.treeNode;
+                        TreeNode_st* pNode = $1.treeNode;
+
+                        if (pNode != NULL)
+                        { 
+                            while (pNode->pSibling != NULL)
+                            {
+                                pNode = pNode->pSibling;    
+                            }                                        
+                            pNode->pSibling = $2.treeNode;
+                            $$.treeNode = $1.treeNode; 
+                        }
+                        else
+                        {
+                            $$.treeNode = $2.treeNode;
+                        }
                         $$.treeNode = $1.treeNode;
                     }
 
@@ -350,7 +370,22 @@ R_SWITCH_BODY   :   R_CASE_LIST R_DEFAULT                    // case 0:  ... def
 // One or multiple CASEs                   // Examples:
 R_CASE_LIST     :   R_CASE_LIST R_CASE     // case 0: ... case 1: ... case 2: ...
                     {
-                        $$.treeNode->pSibling = $1.treeNode;
+                        TreeNode_st* pNode = $1.treeNode;
+
+                        if (pNode != NULL)
+                        { 
+                            while (pNode->pSibling != NULL)
+                            {
+                                pNode = pNode->pSibling;    
+                            }                                        
+                            pNode->pSibling = $2.treeNode;
+                            $$.treeNode = $1.treeNode; 
+                        }
+                        else
+                        {
+                            $$.treeNode = $2.treeNode;
+                        }
+                        $$.treeNode = $1.treeNode;
                     }
 
                 |   R_CASE                 // case 0: ...
@@ -364,7 +399,7 @@ R_CASE_LIST     :   R_CASE_LIST R_CASE     // case 0: ... case 1: ... case 2: ..
 R_CASE          :   TOKEN_CASE TOKEN_NUM TOKEN_COLON R_LOCAL_STATEMENT_LIST
                     {
                         NodeCreate(&($$.treeNode), NODE_CASE);
-                        $$.nodeData.dVal = $2.nodeData.dVal;
+                        $$.treeNode->nodeData.dVal = $2.nodeData.dVal;
 
                         NodeAddChild($$.treeNode, $4.treeNode);
                     }
@@ -563,10 +598,24 @@ R_EXP_LIST  :   %empty
                     $$.treeNode = NULL;
                 }
             
-            |    R_EXP_LIST TOKEN_COMMA R_EXP                // exp , exp
+            |   R_EXP_LIST TOKEN_COMMA R_EXP                // exp , exp
                 {
-                    $1.treeNode->pSibling = $3.treeNode;
-                    $$.treeNode = $1.treeNode;
+                    TreeNode_st* pNode = $1.treeNode;
+
+                    if (pNode != NULL)
+                    { 
+                        while (pNode->pSibling != NULL)
+                        {
+                            pNode = pNode->pSibling;    
+                        }                                        
+                        pNode->pSibling = $3.treeNode;
+                        $$.treeNode = $1.treeNode; 
+                    }
+                    else
+                    {
+                        $$.treeNode = $3.treeNode;
+                    }
+                    pTreeRoot = $$.treeNode;
                 }
 
             |   R_EXP                                       // exp
@@ -689,6 +738,8 @@ R_VAR_DECLARATION       :   R_VAR_PREAMBLE R_ID_LIST TOKEN_SEMI                 
                             {   
                                 TreeNode_st* pNode =  $2.treeNode;
                                 
+                                LOG_WARNING("-> %d", pNode->nodeType);
+
                                 do{
                                     if(pNode->nodeType == NODE_VAR_DECLARATION){
                                         NodeAddChild(pNode, $1.treeNode);
@@ -789,16 +840,17 @@ R_ID_LIST      :    R_ID_LIST TOKEN_COMMA TOKEN_ID
                         pNode = $1.treeNode->pChilds;   //Var indentifier - first child
 
                         NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-                        $$.nodeData.sVal = pNode->nodeData.sVal;
+                        $$.treeNode->nodeData.sVal = pNode->nodeData.sVal;
 
                         $$.treeNode->pSibling = $1.treeNode;
                     }
 
                 |   TOKEN_ID
                     {
-                        LOG_WARNING("DECLARATION\n");
                         NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
-                        $$.nodeData.sVal = $1.nodeData.sVal;
+                        $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
+
+                        LOG_WARNING("--> %d\n", $$.treeNode->nodeType);
                     }
                 ;
 
@@ -1263,7 +1315,7 @@ R_BITWISE_OPERATOR      :   TOKEN_BITWISE_AND                       // &
                         ;
 
 // Assign operators                                                  // Operators:
-R_COMPOUND_ASSIGN_OPERATOR :TOKEN_PLUS_ASSIGN                       // +=
+R_COMPOUND_ASSIGN_OPERATOR: TOKEN_PLUS_ASSIGN                       // +=
                             {
                                 NodeCreate(&($$.treeNode), NODE_OPERATOR);
                                 $$.treeNode->nodeData.dVal = OP_PLUS_ASSIGN;
@@ -1450,15 +1502,6 @@ R_SIGN_QUALIFIER            :   TOKEN_SIGNED
                                     $$.treeNode->nodeData.dVal = (long int) SIGN_UNSIGNED;
                                 }
                             ;
-
-// End of file (EOF).
-R_EOF                       :   TOKEN_EOF
-                                {
-                                    LOG_DEBUG("Reached end of file!\n");
-                                    return 0;
-                                }
-                            ;
-
 
 
 %%
