@@ -220,16 +220,6 @@ R_LOCAL_STATEMENT       :   R_IF_STATEMENT
                                 $$.treeNode = $1.treeNode;
                             }
 
-                        |   R_CASE
-                            {
-                                $$.treeNode = $1.treeNode;
-                            }
-
-                        |   R_DEFAULT
-                            {
-                                $$.treeNode = $1.treeNode;
-                            }
-
                         |   R_BREAK
                             {
                                 $$.treeNode = $1.treeNode;
@@ -352,7 +342,6 @@ R_SWITCH_BODY   :   R_CASE_LIST R_DEFAULT                    // case 0:  ... def
                         {
                             $$.treeNode = $2.treeNode;
                         }
-                        $$.treeNode = $1.treeNode;
                     }
 
                 |   R_CASE_LIST                             //Examples:     // case 0:  ... case 1: ...
@@ -385,7 +374,6 @@ R_CASE_LIST     :   R_CASE_LIST R_CASE     // case 0: ... case 1: ... case 2: ..
                         {
                             $$.treeNode = $2.treeNode;
                         }
-                        $$.treeNode = $1.treeNode;
                     }
 
                 |   R_CASE                 // case 0: ...
@@ -737,12 +725,14 @@ R_STRUCT_BODY           :   R_STRUCT_BODY R_VAR_DECLARATION
 R_VAR_DECLARATION       :   R_VAR_PREAMBLE R_ID_LIST TOKEN_SEMI                         // int var1, var2;    -> int var1, var2;
                             {   
                                 TreeNode_st* pNode =  $2.treeNode;
-                                
-                                LOG_WARNING("-> %d", pNode->nodeType);
+
+                                TreeNode_st nodePreambleCopy;
+                                memcpy(&nodePreambleCopy, $1.treeNode, sizeof(TreeNode_st));
+                                free($1.treeNode);
 
                                 do{
                                     if(pNode->nodeType == NODE_VAR_DECLARATION){
-                                        NodeAddChild(pNode, $1.treeNode);
+                                        NodeAddChildCopy(pNode, &nodePreambleCopy);
                                     }
 
                                     pNode = pNode->pSibling;    
@@ -1090,7 +1080,6 @@ R_FACTOR    :   TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES            
 
             |   TOKEN_ID                                                        // a
                 {
-                    LOG_WARNING("IDENTIFIER\n");
                     NodeCreate(&($$.treeNode), NODE_IDENTIFIER);
                     $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
                 }
@@ -1456,6 +1445,11 @@ R_TYPE                      :   TOKEN_CHAR                                      
                                     NodeCreate(&($$.treeNode), NODE_TYPE);
                                     $$.treeNode->nodeData.dVal = TYPE_LONG_DOUBLE;
                                 }
+                            |   TOKEN_VOID 
+                                {
+                                    NodeCreate(&($$.treeNode), NODE_TYPE);
+                                    $$.treeNode->nodeData.dVal = TYPE_VOID;
+                                }   
                             ;
 
 

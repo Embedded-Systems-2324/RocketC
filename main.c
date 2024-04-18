@@ -72,9 +72,9 @@ int main(int argc, char *argv[])
         else if (strcmp(pMode, "--parse") == 0)
         {
             (void) executeParser(&pTreeRoot);
-            //LOG_WARNING_SHORT("\n-------------------AST-------------------\n\n");
+            LOG_WARNING_SHORT("\n-------------------AST-------------------\n\n");
             PrintNode(pTreeRoot);
-            //LOG_WARNING_SHORT("\n\n-----------------AST END-----------------\n");
+            LOG_WARNING_SHORT("\n\n-----------------AST END-----------------\n");
         }
     }
     else

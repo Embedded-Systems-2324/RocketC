@@ -1,83 +1,27 @@
-int ze = 0;
+static const unsigned int complexVar; 
 
-unsigned int Zelensky (int ze)
-{
-    int i = 0;
-    for ( i = 0; i < 10; i++)
-    {
-        ze ++;
-    }
-    
-    return ze;
+extern float fVar, fVAr3, fVar4;
+
+void function (int x, float y);
+
+int main(){
+    function(24, 3.5);
+    return 0;
 }
 
-
-float print()
+void function(int x, float y)
 {
-    int x = 0;
-    
-    float y;
-
-    if(x == 0){
-        f = 0;
-        
-        switch(d){
-            case 2:
-                g(f, f, f, 4+5);
-                Zelensky (ze);
-                break;
-
-            default:
-                break;
-        }
-
-        while(1);
+    if (x > y) {
+        y++;
     }
-}
-
-
-float print()
-{
-    int x = 0;
-    
-    float y;
-
-    if(x == 0){
-        f = 0;
-        
-        switch(d){
-            case 2:
-                g(f, f, f, 4+5);
-                break;
-
-            default:
-                break;
-        }
-
-        while(1);
+    else if (x < y){
+        y += 2;
     }
+    else {
+        y = (3 / x);
+    }
+    return;
 }
 
 
 
-float print()
-{
-    int x = 0;
-    
-    float y;
-
-    if(x == 0){
-        f = 0;
-        
-        switch(d){
-            case 2:
-                g(f, f, f, 4+5);
-                break;
-
-            default:
-                break;
-        }
-
-        while(1);
-    }
-}

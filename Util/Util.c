@@ -49,7 +49,6 @@ int NodeCreate(TreeNode_st** ppNewNode, NodeType_et nodeType)
     pNode = (TreeNode_st*) (*(ppNewNode));
 
     pNode->nodeType = nodeType;
-
     pNode->lineNumber = getLineNumber();
 
     return 0;
@@ -103,6 +102,29 @@ int NodeAddNewChild(TreeNode_st* pParent, TreeNode_st** ppNewChild, NodeType_et 
 }
 
 
+
+int NodeAddChildCopy(TreeNode_st* pParent, TreeNode_st *pChild)
+{
+    TreeNode_st* pTemp;
+
+    if (!pParent)
+        return -EINVAL;
+
+    pTemp = reallocarray(pParent->pChilds, pParent->childNumber + 1, sizeof(TreeNode_st));
+    if (!pTemp)
+    {
+        LOG_ERROR("Failed to allocate memory while trying to add a new child!\n");
+        return -ENOMEM;
+    }
+
+    pParent->pChilds = pTemp;
+    memcpy(&pParent->pChilds[pParent->childNumber++], pChild, sizeof(TreeNode_st));
+
+    return 0;
+}
+
+
+
 int StringCreateAndCopy(char** ppDest, char* pSrc, size_t strLen)
 {
     if (!ppDest || !pSrc)
@@ -140,11 +162,7 @@ void PrintNode(TreeNode_st* pNode)
         
         switch (pNode->nodeType) {
         case NODE_VAR_DECLARATION:                              
-            printf("Var Declaration: %s \n", pNode->nodeData.sVal);
-            break;
-
-        case NODE_ARRAY_DECLARATION:
-            printf("Array Declaration: %s \n", pNode->nodeData.sVal);
+            printf("VAR DECLARATION: %s \n", pNode->nodeData.sVal);
             break;
 
         case NODE_MISC:                                               
@@ -152,27 +170,27 @@ void PrintNode(TreeNode_st* pNode)
             break;
 
         case NODE_VISIBILITY:                                          
-            printf("Storage Qualifier: %s \n", VisQualifierStrings[pNode->nodeData.dVal]);
+            printf("VISIBILITY QUALIFIER: %s \n", VisQualifierStrings[pNode->nodeData.dVal]);
             break;
 
         case NODE_MODIFIER:                                           
-            printf("Mod Qualifier: %s \n", ModQualifierStrings[pNode->nodeData.dVal]);
+            printf("MOD QUALIFIER: %s \n", ModQualifierStrings[pNode->nodeData.dVal]);
             break;
 
         case NODE_SIGN:                                              
-            printf("Sign Qualifier: %s \n", SignQualifierStrings[pNode->nodeData.dVal]);
+            printf("SIGN QUALIFIER: %s \n", SignQualifierStrings[pNode->nodeData.dVal]);
             break;
 
         case NODE_TYPE:               
-            printf("Type: %s \n", VarTypeStrings[pNode->nodeData.dVal]);
+            printf("TYPE: %s \n", VarTypeStrings[pNode->nodeData.dVal]);
             break;
 
         case NODE_OPERATOR:                                              
-            printf("Operator: %s \n", OperatorStrings[pNode->nodeData.dVal]);
+            printf("OPERATOR: %s \n", OperatorStrings[pNode->nodeData.dVal]);
             break;
 
         case NODE_TERNARY:    
-            printf("Ternary Op \n");
+            printf("TERNARY OERATION \n");
             break;
 
         case NODE_ARRAY_INDEX:          
@@ -217,10 +235,6 @@ void PrintNode(TreeNode_st* pNode)
 
         case NODE_DO_WHILE:
             printf("DO WHILE \n");
-            break;
-
-        case NODE_FOR:
-            printf("FOR \n");
             break;
 
         case NODE_RETURN:

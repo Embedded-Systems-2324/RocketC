@@ -54,7 +54,8 @@ typedef enum
     TYPE_LONG,
     TYPE_FLOAT,
     TYPE_DOUBLE,
-    TYPE_LONG_DOUBLE
+    TYPE_LONG_DOUBLE, 
+    TYPE_VOID
 }VarType_et;
 
 typedef enum
@@ -104,8 +105,7 @@ typedef enum
 
     NODE_IF,               
     NODE_WHILE,            
-    NODE_DO_WHILE,           
-    NODE_FOR,                
+    NODE_DO_WHILE,                           
     NODE_RETURN,             
     NODE_CONTINUE,           
     NODE_BREAK,
