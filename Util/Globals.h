@@ -48,7 +48,7 @@ typedef enum
 
 typedef enum
 {
-    TYPE_CHAR,
+    TYPE_CHAR = 0,
     TYPE_SHORT,
     TYPE_INT,
     TYPE_LONG,

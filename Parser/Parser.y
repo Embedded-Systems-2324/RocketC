@@ -550,6 +550,7 @@ R_FUNC_SIGNATURE        :   R_VAR_PREAMBLE TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG
                                 NodeCreate(&($$.treeNode), NODE_FUNCTION);
                                 $$.treeNode->nodeData.sVal = $2.nodeData.sVal;
 
+                                NodeAddChild($$.treeNode, $1.treeNode);
                                 NodeAddChild($$.treeNode, $4.treeNode);
                             }
                         ;
@@ -839,8 +840,6 @@ R_ID_LIST      :    R_ID_LIST TOKEN_COMMA TOKEN_ID
                     {
                         NodeCreate(&($$.treeNode), NODE_VAR_DECLARATION);
                         $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
-
-                        LOG_WARNING("--> %d\n", $$.treeNode->nodeType);
                     }
                 ;
 

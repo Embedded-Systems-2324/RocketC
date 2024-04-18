@@ -19,7 +19,8 @@ int CalcWhile (int y, int res)
         res += 1;
         y++;
     }
-    
+
+    return res;
 }
 
 void ConfirmRes ()
@@ -30,5 +31,9 @@ void ConfirmRes ()
     }
 
     else 
+    {
         CalcWhile ();
+    }
 }
+
+
