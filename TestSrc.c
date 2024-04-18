@@ -4,12 +4,12 @@ float function (int x, float y);
 
 //main function
 int main(){
-    function(24, 3.5);
+    //function(24, 3.5);
     return 0;
 }
 
 //function
-float function(int x, float y)
+float function(float y)
 {
     if (x > y) {
         y++;

@@ -21,8 +21,11 @@ static void traverse (TreeNode_st* st, void (*preOrder) (TreeNode_st* ), void (*
 }
 
 static void nullProc(TreeNode_st * st)
-{ if (st==NULL) return;
-  else return;
+{ 
+    if (st==NULL) 
+        return;
+    else 
+        return;
 }
 
 
@@ -30,9 +33,7 @@ static void typeChecking(TreeNode_st * st)
 {
     switch (st->nodeData.dVal)
     { 
-        case NODE_VAR_DECLARATION:          // check symbol table
-
-                        
+        case NODE_VAR_DECLARATION:          // check symbol table        
             break;
 
         case NODE_VISIBILITY:               // check symbol table                                 
@@ -50,31 +51,22 @@ static void typeChecking(TreeNode_st * st)
         case NODE_OPERATOR:                 // typechecking                                  
             break;
 
-        case NODE_TERNARY:    
+        case NODE_TERNARY:                  // typechecking 
             break;
 
-        case NODE_ARRAY_INDEX:          
+        case NODE_ARRAY_INDEX:              // check symbol table e type checking (child tem de ser inteiro);
             break;
 
-        case NODE_TYPE_CAST:           
+        case NODE_TYPE_CAST:                // check symbol table (pode ser um tipo ou uma estrutura)
             break;
 
-        case NODE_STRING:
+        case NODE_IDENTIFIER:               // check symbol table
             break;
 
-        case NODE_IDENTIFIER:
-            break;
-
-        case NODE_FUNCTION_CALL:
+        case NODE_FUNCTION_CALL:            // check symbol table (verify name, return type, number of args and type of args)
 	        break;
 
-        case NODE_FUNCTION:
-            break;
-        
-        case NODE_INTEGER:
-            break;
-
-        case NODE_FLOAT:
+        case NODE_FUNCTION:                 
             break;
 
         case NODE_IF:
@@ -84,18 +76,6 @@ static void typeChecking(TreeNode_st * st)
             break;
 
         case NODE_DO_WHILE:
-            break;
-
-        case NODE_RETURN:
-            break;
-
-        case NODE_CONTINUE:
-            break;
-
-        case NODE_BREAK:
-            break;
-
-        case NODE_GOTO:
             break;
 
         case NODE_SWITCH:
@@ -133,7 +113,12 @@ static void typeChecking(TreeNode_st * st)
     }
 }
 
-void typeCheck(TreeNode_st * syntaxTree)
+void TypeCheckTraverse(TreeNode_st * syntaxTree)
+{
+    traverse(syntaxTree,nullProc,checkNode);
+}
+
+void SymbolTableTraverse(TreeNode_st * syntaxTree)
 {
     traverse(syntaxTree,nullProc,checkNode);
 }
