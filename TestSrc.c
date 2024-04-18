@@ -11,7 +11,7 @@ int main(){
 //function
 float function(float y)
 {
-    if (x > y) {
+    if ("ff") {
         y++;
     }
     else {

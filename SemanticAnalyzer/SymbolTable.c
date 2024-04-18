@@ -1,6 +1,7 @@
+#include <errno.h>
+#include "Logger.h"
 #include "SymbolTable.h"
 
-#define SHIFT   4
 
 // Hash function
 static int hash(const char *key)
@@ -8,89 +9,82 @@ static int hash(const char *key)
     int hashValue = 0;
     int i = 0;
     while (key[i] != '\0')
-        hashValue = ((hashValue << SHIFT) + key[i++]) % SIZE;
+        hashValue = ((hashValue << 4) + key[i++]) % HASH_TABLE_SIZE;
 
     return hashValue;
 }
 
+
 // Function to create a new symbol table
 // Note: Global scope recommended to receive enclosingScope = NULL
-int createSymbolTable(SymbolTable_st **ppSymTable, SymbolTable_st *enclosingScope)
+int createSymbolTable(SymbolTable_st** ppSymTable, SymbolTable_st* enclosingScope)
 {
-    ymbolEntry_st *symTable;
+    SymbolTable_st* pSymTable;
 
     if (!ppSymTable)
         return -EINVAL;
 
     *ppSymTable = (SymbolTable_st*) calloc(1, sizeof(SymbolTable_st));
 
-    if (!(*ppSymEntry))
+    if (!(*ppSymTable))
     {
         LOG_ERROR("Failed to allocate memory for new symbol!\n");
         return -ENOMEM;
     }
 
-    symTable = (SymbolTable_st*) (*(ppSymTable));
+    pSymTable = (SymbolTable_st*) (*(ppSymTable));
 
-    symTable->enclosingScope = enclosingScope;
+    pSymTable->enclosingScope = enclosingScope;
 
     // Initialize hash table
-    for (int i = 0; i < SIZE; ++i)
+    for (int i = 0; i < HASH_TABLE_SIZE; ++i)
     {
-        symTable->table[i] = NULL;      // Initialize each entry to NULL
-    }
-    return symTable;
-}
-
-// TODO: Make it work
-// Function to properly initialize Entry Node
-int createSymbolEntry(SymbolEntry_st **ppSymEntry, SymbolType_et symType)
-{
-    SymbolEntry_st *symEntry;
-
-    if (!ppSymEntry)
-        return -EINVAL;
-
-    *ppSymEntry = (SymbolEntry_st*) calloc(1, sizeof(SymbolEntry_st));
-
-    if (!(*ppSymEntry))
-    {
-        LOG_ERROR("Failed to allocate memory for new symbol!\n");
-        return -ENOMEM;
+        pSymTable->table[i] = NULL;      // Initialize each entry to NULL
     }
 
-    symEntry = (SymbolEntry_st*) (*(ppSymEntry));
-    
-    symEntry->symbolType = symType;
-
-    return symEntry;
+    return 0;
 }
+
 
 // Function to insert a symbol into the symbol table
-void insertSymbol(SymbolTable_st *symTable, SymbolEntry_st *symEntry)
+void insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *symName, SymbolType_et symType)
 {
-    int index = hash(symEntry->name);
+    if (!pSymTable || !ppSymEntry)
+        return -EINVAL;
 
-    if (symTable->table[index] == NULL)
+    int index = hash(symName);
+
+    SymbolEntry_st* pEntryAux = pSymTable->table[index];
+
+    while((pEntryAux != NULL) && (strcmp(symName, pEntryAux->name) != 0))
     {
-        symTable->table[index] = symEntry;
+        pEntryAux = pEntryAux->next;
     }
-    else    // In case of collision
+
+    if(pEntryAux == NULL)
     {
-        symEntry->next = symTable->table[index];
-        symTable->table[index] = symEntry;
+        pEntryAux = (SymbolEntry_st*) calloc(1, sizeof(SymbolEntry_st));
+
+        StringCreateAndCopy(&(pEntryAux->name), symName, 0);
+        pEntryAux->symbolType = symType;
+
+        (*ppSymEntry) = &pEntryAux;
+
+        return SYMBOL_NOT_FOUND;
     }
+
+    return SYMBOL_FOUND;
 }
 
 
 // Function to get symbol from symbol table
 // Returns the Symbol if exists in the current scope or enclosing scopes and NULL if it doesn't
-int fetchSymbol(SymbolTable_st *pSymTable, SymbolEntry_st **ppSymbol, int onlyCurrentScope, char *name)
+int fetchSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymbol, char* name, int onlyCurrentScope)
 {
     int index = hash(name);  // Assuming you have a separate hash function
 
     // Traverse the linked list at the hash index
-    SymbolEntry_st *symIterator = symTable->table[index];
+    SymbolEntry_st* symIterator = pSymTable->table[index];
 
     while (symIterator != NULL)
     {
@@ -104,9 +98,9 @@ int fetchSymbol(SymbolTable_st *pSymTable, SymbolEntry_st **ppSymbol, int onlyCu
     }
 
     // Symbol not found in the current scope, check enclosing scope (if it exists)
-    if (symTable->enclosingScope != NULL && !onlyCurrentScope)
+    if (pSymTable->enclosingScope != NULL && !onlyCurrentScope)
     {
-        return  fetchSymbol(symTable->enclosingScope, ppSymbol, FALSE, name);
+        return fetchSymbol(pSymTable->enclosingScope, ppSymbol, onlyCurrentScope, name);
     }
 
     return SYMBOL_NOT_FOUND;                    // Symbol not found
@@ -114,14 +108,14 @@ int fetchSymbol(SymbolTable_st *pSymTable, SymbolEntry_st **ppSymbol, int onlyCu
 
 
 // Function to free the memory allocated for a symbol table
-void freeSymbolTable(SymbolTable_st *symTable)
+void freeSymbolTable(SymbolTable_st* symTable)
 {
-    for (int i = 0; i < SIZE; ++i)
+    for (int i = 0; i < HASH_TABLE_SIZE; ++i)
     {
-        SymbolEntry_st *entry = symTable->table[i];
+        SymbolEntry_st* entry = symTable->table[i];
         while (entry != NULL)
         {
-            SymbolEntry_st *temp = entry;
+            SymbolEntry_st* temp = entry;
             entry = entry->next;
             free(temp->name);
             free(temp);
@@ -129,3 +123,6 @@ void freeSymbolTable(SymbolTable_st *symTable)
     }
     free(symTable);
 }
+
+
+

@@ -3,16 +3,48 @@
 
 #include "../Util/Globals.h"
 
-static void traverse (TreeNode_st* st, void (*preOrder) (TreeNode_st* ), void (*postOrder) (TreeNode_st* ))
+void TypeCheckTraverse(TreeNode_st * syntaxTree);
 
-static void nullProc(TreeNode_st * st)
-
-static void typeChecking(TreeNode_st * st)
-
-
-void TypeCheckTraverse(TreeNode_st * syntaxTree)
-
-void SymbolTableTraverse(TreeNode_st * syntaxTree)
+void SymbolTableTraverse(TreeNode_st * syntaxTree);
 
 
 #endif
+
+
+/*
+
+1ª travessia - preorder
+    - ADICIONAR SÍMBOLOS ÀS TABELAS
+        - NODE_VAR_DECLARATION: colocar na tabela de simbolos do scope
+        - NODE_ARRAY_DECLARATION
+        - Verificar se essa variável já existe no scope 
+        - função e var nomes diferentes
+
+        - NODE_FUNCTION:
+            - Colocar o nome da função no scope onde está
+            - Criar um novo scope
+            - Ir aos filhos para ir buscar a arg_list
+
+
+    - VERIFICAR SE UMA VARIÁVEL FOI DEFINIDA
+        - NODE_IDENTIFIER
+        - NODE_ARRAY_INDEX
+        - NODE_POINTER_CONTENT
+        - NODE_REFERENCE
+        - NODE_GOTO
+        - NODE_FUNCTION_CALL
+        - Se NODE_FUNCTION não ir aos filhos pq os filhos tb têm NODE_ID,
+        mas pertence às vaira- Colocar o nome da função no scope onde estáveis a verificar
+
+
+2ª travessia - postorder
+    - Type check 
+        - Operações 
+        - Const não pode ser alterado
+        - Verificar parametros da chamada de funções
+            - tipos de parametros
+            - numero de parametros
+            - tipo de retorno
+        - indice de um array
+        - if não pode ter strings
+*/

@@ -751,24 +751,24 @@ R_VAR_DECLARATION       :   R_VAR_PREAMBLE R_ID_LIST TOKEN_SEMI                 
 //--------------------------------------------------------------------------------------------------------------------//
 // ARRAYS
 //--------------------------------------------------------------------------------------------------------------------//
-// Array declaration                                                                                        // Examples:
-R_ARR_DECLARATION           :   R_VAR_PREAMBLE TOKEN_ID R_ARR_SIZE TOKEN_SEMI                               // int var [2];
-                                {
-                                    NodeCreate(&($$.treeNode), NODE_ARRAY_DECLARATION);
-                                    $$.treeNode->nodeData.sVal = $2.nodeData.sVal;
-                                    
-                                    NodeAddChild($$.treeNode, $1.treeNode);
-                                    NodeAddChild($$.treeNode, $3.treeNode);
-                                }      
-                            ;    
+// Array declaration                                                                                // Examples:
+R_ARR_DECLARATION   :   R_VAR_PREAMBLE TOKEN_ID R_ARR_SIZE TOKEN_SEMI                               // int var [2];
+                        {
+                            NodeCreate(&($$.treeNode), NODE_ARRAY_DECLARATION);
+                            $$.treeNode->nodeData.sVal = $2.nodeData.sVal;
+                            
+                            NodeAddChild($$.treeNode, $1.treeNode);
+                            NodeAddChild($$.treeNode, $3.treeNode);
+                        }      
+                    ;    
 
 // Dimensions of the array                                                                  // Examples:
-R_ARR_SIZE                  :   TOKEN_LEFT_BRACKET TOKEN_NUM TOKEN_RIGHT_BRACKET            // [2]
-                                {
-                                    NodeCreate(&($$.treeNode), NODE_INTEGER);
-                                    $$.treeNode->nodeData.dVal = $2.nodeData.dVal;
-                                }
-                            ;
+R_ARR_SIZE          :   TOKEN_LEFT_BRACKET TOKEN_NUM TOKEN_RIGHT_BRACKET            // [2]
+                        {
+                            NodeCreate(&($$.treeNode), NODE_INTEGER);
+                            $$.treeNode->nodeData.dVal = $2.nodeData.dVal;
+                        }
+                    ;
 
 
 //Used only in variables declaration - Example: (int) x, y=2, z;
@@ -823,6 +823,8 @@ R_ID_LIST      :    R_ID_LIST TOKEN_COMMA TOKEN_ID
                         {
                             $$.treeNode = pNewNode;
                         }
+
+                        pNode->pSibling = $3.treeNode;      ////VER
                     }                    
 
                 |   R_SIMPLE_VAR_ASSIGN
@@ -1083,19 +1085,19 @@ R_FACTOR    :   TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES            
                     $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
                 }
 
-            |   TOKEN_ASTERISK TOKEN_ID                                             // *a
+            |   TOKEN_ASTERISK TOKEN_ID                                        // *a
                 {
                     NodeCreate(&($$.treeNode), NODE_POINTER_CONTENT);
                     $$.treeNode->nodeData.sVal = $2.nodeData.sVal;
                 }
 
-            |   TOKEN_FNUM                                                      // 1.5
+            |   TOKEN_FNUM                                                     // 1.5
                 {
                     NodeCreate(&($$.treeNode), NODE_FLOAT);
                     $$.treeNode->nodeData.fVal = $1.nodeData.fVal;
                 }       
 
-            |   TOKEN_STR                                                       // "abc"
+            |   TOKEN_STR                                                      // "abc"
                 {
                     NodeCreate(&($$.treeNode), NODE_STRING);
                     $$.treeNode->nodeData.sVal = $1.nodeData.sVal;

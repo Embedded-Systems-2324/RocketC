@@ -7,16 +7,16 @@
 /*preorder - symbol table*/
 /*postoder - type checking da AST*/
 
-static void traverse (TreeNode_st* st, void (*preOrder) (TreeNode_st* ), void (*postOrder) (TreeNode_st* ))
+static void traverse (TreeNode_st* pNode, void (*preOrder) (TreeNode_st* ), void (*postOrder) (TreeNode_st* ))
 {
     /*Precisa começar do nodo inicial até ao nodo final para ser uma função recursiva*/
-    if (st != NULL)
+    if (pNode != NULL)
     {
-        preOrder(st);                                                      //primeiramente faz o preorder para fazer a travessia da tabela de símbolos
-            for ( int i = 0 ; st->childNumber ; i++ )
-                traverse (&st->pChilds[i] , preOrder, postOrder);               
-        postOrder(st);                                                     //depois efetua a travessia para o typechecking
-        traverse (st->pSibling,preOrder,postOrder);                                                        
+        preOrder(pNode);                                                      //primeiramente faz o preorder para fazer a travessia da tabela de símbolos
+            for ( int i = 0 ; pNode->childNumber ; i++ )
+                traverse (&pNode->pChilds[i] , preOrder, postOrder);               
+        postOrder(pNode);                                                     //depois efetua a travessia para o typechecking
+        traverse (pNode->pSibling,preOrder,postOrder);                                                        
     }
 }
 

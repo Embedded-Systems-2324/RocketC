@@ -1,5 +1,5 @@
-#ifndef HASHTABLE_HASH_H
-#define HASHTABLE_HASH_H
+#ifndef _SYMBOL_TABLE_H_
+#define _SYMBOL_TABLE_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,21 +16,10 @@
 typedef enum{
     SYMBOL_VAR,
     SYMBOL_FUNCTION,
-    SYMBOL_LABEL
+    SYMBOL_LABEL,
+    SYMBOL_POINTER,
+    SYMBOL_ARRAY
 }SymbolType_et;
-
-
-// Attribute Enum
-typedef struct ATTRIBUTES
-{
-    int ATTRIBUTE_STATIC;
-    int ATTRIBUTE_EXTERN;
-    int ATTRIBUTE_CONSTANT;
-    int ATTRIBUTE_VOLATILE;
-    int ATTRIBUTE_SIGNED;
-    int ATTRIBUTE_UNSIGNED;
-
-} ATTRIBUTES_ET;
 
 
 typedef struct parameter{
@@ -39,7 +28,7 @@ typedef struct parameter{
     SignQualifier_et varSign;
     ModQualifier_et varMod;
 
-    struct parameter *argument_st;
+    struct parameter* nextParam_st;
 }parameter_st;
 
 
@@ -48,57 +37,66 @@ typedef struct parameter{
 typedef struct SymbolEntry
 {
     SymbolType_et symbolType;
+    struct SymbolEntry* next;                   // Next Entry Pointer (linked list to prevent collisions)
+    char* name;
 
     union{
         struct{
-            char *varName;                          // Variable Name
             uint32_t memoryLocation;                // Variable Location
             VarType_et varType;                     // Variable Type
-            bool isPointer;                         // Variable is a Pointer (1: True, 0: False)                     
+            SignQualifier_et varSign;
+            ModQualifier_et varMod;
+            VisQualifier_et varVis;                    
         }SymbolVar_s;
 
 
         struct{
-            char *functionName;                     // Function Name
             VarType_et returnType;                  // Function Return Type
             uint8_t parameterNumber;                // Number of Function Params
-            parameter_st* parameter;          
+            parameter_st* parameter;
+                      
         }SymbolFunction_s;
 
-        struct{
-            char *label;                     // Function Name         
-        }SymbolLabel_s;
 
         struct{
-
+            uint32_t memoryLocation;                // Variable Location
+            VarType_et arrayType;                   // Variable Type
+            SignQualifier_et arraySign;
+            ModQualifier_et arrayMod;
+            VisQualifier_et arrayVis;
+            uint32_t arraySize;
         }SymbolArray;
 
     }symbolContent_u;
 
-    struct SymbolEntry *next;                   // Next Entry Pointer (linked list to prevent collisions)
 } SymbolEntry_st;
 
 
 // Symbol table struct
 typedef struct SymbolTable
 {
-    struct SymbolEntry *table[HASH_TABLE_SIZE]; // Symbol Table
-    struct SymbolTable *enclosingScope;         // Pointer to Symbol Table of Enclosing Scope
+    struct SymbolEntry* table[HASH_TABLE_SIZE]; // Symbol Table
+    struct SymbolTable* enclosingScope;         // Pointer to Symbol Table of Enclosing Scope
 
 } SymbolTable_st;
 
 
-static int hash(const char *key);
+static int hash(const char* key);
 
-int createSymbolTable(SymbolTable_st **ppsymTable, SymbolTable_st *enclosingScope);
+int createSymbolTable(SymbolTable_st** ppsymTable, SymbolTable_st* enclosingScope);
 
-int createSymbolEntry(SymbolEntry_st **ppSymEntry, SymbolType_et symType);
+void insertSymbol(SymbolTable_st* symTable, SymbolEntry_st* symEntry);
 
-void insertSymbol(SymbolTable_st *symTable, SymbolEntry_st *symEntry);
+int fetchSymbol(SymbolTable_st* symTable, SymbolEntry_st** ppSymbol, int onlyCurrentScope, char* name);
 
-int fetchSymbol(SymbolTable_st *symTable, SymbolEntry_st **ppSymbol, int onlyCurrentScope, char *name);
+void freeSymbolTable(SymbolTable_st* symTable);
 
-void freeSymbolTable(SymbolTable_st *symTable);
+#endif 
 
 
-#endif //HASHTABLE_HASH_H
+functionf
+
+
+
+global_table 
+    funtionf
