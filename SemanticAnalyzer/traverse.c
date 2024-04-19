@@ -1,20 +1,25 @@
 #include <errno.h>
-#include "Util.h"
-#include "Globals.h"
-#include "Logger.h"
+#include "../Util/Util.h"
+#include "../Util/Globals.h"
+#include "../Util/Logger.h"
 #include "../main.h"
+#include "../SemanticAnalyzer/traverse.h"
 
-/*preorder - symbol table*/
-/*postoder - type checking da AST*/
+static SymbolTable_st* pGlobalSymTable;
+static TreeNode_st* pSintaxTree;
+static bool initialized = false;
+
 
 static void traverse (TreeNode_st* pNode, void (*preOrder) (TreeNode_st* ), void (*postOrder) (TreeNode_st* ))
 {
     /*Precisa começar do nodo inicial até ao nodo final para ser uma função recursiva*/
     if (pNode != NULL)
     {
-        preOrder(pNode);                                                      //primeiramente faz o preorder para fazer a travessia da tabela de símbolos
-            for ( int i = 0 ; pNode->childNumber ; i++ )
-                traverse (&pNode->pChilds[i] , preOrder, postOrder);               
+        preOrder(pNode);
+                                                              //primeiramente faz o preorder para fazer a travessia da tabela de símbolos
+        for ( int i = 0 ; pNode->childNumber ; i++ )
+            traverse (&pNode->pChilds[i] , preOrder, postOrder); 
+
         postOrder(pNode);                                                     //depois efetua a travessia para o typechecking
         traverse (pNode->pSibling,preOrder,postOrder);                                                        
     }
@@ -113,12 +118,38 @@ static void typeChecking(TreeNode_st * st)
     }
 }
 
-void TypeCheckTraverse(TreeNode_st * syntaxTree)
+static void TypeCheckTraverse()
 {
-    traverse(syntaxTree,nullProc,checkNode);
+    traverse(pSintaxTree,nullProc,checkNode);
 }
 
-void SymbolTableTraverse(TreeNode_st * syntaxTree)
+
+static void SymbolTableTraverse()
 {
-    traverse(syntaxTree,nullProc,checkNode);
+    traverse(pSintaxTree,nullProc,checkNode);
+}
+
+
+int executeSemanticAnalisys(TreeNode_st** pTreeRoot, SymbolTable_st** ppGlobalTable)
+{
+    if (!ppGlobalTable)
+        return -EINVAL;
+
+    if(!initialized)
+    {
+        if(!createSymbolTable(&pGlobalSymTable, NULL))
+        {
+            return 1;   //error creating symbol table
+        }
+
+        initialized = true;
+    }
+
+    pGlobalSymTable = *ppGlobalTable;
+    pSintaxTree = *pTreeRoot;
+
+    SymbolTableTraverse();
+    TypeCheckTraverse();
+    
+    return 0;
 }

@@ -8,7 +8,7 @@
 
 #include "../Util/Globals.h"
 
-#define HASH_TABLE_SIZE     199
+#define HASH_TABLE_SIZE     97
 #define SYMBOL_NOT_FOUND    0
 #define SYMBOL_FOUND        1
 
@@ -54,7 +54,6 @@ typedef struct SymbolEntry
             VarType_et returnType;                  // Function Return Type
             uint8_t parameterNumber;                // Number of Function Params
             parameter_st* parameter;
-                      
         }SymbolFunction_s;
 
 
@@ -75,9 +74,10 @@ typedef struct SymbolEntry
 // Symbol table struct
 typedef struct SymbolTable
 {
+    uint32_t subScopesNumber;
     struct SymbolEntry* table[HASH_TABLE_SIZE]; // Symbol Table
     struct SymbolTable* enclosingScope;         // Pointer to Symbol Table of Enclosing Scope
-
+    struct SymbolTable* innerScopes;
 } SymbolTable_st;
 
 
@@ -85,18 +85,12 @@ static int hash(const char* key);
 
 int createSymbolTable(SymbolTable_st** ppsymTable, SymbolTable_st* enclosingScope);
 
-void insertSymbol(SymbolTable_st* symTable, SymbolEntry_st* symEntry);
+int addInnerScope(SymbolTable_st* ppsymTable);
+
+void insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *symName, SymbolType_et symType);
 
 int fetchSymbol(SymbolTable_st* symTable, SymbolEntry_st** ppSymbol, int onlyCurrentScope, char* name);
 
 void freeSymbolTable(SymbolTable_st* symTable);
 
 #endif 
-
-
-functionf
-
-
-
-global_table 
-    funtionf

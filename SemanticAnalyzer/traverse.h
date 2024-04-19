@@ -2,11 +2,9 @@
 #define TRAVERSE_H
 
 #include "../Util/Globals.h"
+#include "../SemanticAnalyzer/SymbolTable.h"
 
-void TypeCheckTraverse(TreeNode_st * syntaxTree);
-
-void SymbolTableTraverse(TreeNode_st * syntaxTree);
-
+int executeSemanticAnalisys(TreeNode_st** pTreeRoot, SymbolTable_st** ppGlobalTable);
 
 #endif
 

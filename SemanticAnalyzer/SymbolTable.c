@@ -35,6 +35,8 @@ int createSymbolTable(SymbolTable_st** ppSymTable, SymbolTable_st* enclosingScop
     pSymTable = (SymbolTable_st*) (*(ppSymTable));
 
     pSymTable->enclosingScope = enclosingScope;
+    pSymTable->subScopesNumber = 0;
+    pSymTable->innerScopes = NULL;
 
     // Initialize hash table
     for (int i = 0; i < HASH_TABLE_SIZE; ++i)
@@ -45,6 +47,30 @@ int createSymbolTable(SymbolTable_st** ppSymTable, SymbolTable_st* enclosingScop
     return 0;
 }
 
+
+int addInnerScope(SymbolTable_st* pSymTable)
+{
+    if (!pSymTable)
+        return -EINVAL;
+
+    SymbolTable_st* pNewTable;
+    SymbolTable_st* pInnerScope;
+
+    createSymbolTable(&(pNewTable), pSymTable);
+
+    pInnerScope = reallocarray(pSymTable->innerScopes, pSymTable->subScopesNumber + 1, sizeof(SymbolTable_st));
+    if (!pInnerScope)
+    {
+        LOG_ERROR("Failed to allocate memory while trying to add a new inner scope\n");
+        return -ENOMEM;
+    }
+
+    pSymTable->innerScopes = pInnerScope;
+    memcpy(&pSymTable->innerScopes[pSymTable->subScopesNumber++], pNewTable, sizeof(SymbolTable_st));
+    free(pNewTable);
+
+    return 0;
+}
 
 // Function to insert a symbol into the symbol table
 void insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *symName, SymbolType_et symType)

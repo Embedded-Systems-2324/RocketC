@@ -99,7 +99,7 @@ int NodeAddNewChild(TreeNode_st* pParent, TreeNode_st** ppNewChild, NodeType_et 
     (*ppNewChild)->lineNumber = getLineNumber();
 
     return 0;
-}
+}   
 
 
 

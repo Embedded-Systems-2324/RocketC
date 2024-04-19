@@ -8,13 +8,17 @@
 #include "Lexer/Lexer.h"
 #include "Parser/Parser.h"
 #include "Output/Parser.tab.h"
+#include "SemanticAnalyzer/SymbolTable.h"
 #include "Util/Util.h"
 
 
 static TreeNode_st* pTreeRoot;
+static SymbolTable_st* pGlobalSymTable;
 static FILE* pSourceFile;
 static size_t lineNumber = 1;
 static bool bReady = 0;
+
+
 
 size_t getLineNumber()
 {
