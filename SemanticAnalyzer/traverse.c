@@ -120,13 +120,13 @@ static void typeChecking(TreeNode_st * st)
 
 static void TypeCheckTraverse()
 {
-    traverse(pSintaxTree,nullProc,checkNode);
+    traverse(pSintaxTree,nullProc,nullProc);
 }
 
 
 static void SymbolTableTraverse()
 {
-    traverse(pSintaxTree,nullProc,checkNode);
+    traverse(pSintaxTree,nullProc,nullProc);
 }
 
 

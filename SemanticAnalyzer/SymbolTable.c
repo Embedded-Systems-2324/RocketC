@@ -1,6 +1,7 @@
 #include <errno.h>
-#include "Logger.h"
-#include "SymbolTable.h"
+#include "../Util/Logger.h"
+#include "../Util/Util.h"
+#include "../SemanticAnalyzer/SymbolTable.h"
 
 
 // Hash function
@@ -73,7 +74,7 @@ int addInnerScope(SymbolTable_st* pSymTable)
 }
 
 // Function to insert a symbol into the symbol table
-void insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *symName, SymbolType_et symType)
+int insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *symName, SymbolType_et symType)
 {
     if (!pSymTable || !ppSymEntry)
         return -EINVAL;
@@ -94,7 +95,7 @@ void insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *
         StringCreateAndCopy(&(pEntryAux->name), symName, 0);
         pEntryAux->symbolType = symType;
 
-        (*ppSymEntry) = &pEntryAux;
+        *ppSymEntry = pEntryAux;
 
         return SYMBOL_NOT_FOUND;
     }
@@ -126,7 +127,7 @@ int fetchSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymbol, char* name
     // Symbol not found in the current scope, check enclosing scope (if it exists)
     if (pSymTable->enclosingScope != NULL && !onlyCurrentScope)
     {
-        return fetchSymbol(pSymTable->enclosingScope, ppSymbol, onlyCurrentScope, name);
+        return fetchSymbol(pSymTable->enclosingScope, ppSymbol, name, onlyCurrentScope);
     }
 
     return SYMBOL_NOT_FOUND;                    // Symbol not found

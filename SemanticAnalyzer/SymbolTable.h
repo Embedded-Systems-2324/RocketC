@@ -87,9 +87,9 @@ int createSymbolTable(SymbolTable_st** ppsymTable, SymbolTable_st* enclosingScop
 
 int addInnerScope(SymbolTable_st* ppsymTable);
 
-void insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *symName, SymbolType_et symType);
+int insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *symName, SymbolType_et symType);
 
-int fetchSymbol(SymbolTable_st* symTable, SymbolEntry_st** ppSymbol, int onlyCurrentScope, char* name);
+int fetchSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymbol, char* name, int onlyCurrentScope);
 
 void freeSymbolTable(SymbolTable_st* symTable);
 
