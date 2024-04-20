@@ -86,9 +86,8 @@ int fetchSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymbol, char* name
     int index = hash(name);  // Assuming you have a separate hash function
 
     // Traverse the linked list at the hash index
-    SymbolEntry_st* symIterator = pSymTable->table[index];
+    SymbolEntry_st* symIterator = pSymTable->table[index];   
 
-    printf("->%s  %s\n", symIterator->name, name);
     while (symIterator != NULL)
     {
         // Ensure symIterator->name is valid before comparison (avoid null pointer dereference)
@@ -103,6 +102,7 @@ int fetchSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymbol, char* name
     // Symbol not found in the current scope, check enclosing scope (if it exists)
     if (pSymTable->enclosingScope != NULL && !onlyCurrentScope)
     {
+        printf("SOS\n");
         return fetchSymbol(pSymTable->enclosingScope, ppSymbol, name, onlyCurrentScope);
     }
 
@@ -118,8 +118,6 @@ int insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *s
         return -EINVAL;
 
     int index = hash(symName);
-
-    printf("wwww\n");
 
     SymbolEntry_st* pEntryAux;
     SymbolTable_st* pCurrentTable = pSymTable;
@@ -164,8 +162,12 @@ void freeSymbolTable(SymbolTable_st* symTable)
 }
 
 
-void printSymbolTables(SymbolTable_st* symTable)
+int printSymbolTables(SymbolTable_st* symTable)
 {
+
+    if (!symTable)
+        return -EINVAL;
+
     static uint8_t counter = 0;
     SymbolEntry_st* temp;
 

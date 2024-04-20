@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 
 
             LOG_WARNING_SHORT("\n\n-----------------SYMBOLS-----------------\n");
-            executeSemanticAnalisys(pTreeRoot, pGlobalSymTable);
+            executeSemanticAnalisys(pTreeRoot, &pGlobalSymTable);
 
             printSymbolTables(pGlobalSymTable);
 

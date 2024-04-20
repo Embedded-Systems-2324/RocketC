@@ -95,6 +95,6 @@ int fetchSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymbol, char* name
 
 void freeSymbolTable(SymbolTable_st* symTable);
 
-void printSymbolTables(SymbolTable_st* symTable);
+int printSymbolTables(SymbolTable_st* symTable);
 
 #endif 

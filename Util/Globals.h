@@ -66,16 +66,16 @@ typedef enum
 
 typedef enum
 {
+    MOD_NONE,
     MOD_CONST,
-    MOD_VOLATILE,
-    MOD_NONE
+    MOD_VOLATILE
 }ModQualifier_et;
 
 typedef enum
 {
+    VIS_NONE,
     VIS_STATIC,
-    VIS_EXTERN,
-    VIS_NONE
+    VIS_EXTERN
 }VisQualifier_et;
 
 

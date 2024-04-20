@@ -1,1 +1,2 @@
-int x;
+const int x;
+char x;

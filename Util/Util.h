@@ -54,15 +54,15 @@ static const char *SignQualifierStrings[] = {
 };
 
 static const char *ModQualifierStrings[] = {
+    "",
     "const ",
-    "volatile ",
-    ""
+    "volatile "
 };
 
 static const char *VisQualifierStrings[] = {
+    "",
     "static ",
-    "extern ",
-    ""
+    "extern "
 };
 
 static const char *MiscDataStrings[] = {

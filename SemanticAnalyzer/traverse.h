@@ -4,7 +4,7 @@
 #include "../Util/Globals.h"
 #include "../SemanticAnalyzer/SymbolTable.h"
 
-int executeSemanticAnalisys(TreeNode_st* pTreeRoot, SymbolTable_st* ppGlobalTable);
+int executeSemanticAnalisys(TreeNode_st* pTreeRoot, SymbolTable_st** ppGlobalTable);
 
 #endif
 

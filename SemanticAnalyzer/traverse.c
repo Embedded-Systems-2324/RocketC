@@ -5,8 +5,8 @@
 #include "../main.h"
 #include "../SemanticAnalyzer/traverse.h"
 
-static SymbolTable_st* pGlobalSymTable;
-static SymbolTable_st* pCurrentScope;
+SymbolTable_st* pGlobalSymTable;
+SymbolTable_st* pCurrentScope;
 static bool initialized = false;
 
 static int semanticError(char * message)
@@ -21,15 +21,16 @@ static int semanticError(char * message)
 
 static void traverse (TreeNode_st* pNode, void (*preOrder) (TreeNode_st* ), void (*postOrder) (TreeNode_st* ))
 {
-    /*Precisa começar do nodo inicial até ao nodo final para ser uma função recursiva*/
     if (pNode != NULL)
     {
-        preOrder(pNode);                                                      //primeiramente faz o preorder para fazer a travessia da tabela de símbolos
-                                                                                 
-        for ( int i = 0 ; pNode->childNumber ; i++ )
-            traverse (&pNode->pChilds[i] , preOrder, postOrder); 
+        preOrder(pNode);                                                      
+  
+        for ( int i = 0 ; i < pNode->childNumber ; i++ )
+        {
+            traverse (&pNode->pChilds[i], preOrder, postOrder); 
+        }
 
-        postOrder(pNode);                                                     //depois efetua a travessia para o typechecking
+        postOrder(pNode);                                                 
         traverse (pNode->pSibling,preOrder,postOrder);                                                        
     }
 }
@@ -155,6 +156,8 @@ static int setMemoryLocation(uint32_t* varLocation, VarType_et varType)
 {
     static uint32_t currentLocation = 0;
     
+    *varLocation = currentLocation; 
+
     switch(varType)
     {
         case TYPE_CHAR:
@@ -183,8 +186,6 @@ static int setMemoryLocation(uint32_t* varLocation, VarType_et varType)
             LOG_DEBUG("Invalid variable type");
             break;                                 
     }
-
-    *varLocation = currentLocation; 
 }
 
 
@@ -195,11 +196,12 @@ static void buildSymbolTables(TreeNode_st* pNode)
         case NODE_VAR_DECLARATION:
             SymbolEntry_st* pNewSymbol;
 
-            if( insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_VARIABLE) == SYMBOL_ADDED)
-            {
+
+            if( insertSymbol(pGlobalSymTable, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_VARIABLE) == SYMBOL_ADDED)
+            { 
                 TreeNode_st* pNodeTemp = pNode->pChilds;
 
-                pNewSymbol->symbolContent_u.SymbolVar_s.memoryLocation;
+                setMemoryLocation(&pNewSymbol->symbolContent_u.SymbolVar_s.memoryLocation, pNodeTemp->nodeType);
 
                 while (pNodeTemp != NULL)
                 {
@@ -225,6 +227,8 @@ static void buildSymbolTables(TreeNode_st* pNode)
                             LOG_DEBUG("Invalid node");
                             break;
                     }
+
+                    pNodeTemp = pNodeTemp->pSibling;
                 }
             }
             else
@@ -275,14 +279,15 @@ static void SymbolTableTraverse(TreeNode_st* pSintaxTree)
 }
 
 
-int executeSemanticAnalisys(TreeNode_st* pTreeRoot, SymbolTable_st* ppGlobalTable)
+int executeSemanticAnalisys(TreeNode_st* pTreeRoot, SymbolTable_st** ppGlobalTable)
 {
-    if (!ppGlobalTable)
+    if (!ppGlobalTable || !pTreeRoot)
         return -EINVAL;
+
 
     if(!initialized)
     {
-        if(!createSymbolTable(&pGlobalSymTable, NULL))
+        if(createSymbolTable(&pGlobalSymTable, NULL))
         {
             return 1;   //error creating symbol table
         }
@@ -290,11 +295,8 @@ int executeSemanticAnalisys(TreeNode_st* pTreeRoot, SymbolTable_st* ppGlobalTabl
         initialized = true;
     }
 
-    pGlobalSymTable = ppGlobalTable;
-    pCurrentScope = ppGlobalTable;
-
-    if (!pGlobalSymTable)
-        return -EINVAL;
+    *ppGlobalTable = pGlobalSymTable;
+    pCurrentScope = pGlobalSymTable;
 
     SymbolTableTraverse(pTreeRoot);
     //TypeCheckTraverse(*pTreeRoot);
