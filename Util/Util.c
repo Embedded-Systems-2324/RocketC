@@ -294,6 +294,10 @@ void PrintNode(TreeNode_st* pNode)
             printf("Post incrementation: %s++ \n", pNode->nodeData.sVal);
             break;
 
+        case NODE_ARRAY_DECLARATION:
+            printf("ARRAY DECLARATION: %s \n", pNode->nodeData.sVal);
+            break;
+            
         case NODE_PRE_INC:
             printf("Pre incrementation: ++%s \n", pNode->nodeData.sVal);
             break;

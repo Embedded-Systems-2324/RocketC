@@ -81,14 +81,6 @@ typedef enum
 
 typedef enum
 {
-    RIGHT_PARENTHESIS,
-    LEFT_PARENTHESIS,
-    RIGHT_BRACE,
-    LEFT_BRACE
-}MiscTokens_et;
-
-typedef enum
-{
     NODE_SIGN = 0,
     NODE_MISC,
     NODE_VISIBILITY,  

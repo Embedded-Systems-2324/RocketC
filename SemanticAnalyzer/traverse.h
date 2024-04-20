@@ -4,7 +4,7 @@
 #include "../Util/Globals.h"
 #include "../SemanticAnalyzer/SymbolTable.h"
 
-int executeSemanticAnalisys(TreeNode_st** pTreeRoot, SymbolTable_st** ppGlobalTable);
+int executeSemanticAnalisys(TreeNode_st* pTreeRoot, SymbolTable_st* ppGlobalTable);
 
 #endif
 
@@ -32,7 +32,7 @@ int executeSemanticAnalisys(TreeNode_st** pTreeRoot, SymbolTable_st** ppGlobalTa
         - NODE_GOTO
         - NODE_FUNCTION_CALL
         - Se NODE_FUNCTION não ir aos filhos pq os filhos tb têm NODE_ID,
-        mas pertence às vaira- Colocar o nome da função no scope onde estáveis a verificar
+        mas pertence às vairá Colocar o nome da função no scope onde estáveis a verificar
 
 
 2ª travessia - postorder

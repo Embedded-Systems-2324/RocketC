@@ -6,15 +6,15 @@
 #include "../SemanticAnalyzer/traverse.h"
 
 static SymbolTable_st* pGlobalSymTable;
-static TreeNode_st* pSintaxTree;
+static SymbolTable_st* pCurrentScope;
 static bool initialized = false;
 
-static int typeError(char * message)
+static int semanticError(char * message)
 { 
      if (!message)
         return -EINVAL;
 
-    LOG_ERROR("Type error at line %d: %s\n",getLineNumber(),message);
+    LOG_ERROR("Semantic error at line %d: %s\n",getLineNumber(),message);
 
     return 0;  
 }
@@ -150,17 +150,132 @@ static void typeChecking(TreeNode_st * treeNode)
     }
 }
 
-static void TypeCheckTraverse()
+
+static int setMemoryLocation(uint32_t* varLocation, VarType_et varType)
+{
+    static uint32_t currentLocation = 0;
+    
+    switch(varType)
+    {
+        case TYPE_CHAR:
+            currentLocation += 1;
+            break;
+
+        case TYPE_SHORT:
+            currentLocation += 2;
+            break;    
+  
+        case TYPE_LONG:
+        case TYPE_INT:
+        case TYPE_FLOAT:
+            currentLocation += 4;
+            break;
+
+        case TYPE_DOUBLE:
+            currentLocation += 8;
+            break;   
+
+        case TYPE_LONG_DOUBLE:
+            currentLocation += 16;
+            break; 
+
+        default:
+            LOG_DEBUG("Invalid variable type");
+            break;                                 
+    }
+
+    *varLocation = currentLocation; 
+}
+
+
+static void buildSymbolTables(TreeNode_st* pNode)
+{
+    switch (pNode->nodeType)
+    {
+        case NODE_VAR_DECLARATION:
+            SymbolEntry_st* pNewSymbol;
+
+            if( insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_VARIABLE) == SYMBOL_ADDED)
+            {
+                TreeNode_st* pNodeTemp = pNode->pChilds;
+
+                pNewSymbol->symbolContent_u.SymbolVar_s.memoryLocation;
+
+                while (pNodeTemp != NULL)
+                {
+                    switch(pNodeTemp->nodeType)
+                    {
+                        case NODE_TYPE:
+                            pNewSymbol->symbolContent_u.SymbolVar_s.varType = pNodeTemp->nodeData.dVal;
+                            break;
+
+                        case NODE_SIGN:
+                            pNewSymbol->symbolContent_u.SymbolVar_s.varSign = pNodeTemp->nodeData.dVal;
+                            break;
+
+                        case NODE_MODIFIER:
+                            pNewSymbol->symbolContent_u.SymbolVar_s.varMod = pNodeTemp->nodeData.dVal;
+                            break;
+
+                        case NODE_VISIBILITY:
+                            pNewSymbol->symbolContent_u.SymbolVar_s.varVis = pNodeTemp->nodeData.dVal;
+                            break;       
+
+                        default:
+                            LOG_DEBUG("Invalid node");
+                            break;
+                    }
+                }
+            }
+            else
+            {
+                semanticError("Symbol Redefinition!");
+            }
+            
+            break;
+
+        case NODE_ARRAY_DECLARATION:
+            break;
+
+        case NODE_FUNCTION:
+            break;
+
+        case NODE_IDENTIFIER:
+            break;        
+        
+        case NODE_ARRAY_INDEX:
+            break;
+
+        case NODE_POINTER_CONTENT:
+            break; 
+
+        case NODE_REFERENCE:
+            break;        
+        
+        case NODE_GOTO:
+            break;
+
+        case NODE_FUNCTION_CALL:
+            break;           
+
+        default:
+            break;
+    }
+}
+
+
+static void TypeCheckTraverse(TreeNode_st* pSintaxTree)
 {
     traverse(pSintaxTree,nullProc,typeChecking);
 }
 
-static void SymbolTableTraverse()
+static void SymbolTableTraverse(TreeNode_st* pSintaxTree)
 {
-    traverse(pSintaxTree,nullProc,nullProc);
+    traverse(pSintaxTree,buildSymbolTables,nullProc);
 }
 
-int executeSemanticAnalisys(TreeNode_st** pTreeRoot, SymbolTable_st** ppGlobalTable)
+
+int executeSemanticAnalisys(TreeNode_st* pTreeRoot, SymbolTable_st* ppGlobalTable)
 {
     if (!ppGlobalTable)
         return -EINVAL;
@@ -175,11 +290,14 @@ int executeSemanticAnalisys(TreeNode_st** pTreeRoot, SymbolTable_st** ppGlobalTa
         initialized = true;
     }
 
-    pGlobalSymTable = *ppGlobalTable;
-    pSintaxTree = *pTreeRoot;
+    pGlobalSymTable = ppGlobalTable;
+    pCurrentScope = ppGlobalTable;
 
-    SymbolTableTraverse();
-    TypeCheckTraverse();
+    if (!pGlobalSymTable)
+        return -EINVAL;
+
+    SymbolTableTraverse(pTreeRoot);
+    //TypeCheckTraverse(*pTreeRoot);
     
     return 0;
 }

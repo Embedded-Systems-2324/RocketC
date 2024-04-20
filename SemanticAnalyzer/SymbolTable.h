@@ -11,10 +11,12 @@
 #define HASH_TABLE_SIZE     97
 #define SYMBOL_NOT_FOUND    0
 #define SYMBOL_FOUND        1
+#define SYMBOL_ADDED        1
+#define SYMBOL_ERROR        0
 
 
 typedef enum{
-    SYMBOL_VAR,
+    SYMBOL_VARIABLE,
     SYMBOL_FUNCTION,
     SYMBOL_LABEL,
     SYMBOL_POINTER,
@@ -64,7 +66,7 @@ typedef struct SymbolEntry
             ModQualifier_et arrayMod;
             VisQualifier_et arrayVis;
             uint32_t arraySize;
-        }SymbolArray;
+        }SymbolArray_s;
 
     }symbolContent_u;
 
@@ -74,7 +76,7 @@ typedef struct SymbolEntry
 // Symbol table struct
 typedef struct SymbolTable
 {
-    uint32_t subScopesNumber;
+    uint32_t innerScopesNumber;
     struct SymbolEntry* table[HASH_TABLE_SIZE]; // Symbol Table
     struct SymbolTable* enclosingScope;         // Pointer to Symbol Table of Enclosing Scope
     struct SymbolTable* innerScopes;
@@ -85,12 +87,14 @@ static int hash(const char* key);
 
 int createSymbolTable(SymbolTable_st** ppsymTable, SymbolTable_st* enclosingScope);
 
-int addInnerScope(SymbolTable_st* ppsymTable);
+int addInnercSope(SymbolTable_st* ppsymTable);
 
 int insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *symName, SymbolType_et symType);
 
 int fetchSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymbol, char* name, int onlyCurrentScope);
 
 void freeSymbolTable(SymbolTable_st* symTable);
+
+void printSymbolTables(SymbolTable_st* symTable);
 
 #endif 

@@ -9,6 +9,7 @@
 #include "Parser/Parser.h"
 #include "Output/Parser.tab.h"
 #include "SemanticAnalyzer/SymbolTable.h"
+#include "SemanticAnalyzer/traverse.h"
 #include "Util/Util.h"
 
 
@@ -78,7 +79,15 @@ int main(int argc, char *argv[])
             (void) executeParser(&pTreeRoot);
             LOG_WARNING_SHORT("\n-------------------AST-------------------\n\n");
             PrintNode(pTreeRoot);
-            LOG_WARNING_SHORT("\n\n-----------------AST END-----------------\n");
+            LOG_WARNING_SHORT("\n\n-----------------AST END-----------------\n\n\n");
+
+
+            LOG_WARNING_SHORT("\n\n-----------------SYMBOLS-----------------\n");
+            executeSemanticAnalisys(pTreeRoot, pGlobalSymTable);
+
+            printSymbolTables(pGlobalSymTable);
+
+            LOG_WARNING_SHORT("\n\n-----------------SYMBOLS END-----------------\n");
         }
     }
     else

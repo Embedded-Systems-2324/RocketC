@@ -967,7 +967,6 @@ R_EXP       :   TOKEN_MINUS R_EXP
                     NodeAddNewChild($$.treeNode, &pNode, NODE_INTEGER);
                     pNode->nodeData.dVal = 0;
 
-                    NodeAddChild($$.treeNode, pNode);  
                     NodeAddChild($$.treeNode, $2.treeNode);  
                 }
 
