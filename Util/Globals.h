@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include "Types.h"
 
+
 #define FLAG_REGISTER 1
 
 typedef enum
@@ -135,6 +136,7 @@ typedef union
 }NodeData_ut;
 
 
+#include "../SemanticAnalyzer/SymbolTable.h"
 typedef struct TreeNode
 {
     struct TreeNode* pChilds;
@@ -145,8 +147,8 @@ typedef struct TreeNode
     NodeType_et nodeType;
     NodeData_ut nodeData;
 
+    SymbolTable_st* scopeTable;
 }TreeNode_st;
-
 
 typedef union
 {

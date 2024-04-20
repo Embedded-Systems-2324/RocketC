@@ -4,12 +4,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include "Util/Logger.h"
-#include "Util/Globals.h"
 #include "Lexer/Lexer.h"
 #include "Parser/Parser.h"
 #include "Output/Parser.tab.h"
 #include "SemanticAnalyzer/SymbolTable.h"
 #include "SemanticAnalyzer/traverse.h"
+#include "Util/Globals.h"
 #include "Util/Util.h"
 
 

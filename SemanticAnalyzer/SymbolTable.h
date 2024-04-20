@@ -30,7 +30,7 @@ typedef struct parameter{
     SignQualifier_et varSign;
     ModQualifier_et varMod;
 
-    struct parameter* nextParam_st;
+    void (*addFunctionParams)(struct parameter** ppSelf);
 }parameter_st;
 
 
@@ -54,8 +54,12 @@ typedef struct SymbolEntry
 
         struct{
             VarType_et returnType;                  // Function Return Type
+            SignQualifier_et returnSign;
+            ModQualifier_et varMod;
+            VisQualifier_et varVis;  
             uint8_t parameterNumber;                // Number of Function Params
             parameter_st* parameter;
+            bool isIplemented;
         }SymbolFunction_s;
 
 
@@ -79,7 +83,7 @@ typedef struct SymbolTable
     uint32_t innerScopesNumber;
     struct SymbolEntry* table[HASH_TABLE_SIZE]; // Symbol Table
     struct SymbolTable* enclosingScope;         // Pointer to Symbol Table of Enclosing Scope
-    struct SymbolTable* innerScopes;
+    //struct SymbolTable* innerScopes;
 } SymbolTable_st;
 
 
@@ -87,7 +91,7 @@ static int hash(const char* key);
 
 int createSymbolTable(SymbolTable_st** ppsymTable, SymbolTable_st* enclosingScope);
 
-int addInnercSope(SymbolTable_st* ppsymTable);
+//int addInnercSope(SymbolTable_st* ppsymTable);
 
 int insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *symName, SymbolType_et symType);
 

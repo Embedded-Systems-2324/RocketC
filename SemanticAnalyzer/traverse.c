@@ -9,12 +9,12 @@ SymbolTable_st* pGlobalSymTable;
 SymbolTable_st* pCurrentScope;
 static bool initialized = false;
 
-static int semanticError(char * message)
+static int semanticError(TreeNode_st* pNode, char * message)
 { 
      if (!message)
         return -EINVAL;
 
-    LOG_ERROR("Semantic error at line %d: %s\n",getLineNumber(),message);
+    LOG_ERROR("Semantic error at line %d: %s\n", pNode->lineNumber, message);
 
     return 0;  
 }
@@ -189,51 +189,63 @@ static int setMemoryLocation(uint32_t* varLocation, VarType_et varType)
 }
 
 
+static void setVariblesType(TreeNode_st* pNode, VarType_et* type, SignQualifier_et* sign, ModQualifier_et* modifier, VisQualifier_et* visibility)
+{
+    TreeNode_st* pNodeTemp = pNode;
+
+    while (pNodeTemp != NULL)
+    {
+        switch(pNodeTemp->nodeType)
+        {
+            case NODE_TYPE:
+                *type = pNodeTemp->nodeData.dVal;
+                break;
+
+            case NODE_SIGN:
+                *sign = pNodeTemp->nodeData.dVal;
+                break;
+
+            case NODE_MODIFIER:
+                *modifier = pNodeTemp->nodeData.dVal;
+                break;
+
+            case NODE_VISIBILITY:
+                *visibility = pNodeTemp->nodeData.dVal;
+                break;       
+
+            default:
+                LOG_DEBUG("Invalid node");
+                break;
+        }
+        pNodeTemp = pNodeTemp->pSibling;
+    }
+}
+
+
 static void buildSymbolTables(TreeNode_st* pNode)
 {
+    SymbolEntry_st* pNewSymbol;
+
     switch (pNode->nodeType)
     {
         case NODE_VAR_DECLARATION:
-            SymbolEntry_st* pNewSymbol;
 
-
-            if( insertSymbol(pGlobalSymTable, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_VARIABLE) == SYMBOL_ADDED)
+            if( insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_VARIABLE) == SYMBOL_ADDED)
             { 
                 TreeNode_st* pNodeTemp = pNode->pChilds;
-
+        
                 setMemoryLocation(&pNewSymbol->symbolContent_u.SymbolVar_s.memoryLocation, pNodeTemp->nodeType);
+                pNode->scopeTable = pCurrentScope;
 
-                while (pNodeTemp != NULL)
-                {
-                    switch(pNodeTemp->nodeType)
-                    {
-                        case NODE_TYPE:
-                            pNewSymbol->symbolContent_u.SymbolVar_s.varType = pNodeTemp->nodeData.dVal;
-                            break;
-
-                        case NODE_SIGN:
-                            pNewSymbol->symbolContent_u.SymbolVar_s.varSign = pNodeTemp->nodeData.dVal;
-                            break;
-
-                        case NODE_MODIFIER:
-                            pNewSymbol->symbolContent_u.SymbolVar_s.varMod = pNodeTemp->nodeData.dVal;
-                            break;
-
-                        case NODE_VISIBILITY:
-                            pNewSymbol->symbolContent_u.SymbolVar_s.varVis = pNodeTemp->nodeData.dVal;
-                            break;       
-
-                        default:
-                            LOG_DEBUG("Invalid node");
-                            break;
-                    }
-
-                    pNodeTemp = pNodeTemp->pSibling;
-                }
+                setVariblesType(pNodeTemp, 
+                                &pNewSymbol->symbolContent_u.SymbolVar_s.varType,
+                                &pNewSymbol->symbolContent_u.SymbolVar_s.varSign,
+                                &pNewSymbol->symbolContent_u.SymbolVar_s.varMod,
+                                &pNewSymbol->symbolContent_u.SymbolVar_s.varVis);
             }
             else
             {
-                semanticError("Symbol Redefinition!");
+                semanticError(pNode, "Symbol Redefinition!");
             }
             
             break;
@@ -242,6 +254,34 @@ static void buildSymbolTables(TreeNode_st* pNode)
             break;
 
         case NODE_FUNCTION:
+
+            if( insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_FUNCTION) == SYMBOL_ADDED)
+            {
+                SymbolEntry_st* pNewSymbol;
+                TreeNode_st* pNodeArgs = &pNode->pChilds[1];
+
+                while (pNodeArgs != NULL)
+                {
+                    setVariblesType(pNodeArgs->pChilds, 
+                                    &pNewSymbol->symbolContent_u.SymbolVar_s.varType,
+                                    &pNewSymbol->symbolContent_u.SymbolVar_s.varSign,
+                                    &pNewSymbol->symbolContent_u.SymbolVar_s.varMod,
+                                    &pNewSymbol->symbolContent_u.SymbolVar_s.varVis); 
+
+                    
+                    pNodeArgs = pNodeArgs->pSibling;
+                }
+                
+
+                if(pNode->childNumber > 2)
+                {
+                    pNewSymbol->symbolContent_u.SymbolFunction_s.isIplemented = true;
+                }
+                else
+                {
+                    pNewSymbol->symbolContent_u.SymbolFunction_s.isIplemented = false;
+                }
+            }
             break;
 
         case NODE_IDENTIFIER:

@@ -39,7 +39,7 @@ int createSymbolTable(SymbolTable_st** ppSymTable, SymbolTable_st* enclosingScop
 
     pSymTable->enclosingScope = enclosingScope;
     pSymTable->innerScopesNumber = 0;
-    pSymTable->innerScopes = NULL;
+    //pSymTable->innerScopes = NULL;
 
     // Initialize hash table
     for (int i = 0; i < HASH_TABLE_SIZE; ++i)
@@ -51,7 +51,7 @@ int createSymbolTable(SymbolTable_st** ppSymTable, SymbolTable_st* enclosingScop
 }
 
 
-int addInnerScope(SymbolTable_st* pSymTable)
+/*int addInnerScope(SymbolTable_st* pSymTable)
 {
     if (!pSymTable)
         return -EINVAL;
@@ -73,7 +73,7 @@ int addInnerScope(SymbolTable_st* pSymTable)
     free(pNewTable);
 
     return 0;
-}
+}*/
 
 
 // Function to get symbol from symbol table
@@ -139,6 +139,8 @@ int insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *s
         return SYMBOL_ADDED;
     }
 
+    *ppSymEntry = pEntryAux;
+
     return SYMBOL_ERROR;
 }
 
@@ -160,6 +162,13 @@ void freeSymbolTable(SymbolTable_st* symTable)
     }
     free(symTable);
 }
+
+
+void addFunctionParams(struct parameter** ppSelf)
+{
+    
+}
+
 
 
 int printSymbolTables(SymbolTable_st* symTable)
