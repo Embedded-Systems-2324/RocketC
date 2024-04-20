@@ -1,0 +1,29 @@
+CONST DOUBLE ID SEMI  
+CHAR ID SEMI  
+STATIC UNSIGNED INT ID SEMI  
+INT ID SEMI  
+INT ID SEMI  
+ 
+CHAR ID LEFT_BRACKET NUM RIGHT_BRACKET SEMI  
+FLOAT ID SEMI  
+FLOAT ID SEMI  
+ 
+ 
+ 
+INT ID LEFT_PAREN INT ID RIGHT_PAREN  
+LEFT_BRACE  
+INT ID SEMI  
+RIGHT_BRACE 
+-------------------AST-------------------
+
+
+
+-----------------AST END-----------------
+
+
+
+
+-----------------SYMBOLS-----------------
+
+
+-----------------SYMBOLS END-----------------

@@ -5,6 +5,8 @@
 #include "../main.h"
 #include "../SemanticAnalyzer/SymbolTable.h"
 
+static int tablesNumber = 0;
+static SymbolTable_st** allSymbolsTables;
 
 // Hash function
 static int hash(const char *key)
@@ -46,6 +48,15 @@ int createSymbolTable(SymbolTable_st** ppSymTable, SymbolTable_st* enclosingScop
     {
         pSymTable->table[i] = NULL;      // Initialize each entry to NULL
     }
+
+    allSymbolsTables = reallocarray(allSymbolsTables, tablesNumber + 1, sizeof(SymbolTable_st*));
+    if (!allSymbolsTables)
+    {
+        LOG_DEBUG("Failed to allocate memory while trying to add a table pointer\n");
+        return -ENOMEM;
+    }
+
+    allSymbolsTables[tablesNumber++] = (*ppSymTable);
 
     return 0;
 }
@@ -121,7 +132,7 @@ int insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *s
     SymbolEntry_st* pEntryAux;
     //SymbolTable_st* pCurrentTable = pSymTable;   //??????????
 
-    if( fetchSymbol(pSymTable, &pEntryAux, symName, false) == SYMBOL_NOT_FOUND)
+    if( fetchSymbol(pSymTable, &pEntryAux, symName, true) == SYMBOL_NOT_FOUND)
     {
         SymbolEntry_st* pNewSymbol;
         pNewSymbol = (SymbolEntry_st*) calloc(1, sizeof(SymbolEntry_st));
@@ -163,23 +174,21 @@ void freeSymbolTable(SymbolTable_st* symTable)
 }
 
 
-int printSymbolTables(SymbolTable_st* symTable)
+int printSymbolTables()
 {
-
-    if (!symTable)
-        return -EINVAL;
-
     static uint8_t counter = 0;
     SymbolEntry_st* temp;
-    SymbolTable_st* CurrTable = symTable;
+    SymbolTable_st* CurrTable;
 
-    /*while(CurrTable != NULL)
-    {*/
-        printf("-----------SYMBOL TABLE %u-----------\n", counter);
+    for(int j = 0; j < tablesNumber; j++)
+    {
+        CurrTable = allSymbolsTables[j];
+
+        printf("-----------SYMBOL TABLE %u-----------\n", counter++);
         
         for(int i = 0; i < HASH_TABLE_SIZE; i++)
         {
-            temp = symTable->table[i];
+            temp = CurrTable->table[i];
             
             while(temp != NULL)
             {
@@ -200,6 +209,8 @@ int printSymbolTables(SymbolTable_st* symTable)
                     break;
                 
                 case SYMBOL_FUNCTION:
+                     int paramNumber = temp->symbolContent_u.SymbolFunction_s.parameterNumber;
+
                     printf("%10s: %20s | %11s | %9s | %9s | %6s | %5s | %5s | %5s | %5d\n",     "FUNCTION",
                                                                          /* Functio Name */     temp->name,
                                                                           /* Return Type */     VarTypeStrings[temp->symbolContent_u.SymbolFunction_s.returnType],
@@ -209,36 +220,24 @@ int printSymbolTables(SymbolTable_st* symTable)
                                                                       /* Memory Location */     "n/a",
                                                                            /* Array Size */     "n/a",
                                                               /* Is Function Implemented */     temp->symbolContent_u.SymbolFunction_s.isImplemented ? "True" : "False",
-                                                                     /* Parameter Amount */     temp->symbolContent_u.SymbolFunction_s.parameterNumber
+                                                                     /* Parameter Amount */     paramNumber
                                                                                                 );
 
-                    parameter_st* parameterAux;
-                    if(temp->symbolContent_u.SymbolFunction_s.parameterNumber != 0)
+                    parameter_st* parameterAux = temp->symbolContent_u.SymbolFunction_s.parameters;
+        
+                    if(paramNumber > 0)
                     {
-                        parameterAux = temp->symbolContent_u.SymbolFunction_s.parameters;
-                        printf("\tPARAMETERS: ");
-                        printf("%20s | %11s | %9s | %9s\n",     
-                                                     /* Name */     parameterAux->name,
-                                                     /* Type */     VarTypeStrings[parameterAux->varType],
-                                                     /* Sign */     SignQualifierStrings[parameterAux->varSign],
-                                                 /* Modifier */     ModQualifierStrings[parameterAux->varMod]
-                                                                    );
-                        printf("\t            ");
-                        // while(parameterAux != NULL)
-                        // {
-                        //     printf("%20s | %11s | %9s | %9s\n",     
-                        //                              /* Name */     parameterAux->name,
-                        //                              /* Type */     VarTypeStrings[parameterAux->varType],
-                        //                              /* Sign */     SignQualifierStrings[parameterAux->varSign],
-                        //                          /* Modifier */     ModQualifierStrings[parameterAux->varMod]
-                        //                                             );
-                        //     printf("\t            ");
-                        //     parameterAux = parameterAux->next;
-                        // }
-                        printf("\n");
-                    }
-                    
-                                                        
+                        for(int i = 0; i < paramNumber; i++)
+                        {   
+                            printf("%15s: %15s | %11s | %9s | %9s\n", "PARAM",   
+                                                    /* Name */    parameterAux[i].name,
+                                                    /* Type */    VarTypeStrings[parameterAux[i].varType],
+                                                    /* Sign */    SignQualifierStrings[parameterAux[i].varSign],
+                                                /* Modifier */    ModQualifierStrings[parameterAux[i].varMod]
+                                                                );
+                        }
+                    }    
+                                                 
                     break;
                 
                 
@@ -294,27 +293,28 @@ int printSymbolTables(SymbolTable_st* symTable)
         }
 
         printf("------------------------------------\n\n\n");
-
-    //}    
+    }    
 }
 
 
 
 
-int addFunctionParams(SymbolEntry_st** ppSymbol, struct parameter* pNewParam)
+int addFunctionParams(SymbolEntry_st* pSymbol, struct parameter* pNewParam)
 {
-    if (!ppSymbol)
+    if (!pSymbol)
         return -EINVAL;
     
-    parameter_st* pParamList = (*ppSymbol)->symbolContent_u.SymbolFunction_s.parameters;
+    parameter_st* pParamList; 
 
-    pParamList = reallocarray(pParamList, (*ppSymbol)->symbolContent_u.SymbolFunction_s.parameterNumber + 1, sizeof(parameter_st));
+    pParamList = reallocarray(pSymbol->symbolContent_u.SymbolFunction_s.parameters, pSymbol->symbolContent_u.SymbolFunction_s.parameterNumber + 1, sizeof(parameter_st));
     if (!pParamList)
     {
         LOG_DEBUG("Failed to allocate memory while trying to add a new parameter\n");
         return -ENOMEM;
     }
 
-    memcpy(&pParamList[(*ppSymbol)->symbolContent_u.SymbolFunction_s.parameterNumber++], pNewParam, sizeof(parameter_st));
+    memcpy(&pParamList[pSymbol->symbolContent_u.SymbolFunction_s.parameterNumber++], pNewParam, sizeof(parameter_st));
+    
+    pSymbol->symbolContent_u.SymbolFunction_s.parameters = pParamList;
     return 0;
 }

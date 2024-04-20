@@ -126,7 +126,9 @@ typedef enum
 
     NODE_FUNCTION,
     NODE_FUNCTION_CALL,
-    NODE_PARAMETER
+    NODE_PARAMETER,
+
+    NODE_NULL
 }NodeType_et;
 
 typedef union

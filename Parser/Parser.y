@@ -621,7 +621,7 @@ R_EXP_LIST  :   %empty
 // Function argument list. Note: The argument list can be empty. Example: int x | int x, int y
 R_ARG_LIST              :   %empty 
                             {
-                                $$.treeNode = NULL;
+                                NodeCreate(&($$.treeNode), NODE_NULL);
                             }
 
                         |   R_ARG_LIST TOKEN_COMMA R_ARG

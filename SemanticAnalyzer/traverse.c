@@ -192,6 +192,9 @@ static int setMemoryLocation(int* varLocation, VarType_et varType, int multiplie
 static void setVariblesType(TreeNode_st* pNode, VarType_et* type, SignQualifier_et* sign, ModQualifier_et* modifier, VisQualifier_et* visibility)
 {
     TreeNode_st* pNodeTemp = pNode;
+    *sign = 0;
+    *modifier = 0;
+    *visibility = 0;
 
     while (pNodeTemp != NULL)
     {
@@ -226,6 +229,8 @@ static void buildSymbolTables(TreeNode_st* pNode)
 {
     SymbolEntry_st* pNewSymbol;
 
+    pNode->scopeTable = pCurrentScope;
+
     switch (pNode->nodeType)
     {
         case NODE_VAR_DECLARATION:
@@ -259,14 +264,12 @@ static void buildSymbolTables(TreeNode_st* pNode)
                 pNewSymbol->symbolContent_u.SymbolArray_s.arraySize = arraySize;
                 
                 setMemoryLocation(&pNewSymbol->symbolContent_u.SymbolVar_s.memoryLocation, pNodePreamble->nodeData.dVal, arraySize);
-                pNode->scopeTable = pCurrentScope;
 
                 setVariblesType(pNodePreamble, 
                                 &pNewSymbol->symbolContent_u.SymbolArray_s.arrayType,
                                 &pNewSymbol->symbolContent_u.SymbolArray_s.arraySign,
                                 &pNewSymbol->symbolContent_u.SymbolArray_s.arrayMod,
                                 &pNewSymbol->symbolContent_u.SymbolArray_s.arrayVis);
-                
             }
             else
             {
@@ -278,7 +281,12 @@ static void buildSymbolTables(TreeNode_st* pNode)
             if( insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_FUNCTION) == SYMBOL_ADDED)
             {
                 TreeNode_st* pNodePreamble = &pNode->pChilds[0];
-                TreeNode_st* pNodeArgs = &pNode->pChilds[1];
+                TreeNode_st* pNodeArgs;
+
+                if(pNode->pChilds[1].nodeType != NODE_NULL)
+                    pNodeArgs = &pNode->pChilds[1];
+                else    
+                    pNodeArgs = NULL; 
 
                 setVariblesType(pNodePreamble, 
                                 &pNewSymbol->symbolContent_u.SymbolFunction_s.returnType,
@@ -286,10 +294,13 @@ static void buildSymbolTables(TreeNode_st* pNode)
                                 &pNewSymbol->symbolContent_u.SymbolFunction_s.funcMod,
                                 &pNewSymbol->symbolContent_u.SymbolFunction_s.funcVis); 
 
+
                 while (pNodeArgs != NULL)
                 {
                     parameter_st pParam;
                     VisQualifier_et notUsed;
+
+                    pParam.name = pNodeArgs->nodeData.sVal;
 
                     setVariblesType(pNodeArgs->pChilds, 
                                     &pParam.varType,
@@ -297,12 +308,8 @@ static void buildSymbolTables(TreeNode_st* pNode)
                                     &pParam.varMod,
                                     &notUsed);
 
-                    //addFunctionParams(&pNewSymbol, &pParam);
+                    addFunctionParams(pNewSymbol, &pParam);
 
-                    //parameter_st *ptr = &pNewSymbol->symbolContent_u.SymbolFunction_s.parameters[0];
-
-                    //printf("->%s\n", ptr->name);
-                    
                     pNodeArgs = pNodeArgs->pSibling;
                 }
 
@@ -316,6 +323,18 @@ static void buildSymbolTables(TreeNode_st* pNode)
 
                     pCurrentScope = ppsymTable;
 
+                    if(pNodeArgs != NULL)
+                    {
+                        parameter_st* paramList = pNewSymbol->symbolContent_u.SymbolFunction_s.parameters;
+                        SymbolEntry_st* pParamSym;
+
+                        for(int i = 0; i < pNewSymbol->symbolContent_u.SymbolFunction_s.parameterNumber; i++)
+                        {
+                            insertSymbol(pCurrentScope, &pParamSym, paramList[i].name, SYMBOL_VARIABLE);
+
+                            pParamSym->symbolContent_u.SymbolVar_s.memoryLocation = NO_MEMORY;
+                        }
+                    }
                 }
                 else
                 {

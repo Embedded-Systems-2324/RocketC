@@ -8,4 +8,9 @@ char a[10];
 float teste;
 float value;
 
-int main(int a, char c);
+
+
+int z(int c)
+{
+    int f;
+}

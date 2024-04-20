@@ -306,6 +306,9 @@ void PrintNode(TreeNode_st* pNode)
             printf("Pre incrementation: ++%s \n", pNode->nodeData.sVal);
             break;
 
+        case NODE_NULL:
+            break;
+
         default:
             LOG_ERROR("\nUNKNOWN NODE TYPE!\n");
             break;

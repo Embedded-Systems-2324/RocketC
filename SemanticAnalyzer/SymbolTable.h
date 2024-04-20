@@ -33,7 +33,6 @@ typedef struct parameter{
     VarType_et varType;
     SignQualifier_et varSign;
     ModQualifier_et varMod;
-    struct parameter *next;
 }parameter_st;
 
 // Symbol entry struct
@@ -66,7 +65,7 @@ typedef struct SymbolEntry
 
         struct{
             int memoryLocation;                // Variable Location
-            VarType_et arrayType;                   // Variable Type
+            VarType_et arrayType;              // Variable Type
             SignQualifier_et arraySign;
             ModQualifier_et arrayMod;
             VisQualifier_et arrayVis;
@@ -100,7 +99,7 @@ int fetchSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymbol, char* name
 
 void freeSymbolTable(SymbolTable_st* symTable);
 
-int printSymbolTables(SymbolTable_st* symTable);
+int printSymbolTables();
 
-int addFunctionParams(SymbolEntry_st** ppSymbol, struct parameter* pNewParam);
+int addFunctionParams(SymbolEntry_st* pSymbol, struct parameter* pNewParam);
 #endif 
