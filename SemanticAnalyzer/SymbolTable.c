@@ -102,7 +102,6 @@ int fetchSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymbol, char* name
     // Symbol not found in the current scope, check enclosing scope (if it exists)
     if (pSymTable->enclosingScope != NULL && !onlyCurrentScope)
     {
-        printf("SOS\n");
         return fetchSymbol(pSymTable->enclosingScope, ppSymbol, name, onlyCurrentScope);
     }
 
@@ -120,7 +119,7 @@ int insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *s
     int index = hash(symName);
 
     SymbolEntry_st* pEntryAux;
-    SymbolTable_st* pCurrentTable = pSymTable;
+    //SymbolTable_st* pCurrentTable = pSymTable;   //??????????
 
     if( fetchSymbol(pSymTable, &pEntryAux, symName, false) == SYMBOL_NOT_FOUND)
     {
@@ -164,13 +163,6 @@ void freeSymbolTable(SymbolTable_st* symTable)
 }
 
 
-void addFunctionParams(struct parameter** ppSelf)
-{
-    
-}
-
-
-
 int printSymbolTables(SymbolTable_st* symTable)
 {
 
@@ -179,61 +171,150 @@ int printSymbolTables(SymbolTable_st* symTable)
 
     static uint8_t counter = 0;
     SymbolEntry_st* temp;
+    SymbolTable_st* CurrTable = symTable;
 
-    printf("-----------SYMBOL TABLE %u-----------\n", counter);
-    
-    for(int i = 0; i < HASH_TABLE_SIZE; i++)
-    {
-        temp = symTable->table[i];
+    /*while(CurrTable != NULL)
+    {*/
+        printf("-----------SYMBOL TABLE %u-----------\n", counter);
         
-        while(temp != NULL)
+        for(int i = 0; i < HASH_TABLE_SIZE; i++)
         {
-            switch (temp->symbolType)
+            temp = symTable->table[i];
+            
+            while(temp != NULL)
             {
-            case SYMBOL_VARIABLE:
-                printf("VARIABLE: %s | %s | %s | %s | %s | %d\n",   temp->name,
-                                                                    VarTypeStrings[temp->symbolContent_u.SymbolVar_s.varType],
-                                                                    SignQualifierStrings[temp->symbolContent_u.SymbolVar_s.varSign],
-                                                                    ModQualifierStrings[temp->symbolContent_u.SymbolVar_s.varMod],
-                                                                    VisQualifierStrings[temp->symbolContent_u.SymbolVar_s.varVis],
-                                                                    temp->symbolContent_u.SymbolVar_s.memoryLocation
+                switch (temp->symbolType)
+                {
+                case SYMBOL_VARIABLE:
+                    printf("%10s: %20s | %11s | %9s | %9s | %6s | %5d | %5s | %5s | %5s\n",   "VARIABLE",
+                                                               /* Name */   temp->name,
+                                                               /* Type */   VarTypeStrings[temp->symbolContent_u.SymbolVar_s.varType],
+                                                               /* Sign */   SignQualifierStrings[temp->symbolContent_u.SymbolVar_s.varSign],
+                                                           /* Modifier */   ModQualifierStrings[temp->symbolContent_u.SymbolVar_s.varMod],
+                                                         /* Visibility */   VisQualifierStrings[temp->symbolContent_u.SymbolVar_s.varVis],
+                                                    /* Memory Location */   temp->symbolContent_u.SymbolVar_s.memoryLocation,
+                                                         /* Array Size */   "n/a",
+                                            /* Is Function Implemented */   "n/a",
+                                                   /* Parameter Amount */   "n/a"
+                                                                            );
+                    break;
+                
+                case SYMBOL_FUNCTION:
+                    printf("%10s: %20s | %11s | %9s | %9s | %6s | %5s | %5s | %5s | %5d\n",     "FUNCTION",
+                                                                         /* Functio Name */     temp->name,
+                                                                          /* Return Type */     VarTypeStrings[temp->symbolContent_u.SymbolFunction_s.returnType],
+                                                                          /* Return Sign */     SignQualifierStrings[temp->symbolContent_u.SymbolFunction_s.returnSign],
+                                                                     /* Functio Modifier */     ModQualifierStrings[temp->symbolContent_u.SymbolFunction_s.funcMod],
+                                                                   /* Functio Visibility */     VisQualifierStrings[temp->symbolContent_u.SymbolFunction_s.funcVis],
+                                                                      /* Memory Location */     "n/a",
+                                                                           /* Array Size */     "n/a",
+                                                              /* Is Function Implemented */     temp->symbolContent_u.SymbolFunction_s.isImplemented ? "True" : "False",
+                                                                     /* Parameter Amount */     temp->symbolContent_u.SymbolFunction_s.parameterNumber
+                                                                                                );
+
+                    parameter_st* parameterAux;
+                    if(temp->symbolContent_u.SymbolFunction_s.parameterNumber != 0)
+                    {
+                        parameterAux = temp->symbolContent_u.SymbolFunction_s.parameters;
+                        printf("\tPARAMETERS: ");
+                        printf("%20s | %11s | %9s | %9s\n",     
+                                                     /* Name */     parameterAux->name,
+                                                     /* Type */     VarTypeStrings[parameterAux->varType],
+                                                     /* Sign */     SignQualifierStrings[parameterAux->varSign],
+                                                 /* Modifier */     ModQualifierStrings[parameterAux->varMod]
                                                                     );
-                break;
-            
-            case SYMBOL_FUNCTION:
-                printf("FUNCTION: %s | %s | %d\n",  temp->name,
-                                                    VarTypeStrings[temp->symbolContent_u.SymbolFunction_s.returnType],
-                                                    temp->symbolContent_u.SymbolFunction_s.parameterNumber
-                                                    );
-                                                    // TODO: ADD PRINT FOR PARAMETERS
-                break;
-            
-            case SYMBOL_LABEL:
-                printf("VARIABLE: %s\n", temp->name);
-                break;
-            
-            case SYMBOL_POINTER:
-                printf("VARIABLE: %s\n", temp->name);
-                break;
-            
-            case SYMBOL_ARRAY:
-                printf("VARIABLE: %s | %s | %s | %s | %s | %d | %d\n",  temp->name,
-                                                                        VarTypeStrings[temp->symbolContent_u.SymbolArray_s.arrayType],
-                                                                        SignQualifierStrings[temp->symbolContent_u.SymbolArray_s.arraySign],
-                                                                        ModQualifierStrings[temp->symbolContent_u.SymbolArray_s.arrayMod],
-                                                                        VisQualifierStrings[temp->symbolContent_u.SymbolArray_s.arrayVis],
-                                                                        temp->symbolContent_u.SymbolArray_s.arraySize,
-                                                                        temp->symbolContent_u.SymbolArray_s.memoryLocation);
-                break;
+                        printf("\t            ");
+                        // while(parameterAux != NULL)
+                        // {
+                        //     printf("%20s | %11s | %9s | %9s\n",     
+                        //                              /* Name */     parameterAux->name,
+                        //                              /* Type */     VarTypeStrings[parameterAux->varType],
+                        //                              /* Sign */     SignQualifierStrings[parameterAux->varSign],
+                        //                          /* Modifier */     ModQualifierStrings[parameterAux->varMod]
+                        //                                             );
+                        //     printf("\t            ");
+                        //     parameterAux = parameterAux->next;
+                        // }
+                        printf("\n");
+                    }
+                    
+                                                        
+                    break;
+                
+                
+                case SYMBOL_LABEL:
+                    printf("%10s: %20s | %11s | %9s | %9s | %6s | %5s | %5s | %5s | %5s\n",   "LABEL",
+                                                                                 /* Name */   temp->name,
+                                                                                 /* Type */   "n/a",
+                                                                                 /* Sign */   "n/a",
+                                                                             /* Modifier */   "n/a",
+                                                                           /* Visibility */   "n/a",
+                                                                      /* Memory Location */   "n/a",
+                                                                           /* Array Size */   "n/a",
+                                                              /* Is Function Implemented */   "n/a",
+                                                                     /* Parameter Amount */   "n/a"
+                                                                                              );
+                    break;
+                
+                case SYMBOL_POINTER:
+                    printf("%10s: %20s | %11s | %9s | %9s | %6s | %5d | %5s | %5s | %5s\n",   "POINTER",
+                                                                                 /* Name */   temp->name,
+                                                                                 /* Type */   VarTypeStrings[temp->symbolContent_u.SymbolVar_s.varType],
+                                                                                 /* Sign */   SignQualifierStrings[temp->symbolContent_u.SymbolVar_s.varSign],
+                                                                             /* Modifier */   ModQualifierStrings[temp->symbolContent_u.SymbolVar_s.varMod],
+                                                                           /* Visibility */   VisQualifierStrings[temp->symbolContent_u.SymbolVar_s.varVis],
+                                                                      /* Memory Location */   temp->symbolContent_u.SymbolVar_s.memoryLocation,
+                                                                           /* Array Size */   "n/a",
+                                                              /* Is Function Implemented */   "n/a",
+                                                                     /* Parameter Amount */   "n/a"
+                                                                                              );
+                    break;
+                
+                case SYMBOL_ARRAY:
+                    printf("%10s: %20s | %11s | %9s | %9s | %6s | %5d | %5d | %5s | %5s\n",  "ARRAY",
+                                                                                /* Name */   temp->name,
+                                                                                /* Type */   VarTypeStrings[temp->symbolContent_u.SymbolArray_s.arrayType],
+                                                                                /* Sign */   SignQualifierStrings[temp->symbolContent_u.SymbolArray_s.arraySign],
+                                                                            /* Modifier */   ModQualifierStrings[temp->symbolContent_u.SymbolArray_s.arrayMod],
+                                                                          /* Visibility */   VisQualifierStrings[temp->symbolContent_u.SymbolArray_s.arrayVis],
+                                                                     /* Memory Location */   temp->symbolContent_u.SymbolArray_s.memoryLocation,
+                                                                          /* Array Size */   temp->symbolContent_u.SymbolArray_s.arraySize,
+                                                             /* Is Function Implemented */   "n/a",
+                                                                    /* Parameter Amount */   "n/a"
+                                                                                             );
+                    break;
 
-            default:
+                default:
 
-                break;
+                    break;
+                }
+
+                temp = temp->next;
             }
-
-            temp = temp->next;
         }
+
+        printf("------------------------------------\n\n\n");
+
+    //}    
+}
+
+
+
+
+int addFunctionParams(SymbolEntry_st** ppSymbol, struct parameter* pNewParam)
+{
+    if (!ppSymbol)
+        return -EINVAL;
+    
+    parameter_st* pParamList = (*ppSymbol)->symbolContent_u.SymbolFunction_s.parameters;
+
+    pParamList = reallocarray(pParamList, (*ppSymbol)->symbolContent_u.SymbolFunction_s.parameterNumber + 1, sizeof(parameter_st));
+    if (!pParamList)
+    {
+        LOG_DEBUG("Failed to allocate memory while trying to add a new parameter\n");
+        return -ENOMEM;
     }
 
-    printf("------------------------------------\n\n\n");
+    memcpy(&pParamList[(*ppSymbol)->symbolContent_u.SymbolFunction_s.parameterNumber++], pNewParam, sizeof(parameter_st));
+    return 0;
 }

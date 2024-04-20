@@ -125,7 +125,8 @@ typedef enum
     NODE_ARRAY_INDEX,
 
     NODE_FUNCTION,
-    NODE_FUNCTION_CALL
+    NODE_FUNCTION_CALL,
+    NODE_PARAMETER
 }NodeType_et;
 
 typedef union
@@ -134,26 +135,5 @@ typedef union
     long int dVal;
     char* sVal;
 }NodeData_ut;
-
-
-#include "../SemanticAnalyzer/SymbolTable.h"
-typedef struct TreeNode
-{
-    struct TreeNode* pChilds;
-    struct TreeNode* pSibling;
-    size_t childNumber;
-    size_t lineNumber;
-
-    NodeType_et nodeType;
-    NodeData_ut nodeData;
-
-    SymbolTable_st* scopeTable;
-}TreeNode_st;
-
-typedef union
-{
-    TreeNode_st* treeNode;
-    NodeData_ut nodeData;
-}ParserObject_ut;
 
 #endif

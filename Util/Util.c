@@ -217,6 +217,10 @@ void PrintNode(TreeNode_st* pNode)
             printf("Function: %s \n", pNode->nodeData.sVal);
             break;
         
+        case NODE_PARAMETER:
+            printf("Parameter: %s \n", pNode->nodeData.sVal);
+            break;
+
         case NODE_INTEGER:
             printf("Integer: %ld \n", pNode->nodeData.dVal);
             break;

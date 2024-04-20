@@ -7,12 +7,16 @@
 #include <stdbool.h>
 
 #include "../Util/Globals.h"
+#include "../Util/TreeNode.h"
 
 #define HASH_TABLE_SIZE     97
 #define SYMBOL_NOT_FOUND    0
 #define SYMBOL_FOUND        1
 #define SYMBOL_ADDED        1
 #define SYMBOL_ERROR        0
+
+#define NO_MEMORY           -1
+
 
 
 typedef enum{
@@ -29,11 +33,8 @@ typedef struct parameter{
     VarType_et varType;
     SignQualifier_et varSign;
     ModQualifier_et varMod;
-
-    void (*addFunctionParams)(struct parameter** ppSelf);
+    struct parameter *next;
 }parameter_st;
-
-
 
 // Symbol entry struct
 typedef struct SymbolEntry
@@ -44,7 +45,7 @@ typedef struct SymbolEntry
 
     union{
         struct{
-            uint32_t memoryLocation;                // Variable Location
+            int memoryLocation;                // Variable Location
             VarType_et varType;                     // Variable Type
             SignQualifier_et varSign;
             ModQualifier_et varMod;
@@ -55,16 +56,16 @@ typedef struct SymbolEntry
         struct{
             VarType_et returnType;                  // Function Return Type
             SignQualifier_et returnSign;
-            ModQualifier_et varMod;
-            VisQualifier_et varVis;  
+            ModQualifier_et funcMod;
+            VisQualifier_et funcVis;  
             uint8_t parameterNumber;                // Number of Function Params
-            parameter_st* parameter;
-            bool isIplemented;
+            parameter_st* parameters;
+            bool isImplemented;
         }SymbolFunction_s;
 
 
         struct{
-            uint32_t memoryLocation;                // Variable Location
+            int memoryLocation;                // Variable Location
             VarType_et arrayType;                   // Variable Type
             SignQualifier_et arraySign;
             ModQualifier_et arrayMod;
@@ -101,4 +102,5 @@ void freeSymbolTable(SymbolTable_st* symTable);
 
 int printSymbolTables(SymbolTable_st* symTable);
 
+int addFunctionParams(SymbolEntry_st** ppSymbol, struct parameter* pNewParam);
 #endif 

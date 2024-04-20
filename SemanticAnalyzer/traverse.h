@@ -2,6 +2,8 @@
 #define TRAVERSE_H
 
 #include "../Util/Globals.h"
+#include "../Util/TreeNode.h"
+
 #include "../SemanticAnalyzer/SymbolTable.h"
 
 int executeSemanticAnalisys(TreeNode_st* pTreeRoot, SymbolTable_st** ppGlobalTable);

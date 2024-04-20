@@ -2,6 +2,7 @@
 #define _UTIL_H_
 
 #include "Globals.h"
+#include "TreeNode.h"
 
 static const char *OperatorStrings[] = {
     "+ ",      // 0

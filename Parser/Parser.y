@@ -25,6 +25,7 @@ int yylex();
 int yyerror(char* pStr);
 const char* getTokenName(int tokenValue);
 TreeNode_st* pTreeRoot;
+static char* currentFunction;
 
 
 %}
@@ -429,12 +430,14 @@ R_IF_STATEMENT  :   TOKEN_IF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESE
 R_RETURN        :   TOKEN_RETURN TOKEN_SEMI                                           // return;
                     {
                         NodeCreate(&($$.treeNode), NODE_RETURN);
+                        $$.treeNode->nodeData.sVal = currentFunction;
                     }
                     
                 |   TOKEN_RETURN R_EXP TOKEN_SEMI                                     // return var;
                     {
                         NodeCreate(&($$.treeNode), NODE_RETURN);
                         NodeAddChild($$.treeNode, $2.treeNode);
+                        $$.treeNode->nodeData.sVal = currentFunction;
                     }
                 ;
 
@@ -564,8 +567,9 @@ R_FUNC_PROTOTYPE        :   R_FUNC_SIGNATURE TOKEN_SEMI
                         ;
 
 // Function implementation containing the function signature and a compound statement where it is implemented
-R_FUNC_IMPLEMENT       :   R_FUNC_SIGNATURE R_COMPOUND_STATEMENT
+R_FUNC_IMPLEMENT        :   R_FUNC_SIGNATURE R_COMPOUND_STATEMENT
                             {
+                                currentFunction = $1.treeNode->nodeData.sVal;
                                 $$.treeNode = $1.treeNode;
                                 NodeAddChild($$.treeNode, $2.treeNode);
                             }
@@ -648,7 +652,7 @@ R_ARG_LIST              :   %empty
 // Function argument type. Example: int x | const char* pString.
 R_ARG                   :   R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID 
                             {
-                                NodeCreate(&($$.treeNode), NODE_IDENTIFIER);
+                                NodeCreate(&($$.treeNode), NODE_PARAMETER);
                                 $$.treeNode->nodeData.sVal = $4.nodeData.sVal;
 
                                 $2.treeNode->pSibling = $1.treeNode;
@@ -659,7 +663,7 @@ R_ARG                   :   R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID
 
                         |   R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID 
                             {
-                                NodeCreate(&($$.treeNode), NODE_IDENTIFIER);
+                                NodeCreate(&($$.treeNode), NODE_PARAMETER);
                                 $$.treeNode->nodeData.sVal = $3.nodeData.sVal;
 
                                 $2.treeNode->pSibling = $1.treeNode;
@@ -669,7 +673,7 @@ R_ARG                   :   R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID
 
                         |   R_MOD_QUALIFIER R_TYPE_ALL TOKEN_ID 
                             {
-                                NodeCreate(&($$.treeNode), NODE_IDENTIFIER);
+                                NodeCreate(&($$.treeNode), NODE_PARAMETER);
                                 $$.treeNode->nodeData.sVal = $3.nodeData.sVal;
 
                                 $2.treeNode->pSibling = $1.treeNode;
@@ -679,7 +683,7 @@ R_ARG                   :   R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID
 
                         |   R_TYPE_ALL TOKEN_ID 
                             {
-                                NodeCreate(&($$.treeNode), NODE_IDENTIFIER);
+                                NodeCreate(&($$.treeNode), NODE_PARAMETER);
                                 $$.treeNode->nodeData.sVal = $2.nodeData.sVal;
 
                                 NodeAddChild($$.treeNode, $1.treeNode);

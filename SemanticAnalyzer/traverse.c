@@ -152,34 +152,34 @@ static void typeChecking(TreeNode_st * treeNode)
 }
 
 
-static int setMemoryLocation(uint32_t* varLocation, VarType_et varType)
+static int setMemoryLocation(int* varLocation, VarType_et varType, int multiplier)
 {
-    static uint32_t currentLocation = 0;
+    static int currentLocation = 0;
     
     *varLocation = currentLocation; 
 
     switch(varType)
     {
         case TYPE_CHAR:
-            currentLocation += 1;
+            currentLocation += 1*multiplier;
             break;
 
         case TYPE_SHORT:
-            currentLocation += 2;
+            currentLocation += 2*multiplier;
             break;    
   
         case TYPE_LONG:
         case TYPE_INT:
         case TYPE_FLOAT:
-            currentLocation += 4;
+            currentLocation += 4*multiplier;
             break;
 
         case TYPE_DOUBLE:
-            currentLocation += 8;
+            currentLocation += 8*multiplier;
             break;   
 
         case TYPE_LONG_DOUBLE:
-            currentLocation += 16;
+            currentLocation += 16*multiplier;
             break; 
 
         default:
@@ -229,12 +229,11 @@ static void buildSymbolTables(TreeNode_st* pNode)
     switch (pNode->nodeType)
     {
         case NODE_VAR_DECLARATION:
-
             if( insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_VARIABLE) == SYMBOL_ADDED)
             { 
                 TreeNode_st* pNodeTemp = pNode->pChilds;
         
-                setMemoryLocation(&pNewSymbol->symbolContent_u.SymbolVar_s.memoryLocation, pNodeTemp->nodeType);
+                setMemoryLocation(&pNewSymbol->symbolContent_u.SymbolVar_s.memoryLocation, pNodeTemp->nodeData.dVal, 1);
                 pNode->scopeTable = pCurrentScope;
 
                 setVariblesType(pNodeTemp, 
@@ -251,53 +250,98 @@ static void buildSymbolTables(TreeNode_st* pNode)
             break;
 
         case NODE_ARRAY_DECLARATION:
+            if( insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_ARRAY) == SYMBOL_ADDED)
+            { 
+                TreeNode_st* pNodePreamble = &pNode->pChilds[0];
+                TreeNode_st* pNodeSize = &pNode->pChilds[1];
+        
+                int arraySize = pNodeSize->nodeData.dVal;
+                pNewSymbol->symbolContent_u.SymbolArray_s.arraySize = arraySize;
+                
+                setMemoryLocation(&pNewSymbol->symbolContent_u.SymbolVar_s.memoryLocation, pNodePreamble->nodeData.dVal, arraySize);
+                pNode->scopeTable = pCurrentScope;
+
+                setVariblesType(pNodePreamble, 
+                                &pNewSymbol->symbolContent_u.SymbolArray_s.arrayType,
+                                &pNewSymbol->symbolContent_u.SymbolArray_s.arraySign,
+                                &pNewSymbol->symbolContent_u.SymbolArray_s.arrayMod,
+                                &pNewSymbol->symbolContent_u.SymbolArray_s.arrayVis);
+                
+            }
+            else
+            {
+                semanticError(pNode, "Symbol Redefinition!");
+            }
             break;
 
         case NODE_FUNCTION:
-
             if( insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_FUNCTION) == SYMBOL_ADDED)
             {
-                SymbolEntry_st* pNewSymbol;
+                TreeNode_st* pNodePreamble = &pNode->pChilds[0];
                 TreeNode_st* pNodeArgs = &pNode->pChilds[1];
+
+                setVariblesType(pNodePreamble, 
+                                &pNewSymbol->symbolContent_u.SymbolFunction_s.returnType,
+                                &pNewSymbol->symbolContent_u.SymbolFunction_s.returnSign,
+                                &pNewSymbol->symbolContent_u.SymbolFunction_s.funcMod,
+                                &pNewSymbol->symbolContent_u.SymbolFunction_s.funcVis); 
 
                 while (pNodeArgs != NULL)
                 {
-                    setVariblesType(pNodeArgs->pChilds, 
-                                    &pNewSymbol->symbolContent_u.SymbolVar_s.varType,
-                                    &pNewSymbol->symbolContent_u.SymbolVar_s.varSign,
-                                    &pNewSymbol->symbolContent_u.SymbolVar_s.varMod,
-                                    &pNewSymbol->symbolContent_u.SymbolVar_s.varVis); 
+                    parameter_st pParam;
+                    VisQualifier_et notUsed;
 
+                    setVariblesType(pNodeArgs->pChilds, 
+                                    &pParam.varType,
+                                    &pParam.varSign,
+                                    &pParam.varMod,
+                                    &notUsed);
+
+                    addFunctionParams(&pNewSymbol, &pParam);
+
+                    parameter_st *ptr = &pNewSymbol->symbolContent_u.SymbolFunction_s.parameters[0];
+
+                    printf("->%s\n", ptr->name);
                     
                     pNodeArgs = pNodeArgs->pSibling;
                 }
-                
+
 
                 if(pNode->childNumber > 2)
                 {
-                    pNewSymbol->symbolContent_u.SymbolFunction_s.isIplemented = true;
+                    pNewSymbol->symbolContent_u.SymbolFunction_s.isImplemented = true;
+
+                    SymbolTable_st* ppsymTable;
+                    createSymbolTable(&ppsymTable, pCurrentScope);
+
+                    pCurrentScope = ppsymTable;
+
                 }
                 else
                 {
-                    pNewSymbol->symbolContent_u.SymbolFunction_s.isIplemented = false;
+                    pNewSymbol->symbolContent_u.SymbolFunction_s.isImplemented = false;
                 }
             }
             break;
 
+        case NODE_POINTER_CONTENT:
+        case NODE_GOTO:
         case NODE_IDENTIFIER:
             break;        
         
-        case NODE_ARRAY_INDEX:
+        case NODE_LABEL:
+            if(insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_ARRAY) == SYMBOL_ERROR)    // Might be incomplete
+            {
+                semanticError(pNode, "Symbol Redefinition!");
+            }
             break;
 
-        case NODE_POINTER_CONTENT:
-            break; 
+        case NODE_ARRAY_INDEX:
+
+            break;
 
         case NODE_REFERENCE:
             break;        
-        
-        case NODE_GOTO:
-            break;
 
         case NODE_FUNCTION_CALL:
             break;           
