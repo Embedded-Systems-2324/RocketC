@@ -297,11 +297,11 @@ static void buildSymbolTables(TreeNode_st* pNode)
                                     &pParam.varMod,
                                     &notUsed);
 
-                    addFunctionParams(&pNewSymbol, &pParam);
+                    //addFunctionParams(&pNewSymbol, &pParam);
 
-                    parameter_st *ptr = &pNewSymbol->symbolContent_u.SymbolFunction_s.parameters[0];
+                    //parameter_st *ptr = &pNewSymbol->symbolContent_u.SymbolFunction_s.parameters[0];
 
-                    printf("->%s\n", ptr->name);
+                    //printf("->%s\n", ptr->name);
                     
                     pNodeArgs = pNodeArgs->pSibling;
                 }
@@ -325,6 +325,7 @@ static void buildSymbolTables(TreeNode_st* pNode)
             break;
 
         case NODE_POINTER_CONTENT:
+        case NODE_REFERENCE:
         case NODE_GOTO:
         case NODE_IDENTIFIER:
             break;        
@@ -338,10 +339,7 @@ static void buildSymbolTables(TreeNode_st* pNode)
 
         case NODE_ARRAY_INDEX:
 
-            break;
-
-        case NODE_REFERENCE:
-            break;        
+            break;     
 
         case NODE_FUNCTION_CALL:
             break;           
