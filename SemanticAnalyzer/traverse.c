@@ -316,14 +316,14 @@ static void buildSymbolTables(TreeNode_st* pNode)
 
                 if(pNode->childNumber > 2)
                 {
+                    SymbolTable_st* ppsymTable;
+
                     pNewSymbol->symbolContent_u.SymbolFunction_s.isImplemented = true;
 
-                    SymbolTable_st* ppsymTable;
                     createSymbolTable(&ppsymTable, pCurrentScope);
-
                     pCurrentScope = ppsymTable;
 
-                    if(pNodeArgs != NULL)
+                    if(pNode->pChilds[1].nodeType != NODE_NULL)
                     {
                         parameter_st* paramList = pNewSymbol->symbolContent_u.SymbolFunction_s.parameters;
                         SymbolEntry_st* pParamSym;
@@ -347,21 +347,78 @@ static void buildSymbolTables(TreeNode_st* pNode)
         case NODE_REFERENCE:
         case NODE_GOTO:
         case NODE_IDENTIFIER:
-            break;        
+            if(fetchSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
+            {
+                semanticError(pNode, "Symbol Not Defined!");
+            }
+
+            break;
         
         case NODE_LABEL:
-            if(insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_ARRAY) == SYMBOL_ERROR)    // Might be incomplete
+            if(insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_LABEL) == SYMBOL_ERROR)    // Might be incomplete
             {
                 semanticError(pNode, "Symbol Redefinition!");
             }
             break;
 
         case NODE_ARRAY_INDEX:
-
-            break;     
+            if(fetchSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, false) == SYMBOL_FOUND)
+            {
+                TreeNode_st* pNodeIndex = &pNode->pChilds[0];
+                uint32_t arrSize = pNewSymbol->symbolContent_u.SymbolArray_s.arraySize;
+                if (pNodeIndex->nodeData.dVal > arrSize)
+                {
+                    semanticError(pNode, "Index exceeds array size!");
+                }
+            }
+            else
+            {
+                semanticError(pNode, "Symbol Not Defined!");
+            }
+            break;       
 
         case NODE_FUNCTION_CALL:
-            break;           
+            if(fetchSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, false) == SYMBOL_FOUND)
+            {
+                TreeNode_st* pNodeParameters  = &pNode->pChilds[0];
+                int functionParameterNumber = pNewSymbol->symbolContent_u.SymbolFunction_s.parameterNumber;
+                int parameterCount = 0;
+
+                while(pNodeParameters != NULL)
+                {
+                    parameterCount++;
+                    pNodeParameters = pNodeParameters->pSibling;
+                }
+
+                if(parameterCount != functionParameterNumber)
+                {
+                    char errorMessage[100];
+                    snprintf(errorMessage, sizeof(errorMessage), "%s arguments for function call, expected %d, have %d \n",
+                                                 (parameterCount > functionParameterNumber ? "Too many" : "Too few"),
+                                                 functionParameterNumber, parameterCount);
+                    semanticError(pNode, errorMessage);
+                }
+            }
+            else
+            {
+                semanticError(pNode, "Function Not Defined!");
+            }
+            break;             
+
+        case NODE_START_SCOPE:
+            if(pNode->pSibling->nodeType != NODE_FUNCTION)
+            {
+                SymbolTable_st* ppsymTable;
+                createSymbolTable(&ppsymTable, pCurrentScope);
+
+                pCurrentScope = ppsymTable;
+            }
+            break;
+
+
+        case NODE_END_SCOPE:
+            pCurrentScope = pCurrentScope->enclosingScope;
+            break;            
 
         default:
             break;

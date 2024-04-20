@@ -1,16 +1,31 @@
-const double x;
-char x;
-static unsigned int f;
-int d;
-int value;
+static int x;
 
-char a[10];
-float teste;
-float value;
+void function2(int c);
 
-
-
-int z(int c)
+int main(int argv)
 {
-    int f;
+    //function();
+
+    int d;
+    //function2(argv);
+}
+
+int var;
+
+void function2(int c)
+{
+    int c;
+    int f = 0;
+    float z;
+
+    LLL:
+
+    if(z == 0){
+        z = 20;
+    }
+
+    while(z < 0)
+    {
+        f++;
+    }
 }

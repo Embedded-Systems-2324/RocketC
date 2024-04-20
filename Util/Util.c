@@ -306,6 +306,22 @@ void PrintNode(TreeNode_st* pNode)
             printf("Pre incrementation: ++%s \n", pNode->nodeData.sVal);
             break;
 
+        case NODE_LABEL:
+            printf("Label: %s\n", pNode->nodeData.sVal);
+            break;
+
+        case NODE_START_SCOPE:
+            printf("\033[1;38;2;69;197;173m");
+            printf("Start of Scope\n");
+            printf("\033[1;0m");
+            break;
+
+        case NODE_END_SCOPE:
+            printf("\033[1;38;2;69;197;173m");
+            printf("End of Scope\n");
+            printf("\033[1;0m");
+            break;
+
         case NODE_NULL:
             break;
 

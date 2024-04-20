@@ -235,6 +235,11 @@ R_LOCAL_STATEMENT       :   R_IF_STATEMENT
                             {
                                 $$.treeNode = $1.treeNode;
                             }
+
+                        |   R_LABEL
+                            {
+                                $$.treeNode = $1.treeNode;
+                            }    
                             
                         |   R_WHILE_LOOP
                             {
@@ -281,7 +286,29 @@ R_LOCAL_STATEMENT       :   R_IF_STATEMENT
 // Statements with braces                                                                 // Examples:
 R_COMPOUND_STATEMENT    :   TOKEN_LEFT_BRACE R_LOCAL_STATEMENT_LIST TOKEN_RIGHT_BRACE     // { ... }
                             {
-                                $$.treeNode = $2.treeNode;
+                                TreeNode_st* pNode = $2.treeNode;
+                                TreeNode_st* pEnd;
+                                TreeNode_st* pStart;
+                                TreeNode_st* pNull;
+
+                                if (pNode != NULL)
+                                { 
+                                    NodeCreate(&pEnd, NODE_END_SCOPE);
+                                    NodeCreate(&pStart, NODE_START_SCOPE);
+
+                                    while (pNode->pSibling != NULL)
+                                    {
+                                        pNode = pNode->pSibling;    
+                                    }                                        
+                                    pNode->pSibling = pEnd;
+                                    $$.treeNode = pStart;
+                                    pStart->pSibling = $2.treeNode; 
+                                }
+                                else
+                                {
+                                    NodeCreate(&pNull, NODE_NULL);
+                                    $$.treeNode = pNull;
+                                }
                             }
 
                         |   TOKEN_LEFT_BRACE TOKEN_RIGHT_BRACE                            // {}
