@@ -89,12 +89,13 @@ int main(int argc, char *argv[])
             LOG_WARNING_SHORT("\n\n-----------------AST END-----------------\n\n\n");
 
 
-            LOG_WARNING_SHORT("\n\n-----------------SYMBOLS-----------------\n");
-            executeSemanticAnalisys(pTreeRoot, &pGlobalSymTable);
-
-            printSymbolTables();
-
-            LOG_WARNING_SHORT("\n\n-----------------SYMBOLS END-----------------\n");
+            
+            if(executeSemanticAnalisys(pTreeRoot, &pGlobalSymTable) == SEMANTIC_OK)
+            {
+                LOG_WARNING_SHORT("\n\n-----------------SYMBOLS-----------------\n");
+                printSymbolTables();
+                LOG_WARNING_SHORT("\n\n-----------------SYMBOLS END-----------------\n");
+            }
         }
     }
     else

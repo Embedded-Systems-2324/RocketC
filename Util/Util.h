@@ -46,7 +46,8 @@ static const char *VarTypeStrings[] = {
     "long ",
     "float ",
     "double ",
-    "long double "
+    "long double ",
+    "void "
 };
 
 static const char *SignQualifierStrings[] = {

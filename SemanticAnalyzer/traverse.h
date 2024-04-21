@@ -6,6 +6,10 @@
 
 #include "../SemanticAnalyzer/SymbolTable.h"
 
+
+#define SEMANTIC_OK     0
+#define SEMANTIC_ERROR  -1
+
 int executeSemanticAnalisys(TreeNode_st* pTreeRoot, SymbolTable_st** ppGlobalTable);
 
 #endif

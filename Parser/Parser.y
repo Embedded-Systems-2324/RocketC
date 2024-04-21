@@ -1527,8 +1527,6 @@ R_SIGN_QUALIFIER            :   TOKEN_SIGNED
                                     $$.treeNode->nodeData.dVal = (long int) SIGN_UNSIGNED;
                                 }
                             ;
-
-
 %%
 
 

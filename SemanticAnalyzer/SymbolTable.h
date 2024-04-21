@@ -33,6 +33,7 @@ typedef struct parameter{
     VarType_et varType;
     SignQualifier_et varSign;
     ModQualifier_et varMod;
+    bool isPointer;
 }parameter_st;
 
 // Symbol entry struct

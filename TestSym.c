@@ -1,31 +1,37 @@
 static int x;
+int y;
 
-void function2(int c);
+//void function2(int ffff);
+
+void function2(int c, char z, char l)
+{
+    int function2;    
+    LLL:
+    //int c;
+    int f = 0;
+    //float z;
+
+    {
+        int xx;
+        int fffg;
+        //int xx;
+    }
+
+    if(z < 0)
+    {
+        y = 0;
+    }
+}
+
 
 int main(int argv)
 {
     //function();
 
+
     int d;
-    //function2(argv);
+    function2(argv, argv);
 }
+
 
 int var;
-
-void function2(int c)
-{
-    int c;
-    int f = 0;
-    float z;
-
-    LLL:
-
-    if(z == 0){
-        z = 20;
-    }
-
-    while(z < 0)
-    {
-        f++;
-    }
-}

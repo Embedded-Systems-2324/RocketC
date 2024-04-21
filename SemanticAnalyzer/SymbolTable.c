@@ -40,7 +40,7 @@ int createSymbolTable(SymbolTable_st** ppSymTable, SymbolTable_st* enclosingScop
     pSymTable = (SymbolTable_st*) (*(ppSymTable));
 
     pSymTable->enclosingScope = enclosingScope;
-    pSymTable->innerScopesNumber = 0;
+    //pSymTable->innerScopesNumber = 0;
     //pSymTable->innerScopes = NULL;
 
     // Initialize hash table
@@ -137,7 +137,7 @@ int insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *s
         SymbolEntry_st* pNewSymbol;
         pNewSymbol = (SymbolEntry_st*) calloc(1, sizeof(SymbolEntry_st));
 
-        StringCreateAndCopy(&(pNewSymbol->name), symName, 0);
+        pNewSymbol->name = symName;
         pNewSymbol->symbolType = symType;
 
         pEntryAux = pSymTable->table[index];
@@ -330,7 +330,7 @@ int printSymbolTables()
 
                 temp = temp->next;
             }
-        })
+        }
 
         printf("----------------------------------------------------------------------------------------------------------------------------------------------\n\n\n");
     }    

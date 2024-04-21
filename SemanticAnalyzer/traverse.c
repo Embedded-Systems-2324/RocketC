@@ -8,12 +8,31 @@
 SymbolTable_st* pGlobalSymTable;
 SymbolTable_st* pCurrentScope;
 static bool initialized = false;
+static uint32_t errorCounter = 0;
+
+static void traverse (TreeNode_st* pNode, void (*preOrder) (TreeNode_st* ), void (*postOrder) (TreeNode_st* ));
+static void nullProc(TreeNode_st * st);
+static void buildSymbolTables(TreeNode_st* pNode);
+static void typeChecking(TreeNode_st * treeNode);
+
+
+static void TypeCheckTraverse(TreeNode_st* pSintaxTree)
+{
+    traverse(pSintaxTree,nullProc,typeChecking);
+}
+
+static void SymbolTableTraverse(TreeNode_st* pSintaxTree)
+{
+    traverse(pSintaxTree,buildSymbolTables,nullProc);
+}
+
 
 static int semanticError(TreeNode_st* pNode, char * message)
 { 
      if (!message)
         return -EINVAL;
 
+    errorCounter++;
     LOG_ERROR("Semantic error at line %d: %s\n", pNode->lineNumber, message);
 
     return 0;  
@@ -42,6 +61,46 @@ static void nullProc(TreeNode_st * st)
     else 
         return;
 }
+
+int executeSemanticAnalisys(TreeNode_st* pTreeRoot, SymbolTable_st** ppGlobalTable)
+{
+    if (!ppGlobalTable || !pTreeRoot)
+        return -EINVAL;
+
+
+    if(!initialized)
+    {
+        if(createSymbolTable(&pGlobalSymTable, NULL))
+        {
+            return 1;   //error creating symbol table
+        }
+
+        initialized = true;
+    }
+
+    *ppGlobalTable = pGlobalSymTable;
+    pCurrentScope = pGlobalSymTable;
+
+    SymbolTableTraverse(pTreeRoot);
+        
+    //TypeCheckTraverse(*pTreeRoot);
+
+    if(errorCounter > 0)
+    {
+        LOG_ERROR(": %d error found during semantic analisys!\n", errorCounter);
+        return SEMANTIC_ERROR;
+    }
+
+    LOG_ERROR("%d error found during semantic analisys!\n", errorCounter);
+    return SEMANTIC_OK;
+}
+
+
+
+
+/*****************************************************************************************
+******************************       TYPE CHECKING      **********************************
+******************************************************************************************/
 
 static void typeChecking(TreeNode_st * treeNode) 
 {
@@ -152,6 +211,11 @@ static void typeChecking(TreeNode_st * treeNode)
 }
 
 
+
+/*****************************************************************************************
+ ****************************       BUILD SYMBOLS TABLES       ***************************
+******************************************************************************************/
+
 static int setMemoryLocation(int* varLocation, VarType_et varType, int multiplier)
 {
     static int currentLocation = 0;
@@ -225,8 +289,11 @@ static void setVariblesType(TreeNode_st* pNode, VarType_et* type, SignQualifier_
 }
 
 
+
 static void buildSymbolTables(TreeNode_st* pNode)
 {
+    static bool tablePending = false;
+    static bool tableFunction = false;
     SymbolEntry_st* pNewSymbol;
 
     pNode->scopeTable = pCurrentScope;
@@ -234,6 +301,14 @@ static void buildSymbolTables(TreeNode_st* pNode)
     switch (pNode->nodeType)
     {
         case NODE_VAR_DECLARATION:
+            if(tablePending)
+            {
+                SymbolTable_st* ppsymTable;
+                createSymbolTable(&ppsymTable, pCurrentScope);
+                pCurrentScope = ppsymTable;
+                tablePending = false;
+            }
+
             if( insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_VARIABLE) == SYMBOL_ADDED)
             { 
                 TreeNode_st* pNodeTemp = pNode->pChilds;
@@ -255,6 +330,14 @@ static void buildSymbolTables(TreeNode_st* pNode)
             break;
 
         case NODE_ARRAY_DECLARATION:
+            if(tablePending)
+            {
+                SymbolTable_st* ppsymTable;
+                createSymbolTable(&ppsymTable, pCurrentScope);
+                pCurrentScope = ppsymTable;
+                tablePending = false;
+            }
+
             if( insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_ARRAY) == SYMBOL_ADDED)
             { 
                 TreeNode_st* pNodePreamble = &pNode->pChilds[0];
@@ -312,16 +395,22 @@ static void buildSymbolTables(TreeNode_st* pNode)
 
                     pNodeArgs = pNodeArgs->pSibling;
                 }
+            }
 
-
+            if(pNewSymbol->symbolContent_u.SymbolFunction_s.isImplemented == true)
+            {
+                semanticError(pNode, "Function already implemented");
+            }
+            else
+            {
                 if(pNode->childNumber > 2)
                 {
-                    SymbolTable_st* ppsymTable;
-
                     pNewSymbol->symbolContent_u.SymbolFunction_s.isImplemented = true;
 
+                    SymbolTable_st* ppsymTable;
                     createSymbolTable(&ppsymTable, pCurrentScope);
                     pCurrentScope = ppsymTable;
+                    tableFunction = true;
 
                     if(pNode->pChilds[1].nodeType != NODE_NULL)
                     {
@@ -355,6 +444,14 @@ static void buildSymbolTables(TreeNode_st* pNode)
             break;
         
         case NODE_LABEL:
+            if(tablePending)
+            {
+                SymbolTable_st* ppsymTable;
+                createSymbolTable(&ppsymTable, pCurrentScope);
+                pCurrentScope = ppsymTable;
+                tablePending = false;
+            }
+
             if(insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_LABEL) == SYMBOL_ERROR)    // Might be incomplete
             {
                 semanticError(pNode, "Symbol Redefinition!");
@@ -405,20 +502,20 @@ static void buildSymbolTables(TreeNode_st* pNode)
             }
             break;             
 
-        case NODE_START_SCOPE:
-            if(pNode->pSibling->nodeType != NODE_FUNCTION)
-            {
-                SymbolTable_st* ppsymTable;
-                createSymbolTable(&ppsymTable, pCurrentScope);
 
-                pCurrentScope = ppsymTable;
-            }
+        case NODE_START_SCOPE:
+            if(!tableFunction)
+                tablePending = true;
+            else 
+                tableFunction = false;    
             break;
 
-
         case NODE_END_SCOPE:
-            pCurrentScope = pCurrentScope->enclosingScope;
-            break;            
+            if(!tablePending)
+                pCurrentScope = pCurrentScope->enclosingScope;
+            else    
+                tablePending = false;    
+            break;               
 
         default:
             break;
@@ -426,38 +523,3 @@ static void buildSymbolTables(TreeNode_st* pNode)
 }
 
 
-static void TypeCheckTraverse(TreeNode_st* pSintaxTree)
-{
-    traverse(pSintaxTree,nullProc,typeChecking);
-}
-
-static void SymbolTableTraverse(TreeNode_st* pSintaxTree)
-{
-    traverse(pSintaxTree,buildSymbolTables,nullProc);
-}
-
-
-int executeSemanticAnalisys(TreeNode_st* pTreeRoot, SymbolTable_st** ppGlobalTable)
-{
-    if (!ppGlobalTable || !pTreeRoot)
-        return -EINVAL;
-
-
-    if(!initialized)
-    {
-        if(createSymbolTable(&pGlobalSymTable, NULL))
-        {
-            return 1;   //error creating symbol table
-        }
-
-        initialized = true;
-    }
-
-    *ppGlobalTable = pGlobalSymTable;
-    pCurrentScope = pGlobalSymTable;
-
-    SymbolTableTraverse(pTreeRoot);
-    //TypeCheckTraverse(*pTreeRoot);
-    
-    return 0;
-}
