@@ -251,28 +251,24 @@ int printSymbolTables()
                     );
 
                     parameter_st* parameterAux;
+                    int paramNum = temp->symbolContent_u.SymbolFunction_s.parameterNumber;
                     if(temp->symbolContent_u.SymbolFunction_s.parameterNumber != 0)
                     {
                         parameterAux = temp->symbolContent_u.SymbolFunction_s.parameters;
                         printf("\tPARAMETERS: ");
-                        printf("%15s | %11s | %10s | %10s\n",     
-                                                     /* Name */     parameterAux->name,
-                                                     /* Type */     VarTypeStrings[parameterAux->varType],
-                                                     /* Sign */     SignQualifierStrings[parameterAux->varSign],
-                                                 /* Modifier */     ModQualifierStrings[parameterAux->varMod]
-                                                                    );
-                        printf("\t            ");
-                        // while(parameterAux != NULL)
-                        // {
-                        //     printf("%20s | %11s | %9s | %9s\n",     
-                        //                              /* Name */     parameterAux->name,
-                        //                              /* Type */     VarTypeStrings[parameterAux->varType],
-                        //                              /* Sign */     SignQualifierStrings[parameterAux->varSign],
-                        //                          /* Modifier */     ModQualifierStrings[parameterAux->varMod]
-                        //                                             );
-                        //     printf("\t            ");
-                        //     parameterAux = parameterAux->next;
-                        // }
+                        for(int k=0; k<paramNum; k++)
+                        {
+                            if(k!=0)
+                                printf("\t            ");
+
+                            printf("%15s | %11s | %10s | %10s |\n",     
+                                                     /* Name */     parameterAux[k].name,
+                                                     /* Type */     VarTypeStrings[parameterAux[k].varType],
+                                                     /* Sign */     SignQualifierStrings[parameterAux[k].varSign],
+                                                 /* Modifier */     ModQualifierStrings[parameterAux[k].varMod]
+                            );
+                            
+                        }
                         printf("\n");
                     }
                                              

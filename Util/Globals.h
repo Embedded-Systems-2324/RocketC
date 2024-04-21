@@ -56,6 +56,7 @@ typedef enum
     TYPE_FLOAT,
     TYPE_DOUBLE,
     TYPE_LONG_DOUBLE, 
+    TYPE_STRING,
     TYPE_VOID
 }VarType_et;
 

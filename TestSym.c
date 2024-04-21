@@ -1,37 +1,22 @@
-static int x;
-int y;
 
-//void function2(int ffff);
-
-void function2(int c, char z, char l)
+int main()
 {
-    int function2;    
-    LLL:
-    //int c;
-    int f = 0;
-    //float z;
+    char* hhh = "ggg";
+    int y;
 
+    if(!y) 
     {
-        int xx;
-        int fffg;
-        //int xx;
-    }
+        int w;
+        y++;
+    }else{
 
-    if(z < 0)
-    {
-        y = 0;
     }
+    return y;
 }
 
-
-int main(int argv)
+//function
+float function(float y)
 {
-    //function();
-
-
-    int d;
-    function2(argv, argv);
+    int s;
+    return y;
 }
-
-
-int var;

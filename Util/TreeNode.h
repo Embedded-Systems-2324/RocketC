@@ -14,9 +14,11 @@ typedef struct TreeNode
 
     NodeType_et nodeType;
     NodeData_ut nodeData;
+    VarType_et nodeVarType;
 
     SymbolTable_st* scopeTable;
 }TreeNode_st;
+
 
 typedef union
 {

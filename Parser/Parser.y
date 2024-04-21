@@ -582,6 +582,8 @@ R_FUNC_SIGNATURE        :   R_VAR_PREAMBLE TOKEN_ID TOKEN_LEFT_PARENTHESES R_ARG
 
                                 NodeAddChild($$.treeNode, $1.treeNode);
                                 NodeAddChild($$.treeNode, $4.treeNode);
+
+                                currentFunction = $2.nodeData.sVal;
                             }
                         ;
 
@@ -596,7 +598,6 @@ R_FUNC_PROTOTYPE        :   R_FUNC_SIGNATURE TOKEN_SEMI
 // Function implementation containing the function signature and a compound statement where it is implemented
 R_FUNC_IMPLEMENT        :   R_FUNC_SIGNATURE R_COMPOUND_STATEMENT
                             {
-                                currentFunction = $1.treeNode->nodeData.sVal;
                                 $$.treeNode = $1.treeNode;
                                 NodeAddChild($$.treeNode, $2.treeNode);
                             }
@@ -1080,8 +1081,8 @@ R_OPERAND   :   R_INC_DEC
 
             |   R_TYPE_CAST R_FACTOR
                 {
-                    NodeAddChild($1.treeNode, $2.treeNode);
-                    $$.treeNode =  $1.treeNode;
+                    NodeAddChild($2.treeNode, $1.treeNode);
+                    $$.treeNode = $2.treeNode;
                 }
 
             |   R_FACTOR
@@ -1132,6 +1133,13 @@ R_FACTOR    :   TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES            
                     NodeCreate(&($$.treeNode), NODE_STRING);
                     $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
                 }
+
+            |   TOKEN_BITWISE_AND R_ARRAY_INDEX                                     // &a
+                {
+                    NodeCreate(&($$.treeNode), NODE_REFERENCE);
+                    NodeAddChild($$.treeNode, $2.treeNode);  
+                }
+            ;
 
             |   TOKEN_BITWISE_AND TOKEN_ID                                     // &a
                 {
