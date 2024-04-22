@@ -1,28 +1,59 @@
 
 
 
+float function1(int x, float y, float z);
 
-int function1(int x, float y, float z)
-{
-    int f;
-    char g;
-
-    //char* str = &g;
-
-
-
-    return 0;
-}
 
 int main()
 {
-    float z = 3.3, y;
-    int x;
-    x = 4 + 4 + (-3 + 4);
-    function1(x, y, z);
+    float z, y;
+    unsigned int x;
+    int array[3];
+
+    z = 3.3;
+    y = 5.8;                        //show type check
+    x = 4 + (-3 + 4) + array[2];    //show array range
+
+    x = x / 1;                      //show divison by 0
+
+    function1(x, y, z);             //show number of arguments and type check
     
+
     {
-        int str;
-        x = 1;
+        //int j;
+        int* ptr;
+        int* ptr2;
+
+        ptr = ptr2;                 //show pointer type check
+
+        char* str = "STONE LAYER";
     }
+
+    {
+        int counter = 250;          //show creation of a new scope
+        
+        while(counter > 0)
+        {
+            counter --;
+        }
+    }
+
+    return x;                       //show return type check
+}
+
+
+float function1(int x, float y, float z)
+{   
+    float res;
+    if((x<<3) > 0)
+    {
+        res = y + z;
+    }
+    else
+    {
+        float res_aux = 1.0;
+        res = res_aux;
+    }
+
+    return res;
 }

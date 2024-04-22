@@ -288,6 +288,7 @@ static int checkOperator(TreeNode_st * pNode)
                 (varType2 == TYPE_STRING || varType2 == TYPE_VOID ) ||
                 (varType1 != varType2)) 
             {
+                
                 errorFlag = true;
             }
             else
@@ -323,10 +324,11 @@ static int checkOperator(TreeNode_st * pNode)
             }
             else
             {
-                pNode->nodeType = varType1;
+                pNode->nodeVarType = varType1;
             }
             break;   
     }
+
     if (errorFlag == true)
     {
         semanticError(pNode, "Operands types don't match!\n");
@@ -498,7 +500,19 @@ static void checkNode(TreeNode_st * pNode)
             }
             else
             {
-                pNode->nodeVarType = pEntryAux->symbolContent_u.SymbolFunction_s.returnType;
+                pChild1 = &pNode->pChilds[0];
+
+                int varType = pEntryAux->symbolContent_u.SymbolFunction_s.returnType;
+
+                if(pChild1->nodeVarType == varType)
+                {
+                    pNode->nodeVarType = varType;
+                }
+                else
+                {
+                    semanticError(pNode, "Return type don't match!\n");
+                    pNode->nodeVarType = TYPE_VOID;
+                }
             }
             break;   
 
@@ -774,6 +788,7 @@ static void buildSymbolTables(TreeNode_st* pNode)
                 else    
                     pNodeArgs = NULL; 
 
+                //sets the return type
                 setVariblesType(pNodePreamble, 
                                 &pNewSymbol->symbolContent_u.SymbolFunction_s.returnType,
                                 &pNewSymbol->symbolContent_u.SymbolFunction_s.returnSign,
@@ -781,6 +796,7 @@ static void buildSymbolTables(TreeNode_st* pNode)
                                 &pNewSymbol->symbolContent_u.SymbolFunction_s.funcVis); 
 
 
+                //adds the function arguments 
                 while (pNodeArgs != NULL)
                 {
                     parameter_st pParam;
@@ -799,43 +815,41 @@ static void buildSymbolTables(TreeNode_st* pNode)
                     pNodeArgs = pNodeArgs->pSibling;
                 }
             }
+
+            if(pNewSymbol->symbolContent_u.SymbolFunction_s.isImplemented == true)
+            {
+                semanticError(pNode, "Function already implemented");
+            }
             else
             {
-                if(pNewSymbol->symbolContent_u.SymbolFunction_s.isImplemented == true)
+                //if has three children you have the implementation of the function
+                if(pNode->childNumber > 2)
                 {
-                    semanticError(pNode, "Function already implemented");
+                    pNewSymbol->symbolContent_u.SymbolFunction_s.isImplemented = true;
+
+                    //creates a new symbol table 
+                    SymbolTable_st* ppsymTable;
+                    createSymbolTable(&ppsymTable, pCurrentScope);
+                    pCurrentScope = ppsymTable;
+                    tableFunction = true;
+
+                    //puts all parameters in the new scopes
+                    if(pNode->pChilds[1].nodeType != NODE_NULL)
+                    {
+                        parameter_st* paramList = pNewSymbol->symbolContent_u.SymbolFunction_s.parameters;
+                        SymbolEntry_st* pParamSym;
+
+                        for(int i = 0; i < pNewSymbol->symbolContent_u.SymbolFunction_s.parameterNumber; i++)
+                        {
+                            insertSymbol(pCurrentScope, &pParamSym, paramList[i].name, SYMBOL_VARIABLE);
+                            pParamSym->symbolContent_u.SymbolVar_s.varType = paramList[i].varType;
+                            pParamSym->symbolContent_u.SymbolVar_s.memoryLocation = NO_MEMORY;
+                        }
+                    }
                 }
                 else
                 {
-                    //if has three children you have the implementation of the function
-                    if(pNode->childNumber > 2)
-                    {
-                        pNewSymbol->symbolContent_u.SymbolFunction_s.isImplemented = true;
-
-                        //creates a new symbol table 
-                        SymbolTable_st* ppsymTable;
-                        createSymbolTable(&ppsymTable, pCurrentScope);
-                        pCurrentScope = ppsymTable;
-                        tableFunction = true;
-
-                        //puts all parameters in the new scopes
-                        if(pNode->pChilds[1].nodeType != NODE_NULL)
-                        {
-                            parameter_st* paramList = pNewSymbol->symbolContent_u.SymbolFunction_s.parameters;
-                            SymbolEntry_st* pParamSym;
-
-                            for(int i = 0; i < pNewSymbol->symbolContent_u.SymbolFunction_s.parameterNumber; i++)
-                            {
-                                insertSymbol(pCurrentScope, &pParamSym, paramList[i].name, SYMBOL_VARIABLE);
-                                pParamSym->symbolContent_u.SymbolVar_s.varType = paramList[i].varType;
-                                pParamSym->symbolContent_u.SymbolVar_s.memoryLocation = NO_MEMORY;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        pNewSymbol->symbolContent_u.SymbolFunction_s.isImplemented = false;
-                    }
+                    pNewSymbol->symbolContent_u.SymbolFunction_s.isImplemented = false;
                 }
             }
             break;
