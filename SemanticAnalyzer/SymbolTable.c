@@ -6,9 +6,12 @@
 #include "../SemanticAnalyzer/SymbolTable.h"
 
 static int tablesNumber = 0;
-static SymbolTable_st** allSymbolsTables;
+static SymbolTable_st** allSymbolsTables;  //all created 
 
-// Hash function
+
+/// @brief functio
+/// @param key (symbol name)
+/// @return hash value// Hash function
 static int hash(const char *key)
 {
     int hashValue = 0;
@@ -20,8 +23,11 @@ static int hash(const char *key)
 }
 
 
-// Function to create a new symbol table
-// Note: Global scope recommended to receive enclosingScope = NULL
+/// @brief  Function to create a new symbol table
+///         Note: Global scope recommended to receive enclosingScope = NULL
+/// @param ppSymTable 
+/// @param enclosingScope 
+/// @return 
 int createSymbolTable(SymbolTable_st** ppSymTable, SymbolTable_st* enclosingScope)
 {
     SymbolTable_st* pSymTable;
@@ -33,15 +39,13 @@ int createSymbolTable(SymbolTable_st** ppSymTable, SymbolTable_st* enclosingScop
 
     if (!(*ppSymTable))
     {
-        LOG_DEBUG("Failed to allocate memory for new symbol!\n");
+        LOG_DEBUG("Failed to allocate memory for new symbol table!\n");
         return -ENOMEM;
     }
 
     pSymTable = (SymbolTable_st*) (*(ppSymTable));
 
     pSymTable->enclosingScope = enclosingScope;
-    //pSymTable->innerScopesNumber = 0;
-    //pSymTable->innerScopes = NULL;
 
     // Initialize hash table
     for (int i = 0; i < HASH_TABLE_SIZE; ++i)
@@ -62,33 +66,12 @@ int createSymbolTable(SymbolTable_st** ppSymTable, SymbolTable_st* enclosingScop
 }
 
 
-/*int addInnerScope(SymbolTable_st* pSymTable)
-{
-    if (!pSymTable)
-        return -EINVAL;
-
-    SymbolTable_st* pNewTable;
-    SymbolTable_st* pInnerScope;
-
-    createSymbolTable(&(pNewTable), pSymTable);
-
-    pInnerScope = reallocarray(pSymTable->innerScopes, pSymTable->innerScopesNumber + 1, sizeof(SymbolTable_st));
-    if (!pInnerScope)
-    {
-        LOG_DEBUG("Failed to allocate memory while trying to add a new inner scope\n");
-        return -ENOMEM;
-    }
-
-    pSymTable->innerScopes = pInnerScope;
-    memcpy(&pSymTable->innerScopes[pSymTable->innerScopesNumber++], pNewTable, sizeof(SymbolTable_st));
-    free(pNewTable);
-
-    return 0;
-}*/
-
-
-// Function to get symbol from symbol table
-// Returns the Symbol if exists in the current scope or enclosing scopes and NULL if it doesn't
+/// @brief Function to get symbol from symbol table
+/// @param pSymTable 
+/// @param ppSymbol 
+/// @param name 
+/// @param onlyCurrentScope 
+/// @return error handling or symbol presence flag
 int fetchSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymbol, char* name, int onlyCurrentScope)
 {
     if (!pSymTable || !ppSymbol)
@@ -120,8 +103,12 @@ int fetchSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymbol, char* name
 }
 
 
-
-// Function to insert a symbol into the symbol table
+/// @brief Function to insert a symbol into the symbol table
+/// @param pSymTable 
+/// @param ppSymEntry 
+/// @param symName 
+/// @param symType 
+/// @return 
 int insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *symName, SymbolType_et symType)
 {   
     if (!pSymTable || !ppSymEntry)
@@ -130,12 +117,18 @@ int insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *s
     int index = hash(symName);
 
     SymbolEntry_st* pEntryAux;
-    //SymbolTable_st* pCurrentTable = pSymTable;   //??????????
 
+    // checks if the symbol already exists in the current scope and adds it if not
     if( fetchSymbol(pSymTable, &pEntryAux, symName, true) == SYMBOL_NOT_FOUND)
     {
         SymbolEntry_st* pNewSymbol;
         pNewSymbol = (SymbolEntry_st*) calloc(1, sizeof(SymbolEntry_st));
+
+        if (!pNewSymbol)
+        {
+            LOG_DEBUG("Failed to allocate memory for new symbol!\n");
+            return -ENOMEM;
+        }
 
         pNewSymbol->name = symName;
         pNewSymbol->symbolType = symType;
@@ -155,8 +148,8 @@ int insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *s
 }
 
 
-
-// Function to free the memory allocated for a symbol table
+/// @brief Function to free the memory allocated for a symbol table
+/// @param symTable 
 void freeSymbolTable(SymbolTable_st* symTable)
 {
     for (int i = 0; i < HASH_TABLE_SIZE; ++i)
@@ -173,6 +166,10 @@ void freeSymbolTable(SymbolTable_st* symTable)
     free(symTable);
 }
 
+
+/// @brief Converts a integer to string
+/// @param value 
+/// @return converted string
 static const char *intToString(int value)
 {
     static char buffer[10];
@@ -180,6 +177,18 @@ static const char *intToString(int value)
     return buffer;
 }
 
+
+/// @brief Prints a symbol
+/// @param symbolType 
+/// @param name 
+/// @param varType 
+/// @param varSign 
+/// @param varMod 
+/// @param varVis 
+/// @param memoryLocation 
+/// @param arraySize 
+/// @param isImplemented 
+/// @param parameterNumber 
 static void printSymbol(char* symbolType, const char *name, const char *varType, const char *varSign, const char *varMod,
                  const char *varVis, const char *memoryLocation, const char *arraySize, const char *isImplemented,
                  const char *parameterNumber)
@@ -198,7 +207,9 @@ static void printSymbol(char* symbolType, const char *name, const char *varType,
     );
 }
 
-int printSymbolTables()
+
+/// @brief prints all symbols tables 
+void printSymbolTables()
 {
     static uint8_t counter = 0;
     SymbolEntry_st* temp;
@@ -222,6 +233,7 @@ int printSymbolTables()
             {
                 switch (temp->symbolType)
                 {
+                //prints a symbol of avariable
                 case SYMBOL_VARIABLE:
                     printSymbol("VARIABLE",
                                 temp->name,
@@ -236,7 +248,7 @@ int printSymbolTables()
                     );
                     break;
                 
-
+                //prints a symbol of a function
                 case SYMBOL_FUNCTION:
                     printSymbol("FUNCTION",
                                 temp->name,
@@ -255,6 +267,7 @@ int printSymbolTables()
                     if(temp->symbolContent_u.SymbolFunction_s.parameterNumber != 0)
                     {
                         parameterAux = temp->symbolContent_u.SymbolFunction_s.parameters;
+                        //prints all function parameters
                         printf("\tPARAMETERS: ");
                         for(int k=0; k<paramNum; k++)
                         {
@@ -274,7 +287,7 @@ int printSymbolTables()
                                              
                     break;
                 
-                
+                //prints all symbols of a label
                 case SYMBOL_LABEL:
                     printSymbol("LABEL",
                                 temp->name,
@@ -289,6 +302,7 @@ int printSymbolTables()
                     );
                     break;
                 
+                //prints a symbol of a pointer
                 case SYMBOL_POINTER:
                     printSymbol("POINTER",
                                 temp->name,
@@ -303,7 +317,7 @@ int printSymbolTables()
                     );
                     break;
                 
-
+                //prints a symbol of an array
                 case SYMBOL_ARRAY:
                     printSymbol("ARRAY",
                                 temp->name,
@@ -318,23 +332,23 @@ int printSymbolTables()
                     );
                     break;
 
-
                 default:
-
                     break;
                 }
 
                 temp = temp->next;
             }
         }
-
         printf("----------------------------------------------------------------------------------------------------------------------------------------------\n\n\n");
     }    
 }
 
 
 
-
+/// @brief adds a new parameter to the function parameters list
+/// @param pSymbol   -function symbol
+/// @param pNewParam -parameter to add 
+/// @return error handling
 int addFunctionParams(SymbolEntry_st* pSymbol, struct parameter* pNewParam)
 {
     if (!pSymbol)
@@ -342,6 +356,7 @@ int addFunctionParams(SymbolEntry_st* pSymbol, struct parameter* pNewParam)
     
     parameter_st* pParamList; 
 
+    //rellocates space for the new parameter
     pParamList = reallocarray(pSymbol->symbolContent_u.SymbolFunction_s.parameters, pSymbol->symbolContent_u.SymbolFunction_s.parameterNumber + 1, sizeof(parameter_st));
     if (!pParamList)
     {
@@ -349,6 +364,7 @@ int addFunctionParams(SymbolEntry_st* pSymbol, struct parameter* pNewParam)
         return -ENOMEM;
     }
 
+    //copies the parameter data to the allocated space
     memcpy(&pParamList[pSymbol->symbolContent_u.SymbolFunction_s.parameterNumber++], pNewParam, sizeof(parameter_st));
     
     pSymbol->symbolContent_u.SymbolFunction_s.parameters = pParamList;

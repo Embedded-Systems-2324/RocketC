@@ -130,7 +130,6 @@ int NodeAddChild(TreeNode_st* pParent, TreeNode_st* pChild);
 int NodeAddChildCopy(TreeNode_st* pParent, TreeNode_st *pChild);
 int NodeAddNewChild(TreeNode_st* pParent, TreeNode_st** ppNewChild, NodeType_et nodeType);
 
-
 int StringCreateAndCopy(char** ppDest, char* pSrc, size_t strLen);
 
 static void Indentation(void);

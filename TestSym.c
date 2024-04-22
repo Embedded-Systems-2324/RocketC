@@ -1,22 +1,28 @@
 
-int main()
+
+
+
+int function1(int x, float y, float z)
 {
-    char* hhh = "ggg";
-    int y;
+    int f;
+    char g;
 
-    if(!y) 
-    {
-        int w;
-        y++;
-    }else{
+    //char* str = &g;
 
-    }
-    return y;
+
+
+    return 0;
 }
 
-//function
-float function(float y)
+int main()
 {
-    int s;
-    return y;
+    float z = 3.3, y;
+    int x;
+    x = 4 + 4 + (-3 + 4);
+    function1(x, y, z);
+    
+    {
+        int str;
+        x = 1;
+    }
 }

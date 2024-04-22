@@ -119,6 +119,8 @@ static char* currentFunction;
 // %define api.value.type is prefered over #define YYSTYPE
 %define api.value.type {ParserObject_ut}
 
+%left TOKEN_MINUS TOKEN_PLUS
+
 //--------------------------------------------------------------------------------------------------------------------//
 // Grammar Rules
 //--------------------------------------------------------------------------------------------------------------------//
@@ -898,7 +900,7 @@ R_VAR_ASSIGNMENT    :   R_SIMPLE_VAR_ASSIGN TOKEN_SEMI                          
 
                             NodeAddChild($$.treeNode, $1.treeNode);
                             NodeAddChild($$.treeNode, $3.treeNode);
-                        }       
+                        }           
                     ;
 
 
