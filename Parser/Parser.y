@@ -858,7 +858,7 @@ R_ID_LIST      :    R_ID_LIST TOKEN_COMMA TOKEN_ID
                             $$.treeNode = pNewNode;
                         }
 
-                        pNode->pSibling = $3.treeNode;      ////VER
+                        pNewNode->pSibling = $3.treeNode;
                     }                    
 
                 |   R_SIMPLE_VAR_ASSIGN
