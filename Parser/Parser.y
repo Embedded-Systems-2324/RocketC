@@ -273,7 +273,7 @@ R_LOCAL_STATEMENT       :   R_IF_STATEMENT
                                 $$.treeNode = $1.treeNode;
                             }
 
-                        |   R_FUNC_CALL   
+                        |   R_FUNC_CALL TOKEN_SEMI
                             {
                                 $$.treeNode = $1.treeNode;
                             }   
@@ -337,7 +337,7 @@ R_BREAK     :   TOKEN_BREAK TOKEN_SEMI          // break;
                 }
             ;
 
-R_GOTO      :   TOKEN_GOTO R_LABEL TOKEN_SEMI   // goto label;
+R_GOTO      :   TOKEN_GOTO TOKEN_ID TOKEN_SEMI   // goto label;
                 {
                     NodeCreate(&($$.treeNode), NODE_GOTO);
                     $$.treeNode->nodeData.sVal = $2.nodeData.sVal;
@@ -606,7 +606,7 @@ R_FUNC_IMPLEMENT        :   R_FUNC_SIGNATURE R_COMPOUND_STATEMENT
                         ;
 
 //Function call
-R_FUNC_CALL             :   TOKEN_ID TOKEN_LEFT_PARENTHESES R_EXP_LIST TOKEN_RIGHT_PARENTHESES TOKEN_SEMI
+R_FUNC_CALL             :   TOKEN_ID TOKEN_LEFT_PARENTHESES R_EXP_LIST TOKEN_RIGHT_PARENTHESES 
                             {
                                 NodeCreate(&($$.treeNode), NODE_FUNCTION_CALL);
                                 $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
@@ -893,7 +893,7 @@ R_VAR_ASSIGNMENT    :   R_SIMPLE_VAR_ASSIGN TOKEN_SEMI                          
                             $$.treeNode = $1.treeNode;
                         }
 
-                    |   R_ARRAY_INDEX TOKEN_ASSIGN R_EXP        //array[1] = 3;
+                    |   R_ARRAY_INDEX TOKEN_ASSIGN R_EXP TOKEN_SEMI      //array[1] = 3;
                         {
                             NodeCreate(&($$.treeNode), NODE_OPERATOR);
                             $$.treeNode->nodeData.dVal = OP_ASSIGN;
@@ -996,7 +996,7 @@ R_EXP       :   TOKEN_MINUS R_EXP
                 {           
                     TreeNode_st *pNode;
                     NodeCreate(&($$.treeNode), NODE_OPERATOR);
-                    $$.treeNode->nodeData.dVal = OP_MINUS;
+                    $$.treeNode->nodeData.dVal = OP_NEGATIVE;                          
 
                     NodeAddNewChild($$.treeNode, &pNode, NODE_INTEGER);
                     pNode->nodeData.dVal = 0;
@@ -1050,6 +1050,7 @@ R_EXP       :   TOKEN_MINUS R_EXP
                     $$.treeNode = $1.treeNode;
                 }
             ;
+
 
 
 // Prioritize operators, and minimize rule duplication
@@ -1106,6 +1107,12 @@ R_FACTOR    :   TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES            
                     $$.treeNode =  $1.treeNode;
                 }
                 
+            |   TOKEN_MINUS TOKEN_NUM                                           // -1
+                {   
+                    NodeCreate(&($$.treeNode), NODE_INTEGER);
+                    $$.treeNode->nodeData.dVal = -$2.nodeData.dVal;
+                }    
+
             |   TOKEN_NUM                                                       // 1
                 {   
                     NodeCreate(&($$.treeNode), NODE_INTEGER);
@@ -1124,12 +1131,18 @@ R_FACTOR    :   TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES            
                     $$.treeNode->nodeData.sVal = $2.nodeData.sVal;
                 }
 
+            |   TOKEN_MINUS TOKEN_FNUM                                         // 1.5
+                {
+                    NodeCreate(&($$.treeNode), NODE_FLOAT);
+                    $$.treeNode->nodeData.fVal = -$2.nodeData.fVal;
+                }     
+
             |   TOKEN_FNUM                                                     // 1.5
                 {
                     NodeCreate(&($$.treeNode), NODE_FLOAT);
                     $$.treeNode->nodeData.fVal = $1.nodeData.fVal;
-                }       
-
+                }  
+                   
             |   TOKEN_STR                                                      // "abc"
                 {
                     NodeCreate(&($$.treeNode), NODE_STRING);
@@ -1147,6 +1160,11 @@ R_FACTOR    :   TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES            
                 {
                     NodeCreate(&($$.treeNode), NODE_REFERENCE);
                     $$.treeNode->nodeData.sVal = $2.nodeData.sVal;
+                }
+
+            |   R_FUNC_CALL
+                {
+                    $$.treeNode = $1.treeNode;
                 }
             ;
 

@@ -148,22 +148,36 @@ int insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *s
 }
 
 
-/// @brief Function to free the memory allocated for a symbol table
+/// @brief Function to free the memory allocated for the whole Symbol Table
 /// @param symTable 
-void freeSymbolTable(SymbolTable_st* symTable)
+void freeSymbolTable()
 {
-    for (int i = 0; i < HASH_TABLE_SIZE; ++i)
+    SymbolTable_st* curTable;
+    SymbolEntry_st* curSymbol;
+    SymbolEntry_st* tempSymbol;
+
+    for(int j = 0; j < tablesNumber; j++)
     {
-        SymbolEntry_st* entry = symTable->table[i];
-        while (entry != NULL)
+        curTable = allSymbolsTables[j];
+        for (int i = 0; i < HASH_TABLE_SIZE; ++i)
         {
-            SymbolEntry_st* temp = entry;
-            entry = entry->next;
-            free(temp->name);
-            free(temp);
+            curSymbol = curTable->table[i];
+            while (curSymbol != NULL)
+            {
+                tempSymbol = curSymbol;
+
+                if (tempSymbol->symbolType == SYMBOL_FUNCTION)
+                {
+                    free(tempSymbol->symbolContent_u.SymbolFunction_s.parameters);
+                }
+                free(tempSymbol->name);
+                free(tempSymbol);
+
+                curSymbol = curSymbol->next;
+            }
         }
+        free(curTable);
     }
-    free(symTable);
 }
 
 

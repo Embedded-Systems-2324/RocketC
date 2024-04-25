@@ -160,6 +160,16 @@ static int checkOperator(TreeNode_st * pNode)
             }
             break;
 
+        /*case OP_NEGATIVE:
+            pChild1 = &pNode->pChilds[0];
+
+            if(pChild1->nodeVarType != TYPE_INT)
+            {
+
+            }
+            break;*/
+        
+
         // Valid examples:  pointer = pointer           char* char_var = "string"
         //                  pointer = &array[2]         int_var = int_var
         case OP_ASSIGN:
@@ -168,6 +178,15 @@ static int checkOperator(TreeNode_st * pNode)
 
             varType1 = pChild1->nodeVarType;
             varType2 = pChild2->nodeVarType;
+            /*
+            SymbolEntry_st *pLval;
+            if(fetchSymbol(pNode->scopeTable, &pEntryAux, pChild1->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
+            {
+                semanticError(pNode, "Symbol not found! \n");
+                pNode->nodeVarType = TYPE_VOID;
+            }
+            else if(pLval->symbolContent_u.SymbolVar_s.varMod == )*/
+            
 
             if(pChild1->nodeType == NODE_POINTER) 
             {
@@ -359,21 +378,32 @@ static void checkNode(TreeNode_st * pNode)
                 semanticError(pNode, "Symbol not found!\n");
                 pNode->nodeVarType = TYPE_VOID;
             }
-            pNode->nodeVarType = pEntryAux->symbolContent_u.SymbolVar_s.varType;  
+            
+            
+            if(pNode->childNumber > 0){
+                pChild1 = &pNode->pChilds[0];
+                if(pChild1->nodeType == NODE_TYPE_CAST){
+                    pNode->nodeVarType = pChild1->nodeVarType;  
+                }
+            }else{
+                pNode->nodeVarType = pEntryAux->symbolContent_u.SymbolVar_s.varType; 
+            }
             break;
 
 
         case NODE_FUNCTION_CALL:
-            if(pNode->childNumber > 0)
+            if(fetchSymbol(pNode->scopeTable, &pEntryAux, pNode->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
             {
-                pChild1 = &pNode->pChilds[0];
-
-                if(fetchSymbol(pNode->scopeTable, &pEntryAux, pNode->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
+                semanticError(pNode, "Symbol not found\n");
+                pNode->nodeVarType = TYPE_VOID;
+            }   
+            else
+            {
+                if(!pEntryAux->symbolContent_u.SymbolFunction_s.isImplemented)      //check if is not implemented
                 {
-                    semanticError(pNode, "Symbol not found\n");
-                    pNode->nodeVarType = TYPE_VOID;
-                }   
-                else
+                    semanticError(pNode, "Function isn't implemented\n");
+                }
+                else if(pNode->childNumber > 0)                                     //check is has arguments 
                 {
                     parameter_st* pParam = pEntryAux->symbolContent_u.SymbolFunction_s.parameters;
 
@@ -566,7 +596,12 @@ static void checkNode(TreeNode_st * pNode)
 
             ///PENSAR COMO PASSAR PARA OS OPERANDOS
             break; */
-
+        case NODE_GOTO: 
+            if(fetchSymbol(pGlobalSymTable, &pEntryAux, pNode->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
+            {
+                semanticError(pNode, "Label Not Defined!");
+            }
+            break;
     }
 
     if (errorFlag == true)
@@ -736,12 +771,16 @@ static void buildSymbolTables(TreeNode_st* pNode)
             }
             break;
 
-        //Array declaration
-        case NODE_ARRAY_DECLARATION:
-                /*case NODE_POINTER:
-                ////fazer   
-                break; */      
 
+
+        /*case NODE_POINTER:
+        ////fazer   
+        break; */ 
+
+
+
+        //Array declaration
+        case NODE_ARRAY_DECLARATION:     
             if(tablePending)
             {
                 //Create a new symbol table if tablePending = 1
@@ -756,17 +795,17 @@ static void buildSymbolTables(TreeNode_st* pNode)
             { 
                 TreeNode_st* pNodePreamble = &pNode->pChilds[0];
                 TreeNode_st* pNodeSize = &pNode->pChilds[1];
-        
-                int arraySize = pNodeSize->nodeData.dVal;
-                pNewSymbol->symbolContent_u.SymbolArray_s.arraySize = arraySize;
-                
-                setMemoryLocation(&pNewSymbol->symbolContent_u.SymbolVar_s.memoryLocation, pNodePreamble->nodeData.dVal, arraySize);
 
                 setVariblesType(pNodePreamble, 
                                 &pNewSymbol->symbolContent_u.SymbolArray_s.arrayType,
                                 &pNewSymbol->symbolContent_u.SymbolArray_s.arraySign,
                                 &pNewSymbol->symbolContent_u.SymbolArray_s.arrayMod,
                                 &pNewSymbol->symbolContent_u.SymbolArray_s.arrayVis);
+
+
+                int arraySize = pNodeSize->nodeData.dVal;
+                pNewSymbol->symbolContent_u.SymbolArray_s.arraySize = arraySize;    
+                setMemoryLocation(&pNewSymbol->symbolContent_u.SymbolVar_s.memoryLocation, pNodePreamble->nodeData.dVal, arraySize);           
             }
             else
             {
@@ -856,7 +895,6 @@ static void buildSymbolTables(TreeNode_st* pNode)
 
         //pointer content (*p), go to and identifier
         case NODE_POINTER_CONTENT:
-        case NODE_GOTO:
         case NODE_IDENTIFIER:
             //check if the token already exists
             if(fetchSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
@@ -868,7 +906,7 @@ static void buildSymbolTables(TreeNode_st* pNode)
         //variable refernce (&a)
         case NODE_REFERENCE:
             //if it has no children, the name of the token is in the node data
-            if(pNode->childNumber = 0)
+            if(pNode->childNumber == 0)
             {
                 if(fetchSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
                 {
@@ -879,19 +917,10 @@ static void buildSymbolTables(TreeNode_st* pNode)
         
         //label (init:)
         case NODE_LABEL:
-            if(tablePending)
-            {
-                //Create a new symbol table if tablePending = 1
-                SymbolTable_st* ppsymTable;
-                createSymbolTable(&ppsymTable, pCurrentScope);
-                pCurrentScope = ppsymTable;
-                tablePending = false;
-            }
-
             //inserts the label into the table if it doesn't exist
-            if(insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_LABEL) == SYMBOL_ERROR) 
+            if(insertSymbol(pGlobalSymTable, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_LABEL) == SYMBOL_ERROR) 
             {
-                semanticError(pNode, "Symbol Redefinition!");
+                semanticError(pNode, "Label Redefinition!");
             }
             break;
 
@@ -966,7 +995,8 @@ static void buildSymbolTables(TreeNode_st* pNode)
         case NODE_PRE_DEC:
         case NODE_POST_INC:
         case NODE_PRE_INC:
-            
+            if(fetchSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, false) != SYMBOL_FOUND)
+                semanticError(pNode, "Symbol Not Defined!");
             break;
 
 

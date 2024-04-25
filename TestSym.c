@@ -6,7 +6,12 @@ float function1(int x, float y, float z);
 
 int main()
 {
-    float z = 3.3, y = 5.8;
+    //double x = -(1.0 + 2.0) - 3.0;     ----- estava a ver vai ter o op_negative
+
+    int array[3];
+    int *ptr = &array[1];
+
+    /*float z = 3.3, y = 5.8, t;
     unsigned int x;
     int array[3];
 
@@ -14,8 +19,9 @@ int main()
 
     x = x / 1;                      //show divison by 0
 
-    function1(x, y, z);             //show number of arguments and type check
+    t=function1(x, y, z);           //show number of arguments and type check
 
+    function1(x, y, z); 
 
     {
         //int j;
@@ -36,11 +42,11 @@ int main()
         }
     }
 
-    return x;                       //show return type check
+    return x;                    //show return type check*/
 }
 
 
-float function1(int x, float y, float z)
+/*float function1(int x, float y, float z)
 {   
     float res;
     if((x<<3) > 0)
@@ -54,4 +60,5 @@ float function1(int x, float y, float z)
     }
 
     return res;
-}
+}*/
+

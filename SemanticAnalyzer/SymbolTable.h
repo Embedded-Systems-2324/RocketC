@@ -97,7 +97,7 @@ int insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *s
 
 int fetchSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymbol, char* name, int onlyCurrentScope);
 
-void freeSymbolTable(SymbolTable_st* symTable);
+void freeSymbolTable();
 
 void printSymbolTables();
 

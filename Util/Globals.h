@@ -44,7 +44,8 @@ typedef enum
     OP_BITWISE_XOR_ASSIGN,      // 28
     OP_MULTIPLY_ASSIGN,         // 29
     OP_DIVIDE_ASSIGN,           // 30
-    OP_SIZEOF                   // 31
+    OP_SIZEOF,                  // 31
+    OP_NEGATIVE
 }OperatorType_et;
 
 typedef enum

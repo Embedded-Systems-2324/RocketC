@@ -96,6 +96,11 @@ int main(int argc, char *argv[])
                 printSymbolTables();
                 LOG_WARNING_SHORT("\n\n-----------------SYMBOLS END-----------------\n");
             //}
+
+            // Free Symbol Table resources
+            LOG_MESSAGE_SHORT("\nReleasing Symbol Table resources...\n");
+            freeSymbolTable();
+            LOG_MESSAGE_SHORT("Symbol Table resources successfully released\n");
         }
     }
     else
