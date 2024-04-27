@@ -6,10 +6,23 @@ float function1(int x, float y, float z);
 
 int main()
 {
-    //double x = -(1.0 + 2.0) - 3.0;     ----- estava a ver vai ter o op_negative
 
-    int array[3];
-    int *ptr = &array[1];
+    float address[3];
+    float y;
+    address[0] = 1.0;
+    float* ptr = &address[2];
+    float ptr2 = y;
+
+    char str = 'c';
+
+    //address[0] = 4;
+
+
+    //double x = -(-(-1.0 + 2.0)) - 3.0;  //---estava a ver vai ter o op_negative
+
+    //int array[3];
+    //int d;
+    //int *ptr = &d;
 
     /*float z = 3.3, y = 5.8, t;
     unsigned int x;

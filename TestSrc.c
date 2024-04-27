@@ -25,15 +25,3 @@ float function(float y)
     return y;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-

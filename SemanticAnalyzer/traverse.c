@@ -5,6 +5,7 @@
 #include "../main.h"
 #include "../SemanticAnalyzer/traverse.h"
 
+
 SymbolTable_st* pGlobalSymTable;
 SymbolTable_st* pCurrentScope;
 static bool initialized = false;
@@ -133,6 +134,8 @@ int executeSemanticAnalisys(TreeNode_st* pTreeRoot, SymbolTable_st** ppGlobalTab
  */
 static int checkOperator(TreeNode_st * pNode)
 {
+    SymbolEntry_st* pEntryChild1;
+    SymbolEntry_st* pEntryChild2;
     SymbolEntry_st* pEntryAux;
     TreeNode_st* pChild1;
     TreeNode_st* pChild2;
@@ -149,7 +152,7 @@ static int checkOperator(TreeNode_st * pNode)
 
             varType1 = pChild1->nodeVarType;
             
-            if (varType1 == TYPE_VOID || varType1 == TYPE_STRING || varType1 == TYPE_DOUBLE ||
+            if (varType1 == TYPE_VOID  || varType1 == TYPE_STRING || varType1 == TYPE_DOUBLE ||
                 varType1 == TYPE_FLOAT || varType1 == TYPE_LONG_DOUBLE)
             {
                 errorFlag = true;
@@ -158,17 +161,8 @@ static int checkOperator(TreeNode_st * pNode)
             {
                 pNode->nodeVarType = pChild1->nodeVarType;
             }
-            break;
+            break;        
 
-        /*case OP_NEGATIVE:
-            pChild1 = &pNode->pChilds[0];
-
-            if(pChild1->nodeVarType != TYPE_INT)
-            {
-
-            }
-            break;*/
-        
 
         // Valid examples:  pointer = pointer           char* char_var = "string"
         //                  pointer = &array[2]         int_var = int_var
@@ -178,76 +172,123 @@ static int checkOperator(TreeNode_st * pNode)
 
             varType1 = pChild1->nodeVarType;
             varType2 = pChild2->nodeVarType;
-            /*
-            SymbolEntry_st *pLval;
-            if(fetchSymbol(pNode->scopeTable, &pEntryAux, pChild1->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
+
+
+            if (fetchSymbol(pNode->scopeTable, &pEntryChild1, pChild1->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
             {
                 semanticError(pNode, "Symbol not found! \n");
                 pNode->nodeVarType = TYPE_VOID;
+                return SEMANTIC_ERROR;
             }
-            else if(pLval->symbolContent_u.SymbolVar_s.varMod == )*/
-            
 
-            if(pChild1->nodeType == NODE_POINTER) 
+
+            if (pChild1->nodeType == NODE_POINTER_CONTENT || pChild1->nodeType == NODE_ARRAY_INDEX)
             {
-                if(pChild2->nodeType == NODE_IDENTIFIER)   
+                if(pEntryChild1->modifier == MOD_CONST)         //check if a variable is const
                 {
-                    if(fetchSymbol(pNode->scopeTable, &pEntryAux, pChild2->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
-                    {
-                        semanticError(pNode, "Symbol not found! \n");
-                        pNode->nodeVarType = TYPE_VOID;
-                    }
-                    else
-                    {
-                        if(pEntryAux->symbolType != SYMBOL_POINTER || (varType1 != varType2))
-                        {
-                            errorFlag = true;
-                        }
-                        else
-                        {
-                            pNode->nodeVarType = varType1;
-                        }
-                    }
-                }
-                else if(pChild2->nodeType != NODE_REFERENCE || (varType1 != varType2))
-                {
-                    errorFlag = true;
+                    semanticError(pNode, "Can not assign a constant variable! \n");
                     pNode->nodeVarType = TYPE_VOID;
-                }
+                    return SEMANTIC_ERROR;
+                }               
             }
-
-            else if ((varType1 == TYPE_CHAR))
+            else if(pChild1->nodeType == NODE_IDENTIFIER)
             {
-                if (varType2 == TYPE_STRING)
+                if (pEntryChild1->symbolType == SYMBOL_POINTER)
                 {
-                    if((fetchSymbol(pNode->scopeTable, &pEntryAux, pChild1->nodeData.sVal, false) == SYMBOL_NOT_FOUND) || 
-                      (pEntryAux->symbolType != SYMBOL_POINTER))
+                    if (pChild2->nodeType == NODE_IDENTIFIER)        //pointer = pointer    
                     {
-                        semanticError(pNode, "Symbol not found or not a Symbol Pointer\n");
+                        if (fetchSymbol(pNode->scopeTable, &pEntryChild2, pChild2->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
+                        {
+                            semanticError(pNode, "Symbol not found! \n");
+                            pNode->nodeVarType = TYPE_VOID;
+                            return SEMANTIC_ERROR;
+                        }
+                        else if(pEntryChild2->symbolType != SYMBOL_POINTER && pEntryChild2->symbolType != SYMBOL_ARRAY)
+                        {
+                            semanticError(pNode, "Right expression is not a pointer! \n");
+                            pNode->nodeVarType = TYPE_VOID;
+                            return SEMANTIC_ERROR;
+                        }
+                    }
+                    else if (pChild2->nodeType == NODE_REFERENCE)
+                    {
+                        TreeNode_st * auxNode = (pChild2->childNumber == 0) ? pChild2 : &pChild2->pChilds[0];   // search for sVal of array index or a regular identifier 
+
+                        if (fetchSymbol(pNode->scopeTable, &pEntryChild2, auxNode->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
+                        {
+                            semanticError(pNode, "Symbol not found! \n");
+                            pNode->nodeVarType = TYPE_VOID;
+                            return SEMANTIC_ERROR;
+                        }
+                        else if(pEntryChild2->symbolType == SYMBOL_ARRAY)
+                        {
+                            if(pChild2->childNumber == 0)
+                            {
+                                semanticError(pNode, "Right expression is not compatible! \n");
+                                pNode->nodeVarType = TYPE_VOID;
+                                return SEMANTIC_ERROR; 
+                            }
+                        } 
+                        else if(pEntryChild2->symbolType != SYMBOL_VARIABLE)
+                        {
+                            semanticError(pNode, "Right expression is not compatible! \n");
+                            pNode->nodeVarType = TYPE_VOID;
+                            return SEMANTIC_ERROR; 
+                        }
+                    }
+                    else if (pChild2->nodeType == NODE_STRING && varType1 != TYPE_CHAR)
+                    {
+                        semanticError(pNode, "Can not assign a literal string to a non char pointer! \n");
                         pNode->nodeVarType = TYPE_VOID;
+                        return SEMANTIC_ERROR; 
                     }
                     else
                     {
-                        pNode->nodeVarType = varType1;
-                    }                    
+                        return SEMANTIC_OK;
+                    }
                 }
-                else if (varType2 == TYPE_INT)
+                else if (pEntryChild1->symbolType == SYMBOL_ARRAY || pEntryChild1->symbolType == SYMBOL_VARIABLE)
                 {
-                    pNode->nodeVarType = varType1;
+                    if (pChild2->nodeType == NODE_IDENTIFIER) 
+                    {
+                        if (fetchSymbol(pNode->scopeTable, &pEntryChild2, pChild2->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
+                        {
+                            semanticError(pNode, "Symbol not found! \n");
+                            pNode->nodeVarType = TYPE_VOID;
+                            return SEMANTIC_ERROR;
+                        }
+                        else if(pEntryChild2->symbolType == SYMBOL_POINTER || pEntryChild2->symbolType == SYMBOL_ARRAY)
+                        {
+                            semanticError(pNode, "Right expression is a pointer! \n");
+                            pNode->nodeVarType = TYPE_VOID;
+                            return SEMANTIC_ERROR;
+                        }
+                    }
+                    else if(pChild2->nodeType == NODE_REFERENCE)
+                    {
+                        semanticError(pNode, "Invalid right expression! \n");
+                        pNode->nodeVarType = TYPE_VOID;
+                        return SEMANTIC_ERROR;
+                    }
                 }
-            } 
+            }
+            else 
+            {
+                semanticError(pNode, "Left value isn't a variable! \n");
+                pNode->nodeVarType = TYPE_VOID;
+            }
+
+
+
+            if (varType1 == TYPE_VOID || varType2 == TYPE_STRING || varType2 == TYPE_VOID || varType1 != varType2) 
+            {
+                semanticError(pNode, "Operands types don't match!\n");
+                pNode->nodeVarType = TYPE_VOID;
+                return SEMANTIC_ERROR;        
+            }
             else
             {
-                if ((varType1 == TYPE_STRING || varType1 == TYPE_VOID ) ||
-                    (varType2 == TYPE_STRING || varType2 == TYPE_VOID ) ||
-                    (varType1 != varType2)) 
-                {
-                    errorFlag = true;
-                }
-                else
-                {
-                    pNode->nodeVarType = varType1;
-                }
+                pNode->nodeVarType = varType1;
             }
             break;
 
@@ -282,6 +323,7 @@ static int checkOperator(TreeNode_st * pNode)
                 }
             }
             break;
+
 
         // Valid examples:  int_var + int_var       char_var == char_var
         //                  float_var % float_var   double_var >= double_var
@@ -386,7 +428,7 @@ static void checkNode(TreeNode_st * pNode)
                     pNode->nodeVarType = pChild1->nodeVarType;  
                 }
             }else{
-                pNode->nodeVarType = pEntryAux->symbolContent_u.SymbolVar_s.varType; 
+                pNode->nodeVarType = pEntryAux->type; 
             }
             break;
 
@@ -418,7 +460,7 @@ static void checkNode(TreeNode_st * pNode)
                 }
             }
 
-            pNode->nodeVarType = pEntryAux->symbolContent_u.SymbolFunction_s.returnType;
+            pNode->nodeVarType = pEntryAux->type;
             break;  
 
         case NODE_STRING:
@@ -449,7 +491,7 @@ static void checkNode(TreeNode_st * pNode)
                 }
                 else
                 {
-                    pNode->nodeVarType = pEntryAux->symbolContent_u.SymbolArray_s.arrayType;
+                    pNode->nodeVarType = pEntryAux->type;
                 }
             }
             break;
@@ -464,9 +506,20 @@ static void checkNode(TreeNode_st * pNode)
                 semanticError(pNode, "Symbol not found\n");
                 pNode->nodeVarType = TYPE_VOID;
             } 
-            else if((pEntryAux->symbolType == SYMBOL_POINTER) || (pEntryAux->symbolType == SYMBOL_VARIABLE))
+            else if((pEntryAux->symbolType == SYMBOL_VARIABLE))
+            {
+                if(pEntryAux->modifier == MOD_CONST)
+                {
+                    semanticError(pNode, "The variable is constant!\n");
+                }
+                else
+                {
+                    pNode->nodeVarType = pEntryAux->type;
+                }
+            }
+            else if(pEntryAux->symbolType == SYMBOL_POINTER)
             {   
-                pNode->nodeVarType = pEntryAux->symbolContent_u.SymbolVar_s.varType;
+                pNode->nodeVarType = pEntryAux->type;
             }
             else
             {
@@ -532,7 +585,7 @@ static void checkNode(TreeNode_st * pNode)
             {
                 pChild1 = &pNode->pChilds[0];
 
-                int varType = pEntryAux->symbolContent_u.SymbolFunction_s.returnType;
+                int varType = pEntryAux->type;
 
                 if(pChild1->nodeVarType == varType)
                 {
@@ -549,15 +602,8 @@ static void checkNode(TreeNode_st * pNode)
         // Valid_examples:  &pointer      &array
         case NODE_REFERENCE:
             TreeNode_st* pNodeAux;
-            
-            if(pNode->pChilds->nodeType == NODE_ARRAY_INDEX)
-            {
-                pNodeAux = pNode->pChilds;
-            }
-            else
-            {
-                pNodeAux = pNode;
-            }
+
+            pNodeAux = (pNode->childNumber != 0) ? pNodeAux = &pNode->pChilds[0] : pNode;
 
             if(fetchSymbol(pNodeAux->scopeTable, &pEntryAux, pNodeAux->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
             {
@@ -566,7 +612,14 @@ static void checkNode(TreeNode_st * pNode)
             }
             else
             {
-                pNode->nodeVarType = pEntryAux->symbolContent_u.SymbolVar_s.varType;
+                if(pEntryAux->symbolType == SYMBOL_ARRAY)
+                {
+                    pNode->nodeVarType = pEntryAux->type;
+                }
+                else if(pEntryAux->symbolType == SYMBOL_VARIABLE)
+                {
+                    pNode->nodeVarType = pEntryAux->type;
+                }
             }
             break;
 
@@ -579,7 +632,7 @@ static void checkNode(TreeNode_st * pNode)
             }
             else if(pEntryAux->symbolType == SYMBOL_POINTER)
             {
-                pNode->nodeVarType = pEntryAux->symbolContent_u.SymbolVar_s.varType;
+                pNode->nodeVarType = pEntryAux->type;
             }
             else 
             {
@@ -756,14 +809,14 @@ static void buildSymbolTables(TreeNode_st* pNode)
             //inserts the new symbol into the table if it doesn't exist
             if( insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, symType) == SYMBOL_ADDED)
             { 
-                setMemoryLocation(&pNewSymbol->symbolContent_u.SymbolVar_s.memoryLocation, pNodeChild->nodeData.dVal, 1);
+                setMemoryLocation(&pNewSymbol->symbolContent_u.memoryLocation, pNodeChild->nodeData.dVal, 1);
                 pNode->scopeTable = pCurrentScope;
 
                 setVariblesType(pNodeChild, 
-                                &pNewSymbol->symbolContent_u.SymbolVar_s.varType,
-                                &pNewSymbol->symbolContent_u.SymbolVar_s.varSign,
-                                &pNewSymbol->symbolContent_u.SymbolVar_s.varMod,
-                                &pNewSymbol->symbolContent_u.SymbolVar_s.varVis);
+                                &pNewSymbol->type,
+                                &pNewSymbol->signal,
+                                &pNewSymbol->modifier,
+                                &pNewSymbol->visibility);
             }
             else
             {
@@ -797,15 +850,15 @@ static void buildSymbolTables(TreeNode_st* pNode)
                 TreeNode_st* pNodeSize = &pNode->pChilds[1];
 
                 setVariblesType(pNodePreamble, 
-                                &pNewSymbol->symbolContent_u.SymbolArray_s.arrayType,
-                                &pNewSymbol->symbolContent_u.SymbolArray_s.arraySign,
-                                &pNewSymbol->symbolContent_u.SymbolArray_s.arrayMod,
-                                &pNewSymbol->symbolContent_u.SymbolArray_s.arrayVis);
+                                &pNewSymbol->type,
+                                &pNewSymbol->signal,
+                                &pNewSymbol->modifier,
+                                &pNewSymbol->visibility);
 
 
                 int arraySize = pNodeSize->nodeData.dVal;
                 pNewSymbol->symbolContent_u.SymbolArray_s.arraySize = arraySize;    
-                setMemoryLocation(&pNewSymbol->symbolContent_u.SymbolVar_s.memoryLocation, pNodePreamble->nodeData.dVal, arraySize);           
+                setMemoryLocation(&pNewSymbol->symbolContent_u.SymbolArray_s.memoryLocation, pNodePreamble->nodeData.dVal, arraySize);           
             }
             else
             {
@@ -829,10 +882,10 @@ static void buildSymbolTables(TreeNode_st* pNode)
 
                 //sets the return type
                 setVariblesType(pNodePreamble, 
-                                &pNewSymbol->symbolContent_u.SymbolFunction_s.returnType,
-                                &pNewSymbol->symbolContent_u.SymbolFunction_s.returnSign,
-                                &pNewSymbol->symbolContent_u.SymbolFunction_s.funcMod,
-                                &pNewSymbol->symbolContent_u.SymbolFunction_s.funcVis); 
+                                &pNewSymbol->type,
+                                &pNewSymbol->signal,
+                                &pNewSymbol->modifier,
+                                &pNewSymbol->visibility); 
 
 
                 //adds the function arguments 
@@ -881,8 +934,8 @@ static void buildSymbolTables(TreeNode_st* pNode)
                         for(int i = 0; i < pNewSymbol->symbolContent_u.SymbolFunction_s.parameterNumber; i++)
                         {
                             insertSymbol(pCurrentScope, &pParamSym, paramList[i].name, SYMBOL_VARIABLE);
-                            pParamSym->symbolContent_u.SymbolVar_s.varType = paramList[i].varType;
-                            pParamSym->symbolContent_u.SymbolVar_s.memoryLocation = NO_MEMORY;
+                            pParamSym->type = paramList[i].varType;
+                            pParamSym->symbolContent_u.memoryLocation = NO_MEMORY;
                         }
                     }
                 }
@@ -906,13 +959,15 @@ static void buildSymbolTables(TreeNode_st* pNode)
         //variable refernce (&a)
         case NODE_REFERENCE:
             //if it has no children, the name of the token is in the node data
-            if(pNode->childNumber == 0)
+
+            TreeNode_st * auxNode;
+            auxNode = (pNode->childNumber == 0) ? pNode : &pNode->pChilds[0];
+            
+            if(fetchSymbol(pCurrentScope, &pNewSymbol, auxNode->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
             {
-                if(fetchSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
-                {
-                    semanticError(pNode, "Symbol Not Defined!");
-                }  
-            }
+                semanticError(pNode, "Symbol Not Defined!");
+            }  
+
             break;    
         
         //label (init:)

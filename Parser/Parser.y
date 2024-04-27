@@ -900,7 +900,16 @@ R_VAR_ASSIGNMENT    :   R_SIMPLE_VAR_ASSIGN TOKEN_SEMI                          
 
                             NodeAddChild($$.treeNode, $1.treeNode);
                             NodeAddChild($$.treeNode, $3.treeNode);
-                        }           
+                        } 
+
+                    |   R_POINTER_CONTENT TOKEN_ASSIGN R_EXP TOKEN_SEMI     // *pointer = 3;
+                        {
+                            NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                            $$.treeNode->nodeData.dVal = OP_ASSIGN;
+
+                            NodeAddChild($$.treeNode, $1.treeNode);
+                            NodeAddChild($$.treeNode, $3.treeNode);
+                        }     
                     ;
 
 
@@ -993,13 +1002,13 @@ R_VAR_PREAMBLE          :   R_VISIBILITY_QUALIFIER R_MOD_QUALIFIER R_SIGN_QUALIF
 //--------------------------------------------------------------------------------------------------------------------//
 // Main expression rule
 R_EXP       :   TOKEN_MINUS R_EXP
-                {           
+                {         
                     TreeNode_st *pNode;
                     NodeCreate(&($$.treeNode), NODE_OPERATOR);
-                    $$.treeNode->nodeData.dVal = OP_NEGATIVE;                          
+                    $$.treeNode->nodeData.dVal = OP_MINUS;                          
 
-                    NodeAddNewChild($$.treeNode, &pNode, NODE_INTEGER);
-                    pNode->nodeData.dVal = 0;
+                    //NodeAddNewChild($$.treeNode, &pNode, NODE_INTEGER);
+                    //pNode->nodeData.dVal = 0;
 
                     NodeAddChild($$.treeNode, $2.treeNode);  
                 }
@@ -1125,10 +1134,9 @@ R_FACTOR    :   TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES            
                     $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
                 }
 
-            |   TOKEN_ASTERISK TOKEN_ID                                        // *a
+            |   R_POINTER_CONTENT                                       // *a
                 {
-                    NodeCreate(&($$.treeNode), NODE_POINTER_CONTENT);
-                    $$.treeNode->nodeData.sVal = $2.nodeData.sVal;
+                    $$.treeNode = $1.treeNode;
                 }
 
             |   TOKEN_MINUS TOKEN_FNUM                                         // 1.5
@@ -1176,6 +1184,15 @@ R_ARRAY_INDEX:  TOKEN_ID TOKEN_LEFT_BRACKET R_EXP TOKEN_RIGHT_BRACKET           
 
                     NodeAddChild($$.treeNode, $3.treeNode);  
                 }
+            ;                
+
+
+R_POINTER_CONTENT:  TOKEN_ASTERISK TOKEN_ID
+                    {
+                        NodeCreate(&($$.treeNode), NODE_POINTER_CONTENT);
+                        $$.treeNode->nodeData.sVal = $2.nodeData.sVal;
+                    }
+                ;  
 
 
 // Increment/Decrement group

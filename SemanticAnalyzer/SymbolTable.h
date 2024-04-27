@@ -41,38 +41,29 @@ typedef struct parameter{
 // Symbol entry struct
 typedef struct SymbolEntry
 {
-    SymbolType_et symbolType;               // Symbol type
-    struct SymbolEntry* next;               // Next Entry Pointer (linked list to prevent collisions)
-    char* name;                             // Symbol name
+    SymbolType_et symbolType;       // Symbol type
+    struct SymbolEntry* next;       // Next Entry Pointer (linked list to prevent collisions)
+    char* name;                     // Symbol name
+
+    VarType_et type;                // Variable Type
+    SignQualifier_et signal;        // Variable signal
+    ModQualifier_et modifier;       // Variable modifier
+    VisQualifier_et visibility;     // Variable visibility   
 
     union{
-        //Variables and pointers symbol struct
-        struct{
-            int memoryLocation;             // Variable Location
-            VarType_et varType;             // Variable Type
-            SignQualifier_et varSign;       // Variable signal
-            ModQualifier_et varMod;         // Variable modifier
-            VisQualifier_et varVis;         // Variable visibility          
-        }SymbolVar_s;
+        //pointers and variables
+        int memoryLocation;                 // memory offset        
 
-
+        //functions
         struct{
-            VarType_et returnType;          // Function Return Type
-            SignQualifier_et returnSign;    // Function return signal
-            ModQualifier_et funcMod;        // Function modifier
-            VisQualifier_et funcVis;        // Function visibility
             uint8_t parameterNumber;        // Number of Function Params
             parameter_st* parameters;       // List of parameters
             bool isImplemented;             // Flag to signal whether it's just the signature or the implementation
         }SymbolFunction_s;
 
-
+        //arrays
         struct{
             int memoryLocation;             // Array Location
-            VarType_et arrayType;           // Array Type
-            SignQualifier_et arraySign;     // Array signal
-            ModQualifier_et arrayMod;       // Array modifier
-            VisQualifier_et arrayVis;       // Array visibility
             uint32_t arraySize;             // Array size
         }SymbolArray_s;
 
