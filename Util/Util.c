@@ -50,6 +50,7 @@ int NodeCreate(TreeNode_st** ppNewNode, NodeType_et nodeType)
 
     pNode->nodeType = nodeType;
     pNode->lineNumber = getLineNumber();
+    pNode->pSymbol = NULL;
 
     return 0;
 }
@@ -77,6 +78,7 @@ int NodeAddChild(TreeNode_st* pParent, TreeNode_st* pChild)
 }
 
 
+
 int NodeAddNewChild(TreeNode_st* pParent, TreeNode_st** ppNewChild, NodeType_et nodeType)
 {
     TreeNode_st* pTemp;
@@ -97,6 +99,7 @@ int NodeAddNewChild(TreeNode_st* pParent, TreeNode_st** ppNewChild, NodeType_et 
     memset(*ppNewChild, 0, sizeof(TreeNode_st));
     (*ppNewChild)->nodeType = nodeType;
     (*ppNewChild)->lineNumber = getLineNumber();
+    (*ppNewChild)->pSymbol = NULL;
 
     return 0;
 }   

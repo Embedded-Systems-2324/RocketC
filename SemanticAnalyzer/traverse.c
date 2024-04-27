@@ -104,6 +104,8 @@ int executeSemanticAnalisys(TreeNode_st* pTreeRoot, SymbolTable_st** ppGlobalTab
     pCurrentScope = pGlobalSymTable;
 
     SymbolTableTraverse(pTreeRoot);
+
+    LOG_WARNING("STARTING TYPE CHECKING\n");
         
     // type checking is not performed if errors are detected during symbol tables construction
     if(errorCounter == 0)
@@ -167,130 +169,148 @@ static int checkOperator(TreeNode_st * pNode)
         // Valid examples:  pointer = pointer           char* char_var = "string"
         //                  pointer = &array[2]         int_var = int_var
         case OP_ASSIGN:
+        case OP_PLUS_ASSIGN:
+        case OP_MINUS_ASSIGN:
             pChild1 = &pNode->pChilds[0];
             pChild2 = &pNode->pChilds[1];
 
             varType1 = pChild1->nodeVarType;
             varType2 = pChild2->nodeVarType;
 
-
-            if (fetchSymbol(pNode->scopeTable, &pEntryChild1, pChild1->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
+            if(pChild1->pSymbol != NULL)
             {
-                semanticError(pNode, "Symbol not found! \n");
-                pNode->nodeVarType = TYPE_VOID;
-                return SEMANTIC_ERROR;
-            }
-
-
-            if (pChild1->nodeType == NODE_POINTER_CONTENT || pChild1->nodeType == NODE_ARRAY_INDEX)
-            {
-                if(pEntryChild1->modifier == MOD_CONST)         //check if a variable is const
+                switch (pChild1->nodeType)
                 {
-                    semanticError(pNode, "Can not assign a constant variable! \n");
-                    pNode->nodeVarType = TYPE_VOID;
-                    return SEMANTIC_ERROR;
-                }               
-            }
-            else if(pChild1->nodeType == NODE_IDENTIFIER)
-            {
-                if (pEntryChild1->symbolType == SYMBOL_POINTER)
-                {
-                    if (pChild2->nodeType == NODE_IDENTIFIER)        //pointer = pointer    
+                case NODE_POINTER_CONTENT:
+                case NODE_ARRAY_INDEX:
+                    if(pChild1->pSymbol->modifier == MOD_CONST)         //check if a variable is const
                     {
-                        if (fetchSymbol(pNode->scopeTable, &pEntryChild2, pChild2->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
-                        {
-                            semanticError(pNode, "Symbol not found! \n");
-                            pNode->nodeVarType = TYPE_VOID;
-                            return SEMANTIC_ERROR;
-                        }
-                        else if(pEntryChild2->symbolType != SYMBOL_POINTER && pEntryChild2->symbolType != SYMBOL_ARRAY)
-                        {
-                            semanticError(pNode, "Right expression is not a pointer! \n");
-                            pNode->nodeVarType = TYPE_VOID;
-                            return SEMANTIC_ERROR;
-                        }
+                        semanticError(pNode, "Can not assign a constant variable! \n");
+                        pNode->nodeVarType = TYPE_VOID;
+                        return SEMANTIC_ERROR;
                     }
-                    else if (pChild2->nodeType == NODE_REFERENCE)
+                    else if (pChild2->nodeType == NODE_REFERENCE) 
                     {
-                        TreeNode_st * auxNode = (pChild2->childNumber == 0) ? pChild2 : &pChild2->pChilds[0];   // search for sVal of array index or a regular identifier 
-
-                        if (fetchSymbol(pNode->scopeTable, &pEntryChild2, auxNode->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
+                        semanticError(pNode, "Can not assign to a variable reference! \n");
+                        pNode->nodeVarType = TYPE_VOID;
+                        return SEMANTIC_ERROR;
+                    }
+                    else if (pChild2->nodeType == NODE_IDENTIFIER) 
+                    {
+                        if(pChild2->pSymbol->symbolType == SYMBOL_POINTER)
                         {
-                            semanticError(pNode, "Symbol not found! \n");
+                            semanticError(pNode, "Can not assign to a pointer variable! \n");
                             pNode->nodeVarType = TYPE_VOID;
                             return SEMANTIC_ERROR;
                         }
-                        else if(pEntryChild2->symbolType == SYMBOL_ARRAY)
+                    }   
+                    break;
+
+
+                case NODE_IDENTIFIER:
+                    if (pChild1->pSymbol->symbolType == SYMBOL_POINTER)
+                    {
+                        if (pChild2->nodeType == NODE_IDENTIFIER)        //pointer = pointer    
                         {
-                            if(pChild2->childNumber == 0)
+                            if(pChild2->pSymbol->symbolType != SYMBOL_POINTER && pChild2->pSymbol->symbolType != SYMBOL_ARRAY)
+                            {
+                                semanticError(pNode, "Right expression is not a pointer! \n");
+                                pNode->nodeVarType = TYPE_VOID;
+                                return SEMANTIC_ERROR;
+                            }
+                        }
+                        else if (pChild2->nodeType == NODE_REFERENCE)
+                        {
+                            if(pChild2->pSymbol->symbolType == SYMBOL_ARRAY)
+                            {
+                                if(pChild2->childNumber == 0)       //ptr = &array (not permited)
+                                {
+                                    semanticError(pNode, "Right expression is not compatible! \n");
+                                    pNode->nodeVarType = TYPE_VOID;
+                                    return SEMANTIC_ERROR; 
+                                }
+                            } 
+                            else if(pChild2->pSymbol->symbolType != SYMBOL_VARIABLE)
                             {
                                 semanticError(pNode, "Right expression is not compatible! \n");
                                 pNode->nodeVarType = TYPE_VOID;
                                 return SEMANTIC_ERROR; 
                             }
-                        } 
-                        else if(pEntryChild2->symbolType != SYMBOL_VARIABLE)
+                        }
+                        else if (pChild2->nodeType == NODE_STRING)
+                        {
+                            if(varType1 != TYPE_CHAR)
+                            {
+                                semanticError(pNode, "Can not assign a literal string to a non char pointer! \n");
+                                pNode->nodeVarType = TYPE_VOID;
+                                return SEMANTIC_ERROR; 
+                            }
+                            else
+                            {
+                                return SEMANTIC_OK;
+                            }
+                        }
+                        else
                         {
                             semanticError(pNode, "Right expression is not compatible! \n");
                             pNode->nodeVarType = TYPE_VOID;
-                            return SEMANTIC_ERROR; 
+                            return SEMANTIC_ERROR;   
                         }
-                    }
-                    else if (pChild2->nodeType == NODE_STRING && varType1 != TYPE_CHAR)
+                    } 
+                    else if(pChild1->pSymbol->symbolType == SYMBOL_FUNCTION) 
                     {
-                        semanticError(pNode, "Can not assign a literal string to a non char pointer! \n");
+                        semanticError(pNode, "Can not assign to a function! \n");
                         pNode->nodeVarType = TYPE_VOID;
-                        return SEMANTIC_ERROR; 
+                        return SEMANTIC_ERROR;   
                     }
                     else
                     {
-                        return SEMANTIC_OK;
+                        if(pChild1->pSymbol->modifier == MOD_CONST)         //check if a variable is const
+                        {
+                            semanticError(pNode, "Can not assign a constant variable! \n");
+                            pNode->nodeVarType = TYPE_VOID;
+                            return SEMANTIC_ERROR;
+                        }
+
+                        else if(pChild2->pSymbol != NULL && pChild2->pSymbol->symbolType == SYMBOL_POINTER)
+                        {
+                            semanticError(pNode, "Can not assign to a variable an pointer! \n");
+                            pNode->nodeVarType = TYPE_VOID;
+                            return SEMANTIC_ERROR; 
+                        }
+                        else if(pChild2->nodeType == NODE_REFERENCE)
+                        {
+                            semanticError(pNode, "Can not assign to a variable an pointer! \n");
+                            pNode->nodeVarType = TYPE_VOID;
+                            return SEMANTIC_ERROR;   
+                        }
                     }
+                    break;  
+                
+
+                default:
+                    semanticError(pNode, "Left value isn't a variable! \n");
+                    pNode->nodeVarType = TYPE_VOID;
+                    break;
                 }
-                else if (pEntryChild1->symbolType == SYMBOL_ARRAY || pEntryChild1->symbolType == SYMBOL_VARIABLE)
+
+                if (varType1 == TYPE_VOID || varType2 == TYPE_STRING || varType2 == TYPE_VOID || varType1 != varType2) 
                 {
-                    if (pChild2->nodeType == NODE_IDENTIFIER) 
-                    {
-                        if (fetchSymbol(pNode->scopeTable, &pEntryChild2, pChild2->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
-                        {
-                            semanticError(pNode, "Symbol not found! \n");
-                            pNode->nodeVarType = TYPE_VOID;
-                            return SEMANTIC_ERROR;
-                        }
-                        else if(pEntryChild2->symbolType == SYMBOL_POINTER || pEntryChild2->symbolType == SYMBOL_ARRAY)
-                        {
-                            semanticError(pNode, "Right expression is a pointer! \n");
-                            pNode->nodeVarType = TYPE_VOID;
-                            return SEMANTIC_ERROR;
-                        }
-                    }
-                    else if(pChild2->nodeType == NODE_REFERENCE)
-                    {
-                        semanticError(pNode, "Invalid right expression! \n");
-                        pNode->nodeVarType = TYPE_VOID;
-                        return SEMANTIC_ERROR;
-                    }
+                    semanticError(pNode, "Operands types don't match!\n");
+                    pNode->nodeVarType = TYPE_VOID;
+                    return SEMANTIC_ERROR;        
                 }
-            }
-            else 
-            {
-                semanticError(pNode, "Left value isn't a variable! \n");
-                pNode->nodeVarType = TYPE_VOID;
-            }
-
-
-
-            if (varType1 == TYPE_VOID || varType2 == TYPE_STRING || varType2 == TYPE_VOID || varType1 != varType2) 
-            {
-                semanticError(pNode, "Operands types don't match!\n");
-                pNode->nodeVarType = TYPE_VOID;
-                return SEMANTIC_ERROR;        
+                else
+                {
+                    pNode->nodeVarType = varType1;
+                }
             }
             else
             {
-                pNode->nodeVarType = varType1;
+                LOG_DEBUG("INVALID SYMBOL\n");
             }
             break;
+
 
         // Valid examples:  char_var / char_var     double_var / double_var
         //                  int_var / int_var       float_var / float_var
@@ -303,8 +323,6 @@ static int checkOperator(TreeNode_st * pNode)
             {
                 semanticError(pNode, "Division by zero is not supported\n");
                 pNode->nodeVarType = TYPE_VOID;
-
-                // PARAR!!!!!!
             }
             else
             {
@@ -358,6 +376,7 @@ static int checkOperator(TreeNode_st * pNode)
             }
             break;
 
+
         // Valid examples:  int_var & int_var       char_var << char_var
         case OP_BITWISE_AND_ASSIGN:
         case OP_BITWISE_OR_ASSIGN:
@@ -403,7 +422,6 @@ static int checkOperator(TreeNode_st * pNode)
  */
 static void checkNode(TreeNode_st * pNode)
 {   
-    SymbolEntry_st* pEntryAux;
     TreeNode_st* pChild1;
     TreeNode_st* pChild2;
     bool errorFlag = false;
@@ -415,52 +433,54 @@ static void checkNode(TreeNode_st * pNode)
             break;
 
         case NODE_IDENTIFIER:
-            if(fetchSymbol(pNode->scopeTable, &pEntryAux, pNode->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
+            if(pNode->pSymbol != NULL)
             {
-                semanticError(pNode, "Symbol not found!\n");
-                pNode->nodeVarType = TYPE_VOID;
-            }
-            
-            
-            if(pNode->childNumber > 0){
-                pChild1 = &pNode->pChilds[0];
-                if(pChild1->nodeType == NODE_TYPE_CAST){
-                    pNode->nodeVarType = pChild1->nodeVarType;  
+                if(pNode->childNumber > 0)
+                {
+                    pChild1 = &pNode->pChilds[0];
+                    if(pChild1->nodeType == NODE_TYPE_CAST)
+                    {
+                        pNode->nodeVarType = pChild1->nodeVarType;  
+                    }
                 }
-            }else{
-                pNode->nodeVarType = pEntryAux->type; 
+                else
+                {
+                    pNode->nodeVarType = pNode->pSymbol->type; 
+                }
             }
             break;
 
 
         case NODE_FUNCTION_CALL:
-            if(fetchSymbol(pNode->scopeTable, &pEntryAux, pNode->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
+            if(pNode->pSymbol != NULL)
             {
-                semanticError(pNode, "Symbol not found\n");
-                pNode->nodeVarType = TYPE_VOID;
-            }   
-            else
-            {
-                if(!pEntryAux->symbolContent_u.SymbolFunction_s.isImplemented)      //check if is not implemented
+                if(!pNode->pSymbol->symbolContent_u.SymbolFunction_s.isImplemented)      //check if is not implemented
                 {
                     semanticError(pNode, "Function isn't implemented\n");
                 }
                 else if(pNode->childNumber > 0)                                     //check is has arguments 
                 {
-                    parameter_st* pParam = pEntryAux->symbolContent_u.SymbolFunction_s.parameters;
+                    parameter_st* pParam = pNode->pSymbol->symbolContent_u.SymbolFunction_s.parameters;
 
-                    for(int i = 0; i < pEntryAux->symbolContent_u.SymbolFunction_s.parameterNumber; i++)
+                    pChild1 = &pNode->pChilds[0];
+                    for(int i = 0; i < pNode->pSymbol->symbolContent_u.SymbolFunction_s.parameterNumber; i++)
                     {
                         if(pChild1->nodeVarType != pParam[i].varType)
                         {
+                            printf("%d, %d\n", pChild1->nodeVarType, pParam[i].varType);
+
                             semanticError(pNode, "Parameters types don't match\n");
                         }
                         pChild1 = pChild1->pSibling;
                     }
                 }
-            }
 
-            pNode->nodeVarType = pEntryAux->type;
+                pNode->nodeVarType = pNode->pSymbol->type;
+            }
+            else
+            {
+                LOG_DEBUG("INVALID SYMBOL\n");
+            }              
             break;  
 
         case NODE_STRING:
@@ -475,15 +495,11 @@ static void checkNode(TreeNode_st * pNode)
             pNode->nodeVarType = TYPE_FLOAT;
             break;
 
+
         // Valid examples:  array[int_var]      array[short_var]
         case NODE_ARRAY_INDEX:
-            if(fetchSymbol(pNode->scopeTable, &pEntryAux, pNode->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
+            if(pNode->pSymbol != NULL)
             {
-                semanticError(pNode, "Symbol not found\n");
-                pNode->nodeVarType = TYPE_VOID;
-            } 
-            else
-            {   
                 if ((pNode->pChilds->nodeVarType != TYPE_INT) && (pNode->pChilds->nodeVarType != TYPE_LONG) && (pNode->pChilds->nodeVarType != TYPE_SHORT))
                 {
                     semanticError(pNode, "Array's index must be an INT, LONG or SHORT!\n");
@@ -491,41 +507,48 @@ static void checkNode(TreeNode_st * pNode)
                 }
                 else
                 {
-                    pNode->nodeVarType = pEntryAux->type;
+                    pNode->nodeVarType = pNode->pSymbol->type;
                 }
             }
+            else
+            {
+                LOG_DEBUG("INVALID SYMBOL\n");
+            }  
             break;
+
 
         // Valid examples:  pointer ++      -- double_var
         case NODE_POST_DEC:
         case NODE_PRE_DEC:
         case NODE_POST_INC:
         case NODE_PRE_INC:
-            if(fetchSymbol(pNode->scopeTable, &pEntryAux, pNode->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
+            if(pNode->pSymbol != NULL)
             {
-                semanticError(pNode, "Symbol not found\n");
-                pNode->nodeVarType = TYPE_VOID;
-            } 
-            else if((pEntryAux->symbolType == SYMBOL_VARIABLE))
-            {
-                if(pEntryAux->modifier == MOD_CONST)
+                if((pNode->pSymbol->symbolType == SYMBOL_VARIABLE))
                 {
-                    semanticError(pNode, "The variable is constant!\n");
+                    if(pNode->pSymbol->modifier == MOD_CONST)
+                    {
+                        semanticError(pNode, "The variable is constant!\n");
+                    }
+                    else
+                    {
+                        pNode->nodeVarType = pNode->pSymbol->type;
+                    }
+                }
+                else if(pNode->pSymbol->symbolType == SYMBOL_POINTER)
+                {   
+                    pNode->nodeVarType = pNode->pSymbol->type;
                 }
                 else
                 {
-                    pNode->nodeVarType = pEntryAux->type;
+                    semanticError(pNode, "Operand type not supported!\n");
+                    pNode->nodeVarType = TYPE_VOID;
                 }
-            }
-            else if(pEntryAux->symbolType == SYMBOL_POINTER)
-            {   
-                pNode->nodeVarType = pEntryAux->type;
-            }
+            }  
             else
             {
-                semanticError(pNode, "Operand type not supported!\n");
-                pNode->nodeVarType = TYPE_VOID;
-            }
+                LOG_DEBUG("INVALID SYMBOL\n");
+            }  
             break;
 
         // Valid examples:  case 2      case char_var
@@ -547,6 +570,7 @@ static void checkNode(TreeNode_st * pNode)
                 pNode->nodeVarType = TYPE_VOID;
             }
             break;
+
 
         // Valid examples:  (double_var) ? float_var : float_var
         case NODE_TERNARY:
@@ -575,17 +599,13 @@ static void checkNode(TreeNode_st * pNode)
             }
             break;    
 
+
         case NODE_RETURN:
-            if(fetchSymbol(pGlobalSymTable, &pEntryAux, pNode->nodeData.sVal, true) == SYMBOL_NOT_FOUND)
-            {
-                semanticError(pNode, "Symbol not found\n");
-                pNode->nodeVarType = TYPE_VOID;
-            }
-            else
+            if(pNode->pSymbol != NULL)
             {
                 pChild1 = &pNode->pChilds[0];
 
-                int varType = pEntryAux->type;
+                int varType = pNode->pSymbol->type;
 
                 if(pChild1->nodeVarType == varType)
                 {
@@ -597,7 +617,13 @@ static void checkNode(TreeNode_st * pNode)
                     pNode->nodeVarType = TYPE_VOID;
                 }
             }
+            else
+            {
+                LOG_DEBUG("INVALID SYMBOL\n");
+            }  
+            
             break;   
+
 
         // Valid_examples:  &pointer      &array
         case NODE_REFERENCE:
@@ -605,40 +631,43 @@ static void checkNode(TreeNode_st * pNode)
 
             pNodeAux = (pNode->childNumber != 0) ? pNodeAux = &pNode->pChilds[0] : pNode;
 
-            if(fetchSymbol(pNodeAux->scopeTable, &pEntryAux, pNodeAux->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
+            if(pNodeAux->pSymbol != NULL)
             {
-                semanticError(pNodeAux, "Symbol not found\n");
-                pNodeAux->nodeVarType = TYPE_VOID;
+                if(pNodeAux->pSymbol->symbolType == SYMBOL_ARRAY || pNodeAux->pSymbol->symbolType == SYMBOL_VARIABLE)
+                {
+                    pNode->nodeVarType = pNode->pSymbol->type;
+                }
+                else
+                {
+                    semanticError(pNode, "Invalid use of '&'!\n");
+                    pNode->nodeVarType = TYPE_VOID;
+                }
             }
             else
             {
-                if(pEntryAux->symbolType == SYMBOL_ARRAY)
-                {
-                    pNode->nodeVarType = pEntryAux->type;
-                }
-                else if(pEntryAux->symbolType == SYMBOL_VARIABLE)
-                {
-                    pNode->nodeVarType = pEntryAux->type;
-                }
-            }
+                LOG_DEBUG("INVALID SYMBOL\n");
+            }              
             break;
+
 
         // Valid examples:  *pointer
         case NODE_POINTER_CONTENT:
-            if(fetchSymbol(pNode->scopeTable, &pEntryAux, pNode->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
+            if(pNode->pSymbol != NULL)
             {
-                semanticError(pNode, "Symbol not found\n");
-                pNode->nodeVarType = TYPE_VOID;
+                if(pNode->pSymbol->symbolType == SYMBOL_POINTER)
+                {
+                    pNode->nodeVarType = pNode->pSymbol->type;
+                }
+                else
+                {
+                    semanticError(pNode, "Can't reference a non pointer variable!\n");
+                    pNode->nodeVarType = TYPE_VOID;
+                }
             }
-            else if(pEntryAux->symbolType == SYMBOL_POINTER)
+            else
             {
-                pNode->nodeVarType = pEntryAux->type;
-            }
-            else 
-            {
-                semanticError(pNode, "Can't reference a non pointer variable!\n");
-                pNode->nodeVarType = TYPE_VOID;
-            }
+                LOG_DEBUG("INVALID SYMBOL\n");
+            }              
             break; 
 
         /*case NODE_TYPE_CAST:
@@ -649,12 +678,6 @@ static void checkNode(TreeNode_st * pNode)
 
             ///PENSAR COMO PASSAR PARA OS OPERANDOS
             break; */
-        case NODE_GOTO: 
-            if(fetchSymbol(pGlobalSymTable, &pEntryAux, pNode->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
-            {
-                semanticError(pNode, "Label Not Defined!");
-            }
-            break;
     }
 
     if (errorFlag == true)
@@ -810,26 +833,20 @@ static void buildSymbolTables(TreeNode_st* pNode)
             if( insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, symType) == SYMBOL_ADDED)
             { 
                 setMemoryLocation(&pNewSymbol->symbolContent_u.memoryLocation, pNodeChild->nodeData.dVal, 1);
-                pNode->scopeTable = pCurrentScope;
 
                 setVariblesType(pNodeChild, 
                                 &pNewSymbol->type,
                                 &pNewSymbol->signal,
                                 &pNewSymbol->modifier,
                                 &pNewSymbol->visibility);
+
+                pNode->pSymbol = pNewSymbol;                
             }
             else
             {
                 semanticError(pNode, "Symbol Redefinition!");
             }
             break;
-
-
-
-        /*case NODE_POINTER:
-        ////fazer   
-        break; */ 
-
 
 
         //Array declaration
@@ -859,6 +876,8 @@ static void buildSymbolTables(TreeNode_st* pNode)
                 int arraySize = pNodeSize->nodeData.dVal;
                 pNewSymbol->symbolContent_u.SymbolArray_s.arraySize = arraySize;    
                 setMemoryLocation(&pNewSymbol->symbolContent_u.SymbolArray_s.memoryLocation, pNodePreamble->nodeData.dVal, arraySize);           
+            
+                pNode->pSymbol = pNewSymbol;
             }
             else
             {
@@ -906,6 +925,8 @@ static void buildSymbolTables(TreeNode_st* pNode)
 
                     pNodeArgs = pNodeArgs->pSibling;
                 }
+
+                pNode->pSymbol = pNewSymbol;
             }
 
             if(pNewSymbol->symbolContent_u.SymbolFunction_s.isImplemented == true)
@@ -938,6 +959,8 @@ static void buildSymbolTables(TreeNode_st* pNode)
                             pParamSym->symbolContent_u.memoryLocation = NO_MEMORY;
                         }
                     }
+
+                    pNode->pSymbol = pNewSymbol;
                 }
                 else
                 {
@@ -949,14 +972,15 @@ static void buildSymbolTables(TreeNode_st* pNode)
         //pointer content (*p), go to and identifier
         case NODE_POINTER_CONTENT:
         case NODE_IDENTIFIER:
-            //check if the token already exists
+            //check if the symbol already exists
             if(fetchSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
-            {
                 semanticError(pNode, "Symbol Not Defined!");
-            }
+            else    
+                pNode->pSymbol = pNewSymbol;    
+
             break;
 
-        //variable refernce (&a)
+        //variable reference (&a)
         case NODE_REFERENCE:
             //if it has no children, the name of the token is in the node data
 
@@ -964,9 +988,9 @@ static void buildSymbolTables(TreeNode_st* pNode)
             auxNode = (pNode->childNumber == 0) ? pNode : &pNode->pChilds[0];
             
             if(fetchSymbol(pCurrentScope, &pNewSymbol, auxNode->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
-            {
                 semanticError(pNode, "Symbol Not Defined!");
-            }  
+            else
+                pNode->pSymbol = pNewSymbol;    
 
             break;    
         
@@ -974,10 +998,31 @@ static void buildSymbolTables(TreeNode_st* pNode)
         case NODE_LABEL:
             //inserts the label into the table if it doesn't exist
             if(insertSymbol(pGlobalSymTable, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_LABEL) == SYMBOL_ERROR) 
-            {
                 semanticError(pNode, "Label Redefinition!");
-            }
+            else
+                pNode->pSymbol = pNewSymbol;
+
             break;
+
+
+        case NODE_GOTO:
+            //check if the symbol already exists
+            if(fetchSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, false) == SYMBOL_NOT_FOUND)
+                semanticError(pNode, "Symbol Not Defined!");
+            else    
+                pNode->pSymbol = pNewSymbol;  
+
+            break;   
+
+
+
+        case NODE_RETURN:
+            if(fetchSymbol(pGlobalSymTable, &pNewSymbol, pNode->nodeData.sVal, true) == SYMBOL_NOT_FOUND)
+                semanticError(pNode, "Symbol not found\n");
+            else
+                pNode->pSymbol = pNewSymbol;     
+
+            break;    
 
 
         //Array value (array[x])
@@ -993,12 +1038,15 @@ static void buildSymbolTables(TreeNode_st* pNode)
                 {
                     semanticError(pNode, "Index exceeds array size!");
                 }
+
+                pNode->pSymbol = pNewSymbol;
             }
             else
             {
                 semanticError(pNode, "Symbol Not Defined!");
             }
             break;       
+
 
         //function call
         case NODE_FUNCTION_CALL:
@@ -1023,6 +1071,8 @@ static void buildSymbolTables(TreeNode_st* pNode)
                                                  functionParameterNumber, parameterCount);
                     semanticError(pNode, errorMessage);
                 }
+
+                pNode->pSymbol = pNewSymbol;
             }
             else
             {
@@ -1038,11 +1088,12 @@ static void buildSymbolTables(TreeNode_st* pNode)
                 tableFunction = false;    
             break;
 
+
         case NODE_END_SCOPE:
             if(!tablePending)
                 pCurrentScope = pCurrentScope->enclosingScope;
             else    
-                tablePending = false;    
+                tablePending = false;
             break;            
 
 
@@ -1052,14 +1103,16 @@ static void buildSymbolTables(TreeNode_st* pNode)
         case NODE_PRE_INC:
             if(fetchSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, false) != SYMBOL_FOUND)
                 semanticError(pNode, "Symbol Not Defined!");
-            break;
+            else
+                pNode->pSymbol = pNewSymbol;
 
+            break;
 
         default:
             break;
     }
 
-    pNode->scopeTable = pCurrentScope;  //sets the scope in the node struct
+    pNode->scopeTable = pCurrentScope; //retirar isto daqui e do trenode.h
 }
 
 

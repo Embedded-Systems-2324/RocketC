@@ -14,9 +14,10 @@ typedef struct TreeNode
 
     NodeType_et nodeType;
     NodeData_ut nodeData;
-    VarType_et nodeVarType;
 
+    VarType_et nodeVarType;
     SymbolTable_st* scopeTable;
+    SymbolEntry_st* pSymbol;
 }TreeNode_st;
 
 

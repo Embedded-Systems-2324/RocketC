@@ -1,21 +1,20 @@
 
 
 
-float function1(int x, float y, float z);
+float function1(int x, float y, float z)
+{
+    //x = 1.33;
+    x = 0;
+
+    return y + z;
+}
 
 
 int main()
 {
+    //const int ss = 1;
 
-    float address[3];
-    float y;
-    address[0] = 1.0;
-    float* ptr = &address[2];
-    float ptr2 = y;
-
-    char str = 'c';
-
-    //address[0] = 4;
+    return function1(1, 2.0, 3.0);
 
 
     //double x = -(-(-1.0 + 2.0)) - 3.0;  //---estava a ver vai ter o op_negative
