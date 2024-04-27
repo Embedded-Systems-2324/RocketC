@@ -141,7 +141,6 @@ static int checkOperator(TreeNode_st * pNode)
     SymbolEntry_st* pEntryAux;
     TreeNode_st* pChild1;
     TreeNode_st* pChild2;
-    bool errorFlag = false;
 
     int varType1;
     int varType2;
@@ -157,7 +156,8 @@ static int checkOperator(TreeNode_st * pNode)
             if (varType1 == TYPE_VOID  || varType1 == TYPE_STRING || varType1 == TYPE_DOUBLE ||
                 varType1 == TYPE_FLOAT || varType1 == TYPE_LONG_DOUBLE)
             {
-                errorFlag = true;
+                semanticError(pNode, "Operands types don't match!\n");
+                return SEMANTIC_ERROR;
             }
             else
             {
@@ -330,11 +330,16 @@ static int checkOperator(TreeNode_st * pNode)
                 varType2 = pChild2->nodeVarType;
 
                 if ((varType1 == TYPE_STRING || varType1 == TYPE_VOID ) ||
-                    (varType2 == TYPE_STRING || varType2 == TYPE_VOID ) ||
-                    (varType1 != varType2)) 
+                    (varType2 == TYPE_STRING || varType2 == TYPE_VOID ))
                 {
-                    errorFlag = true;
+                    semanticError(pNode, "Invalid operands type!\n");
+                    return SEMANTIC_ERROR;
                 }
+                else if (varType1 != varType2)
+                {
+                    semanticError(pNode, "Operands types don't match!\n");
+                    return SEMANTIC_ERROR;
+                }                
                 else
                 {
                     pNode->nodeVarType = varType1;
@@ -344,11 +349,10 @@ static int checkOperator(TreeNode_st * pNode)
 
 
         // Valid examples:  int_var + int_var       char_var == char_var
-        //                  float_var % float_var   double_var >= double_var
+        //                   double_var >= double_var
         case OP_PLUS:
         case OP_MINUS:
         case OP_MULTIPLY:
-        case OP_REMAIN:
         case OP_EQUAL:
         case OP_NOT_EQUAL:
         case OP_GREATER_THAN:
@@ -364,11 +368,15 @@ static int checkOperator(TreeNode_st * pNode)
             varType2 = pChild2->nodeVarType;
 
             if ((varType1 == TYPE_STRING || varType1 == TYPE_VOID ) ||
-                (varType2 == TYPE_STRING || varType2 == TYPE_VOID ) ||
-                (varType1 != varType2)) 
+                (varType2 == TYPE_STRING || varType2 == TYPE_VOID )) 
+            {               
+                semanticError(pNode, "Invalid operands type!\n");
+                return SEMANTIC_ERROR;
+            }
+            else if (varType1 != varType2)
             {
-                
-                errorFlag = true;
+                semanticError(pNode, "Operands types don't match!\n");
+                return SEMANTIC_ERROR;
             }
             else
             {
@@ -387,31 +395,29 @@ static int checkOperator(TreeNode_st * pNode)
         case OP_BITWISE_XOR:
         case OP_RIGHT_SHIFT:
         case OP_LEFT_SHIFT:
+        case OP_REMAIN:
             pChild1 = &pNode->pChilds[0];
             pChild2 = &pNode->pChilds[1];
 
             varType1 = pChild1->nodeVarType;
-            varType2 = pChild1->nodeVarType;
+            varType2 = pChild2->nodeVarType;
 
-            if (!(varType1 == TYPE_INT || varType1 == TYPE_CHAR || varType1 == TYPE_SHORT || varType1 == TYPE_LONG) ||
-                !(varType2 == TYPE_INT || varType2 == TYPE_CHAR || varType2 == TYPE_SHORT || varType2 == TYPE_LONG)) 
+            if (!(varType1 == TYPE_INT || varType1 == TYPE_CHAR || varType1 == TYPE_SHORT || varType1 == TYPE_LONG ||
+                varType2 == TYPE_INT || varType2 == TYPE_CHAR || varType2 == TYPE_SHORT || varType2 == TYPE_LONG)) 
             {
-                errorFlag = true;
+                semanticError(pNode, "Operands with floating point are not supported!\n");
+                return SEMANTIC_ERROR;
             }
             else if(varType1 != varType2)
             {
-                errorFlag = true;
+                semanticError(pNode, "Operands types don't match!\n");
+                return SEMANTIC_ERROR;
             }
             else
             {
                 pNode->nodeVarType = varType1;
             }
             break;   
-    }
-
-    if (errorFlag == true)
-    {
-        semanticError(pNode, "Operands types don't match!\n");
     }
 }
 
@@ -424,7 +430,6 @@ static void checkNode(TreeNode_st * pNode)
 {   
     TreeNode_st* pChild1;
     TreeNode_st* pChild2;
-    bool errorFlag = false;
 
     switch(pNode->nodeType)
     {
@@ -467,8 +472,6 @@ static void checkNode(TreeNode_st * pNode)
                     {
                         if(pChild1->nodeVarType != pParam[i].varType)
                         {
-                            printf("%d, %d\n", pChild1->nodeVarType, pParam[i].varType);
-
                             semanticError(pNode, "Parameters types don't match\n");
                         }
                         pChild1 = pChild1->pSibling;
@@ -590,7 +593,7 @@ static void checkNode(TreeNode_st * pNode)
                     (varType2 == TYPE_STRING || varType2 == TYPE_VOID ) ||
                     (varType1 != varType2)) 
                 {
-                    errorFlag = true;
+                    semanticError(pNode, "Operands types don't match!\n");
                 }
                 else
                 {
@@ -601,7 +604,7 @@ static void checkNode(TreeNode_st * pNode)
 
 
         case NODE_RETURN:
-            if(pNode->pSymbol != NULL)
+            if(pNode->pSymbol != NULL && pNode->childNumber > 0)
             {
                 pChild1 = &pNode->pChilds[0];
 
@@ -678,11 +681,6 @@ static void checkNode(TreeNode_st * pNode)
 
             ///PENSAR COMO PASSAR PARA OS OPERANDOS
             break; */
-    }
-
-    if (errorFlag == true)
-    {
-        semanticError(pNode, "Type checking error!\n");
     }
 }
 
@@ -829,6 +827,11 @@ static void buildSymbolTables(TreeNode_st* pNode)
                 symType = SYMBOL_VARIABLE;
             }
             
+
+            if(pNodeChild->nodeData.dVal == TYPE_VOID)
+            {
+                semanticError(pNode, "Can not declare a 'void' variable.");
+            }
             //inserts the new symbol into the table if it doesn't exist
             if( insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, symType) == SYMBOL_ADDED)
             { 
@@ -860,10 +863,15 @@ static void buildSymbolTables(TreeNode_st* pNode)
                 tablePending = false;
             }
 
+            TreeNode_st* pNodePreamble = &pNode->pChilds[0];
+
+            if(pNodePreamble->nodeData.dVal == TYPE_VOID)
+            {
+                semanticError(pNode, "Can not declare a 'void' array.");
+            }
             //inserts the new symbol into the table if it doesn't exist
-            if( insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_ARRAY) == SYMBOL_ADDED)
+            else if( insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_ARRAY) == SYMBOL_ADDED)
             { 
-                TreeNode_st* pNodePreamble = &pNode->pChilds[0];
                 TreeNode_st* pNodeSize = &pNode->pChilds[1];
 
                 setVariblesType(pNodePreamble, 
@@ -927,6 +935,10 @@ static void buildSymbolTables(TreeNode_st* pNode)
                 }
 
                 pNode->pSymbol = pNewSymbol;
+            }
+            else
+            {
+                
             }
 
             if(pNewSymbol->symbolContent_u.SymbolFunction_s.isImplemented == true)
@@ -1034,9 +1046,13 @@ static void buildSymbolTables(TreeNode_st* pNode)
                 uint32_t arrSize = pNewSymbol->symbolContent_u.SymbolArray_s.arraySize;
                 
                 //checks if the index excced the array size
-                if (pNodeIndex->nodeData.dVal > arrSize)
+                if (pNodeIndex->nodeData.dVal >= arrSize)
                 {
                     semanticError(pNode, "Index exceeds array size!");
+                }
+                else if(pNodeIndex->nodeData.dVal < 0)
+                {
+                    semanticError(pNode, "Invalid array index: index can not be a negative number");
                 }
 
                 pNode->pSymbol = pNewSymbol;
