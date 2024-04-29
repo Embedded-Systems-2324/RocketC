@@ -16,7 +16,6 @@ int executeSemanticAnalisys(TreeNode_st* pTreeRoot, SymbolTable_st** ppGlobalTab
 
 
 /*
-
 1ª travessia - preorder
     - ADICIONAR SÍMBOLOS ÀS TABELAS
         - NODE_VAR_DECLARATION: colocar na tabela de simbolos do scope

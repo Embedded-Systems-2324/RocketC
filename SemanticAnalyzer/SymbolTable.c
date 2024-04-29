@@ -301,13 +301,11 @@ void printSymbolTables()
                                         /* Type */     VarTypeStrings[parameterAux[k].varType],
                                         /* Sign */     SignQualifierStrings[parameterAux[k].varSign],
                                         /* Modifier */     ModQualifierStrings[parameterAux[k].varMod],
-                                        /* Is Pointer */     parameterAux[k].isPointer? "True" : "False"
+                                        /* Is Pointer */     parameterAux[k].isPointer? "Pointer: yes" : "Pointer: no"
                                 );
-
                             }
                             printf("\n");
                         }
-
                         break;
 
                         // Prints all symbols of a label

@@ -115,6 +115,7 @@ static char* currentFunction;
 %token TOKEN_NUM
 %token TOKEN_STR
 %token TOKEN_ID
+%token TOKEN_CNUM
 
 // %define api.value.type is prefered over #define YYSTYPE
 %define api.value.type {ParserObject_ut}
@@ -1002,13 +1003,10 @@ R_VAR_PREAMBLE          :   R_VISIBILITY_QUALIFIER R_MOD_QUALIFIER R_SIGN_QUALIF
 //--------------------------------------------------------------------------------------------------------------------//
 // Main expression rule
 R_EXP       :   TOKEN_MINUS R_EXP
-                {         
+                {        
                     TreeNode_st *pNode;
                     NodeCreate(&($$.treeNode), NODE_OPERATOR);
-                    $$.treeNode->nodeData.dVal = OP_MINUS;                          
-
-                    //NodeAddNewChild($$.treeNode, &pNode, NODE_INTEGER);
-                    //pNode->nodeData.dVal = 0;
+                    $$.treeNode->nodeData.dVal = OP_MINUS;
 
                     NodeAddChild($$.treeNode, $2.treeNode);  
                 }
@@ -1050,8 +1048,8 @@ R_EXP       :   TOKEN_MINUS R_EXP
                     NodeCreate(&($$.treeNode), NODE_TERNARY);
 
                     NodeAddChild($$.treeNode, $1.treeNode); 
-                    NodeAddChild($$.treeNode, $2.treeNode); 
-                    NodeAddChild($$.treeNode, $3.treeNode);   
+                    NodeAddChild($$.treeNode, $3.treeNode); 
+                    NodeAddChild($$.treeNode, $5.treeNode);   
                 }
 
             |   R_TERM

@@ -294,11 +294,18 @@ static int checkOperator(TreeNode_st * pNode)
                     break;
                 }
 
-                if (varType1 == TYPE_VOID || varType2 == TYPE_STRING || varType2 == TYPE_VOID || varType1 != varType2) 
+                if (varType1 == TYPE_VOID || varType2 == TYPE_STRING || varType2 == TYPE_VOID) 
                 {
-                    semanticError(pNode, "Operands types don't match!\n");
+                    semanticError(pNode, "Invalid operands types don't match!\n");
                     pNode->nodeVarType = TYPE_VOID;
                     return SEMANTIC_ERROR;        
+                }
+                else if(varType1 != varType2)
+                {
+                    printf("%s %s\n", VarTypeStrings[varType1], VarTypeStrings[varType2]);
+                    semanticError(pNode, "Operands types don't match!\n");
+                    pNode->nodeVarType = TYPE_VOID;
+                    return SEMANTIC_ERROR;   
                 }
                 else
                 {
@@ -440,17 +447,19 @@ static void checkNode(TreeNode_st * pNode)
         case NODE_IDENTIFIER:
             if(pNode->pSymbol != NULL)
             {
+                VarType_et symbolVarType;
+
                 if(pNode->childNumber > 0)
                 {
                     pChild1 = &pNode->pChilds[0];
                     if(pChild1->nodeType == NODE_TYPE_CAST)
                     {
-                        pNode->nodeVarType = pChild1->nodeVarType;  
+                        symbolVarType = pChild1->nodeVarType;  
                     }
                 }
                 else
                 {
-                    pNode->nodeVarType = pNode->pSymbol->type; 
+                    symbolVarType = pNode->pSymbol->type; 
                 }
             }
             break;
@@ -590,8 +599,11 @@ static void checkNode(TreeNode_st * pNode)
                 int varType2 = pChild2->nodeVarType;
 
                 if ((varType1 == TYPE_STRING || varType1 == TYPE_VOID ) ||
-                    (varType2 == TYPE_STRING || varType2 == TYPE_VOID ) ||
-                    (varType1 != varType2)) 
+                    (varType2 == TYPE_STRING || varType2 == TYPE_VOID )) 
+                {
+                    semanticError(pNode, "Invalid operands types!\n");
+                }
+                else if(varType1 != varType2)
                 {
                     semanticError(pNode, "Operands types don't match!\n");
                 }
@@ -920,10 +932,22 @@ static void buildSymbolTables(TreeNode_st* pNode)
                 {
                     parameter_st pParam;
                     VisQualifier_et notUsed;
+                    TreeNode_st* pNodeAux;
 
                     pParam.name = pNodeArgs->nodeData.sVal;
 
-                    setVariblesType(pNodeArgs->pChilds, 
+                    if(pNodeArgs->pChilds->nodeType == NODE_POINTER)
+                    {
+                        pNodeAux = pNodeArgs->pChilds->pChilds;
+                        pParam.isPointer = true;
+                    }
+                    else
+                    {
+                        pNodeAux = pNodeArgs->pChilds;
+                        pParam.isPointer = false;
+                    }
+
+                    setVariblesType(pNodeAux, 
                                     &pParam.varType,
                                     &pParam.varSign,
                                     &pParam.varMod,
@@ -958,15 +982,15 @@ static void buildSymbolTables(TreeNode_st* pNode)
                     pCurrentScope = ppsymTable;
                     tableFunction = true;
 
-                    //puts all parameters in the new scopes
+                    //puts all parameters in the new scope
                     if(pNode->pChilds[1].nodeType != NODE_NULL)
                     {
                         parameter_st* paramList = pNewSymbol->symbolContent_u.SymbolFunction_s.parameters;
-                        SymbolEntry_st* pParamSym;
 
                         for(int i = 0; i < pNewSymbol->symbolContent_u.SymbolFunction_s.parameterNumber; i++)
                         {
-                            insertSymbol(pCurrentScope, &pParamSym, paramList[i].name, SYMBOL_VARIABLE);
+                            SymbolEntry_st* pParamSym;
+                            insertSymbol(pCurrentScope, &pParamSym, paramList[i].name, (paramList[i].isPointer) ? SYMBOL_POINTER : SYMBOL_VARIABLE);
                             pParamSym->type = paramList[i].varType;
                             pParamSym->symbolContent_u.memoryLocation = NO_MEMORY;
                         }

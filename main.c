@@ -111,8 +111,13 @@ int main(int argc, char *argv[])
 
     fclose(pSourceFile);
 
+    //endCompiling();
+
     return 0;
 }
+
+
+
 
 
 

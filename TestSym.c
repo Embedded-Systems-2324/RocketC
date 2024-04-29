@@ -1,10 +1,13 @@
 
 
 
-void function1(int x, float y, float z)
+void function1(int *x, float y, float z)
 {
     //x = 1.33;
-    x = 0;
+    //x = 0;
+
+
+    *x = 2;
 
     return;
 }
@@ -12,10 +15,23 @@ void function1(int x, float y, float z)
 
 int main()
 {
+    char c = 'a';
+    char c1 = 20;
+    return 0;
+
     //const int ss = 1;
 
+    /*int res;
+    int num1 = 1;
+    int num2 = 3;
+    
+    res = (num1 == num1) ? num1 : num2;*/
 
-    //double x = -(-(-1.0 + 2.0)) - 3.0;  //---estava a ver vai ter o op_negative
+    //float g = 3.0;
+
+    //float x = -(-(-1.0 + 2.0)) - 3.0;  //---estava a ver vai ter o 
+
+    //float k;
 
     //int array[3];
     //int d;
