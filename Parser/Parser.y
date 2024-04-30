@@ -735,8 +735,10 @@ R_VAR_DECLARATION       :   R_VAR_PREAMBLE R_ID_LIST TOKEN_SEMI                 
                                 memcpy(&nodePreambleCopy, $1.treeNode, sizeof(TreeNode_st));
                                 free($1.treeNode);
 
-                                do{
-                                    if(pNode->nodeType == NODE_VAR_DECLARATION){
+                                do
+                                {
+                                    if(pNode->nodeType == NODE_VAR_DECLARATION)
+                                    {
                                         NodeAddChildCopy(pNode, &nodePreambleCopy);
                                     }
 
@@ -1059,8 +1061,8 @@ R_OPERAND   :   R_INC_DEC
 
             |   R_TYPE_CAST R_FACTOR
                 {
-                    NodeAddChild($2.treeNode, $1.treeNode);
-                    $$.treeNode = $2.treeNode;
+                    NodeAddChild($1.treeNode, $2.treeNode);
+                    $$.treeNode = $1.treeNode;
                 }
 
             |   R_FACTOR

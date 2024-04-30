@@ -167,6 +167,7 @@ void freeSymbolTable()
             while (curSymbol != NULL)
             {
                 tempSymbol = curSymbol;
+                curSymbol = curSymbol->next;
 
                 if (tempSymbol->symbolType == SYMBOL_FUNCTION)
                 {
@@ -174,9 +175,8 @@ void freeSymbolTable()
                 }
                 free(tempSymbol->name);
                 free(tempSymbol);
-
-                curSymbol = curSymbol->next;
             }
+            free(curSymbol);
         }
         free(curTable);
     }

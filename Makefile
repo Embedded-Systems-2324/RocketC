@@ -1,4 +1,4 @@
-default:all
+ccddefault:all
 setup:
 	mkdir -p Output
 
@@ -16,7 +16,7 @@ clean:
 	rm -r Output
 
 prog:
-	./Output/RocketC TestSym.c --parse
+	./Output/RocketC TestSrc2.c --parse
 
 run: clean all prog
 

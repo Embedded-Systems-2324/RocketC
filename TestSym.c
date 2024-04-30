@@ -25,17 +25,19 @@ int arroz=0;
 
 int main()
 {
-    char c = 'c';
+    char c = 'f';
 
     int *ptr;
 
-    int x = ptr;
+    int x = *ptr;
     float d;
     float d1;
     int array[2];
     char *str = "jvsdj";
 
     function1("##jhsdf", d,  d1);
+    char ch = 'c';
+    int i;
 
 
     /*int* ptr;
