@@ -195,6 +195,7 @@ static int checkOperator(TreeNode_st * pNode)
     {
         // Valid examples:  !int_var
         case OP_LOGICAL_NOT:
+        case OP_BITWISE_NOT:
             pChild1 = &pNode->pChilds[0];
 
             varType1 = pChild1->nodeVarType;
@@ -388,7 +389,6 @@ static int checkOperator(TreeNode_st * pNode)
         case OP_BITWISE_OR_ASSIGN:
         case OP_BITWISE_XOR_ASSIGN:
         case OP_BITWISE_AND:
-        case OP_BITWISE_NOT:
         case OP_BITWISE_OR:
         case OP_BITWISE_XOR:
         case OP_RIGHT_SHIFT:

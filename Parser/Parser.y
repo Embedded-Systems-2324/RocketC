@@ -1012,6 +1012,13 @@ R_EXP       :   TOKEN_MINUS R_EXP
                     $$.treeNode = $2.treeNode; 
                 }
 
+            |   TOKEN_BITWISE_NOT R_TERM                   // ~
+                {
+                    NodeCreate(&($$.treeNode), NODE_OPERATOR);
+                    $$.treeNode->nodeData.dVal = OP_BITWISE_NOT;
+                    NodeAddChild($$.treeNode, $2.treeNode); 
+                }    
+
             |   R_EXP R_LOGIC_OPERATOR R_TERM
                 {
                     NodeAddChild($2.treeNode, $1.treeNode); 
@@ -1339,12 +1346,6 @@ R_BITWISE_OPERATOR      :   TOKEN_BITWISE_AND                       // &
                             {
                                 NodeCreate(&($$.treeNode), NODE_OPERATOR);
                                 $$.treeNode->nodeData.dVal = OP_BITWISE_AND;
-                            }
-
-                        |   TOKEN_BITWISE_NOT                       // ~
-                            {
-                                NodeCreate(&($$.treeNode), NODE_OPERATOR);
-                                $$.treeNode->nodeData.dVal = OP_BITWISE_NOT;
                             }
 
                         |   TOKEN_BITWISE_OR                        // |

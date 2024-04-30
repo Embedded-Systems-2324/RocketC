@@ -1,41 +1,41 @@
  
-INT ID SEMI  
  
-CHAR ID LEFT_PAREN RIGHT_PAREN SEMI  
+ [In comment] [Out comment] 
  
-INT ID LEFT_PAREN INT ID RIGHT_PAREN  
+INT ID LEFT_PAREN RIGHT_PAREN  
 LEFT_BRACE  
-INT ID SEMI  
+ [In comment] [Out comment] 
+ 
 INT ID SEMI  
  
+INT ID ASSIGN BITWISE_NOT LEFT_PAREN ID PLUS NUM RIGHT_PAREN SEMI  
+ 
+ 
+ [In comment] [Out comment] 
+ 
+RETURN NUM SEMI  
+ 
+ 
+ 
+ [In comment] [Out comment] 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ [In comment] [Out comment] 
 RIGHT_BRACE  
  
-CHAR ID LEFT_PAREN RIGHT_PAREN  
-LEFT_BRACE  
-INT ID SEMI  
-INT ID SEMI  
-ID ASSIGN NUM SEMI  
  
-INT ID ASSIGN LEFT_PAREN INT RIGHT_PAREN CHAR SEMI  
+ [In comment] [Out comment] 
  
-INT ID ASSIGN NUM SEMI  
-INT ID SEMI  
- 
-CHAR ID SEMI  
- 
-SWITCH LEFT_PAREN ID RIGHT_PAREN  
-LEFT_BRACE  
-CASE NUM COLON  
-CASE NUM COLON  
-CASE NUM COLON  
-ID ASSIGN NUM SEMI  
-BREAK SEMI  
- 
-CASE NUM COLON  
-ID ASSIGN NUM SEMI  
-BREAK SEMI  
-RIGHT_BRACE  
-RIGHT_BRACE 
+
 -------------------AST-------------------
 
 
