@@ -1042,14 +1042,17 @@ static void buildSymbolTables(TreeNode_st* pNode)
                 TreeNode_st* pNodeIndex = &pNode->pChilds[0];
                 uint32_t arrSize = pNewSymbol->symbolContent_u.SymbolArray_s.arraySize;
                 
-                //checks if the index excced the array size
-                if (pNodeIndex->nodeData.dVal >= arrSize)
+                if(pNodeIndex->nodeType != NODE_IDENTIFIER)
                 {
-                    semanticError(pNode, "Index out of range!\n");
-                }
-                else if(pNodeIndex->nodeData.dVal < 0)
-                {
-                    semanticError(pNode, "Invalid array index: can not be a negative number!\n");
+                    //checks if the index excced the array size
+                    if (pNodeIndex->nodeData.dVal >= arrSize)
+                    {
+                        semanticError(pNode, "Index out of range!\n");
+                    }
+                    else if(pNodeIndex->nodeData.dVal < 0)
+                    {
+                        semanticError(pNode, "Invalid array index: can not be a negative number!\n");
+                    }
                 }
 
                 pNode->pSymbol = pNewSymbol;

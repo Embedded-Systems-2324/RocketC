@@ -3,37 +3,10 @@ int res = 0;
 
 int CalcDOWhile(int y, int res)
 {
-    do
-    {
-        y++;
-        res += 1;
-    } while (y ==3);
+    int array[5];
 
-    return res;
+    int i = 1;
+
+    array[5] = 0;
 }
-
-int CalcWhile (int y, int res)
-{
-    while (y < 4)
-    {
-        res += 1;
-        y++;
-    }
-
-    return res;
-}
-
-void ConfirmRes ()
-{
-    if (Res == 2)
-    {
-        CalCalcDOWhilec();
-    }
-
-    else 
-    {
-        CalcWhile ();
-    }
-}
-
 

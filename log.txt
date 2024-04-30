@@ -1,39 +1,14 @@
+STATIC UNSIGNED INT ID ASSIGN NUM SEMI  
+INT ID ASSIGN NUM SEMI  
  
- 
- [In comment] [Out comment] 
- 
-INT ID LEFT_PAREN RIGHT_PAREN  
+INT ID LEFT_PAREN INT ID COMMA INT ID RIGHT_PAREN  
 LEFT_BRACE  
- [In comment] [Out comment] 
+INT ID LEFT_BRACKET NUM RIGHT_BRACKET SEMI  
  
-INT ID SEMI  
+INT ID ASSIGN NUM SEMI  
  
-INT ID ASSIGN BITWISE_NOT LEFT_PAREN ID PLUS NUM RIGHT_PAREN SEMI  
- 
- 
- [In comment] [Out comment] 
- 
-RETURN NUM SEMI  
- 
- 
- 
- [In comment] [Out comment] 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- [In comment] [Out comment] 
+ID LEFT_BRACKET NUM RIGHT_BRACKET ASSIGN NUM SEMI  
 RIGHT_BRACE  
- 
- 
- [In comment] [Out comment] 
  
 
 -------------------AST-------------------

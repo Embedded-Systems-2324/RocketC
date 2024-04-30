@@ -16,7 +16,7 @@ clean:
 	rm -r Output
 
 prog:
-	./Output/RocketC TestSym.c --parse
+	./Output/RocketC TestSrc3.c --parse
 
 run: clean all prog
 
