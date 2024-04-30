@@ -422,6 +422,13 @@ R_CASE          :   TOKEN_CASE TOKEN_NUM TOKEN_COLON R_LOCAL_STATEMENT_LIST
 
                         NodeAddChild($$.treeNode, $4.treeNode);
                     }
+                |   TOKEN_CASE TOKEN_CNUM TOKEN_COLON R_LOCAL_STATEMENT_LIST
+                    {
+                        NodeCreate(&($$.treeNode), NODE_CASE);
+                        $$.treeNode->nodeData.dVal = $2.nodeData.dVal;
+
+                        NodeAddChild($$.treeNode, $4.treeNode);
+                    }
                 ;
                 
 

@@ -1,29 +1,38 @@
 
+int x;
 
-/*int main()
+char func();
+
+int main(int a)
 {
-
-    float f;
-    int x = 1 + (int)f;
-}*/
-
-int ze (int y, int z)
-{
-    z = -2;
-    return 0;
+    int x;
+    int y;
+    
 }
 
-int main()
+char func()
 {
-    int x[2];
-    x[0] = 2;
-    x[1] = 3;
-    int y = x[0] + x[1];
+    int o;
+    int d;
+    o = 1;
 
-    ze (x[1], x[0]);
+    int f= (int)'a';
 
-    volatile int a;
+    int x = 0;
+    int a;
 
+    char y;
 
-    return 0;
+    switch(o)
+    {
+        case 1:
+        case 2:
+        case 3:
+            a = 20;
+            break;
+
+        case 4:
+            a = 12;
+            break;
+    }
 }

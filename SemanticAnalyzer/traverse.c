@@ -552,10 +552,14 @@ static void checkNode(TreeNode_st * pNode)
 
         // Valid examples:  case 2      case char_var
         case NODE_CASE:
-            if((pNode->pChilds[0].nodeVarType != TYPE_INT) || (pNode->pChilds[0].nodeVarType != TYPE_CHAR))
+            if(pNode->childNumber > 0)
             {
-                semanticError(pNode, "Case condition type must be a INT or CHAR!\n");
-                pNode->nodeVarType = TYPE_VOID;
+                if((pNode->pChilds[0].nodeVarType != TYPE_INT) && (pNode->pChilds[0].nodeVarType != TYPE_CHAR))
+                {
+                    printf("CASE TYPE: %d\n",pNode->pChilds[0].nodeVarType);
+                    semanticError(pNode, "Case condition type must be a INT or CHAR!\n");
+                    pNode->nodeVarType = TYPE_VOID;
+                }
             }
             break;
 
@@ -809,7 +813,7 @@ static void buildSymbolTables(TreeNode_st* pNode)
             {
                 symType = SYMBOL_VARIABLE;
             }
-            
+
 
             if(pNodeChild->nodeData.dVal == TYPE_VOID)
             {
@@ -930,10 +934,6 @@ static void buildSymbolTables(TreeNode_st* pNode)
                 }
 
                 pNode->pSymbol = pNewSymbol;
-            }
-            else
-            {
-                
             }
 
             if(pNewSymbol->symbolContent_u.SymbolFunction_s.isImplemented == true)
