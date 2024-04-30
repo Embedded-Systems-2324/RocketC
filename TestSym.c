@@ -1,7 +1,7 @@
 
 
 
-void function1(int *x, float y, float z)
+void function1(char *x, float y, float z)
 {
     //x = 1.33;
     //x = 0;
@@ -14,16 +14,29 @@ void function1(int *x, float y, float z)
 }
 
 
+void teste()
+{
+    int h = 0;
+
+    int x = 0, b , y = 9;
+}
+
+int arroz=0;
+
 int main()
 {
     char c = 'c';
 
-    int x ;
+    int *ptr;
+
+    int x = ptr;
     float d;
     float d1;
     int array[2];
+    char *str = "jvsdj";
 
-    function1(array, d,  d1);
+    function1("##jhsdf", d,  d1);
+
 
     /*int* ptr;
     ptr = &x;

@@ -205,7 +205,7 @@ void PrintNode(TreeNode_st* pNode)
             break;
 
         case NODE_STRING:
-            printf("STRING: %s", pNode->nodeData.sVal);   
+            printf("STRING: %s\n", pNode->nodeData.sVal);   
             break;
 
         case NODE_IDENTIFIER:
