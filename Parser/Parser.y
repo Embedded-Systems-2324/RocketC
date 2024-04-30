@@ -1100,7 +1100,7 @@ R_FACTOR    :   TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES            
                     $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
                 }
 
-            |   R_POINTER_CONTENT                                       // *a
+            |   R_POINTER_CONTENT                                               // *a
                 {
                     $$.treeNode = $1.treeNode;
                 }
@@ -1117,7 +1117,7 @@ R_FACTOR    :   TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES            
                     $$.treeNode->nodeData.fVal = $1.nodeData.fVal;
                 } 
 
-            |   TOKEN_CNUM                                                  // 'c'
+            |   TOKEN_CNUM                                                      // 'c'
                 {
                     NodeCreate(&($$.treeNode), NODE_CHAR);
                     $$.treeNode->nodeData.dVal = $1.nodeData.dVal;
@@ -1129,7 +1129,7 @@ R_FACTOR    :   TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES            
                     $$.treeNode->nodeData.sVal = $1.nodeData.sVal;
                 }
 
-            |   TOKEN_BITWISE_AND R_ARRAY_INDEX                                     // &a
+            |   TOKEN_BITWISE_AND R_ARRAY_INDEX                               // &a
                 {
                     NodeCreate(&($$.treeNode), NODE_REFERENCE);
                     NodeAddChild($$.treeNode, $2.treeNode);  

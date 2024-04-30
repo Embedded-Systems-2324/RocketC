@@ -16,14 +16,14 @@ void function1(int *x, float y, float z)
 
 int main()
 {
-    char c = '0';
+    char c = 'c';
 
-    int x;
+    int x ;
     float d;
     float d1;
     int array[2];
 
-    function1(&array[1], d,  d1);
+    function1(array, d,  d1);
 
     /*int* ptr;
     ptr = &x;

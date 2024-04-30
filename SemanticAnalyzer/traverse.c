@@ -230,6 +230,7 @@ static int checkOperator(TreeNode_st * pNode)
 
             if(pChild1->pSymbol != NULL)
             {
+                
                 if(varType1 != varType2)
                 {
                     semanticError(pNode, "Operands types don't match!\n");
