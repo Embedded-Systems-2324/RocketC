@@ -128,6 +128,57 @@ int executeSemanticAnalisys(TreeNode_st* pTreeRoot, SymbolTable_st** ppGlobalTab
 ******************************       TYPE CHECKING      **********************************
 ******************************************************************************************/
 
+int pointerAssignCheck(TreeNode_st* pCurrentNode, VarType_et pLeftVarType, TreeNode_st* pRightValue)
+{
+    if (pRightValue->nodeType == NODE_IDENTIFIER)        //pointer = pointer    
+    {
+        if(pRightValue->pSymbol->symbolType != SYMBOL_POINTER && pRightValue->pSymbol->symbolType != SYMBOL_ARRAY)
+        {
+            semanticError(pCurrentNode, "Right expression is not a pointer! \n");
+            pCurrentNode->nodeVarType = TYPE_VOID;
+            return SEMANTIC_ERROR;
+        }
+    }
+    else if (pRightValue->nodeType == NODE_REFERENCE)
+    {
+        if(pRightValue->pSymbol->symbolType == SYMBOL_ARRAY)
+        {
+            if(pRightValue->childNumber == 0)       //ptr = &array (not permited)
+            {
+                semanticError(pCurrentNode, "Right expression is not compatible! \n");
+                pCurrentNode->nodeVarType = TYPE_VOID;
+                return SEMANTIC_ERROR; 
+            }
+        } 
+        else if(pRightValue->pSymbol->symbolType != SYMBOL_VARIABLE)
+        {
+            semanticError(pCurrentNode, "Right expression is not compatible! \n");
+            pCurrentNode->nodeVarType = TYPE_VOID;
+            return SEMANTIC_ERROR; 
+        }
+    }
+    else if (pRightValue->nodeType == NODE_STRING)
+    {
+        if(pLeftVarType != TYPE_CHAR)
+        {
+            semanticError(pCurrentNode, "Can not assign a literal string to a non char pointer! \n");
+            pCurrentNode->nodeVarType = TYPE_VOID;
+            return SEMANTIC_ERROR; 
+        }
+        else
+            return SEMANTIC_OK;
+    }
+    else
+    {
+        semanticError(pCurrentNode, "Right expression is not compatible! \n");
+        pCurrentNode->nodeVarType = TYPE_VOID;
+        return SEMANTIC_ERROR;   
+    }
+
+    return SEMANTIC_OK;
+}
+
+
 /**
  * @brief Checks the type of an operator, the operation validity
  *        and the type and compatibility of the operands
@@ -179,20 +230,25 @@ static int checkOperator(TreeNode_st * pNode)
 
             if(pChild1->pSymbol != NULL)
             {
+                if(varType1 != varType2)
+                {
+                    semanticError(pNode, "Operands types don't match!\n");
+                    return SEMANTIC_ERROR; 
+                }
+
                 switch (pChild1->nodeType)
                 {
                 case NODE_POINTER_CONTENT:
                 case NODE_ARRAY_INDEX:
                     if(pChild1->pSymbol->modifier == MOD_CONST)         //check if a variable is const
                     {
-                        semanticError(pNode, "Can not assign a constant variable! \n");
+                        /*semanticError(pNode, "Can not assign a constant variable! \n");
                         pNode->nodeVarType = TYPE_VOID;
-                        return SEMANTIC_ERROR;
+                        return SEMANTIC_ERROR;*/
                     }
                     else if (pChild2->nodeType == NODE_REFERENCE) 
                     {
                         semanticError(pNode, "Can not assign to a variable reference! \n");
-                        pNode->nodeVarType = TYPE_VOID;
                         return SEMANTIC_ERROR;
                     }
                     else if (pChild2->nodeType == NODE_IDENTIFIER) 
@@ -200,88 +256,38 @@ static int checkOperator(TreeNode_st * pNode)
                         if(pChild2->pSymbol->symbolType == SYMBOL_POINTER)
                         {
                             semanticError(pNode, "Can not assign to a pointer variable! \n");
-                            pNode->nodeVarType = TYPE_VOID;
                             return SEMANTIC_ERROR;
                         }
-                    }   
+                    }
                     break;
 
 
                 case NODE_IDENTIFIER:
-                    if (pChild1->pSymbol->symbolType == SYMBOL_POINTER)
+                    if (pChild1->pSymbol->symbolType == SYMBOL_POINTER) 
                     {
-                        if (pChild2->nodeType == NODE_IDENTIFIER)        //pointer = pointer    
-                        {
-                            if(pChild2->pSymbol->symbolType != SYMBOL_POINTER && pChild2->pSymbol->symbolType != SYMBOL_ARRAY)
-                            {
-                                semanticError(pNode, "Right expression is not a pointer! \n");
-                                pNode->nodeVarType = TYPE_VOID;
-                                return SEMANTIC_ERROR;
-                            }
-                        }
-                        else if (pChild2->nodeType == NODE_REFERENCE)
-                        {
-                            if(pChild2->pSymbol->symbolType == SYMBOL_ARRAY)
-                            {
-                                if(pChild2->childNumber == 0)       //ptr = &array (not permited)
-                                {
-                                    semanticError(pNode, "Right expression is not compatible! \n");
-                                    pNode->nodeVarType = TYPE_VOID;
-                                    return SEMANTIC_ERROR; 
-                                }
-                            } 
-                            else if(pChild2->pSymbol->symbolType != SYMBOL_VARIABLE)
-                            {
-                                semanticError(pNode, "Right expression is not compatible! \n");
-                                pNode->nodeVarType = TYPE_VOID;
-                                return SEMANTIC_ERROR; 
-                            }
-                        }
-                        else if (pChild2->nodeType == NODE_STRING)
-                        {
-                            if(varType1 != TYPE_CHAR)
-                            {
-                                semanticError(pNode, "Can not assign a literal string to a non char pointer! \n");
-                                pNode->nodeVarType = TYPE_VOID;
-                                return SEMANTIC_ERROR; 
-                            }
-                            else
-                            {
-                                return SEMANTIC_OK;
-                            }
-                        }
-                        else
-                        {
-                            semanticError(pNode, "Right expression is not compatible! \n");
-                            pNode->nodeVarType = TYPE_VOID;
-                            return SEMANTIC_ERROR;   
-                        }
+                        return pointerAssignCheck(pNode, pChild1->nodeVarType, pChild2);
                     } 
                     else if(pChild1->pSymbol->symbolType == SYMBOL_FUNCTION) 
                     {
                         semanticError(pNode, "Can not assign to a function! \n");
-                        pNode->nodeVarType = TYPE_VOID;
                         return SEMANTIC_ERROR;   
                     }
                     else
                     {
                         if(pChild1->pSymbol->modifier == MOD_CONST)         //check if a variable is const
                         {
-                            semanticError(pNode, "Can not assign a constant variable! \n");
+                            /*semanticError(pNode, "Can not assign a constant variable! \n");
                             pNode->nodeVarType = TYPE_VOID;
-                            return SEMANTIC_ERROR;
+                            return SEMANTIC_ERROR;*/
                         }
-
                         else if(pChild2->pSymbol != NULL && pChild2->pSymbol->symbolType == SYMBOL_POINTER)
                         {
                             semanticError(pNode, "Can not assign to a variable an pointer! \n");
-                            pNode->nodeVarType = TYPE_VOID;
                             return SEMANTIC_ERROR; 
                         }
                         else if(pChild2->nodeType == NODE_REFERENCE)
                         {
                             semanticError(pNode, "Can not assign to a variable an pointer! \n");
-                            pNode->nodeVarType = TYPE_VOID;
                             return SEMANTIC_ERROR;   
                         }
                     }
@@ -294,23 +300,7 @@ static int checkOperator(TreeNode_st * pNode)
                     break;
                 }
 
-                if (varType1 == TYPE_VOID || varType2 == TYPE_STRING || varType2 == TYPE_VOID) 
-                {
-                    semanticError(pNode, "Invalid operands types don't match!\n");
-                    pNode->nodeVarType = TYPE_VOID;
-                    return SEMANTIC_ERROR;        
-                }
-                else if(varType1 != varType2)
-                {
-                    printf("%s %s\n", VarTypeStrings[varType1], VarTypeStrings[varType2]);
-                    semanticError(pNode, "Operands types don't match!\n");
-                    pNode->nodeVarType = TYPE_VOID;
-                    return SEMANTIC_ERROR;   
-                }
-                else
-                {
-                    pNode->nodeVarType = varType1;
-                }
+                pNode->nodeVarType = varType1;
             }
             else
             {
@@ -329,7 +319,7 @@ static int checkOperator(TreeNode_st * pNode)
             if(((pChild2->nodeType == NODE_INTEGER) && (pChild2->nodeData.dVal == 0)) || ((pChild2->nodeType == NODE_FLOAT) && (pChild2->nodeData.fVal == 0.0)))
             {
                 semanticError(pNode, "Division by zero is not supported\n");
-                pNode->nodeVarType = TYPE_VOID;
+                return SEMANTIC_ERROR;
             }
             else
             {
@@ -447,19 +437,17 @@ static void checkNode(TreeNode_st * pNode)
         case NODE_IDENTIFIER:
             if(pNode->pSymbol != NULL)
             {
-                VarType_et symbolVarType;
-
                 if(pNode->childNumber > 0)
                 {
                     pChild1 = &pNode->pChilds[0];
                     if(pChild1->nodeType == NODE_TYPE_CAST)
                     {
-                        symbolVarType = pChild1->nodeVarType;  
+                        pNode->nodeVarType = pChild1->nodeVarType;  
                     }
                 }
                 else
                 {
-                    symbolVarType = pNode->pSymbol->type; 
+                    pNode->nodeVarType = pNode->pSymbol->type; 
                 }
             }
             break;
@@ -477,12 +465,19 @@ static void checkNode(TreeNode_st * pNode)
                     parameter_st* pParam = pNode->pSymbol->symbolContent_u.SymbolFunction_s.parameters;
 
                     pChild1 = &pNode->pChilds[0];
+
                     for(int i = 0; i < pNode->pSymbol->symbolContent_u.SymbolFunction_s.parameterNumber; i++)
-                    {
+                    {   
+                        if(pParam[i].isPointer)
+                        {
+                            pointerAssignCheck(pNode, pParam[i].varType, pChild1);
+                        }
+
                         if(pChild1->nodeVarType != pParam[i].varType)
                         {
                             semanticError(pNode, "Parameters types don't match\n");
                         }
+
                         pChild1 = pChild1->pSibling;
                     }
                 }
@@ -1030,6 +1025,7 @@ static void buildSymbolTables(TreeNode_st* pNode)
 
             break;    
         
+
         //label (init:)
         case NODE_LABEL:
             //inserts the label into the table if it doesn't exist
@@ -1151,8 +1147,6 @@ static void buildSymbolTables(TreeNode_st* pNode)
         default:
             break;
     }
-
-    pNode->scopeTable = pCurrentScope; //retirar isto daqui e do trenode.h
 }
 
 

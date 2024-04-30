@@ -144,7 +144,7 @@ whitespace  [ \t]+
 "->"            { LOG_DEBUG_SHORT("ARROW ");                 return TOKEN_ARROW;                 }
 "\0"            { return TOKEN_EOF; }
 
-{char}          { LOG_DEBUG_SHORT("CHAR ");     yylval.nodeData.dVal = (long int) yytext[0];            return TOKEN_CNUM;}
+{char}          { LOG_DEBUG_SHORT("CHAR ");     yylval.nodeData.dVal = (long int) yytext[1];            return TOKEN_CNUM;}
 {binNumber}     { LOG_DEBUG_SHORT("BIN_NUM ");  yylval.nodeData.dVal = strtol(yytext, NULL, 2);         return TOKEN_NUM; }
 {hexNumber}     { LOG_DEBUG_SHORT("HEX_NUM ");  yylval.nodeData.dVal = strtol(yytext, NULL, 16);        return TOKEN_NUM; }
 {number}        { LOG_DEBUG_SHORT("NUM ");      yylval.nodeData.dVal = strtol(yytext, NULL, 10);        return TOKEN_NUM; }

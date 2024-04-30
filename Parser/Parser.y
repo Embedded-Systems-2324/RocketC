@@ -726,37 +726,6 @@ R_ARG                   :   R_MOD_QUALIFIER R_SIGN_QUALIFIER R_TYPE_ALL TOKEN_ID
 // Variable Related Rules
 //--------------------------------------------------------------------------------------------------------------------//
 
-/*R_STRUCT_DECLARATION  :   TOKEN_STRUCT TOKEN_ID TOKEN_LEFT_BRACE R_STRUCT_BODY TOKEN_RIGHT_BRACE R_ID_LIST TOKEN_SEMI
-                        |   TOKEN_STRUCT TOKEN_ID TOKEN_LEFT_BRACE R_STRUCT_BODY TOKEN_RIGHT_BRACE TOKEN_SEMI;
-
-R_STRUCT_INSTANTITION   :   TOKEN_STRUCT TOKEN_ID TOKEN_ID TOKEN_SEMI;                            
-
-R_STRUCT_BODY           :   R_STRUCT_BODY R_VAR_DECLARATION
-                            {
-                                TreeNode_st *pNode = $1.treeNode;
-
-                                if (pNode != NULL)
-                                { 
-                                    while (pNode->pSibling != NULL)
-                                    {
-                                        pNode = pNode->pSibling;    
-                                    }                                        
-                                    pNode->pSibling = $2.treeNode;
-                                    $$.treeNode = $1.treeNode; 
-                                }
-                                else
-                                {
-                                    $$.treeNode = $2.treeNode;
-                                }
-                            }
-
-                        |   R_VAR_DECLARATION
-                            {
-                                $$.treeNode = $1.treeNode;
-                            }
-                        ;*/    
-                        
-
 // Variable declaration (simple or followed by its assignment).                         // Examples:
 R_VAR_DECLARATION       :   R_VAR_PREAMBLE R_ID_LIST TOKEN_SEMI                         // int var1, var2;    -> int var1, var2;
                             {   
@@ -1003,8 +972,7 @@ R_VAR_PREAMBLE          :   R_VISIBILITY_QUALIFIER R_MOD_QUALIFIER R_SIGN_QUALIF
 //--------------------------------------------------------------------------------------------------------------------//
 // Main expression rule
 R_EXP       :   TOKEN_MINUS R_EXP
-                {        
-                    TreeNode_st *pNode;
+                {
                     NodeCreate(&($$.treeNode), NODE_OPERATOR);
                     $$.treeNode->nodeData.dVal = OP_MINUS;
 
@@ -1147,7 +1115,13 @@ R_FACTOR    :   TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES            
                 {
                     NodeCreate(&($$.treeNode), NODE_FLOAT);
                     $$.treeNode->nodeData.fVal = $1.nodeData.fVal;
-                }  
+                } 
+
+            |   TOKEN_CNUM                                                  // 'c'
+                {
+                    NodeCreate(&($$.treeNode), NODE_CHAR);
+                    $$.treeNode->nodeData.dVal = $1.nodeData.dVal;
+                }      
                    
             |   TOKEN_STR                                                      // "abc"
                 {

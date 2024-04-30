@@ -180,6 +180,7 @@ void freeSymbolTable()
         }
         free(curTable);
     }
+    //endCompiling();
 }
 
 
@@ -203,8 +204,8 @@ static void printSymbol(char* symbolType, const char *name, int varType, int var
            name,
            varType != NOT_APPLICABLE            ? VarTypeStrings[varType]       : "n/a",
            varSign != NOT_APPLICABLE            ? SignQualifierStrings[varSign] : "n/a",
-           varMod  != NOT_APPLICABLE             ? ModQualifierStrings[varMod]   : "n/a",
-           varVis  != NOT_APPLICABLE             ? VisQualifierStrings[varVis]   : "n/a"
+           varMod  != NOT_APPLICABLE            ? ModQualifierStrings[varMod]   : "n/a",
+           varVis  != NOT_APPLICABLE            ? VisQualifierStrings[varVis]   : "n/a"
     );
 
     if(memoryLocation != NOT_APPLICABLE)

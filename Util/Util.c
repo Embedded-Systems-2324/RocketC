@@ -228,6 +228,10 @@ void PrintNode(TreeNode_st* pNode)
             printf("Integer: %ld \n", pNode->nodeData.dVal);
             break;
 
+        case NODE_CHAR:
+            printf("Char: '%c' \n", (char)pNode->nodeData.dVal);
+            break;    
+
         case NODE_FLOAT:
             printf("Float: %.10g \n", pNode->nodeData.fVal);
             break;

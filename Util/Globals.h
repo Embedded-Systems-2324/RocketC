@@ -96,6 +96,7 @@ typedef enum
     NODE_STRING,          
     NODE_INTEGER,           
     NODE_FLOAT,
+    NODE_CHAR,
     NODE_STRUCT,
 
     NODE_IF,               

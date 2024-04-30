@@ -18,15 +18,11 @@
 #include "Util/Logger.h"
 #include "Util/Util.h"
 
-
-
 static TreeNode_st* pTreeRoot;
 static SymbolTable_st* pGlobalSymTable;
 static FILE* pSourceFile;
 static size_t lineNumber = 1;
 static bool bReady = 0;
-
-
 
 size_t getLineNumber()
 {
@@ -100,7 +96,7 @@ int main(int argc, char *argv[])
             // Free Symbol Table resources
             LOG_MESSAGE_SHORT("\nReleasing Symbol Table resources...\n");
             freeSymbolTable();
-            LOG_MESSAGE_SHORT("Symbol Table resources successfully released\n");
+            //LOG_MESSAGE_SHORT("Symbol Table resources successfully released\n");
         }
     }
     else
@@ -110,8 +106,6 @@ int main(int argc, char *argv[])
     }
 
     fclose(pSourceFile);
-
-    //endCompiling();
 
     return 0;
 }
