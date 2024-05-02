@@ -122,17 +122,17 @@ enum yysymbol_kind_t
   YYSYMBOL_TOKEN_NOT = 7,                  /* TOKEN_NOT  */
   YYSYMBOL_TOKEN_XOR = 8,                  /* TOKEN_XOR  */
   YYSYMBOL_TOKEN_CMP = 9,                  /* TOKEN_CMP  */
-  YYSYMBOL_TOKEN_BRANCH = 10,              /* TOKEN_BRANCH  */
-  YYSYMBOL_TOKEN_JUMP = 11,                /* TOKEN_JUMP  */
-  YYSYMBOL_TOKEN_JUMP_LINK = 12,           /* TOKEN_JUMP_LINK  */
-  YYSYMBOL_TOKEN_MOVE = 13,                /* TOKEN_MOVE  */
-  YYSYMBOL_TOKEN_LOAD_DIRECT = 14,         /* TOKEN_LOAD_DIRECT  */
-  YYSYMBOL_TOKEN_LOAD_IMMEDIATE = 15,      /* TOKEN_LOAD_IMMEDIATE  */
-  YYSYMBOL_TOKEN_LOAD_INDEXED = 16,        /* TOKEN_LOAD_INDEXED  */
-  YYSYMBOL_TOKEN_STORE_DIRECT = 17,        /* TOKEN_STORE_DIRECT  */
-  YYSYMBOL_TOKEN_STORE_INDEXED = 18,       /* TOKEN_STORE_INDEXED  */
-  YYSYMBOL_TOKEN_PUSH = 19,                /* TOKEN_PUSH  */
-  YYSYMBOL_TOKEN_POP = 20,                 /* TOKEN_POP  */
+  YYSYMBOL_TOKEN_RR = 10,                  /* TOKEN_RR  */
+  YYSYMBOL_TOKEN_RL = 11,                  /* TOKEN_RL  */
+  YYSYMBOL_TOKEN_BRANCH = 12,              /* TOKEN_BRANCH  */
+  YYSYMBOL_TOKEN_JUMP = 13,                /* TOKEN_JUMP  */
+  YYSYMBOL_TOKEN_JUMP_LINK = 14,           /* TOKEN_JUMP_LINK  */
+  YYSYMBOL_TOKEN_MOVE = 15,                /* TOKEN_MOVE  */
+  YYSYMBOL_TOKEN_LOAD_DIRECT = 16,         /* TOKEN_LOAD_DIRECT  */
+  YYSYMBOL_TOKEN_LOAD_IMMEDIATE = 17,      /* TOKEN_LOAD_IMMEDIATE  */
+  YYSYMBOL_TOKEN_LOAD_INDEXED = 18,        /* TOKEN_LOAD_INDEXED  */
+  YYSYMBOL_TOKEN_STORE_DIRECT = 19,        /* TOKEN_STORE_DIRECT  */
+  YYSYMBOL_TOKEN_STORE_INDEXED = 20,       /* TOKEN_STORE_INDEXED  */
   YYSYMBOL_TOKEN_RETI = 21,                /* TOKEN_RETI  */
   YYSYMBOL_TOKEN_HALT = 22,                /* TOKEN_HALT  */
   YYSYMBOL_TOKEN_NOP = 23,                 /* TOKEN_NOP  */
@@ -164,13 +164,13 @@ enum yysymbol_kind_t
   YYSYMBOL_xor_stmt = 49,                  /* xor_stmt  */
   YYSYMBOL_not_stmt = 50,                  /* not_stmt  */
   YYSYMBOL_cmp_stmt = 51,                  /* cmp_stmt  */
-  YYSYMBOL_branch_stmt = 52,               /* branch_stmt  */
-  YYSYMBOL_move_stmt = 53,                 /* move_stmt  */
-  YYSYMBOL_jump_stmt = 54,                 /* jump_stmt  */
-  YYSYMBOL_load_stmt = 55,                 /* load_stmt  */
-  YYSYMBOL_store_stmt = 56,                /* store_stmt  */
-  YYSYMBOL_push_stmt = 57,                 /* push_stmt  */
-  YYSYMBOL_pop_stmt = 58,                  /* pop_stmt  */
+  YYSYMBOL_rr_stmt = 52,                   /* rr_stmt  */
+  YYSYMBOL_rl_stmt = 53,                   /* rl_stmt  */
+  YYSYMBOL_branch_stmt = 54,               /* branch_stmt  */
+  YYSYMBOL_move_stmt = 55,                 /* move_stmt  */
+  YYSYMBOL_jump_stmt = 56,                 /* jump_stmt  */
+  YYSYMBOL_load_stmt = 57,                 /* load_stmt  */
+  YYSYMBOL_store_stmt = 58,                /* store_stmt  */
   YYSYMBOL_reti_stmt = 59,                 /* reti_stmt  */
   YYSYMBOL_halt_stmt = 60,                 /* halt_stmt  */
   YYSYMBOL_nop_stmt = 61,                  /* nop_stmt  */
@@ -508,16 +508,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  79
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   172
+#define YYLAST   184
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  42
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  27
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  70
+#define YYNRULES  72
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  166
+#define YYNSTATES  178
 
 /* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   296
@@ -574,10 +574,10 @@ static const yytype_int16 yyrline[] =
       75,    76,    77,    78,    79,    80,    81,    82,    83,    84,
       85,    86,    87,    88,    89,    90,    91,    92,    97,   101,
      108,   112,   119,   123,   130,   134,   141,   145,   152,   156,
-     163,   167,   174,   178,   182,   189,   196,   200,   207,   211,
-     215,   222,   226,   233,   239,   245,   251,   257,   263,   269,
-     275,   281,   287,   299,   311,   315,   319,   323,   327,   331,
-     335
+     163,   167,   174,   179,   186,   191,   198,   202,   206,   213,
+     221,   225,   232,   236,   240,   247,   251,   258,   264,   270,
+     276,   282,   288,   294,   300,   312,   324,   328,   332,   336,
+     340,   344,   348
 };
 #endif
 
@@ -595,18 +595,18 @@ static const char *const yytname[] =
 {
   "\"end of file\"", "error", "\"invalid token\"", "TOKEN_ADD",
   "TOKEN_SUB", "TOKEN_OR", "TOKEN_AND", "TOKEN_NOT", "TOKEN_XOR",
-  "TOKEN_CMP", "TOKEN_BRANCH", "TOKEN_JUMP", "TOKEN_JUMP_LINK",
-  "TOKEN_MOVE", "TOKEN_LOAD_DIRECT", "TOKEN_LOAD_IMMEDIATE",
-  "TOKEN_LOAD_INDEXED", "TOKEN_STORE_DIRECT", "TOKEN_STORE_INDEXED",
-  "TOKEN_PUSH", "TOKEN_POP", "TOKEN_RETI", "TOKEN_HALT", "TOKEN_NOP",
+  "TOKEN_CMP", "TOKEN_RR", "TOKEN_RL", "TOKEN_BRANCH", "TOKEN_JUMP",
+  "TOKEN_JUMP_LINK", "TOKEN_MOVE", "TOKEN_LOAD_DIRECT",
+  "TOKEN_LOAD_IMMEDIATE", "TOKEN_LOAD_INDEXED", "TOKEN_STORE_DIRECT",
+  "TOKEN_STORE_INDEXED", "TOKEN_RETI", "TOKEN_HALT", "TOKEN_NOP",
   "TOKEN_NUMBER", "TOKEN_REG", "TOKEN_IDENTIFIER", "TOKEN_ENDFILE",
   "TOKEN_ERROR", "TOKEN_COMMA", "TOKEN_CARDINAL", "TOKEN_COLON",
   "TOKEN_DOLLAR", "TOKEN_BYTE", "TOKEN_WORD", "TOKEN_ALLOC", "TOKEN_ORG",
   "TOKEN_EQU", "TOKEN_PLUS", "TOKEN_MINUS", "TOKEN_LEFT_PAREN",
   "TOKEN_RIGHT_PAREN", "$accept", "prog", "stmt", "add_stmt", "sub_stmt",
-  "or_stmt", "and_stmt", "xor_stmt", "not_stmt", "cmp_stmt", "branch_stmt",
-  "move_stmt", "jump_stmt", "load_stmt", "store_stmt", "push_stmt",
-  "pop_stmt", "reti_stmt", "halt_stmt", "nop_stmt", "byte_stmt",
+  "or_stmt", "and_stmt", "xor_stmt", "not_stmt", "cmp_stmt", "rr_stmt",
+  "rl_stmt", "branch_stmt", "move_stmt", "jump_stmt", "load_stmt",
+  "store_stmt", "reti_stmt", "halt_stmt", "nop_stmt", "byte_stmt",
   "word_stmt", "alloc_stmt", "org_stmt", "equ_stmt", "label", "expression", YY_NULLPTR
 };
 
@@ -617,7 +617,7 @@ yysymbol_name (yysymbol_kind_t yysymbol)
 }
 #endif
 
-#define YYPACT_NINF (-94)
+#define YYPACT_NINF (-96)
 
 #define yypact_value_is_default(Yyn) \
   ((Yyn) == YYPACT_NINF)
@@ -631,23 +631,24 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
-     100,   -13,   -10,    -9,     2,    12,    13,    16,   -24,    19,
-      21,    22,    23,    24,    25,    26,    27,    29,    31,   -94,
-     -94,   -94,   -30,    34,    36,    40,    43,    63,    65,   -94,
-     -94,   -94,   -94,   -94,   -94,   -94,   -94,   -94,   -94,   -94,
-     -94,   -94,   -94,   -94,   -94,   -94,   -94,   -94,   -94,   -94,
-     -94,   -94,   -94,    61,    64,    66,    67,    68,    95,    96,
-     -94,   -17,   -94,    98,    99,   101,   102,   103,   109,   110,
-     111,   -94,   -94,   -94,   -94,   -94,    70,   -94,   112,   -94,
-     -94,   -94,   104,   117,   118,   119,   -20,   120,   -12,   -94,
-     -94,   122,   123,   -17,   -35,   121,   124,   125,   126,   127,
-     128,   129,   130,   -94,   -17,   131,   132,   133,   134,   -94,
-     -17,   135,   -94,   -17,   -94,   -94,     4,   -17,   -17,   -17,
-     136,   -94,   -17,   -17,   137,   -17,   138,   -35,   -11,     3,
-       6,     9,   -35,    10,   -35,   -94,   -94,   -94,   -35,   139,
-     -35,   -35,   140,   -35,   141,   -94,   -17,   -94,   -17,   -94,
-     -17,   -94,   -17,   -94,   -17,   -17,   -17,   -17,   -35,   -35,
-     -35,   -35,   -35,   -35,   -35,   -35
+     108,   -13,   -10,    -9,    14,    20,    22,    23,    24,    25,
+     -24,    26,    27,    28,    29,    30,    31,    33,    35,   -96,
+     -96,   -96,   -30,    38,    40,    42,    50,    49,    73,   -96,
+     -96,   -96,   -96,   -96,   -96,   -96,   -96,   -96,   -96,   -96,
+     -96,   -96,   -96,   -96,   -96,   -96,   -96,   -96,   -96,   -96,
+     -96,   -96,   -96,    37,    68,    69,    72,    74,    75,    76,
+     103,   104,   -96,   -17,   -96,   106,   107,   109,   110,   111,
+     117,   118,   119,   -96,   -96,   -96,    78,   -96,   120,   -96,
+     -96,   -96,   112,   125,   126,   127,   -20,   128,   -12,   129,
+     130,   -96,   -96,   132,   133,   -17,   -35,   131,   134,   135,
+     136,   137,   138,   139,   140,   -96,   -17,   141,   142,   143,
+     144,   -96,   -17,   145,   -96,   -17,   146,   147,   -96,   -96,
+       5,   -17,   -17,   -17,   148,   -96,   -17,   -17,   149,   -17,
+     150,   -35,   -11,    -1,     0,     8,   -35,    10,   -35,    11,
+      12,   -96,   -96,   -96,   -35,   151,   -35,   -35,   152,   -35,
+     153,   -96,   -17,   -96,   -17,   -96,   -17,   -96,   -17,   -96,
+     -17,   -96,   -17,   -96,   -17,   -17,   -17,   -17,   -35,   -35,
+     -35,   -35,   -35,   -35,   -35,   -35,   -35,   -35
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -656,30 +657,31 @@ static const yytype_int16 yypact[] =
 static const yytype_int8 yydefact[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,    55,
-      56,    57,     0,     0,     0,     0,     0,     0,     0,     4,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,    57,
+      58,    59,     0,     0,     0,     0,     0,     0,     0,     4,
        5,     6,     7,     8,    10,     9,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
       25,    26,    27,     0,     0,     0,     0,     0,     0,     0,
-      42,     0,    44,     0,     0,     0,     0,     0,     0,     0,
-       0,    53,    54,    63,    58,    59,     0,    61,     0,     1,
-       2,     3,     0,     0,     0,     0,     0,     0,     0,    69,
-      70,     0,     0,     0,    43,     0,     0,     0,     0,     0,
-       0,     0,     0,    60,     0,     0,     0,     0,     0,    38,
-       0,     0,    40,     0,    67,    68,     0,     0,     0,     0,
-       0,    45,     0,     0,     0,     0,     0,    62,     0,     0,
-       0,     0,    39,     0,    41,    64,    65,    66,    46,     0,
-      48,    49,     0,    51,     0,    28,     0,    30,     0,    32,
-       0,    34,     0,    36,     0,     0,     0,     0,    29,    31,
-      33,    35,    37,    47,    50,    52
+       0,     0,    46,     0,    48,     0,     0,     0,     0,     0,
+       0,     0,     0,    65,    60,    61,     0,    63,     0,     1,
+       2,     3,     0,     0,     0,     0,     0,     0,     0,     0,
+       0,    71,    72,     0,     0,     0,    47,     0,     0,     0,
+       0,     0,     0,     0,     0,    62,     0,     0,     0,     0,
+       0,    38,     0,     0,    40,     0,     0,     0,    69,    70,
+       0,     0,     0,     0,     0,    49,     0,     0,     0,     0,
+       0,    64,     0,     0,     0,     0,    39,     0,    41,     0,
+       0,    66,    67,    68,    50,     0,    52,    53,     0,    55,
+       0,    28,     0,    30,     0,    32,     0,    34,     0,    36,
+       0,    42,     0,    44,     0,     0,     0,     0,    29,    31,
+      33,    35,    37,    43,    45,    51,    54,    56
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
-     -94,   -94,   144,   -94,   -94,   -94,   -94,   -94,   -94,   -94,
-     -94,   -94,   -94,   -94,   -94,   -94,   -94,   -94,   -94,   -94,
-     -94,   -94,   -94,   -94,   -94,   -94,   -93
+     -96,   -96,   156,   -96,   -96,   -96,   -96,   -96,   -96,   -96,
+     -96,   -96,   -96,   -96,   -96,   -96,   -96,   -96,   -96,   -96,
+     -96,   -96,   -96,   -96,   -96,   -96,   -95
 };
 
 /* YYDEFGOTO[NTERM-NUM].  */
@@ -687,7 +689,7 @@ static const yytype_int8 yydefgoto[] =
 {
        0,    28,    29,    30,    31,    32,    33,    34,    35,    36,
       37,    38,    39,    40,    41,    42,    43,    44,    45,    46,
-      47,    48,    49,    50,    51,    52,    94
+      47,    48,    49,    50,    51,    52,    96
 };
 
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
@@ -695,46 +697,48 @@ static const yytype_int8 yydefgoto[] =
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
 static const yytype_uint8 yytable[] =
 {
-     116,    73,    60,   117,   118,   109,    61,    89,    62,    90,
-     110,   127,    53,   112,   145,    54,    55,   132,   113,   146,
-     134,    91,    92,    93,   136,   137,   138,    56,   147,   140,
-     141,   149,   143,   148,   151,   153,   150,    57,    58,   152,
-     154,    59,   117,   118,    63,   135,    64,    65,    66,    67,
-      68,    69,    70,   158,    71,   159,    72,   160,    74,   161,
-      75,   162,   163,   164,   165,    79,    76,    77,     1,     2,
-       3,     4,     5,     6,     7,     8,     9,    10,    11,    12,
-      13,    14,    15,    16,    17,    18,    19,    20,    21,    78,
-      82,    22,    80,    83,   103,    84,    85,    86,    23,    24,
-      25,    26,    27,     1,     2,     3,     4,     5,     6,     7,
-       8,     9,    10,    11,    12,    13,    14,    15,    16,    17,
-      18,    19,    20,    21,    87,    88,    22,    95,    96,   105,
-      97,    98,    99,    23,    24,    25,    26,    27,   100,   101,
-     102,   104,   106,   107,   108,   111,   114,   115,     0,   120,
-     121,   119,     0,   124,     0,   126,   122,   123,     0,   125,
-     128,   129,   130,   131,   133,   139,   142,   144,     0,   155,
-     156,   157,    81
+     120,    73,    62,   121,   122,   111,    63,    91,    64,    92,
+     112,   131,    53,   114,   151,    54,    55,   136,   115,   152,
+     138,    93,    94,    95,   153,   155,   142,   143,   144,   154,
+     156,   146,   147,   157,   149,   159,   161,   163,   158,    56,
+     160,   162,   164,   121,   122,    57,   141,    58,    59,    60,
+      61,    65,    66,    67,    68,    69,    70,   168,    71,   169,
+      72,   170,    74,   171,    75,   172,    82,   173,    76,   174,
+     175,   176,   177,    79,    77,    78,     1,     2,     3,     4,
+       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
+      15,    16,    17,    18,    19,    20,    21,    83,    84,    22,
+      80,    85,   105,    86,    87,    88,    23,    24,    25,    26,
+      27,     1,     2,     3,     4,     5,     6,     7,     8,     9,
+      10,    11,    12,    13,    14,    15,    16,    17,    18,    19,
+      20,    21,    89,    90,    22,    97,    98,   107,    99,   100,
+     101,    23,    24,    25,    26,    27,   102,   103,   104,   106,
+     108,   109,   110,   113,   116,   117,   118,   119,     0,   124,
+     125,   123,     0,   128,     0,   130,   126,   127,     0,   129,
+     132,   133,   134,   135,   137,   139,   140,   145,   148,   150,
+       0,   165,   166,   167,    81
 };
 
 static const yytype_int16 yycheck[] =
 {
-      93,    31,    26,    38,    39,    25,    30,    24,    32,    26,
-      30,   104,    25,    25,    25,    25,    25,   110,    30,    30,
-     113,    38,    39,    40,   117,   118,   119,    25,    25,   122,
-     123,    25,   125,    30,    25,    25,    30,    25,    25,    30,
-      30,    25,    38,    39,    25,    41,    25,    25,    25,    25,
-      25,    25,    25,   146,    25,   148,    25,   150,    24,   152,
-      24,   154,   155,   156,   157,     0,    26,    24,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    19,    20,    21,    22,    23,    26,
-      29,    26,    27,    29,    24,    29,    29,    29,    33,    34,
-      35,    36,    37,     3,     4,     5,     6,     7,     8,     9,
-      10,    11,    12,    13,    14,    15,    16,    17,    18,    19,
-      20,    21,    22,    23,    29,    29,    26,    29,    29,    25,
-      29,    29,    29,    33,    34,    35,    36,    37,    29,    29,
-      29,    29,    25,    25,    25,    25,    24,    24,    -1,    25,
+      95,    31,    26,    38,    39,    25,    30,    24,    32,    26,
+      30,   106,    25,    25,    25,    25,    25,   112,    30,    30,
+     115,    38,    39,    40,    25,    25,   121,   122,   123,    30,
+      30,   126,   127,    25,   129,    25,    25,    25,    30,    25,
+      30,    30,    30,    38,    39,    25,    41,    25,    25,    25,
+      25,    25,    25,    25,    25,    25,    25,   152,    25,   154,
+      25,   156,    24,   158,    24,   160,    29,   162,    26,   164,
+     165,   166,   167,     0,    24,    26,     3,     4,     5,     6,
+       7,     8,     9,    10,    11,    12,    13,    14,    15,    16,
+      17,    18,    19,    20,    21,    22,    23,    29,    29,    26,
+      27,    29,    24,    29,    29,    29,    33,    34,    35,    36,
+      37,     3,     4,     5,     6,     7,     8,     9,    10,    11,
+      12,    13,    14,    15,    16,    17,    18,    19,    20,    21,
+      22,    23,    29,    29,    26,    29,    29,    25,    29,    29,
+      29,    33,    34,    35,    36,    37,    29,    29,    29,    29,
+      25,    25,    25,    25,    25,    25,    24,    24,    -1,    25,
       25,    30,    -1,    25,    -1,    25,    30,    30,    -1,    30,
-      29,    29,    29,    29,    29,    29,    29,    29,    -1,    30,
-      30,    30,    28
+      29,    29,    29,    29,    29,    29,    29,    29,    29,    29,
+      -1,    30,    30,    30,    28
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
@@ -747,17 +751,18 @@ static const yytype_int8 yystos[] =
       45,    46,    47,    48,    49,    50,    51,    52,    53,    54,
       55,    56,    57,    58,    59,    60,    61,    62,    63,    64,
       65,    66,    67,    25,    25,    25,    25,    25,    25,    25,
-      26,    30,    32,    25,    25,    25,    25,    25,    25,    25,
+      25,    25,    26,    30,    32,    25,    25,    25,    25,    25,
       25,    25,    25,    31,    24,    24,    26,    24,    26,     0,
-      27,    44,    29,    29,    29,    29,    29,    29,    29,    24,
-      26,    38,    39,    40,    68,    29,    29,    29,    29,    29,
-      29,    29,    29,    24,    29,    25,    25,    25,    25,    25,
-      30,    25,    25,    30,    24,    24,    68,    38,    39,    30,
-      25,    25,    30,    30,    25,    30,    25,    68,    29,    29,
-      29,    29,    68,    29,    68,    41,    68,    68,    68,    29,
-      68,    68,    29,    68,    29,    25,    30,    25,    30,    25,
+      27,    44,    29,    29,    29,    29,    29,    29,    29,    29,
+      29,    24,    26,    38,    39,    40,    68,    29,    29,    29,
+      29,    29,    29,    29,    29,    24,    29,    25,    25,    25,
+      25,    25,    30,    25,    25,    30,    25,    25,    24,    24,
+      68,    38,    39,    30,    25,    25,    30,    30,    25,    30,
+      25,    68,    29,    29,    29,    29,    68,    29,    68,    29,
+      29,    41,    68,    68,    68,    29,    68,    68,    29,    68,
+      29,    25,    30,    25,    30,    25,    30,    25,    30,    25,
       30,    25,    30,    25,    30,    30,    30,    30,    68,    68,
-      68,    68,    68,    68,    68,    68
+      68,    68,    68,    68,    68,    68,    68,    68
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
@@ -767,10 +772,10 @@ static const yytype_int8 yyr1[] =
       44,    44,    44,    44,    44,    44,    44,    44,    44,    44,
       44,    44,    44,    44,    44,    44,    44,    44,    45,    45,
       46,    46,    47,    47,    48,    48,    49,    49,    50,    50,
-      51,    51,    52,    52,    52,    53,    54,    54,    55,    55,
-      55,    56,    56,    57,    58,    59,    60,    61,    62,    63,
-      64,    65,    66,    67,    68,    68,    68,    68,    68,    68,
-      68
+      51,    51,    52,    52,    53,    53,    54,    54,    54,    55,
+      56,    56,    57,    57,    57,    58,    58,    59,    60,    61,
+      62,    63,    64,    65,    66,    67,    68,    68,    68,    68,
+      68,    68,    68
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
@@ -780,10 +785,10 @@ static const yytype_int8 yyr2[] =
        1,     1,     1,     1,     1,     1,     1,     1,     1,     1,
        1,     1,     1,     1,     1,     1,     1,     1,     6,     7,
        6,     7,     6,     7,     6,     7,     6,     7,     4,     5,
-       4,     5,     2,     3,     2,     4,     5,     7,     5,     5,
-       7,     5,     7,     2,     2,     1,     1,     1,     2,     2,
-       3,     2,     4,     2,     3,     3,     3,     2,     2,     1,
-       1
+       4,     5,     6,     7,     6,     7,     2,     3,     2,     4,
+       5,     7,     5,     5,     7,     5,     7,     1,     1,     1,
+       2,     2,     3,     2,     4,     2,     3,     3,     3,     2,
+       2,     1,     1
 };
 
 
@@ -1251,7 +1256,7 @@ yyreduce:
                     {  
                         add_statement(ADD_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE); 
                     }
-#line 1255 "asm_parser.tab.c"
+#line 1260 "asm_parser.tab.c"
     break;
 
   case 29: /* add_stmt: TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
@@ -1259,7 +1264,7 @@ yyreduce:
                     {
                         add_statement(ADD_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE); 
                     }
-#line 1263 "asm_parser.tab.c"
+#line 1268 "asm_parser.tab.c"
     break;
 
   case 30: /* sub_stmt: TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG  */
@@ -1267,7 +1272,7 @@ yyreduce:
                     { 
                         add_statement(SUB_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE);  
                     }
-#line 1271 "asm_parser.tab.c"
+#line 1276 "asm_parser.tab.c"
     break;
 
   case 31: /* sub_stmt: TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
@@ -1275,7 +1280,7 @@ yyreduce:
                     { 
                         add_statement(SUB_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE); 
                     }
-#line 1279 "asm_parser.tab.c"
+#line 1284 "asm_parser.tab.c"
     break;
 
   case 32: /* or_stmt: TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG  */
@@ -1283,7 +1288,7 @@ yyreduce:
                     { 
                         add_statement(OR_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE);    
                     }
-#line 1287 "asm_parser.tab.c"
+#line 1292 "asm_parser.tab.c"
     break;
 
   case 33: /* or_stmt: TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
@@ -1291,7 +1296,7 @@ yyreduce:
                     { 
                         add_statement(OR_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE);   
                     }
-#line 1295 "asm_parser.tab.c"
+#line 1300 "asm_parser.tab.c"
     break;
 
   case 34: /* and_stmt: TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG  */
@@ -1299,7 +1304,7 @@ yyreduce:
                     { 
                         add_statement(AND_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE);  
                     }
-#line 1303 "asm_parser.tab.c"
+#line 1308 "asm_parser.tab.c"
     break;
 
   case 35: /* and_stmt: TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
@@ -1307,7 +1312,7 @@ yyreduce:
                     { 
                         add_statement(AND_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE); 
                     }
-#line 1311 "asm_parser.tab.c"
+#line 1316 "asm_parser.tab.c"
     break;
 
   case 36: /* xor_stmt: TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG  */
@@ -1315,7 +1320,7 @@ yyreduce:
                     { 
                         add_statement(XOR_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE);  
                     }
-#line 1319 "asm_parser.tab.c"
+#line 1324 "asm_parser.tab.c"
     break;
 
   case 37: /* xor_stmt: TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
@@ -1323,7 +1328,7 @@ yyreduce:
                     { 
                         add_statement(XOR_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], IMMEDIATE); 
                     }
-#line 1327 "asm_parser.tab.c"
+#line 1332 "asm_parser.tab.c"
     break;
 
   case 38: /* not_stmt: TOKEN_NOT TOKEN_REG TOKEN_COMMA TOKEN_REG  */
@@ -1331,7 +1336,7 @@ yyreduce:
                     { 
                         add_statement(NOT_OPCODE, yyvsp[-2], yyvsp[0], NULL_ARG, NO_TYPE);   
                     }
-#line 1335 "asm_parser.tab.c"
+#line 1340 "asm_parser.tab.c"
     break;
 
   case 39: /* not_stmt: TOKEN_NOT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
@@ -1339,7 +1344,7 @@ yyreduce:
                     { 
                         add_statement(NOT_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, IMMEDIATE); 
                     }
-#line 1343 "asm_parser.tab.c"
+#line 1348 "asm_parser.tab.c"
     break;
 
   case 40: /* cmp_stmt: TOKEN_CMP TOKEN_REG TOKEN_COMMA TOKEN_REG  */
@@ -1347,7 +1352,7 @@ yyreduce:
                     { 
                         add_statement(CMP_OPCODE, yyvsp[-2], yyvsp[0], NULL_ARG, NO_TYPE);
                     }
-#line 1351 "asm_parser.tab.c"
+#line 1356 "asm_parser.tab.c"
     break;
 
   case 41: /* cmp_stmt: TOKEN_CMP TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
@@ -1355,171 +1360,187 @@ yyreduce:
                     { 
                         add_statement(CMP_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, IMMEDIATE);
                     }
-#line 1359 "asm_parser.tab.c"
+#line 1364 "asm_parser.tab.c"
     break;
 
-  case 42: /* branch_stmt: TOKEN_BRANCH TOKEN_IDENTIFIER  */
+  case 42: /* rr_stmt: TOKEN_RR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG  */
 #line 175 "Step1/asm_parser.y"
+                    { 
+                        add_statement(RR_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE);  
+                    }
+#line 1372 "asm_parser.tab.c"
+    break;
+
+  case 43: /* rr_stmt: TOKEN_RR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
+#line 180 "Step1/asm_parser.y"
+                    {
+                        add_statement(RR_OPCODE, yyvsp[-5], yyvsp[-2], yyvsp[0], IMMEDIATE);
+                    }
+#line 1380 "asm_parser.tab.c"
+    break;
+
+  case 44: /* rl_stmt: TOKEN_RL TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG  */
+#line 187 "Step1/asm_parser.y"
+                    { 
+                        add_statement(RL_OPCODE, yyvsp[-4], yyvsp[-2], yyvsp[0], NO_TYPE);  
+                    }
+#line 1388 "asm_parser.tab.c"
+    break;
+
+  case 45: /* rl_stmt: TOKEN_RL TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
+#line 192 "Step1/asm_parser.y"
+                    {
+                        add_statement(RL_OPCODE, yyvsp[-5], yyvsp[-2], yyvsp[0], IMMEDIATE);
+                    }
+#line 1396 "asm_parser.tab.c"
+    break;
+
+  case 46: /* branch_stmt: TOKEN_BRANCH TOKEN_IDENTIFIER  */
+#line 199 "Step1/asm_parser.y"
                     {
                         add_statement(BXX_OPCODE, yyvsp[0], yyvsp[-1], NULL_ARG, NO_TYPE);
                     }
-#line 1367 "asm_parser.tab.c"
+#line 1404 "asm_parser.tab.c"
     break;
 
-  case 43: /* branch_stmt: TOKEN_BRANCH TOKEN_CARDINAL expression  */
-#line 179 "Step1/asm_parser.y"
+  case 47: /* branch_stmt: TOKEN_BRANCH TOKEN_CARDINAL expression  */
+#line 203 "Step1/asm_parser.y"
                     {
                         add_statement(BXX_OPCODE, yyvsp[0], yyvsp[-2], NULL_ARG, IMMEDIATE); 
                     }
-#line 1375 "asm_parser.tab.c"
+#line 1412 "asm_parser.tab.c"
     break;
 
-  case 44: /* branch_stmt: TOKEN_BRANCH TOKEN_DOLLAR  */
-#line 183 "Step1/asm_parser.y"
+  case 48: /* branch_stmt: TOKEN_BRANCH TOKEN_DOLLAR  */
+#line 207 "Step1/asm_parser.y"
                     {
                         add_statement(BXX_OPCODE, yyvsp[0], yyvsp[-1], NULL_ARG, IMMEDIATE);
                     }
-#line 1383 "asm_parser.tab.c"
+#line 1420 "asm_parser.tab.c"
     break;
 
-  case 45: /* move_stmt: TOKEN_MOVE TOKEN_REG TOKEN_COMMA TOKEN_REG  */
-#line 190 "Step1/asm_parser.y"
+  case 49: /* move_stmt: TOKEN_MOVE TOKEN_REG TOKEN_COMMA TOKEN_REG  */
+#line 214 "Step1/asm_parser.y"
                     {
                         add_statement(ADD_OPCODE, yyvsp[-2], yyvsp[0], 0, IMMEDIATE);
                     }
-#line 1391 "asm_parser.tab.c"
+#line 1428 "asm_parser.tab.c"
     break;
 
-  case 46: /* jump_stmt: TOKEN_JUMP TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
-#line 197 "Step1/asm_parser.y"
+  case 50: /* jump_stmt: TOKEN_JUMP TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
+#line 222 "Step1/asm_parser.y"
                     { 
                         add_statement(JMP_OPCODE, NULL_ARG, yyvsp[-3], yyvsp[0], IMMEDIATE); 
                     }
-#line 1399 "asm_parser.tab.c"
+#line 1436 "asm_parser.tab.c"
     break;
 
-  case 47: /* jump_stmt: TOKEN_JUMP_LINK TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
-#line 201 "Step1/asm_parser.y"
+  case 51: /* jump_stmt: TOKEN_JUMP_LINK TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
+#line 226 "Step1/asm_parser.y"
                     {
                         add_statement(JMP_OPCODE, yyvsp[-5], yyvsp[-3] , yyvsp[0], LINK);
                     }
-#line 1407 "asm_parser.tab.c"
+#line 1444 "asm_parser.tab.c"
     break;
 
-  case 48: /* load_stmt: TOKEN_LOAD_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
-#line 208 "Step1/asm_parser.y"
+  case 52: /* load_stmt: TOKEN_LOAD_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
+#line 233 "Step1/asm_parser.y"
                     { 
                         add_statement(LD_OPCODE, yyvsp[-3], NULL_ARG, yyvsp[0], NO_TYPE); 
                     }
-#line 1415 "asm_parser.tab.c"
+#line 1452 "asm_parser.tab.c"
     break;
 
-  case 49: /* load_stmt: TOKEN_LOAD_IMMEDIATE TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
-#line 212 "Step1/asm_parser.y"
+  case 53: /* load_stmt: TOKEN_LOAD_IMMEDIATE TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
+#line 237 "Step1/asm_parser.y"
                     {
                         add_statement(LDI_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, NO_TYPE); 
                     }
-#line 1423 "asm_parser.tab.c"
+#line 1460 "asm_parser.tab.c"
     break;
 
-  case 50: /* load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
-#line 216 "Step1/asm_parser.y"
+  case 54: /* load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
+#line 241 "Step1/asm_parser.y"
                     { 
                         add_statement(LDX_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], NO_TYPE); 
                     }
-#line 1431 "asm_parser.tab.c"
+#line 1468 "asm_parser.tab.c"
     break;
 
-  case 51: /* store_stmt: TOKEN_STORE_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
-#line 223 "Step1/asm_parser.y"
+  case 55: /* store_stmt: TOKEN_STORE_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
+#line 248 "Step1/asm_parser.y"
                     { 
                         add_statement(ST_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, NO_TYPE); 
                     }
-#line 1439 "asm_parser.tab.c"
+#line 1476 "asm_parser.tab.c"
     break;
 
-  case 52: /* store_stmt: TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
-#line 227 "Step1/asm_parser.y"
+  case 56: /* store_stmt: TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
+#line 252 "Step1/asm_parser.y"
                     { 
                         add_statement(STX_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], NO_TYPE);
                     }
-#line 1447 "asm_parser.tab.c"
+#line 1484 "asm_parser.tab.c"
     break;
 
-  case 53: /* push_stmt: TOKEN_PUSH TOKEN_REG  */
-#line 234 "Step1/asm_parser.y"
-                    { 
-                        add_statement(PUSH_OPCODE, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
-                    }
-#line 1455 "asm_parser.tab.c"
-    break;
-
-  case 54: /* pop_stmt: TOKEN_POP TOKEN_REG  */
-#line 240 "Step1/asm_parser.y"
-                    { 
-                        add_statement(POP_OPCODE,yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
-                    }
-#line 1463 "asm_parser.tab.c"
-    break;
-
-  case 55: /* reti_stmt: TOKEN_RETI  */
-#line 246 "Step1/asm_parser.y"
+  case 57: /* reti_stmt: TOKEN_RETI  */
+#line 259 "Step1/asm_parser.y"
                     {
                         add_statement(RETI_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     }
-#line 1471 "asm_parser.tab.c"
+#line 1492 "asm_parser.tab.c"
     break;
 
-  case 56: /* halt_stmt: TOKEN_HALT  */
-#line 252 "Step1/asm_parser.y"
+  case 58: /* halt_stmt: TOKEN_HALT  */
+#line 265 "Step1/asm_parser.y"
                     { 
                         add_statement(HLT_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     }
-#line 1479 "asm_parser.tab.c"
+#line 1500 "asm_parser.tab.c"
     break;
 
-  case 57: /* nop_stmt: TOKEN_NOP  */
-#line 258 "Step1/asm_parser.y"
+  case 59: /* nop_stmt: TOKEN_NOP  */
+#line 271 "Step1/asm_parser.y"
                     { 
                         add_statement(NOP_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     }
-#line 1487 "asm_parser.tab.c"
+#line 1508 "asm_parser.tab.c"
     break;
 
-  case 58: /* byte_stmt: TOKEN_BYTE TOKEN_NUMBER  */
-#line 264 "Step1/asm_parser.y"
+  case 60: /* byte_stmt: TOKEN_BYTE TOKEN_NUMBER  */
+#line 277 "Step1/asm_parser.y"
                     { 
                         add_statement(DOT_BYTE_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
-#line 1495 "asm_parser.tab.c"
+#line 1516 "asm_parser.tab.c"
     break;
 
-  case 59: /* word_stmt: TOKEN_WORD TOKEN_NUMBER  */
-#line 270 "Step1/asm_parser.y"
+  case 61: /* word_stmt: TOKEN_WORD TOKEN_NUMBER  */
+#line 283 "Step1/asm_parser.y"
                     { 
                         add_statement(DOT_WORD_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
-#line 1503 "asm_parser.tab.c"
+#line 1524 "asm_parser.tab.c"
     break;
 
-  case 60: /* alloc_stmt: TOKEN_ALLOC TOKEN_IDENTIFIER TOKEN_NUMBER  */
-#line 276 "Step1/asm_parser.y"
+  case 62: /* alloc_stmt: TOKEN_ALLOC TOKEN_IDENTIFIER TOKEN_NUMBER  */
+#line 289 "Step1/asm_parser.y"
                     {
                         add_statement(DOT_ALLOC_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
-#line 1511 "asm_parser.tab.c"
+#line 1532 "asm_parser.tab.c"
     break;
 
-  case 61: /* org_stmt: TOKEN_ORG TOKEN_NUMBER  */
-#line 282 "Step1/asm_parser.y"
+  case 63: /* org_stmt: TOKEN_ORG TOKEN_NUMBER  */
+#line 295 "Step1/asm_parser.y"
                     {
                         add_statement(DOT_ORG_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
-#line 1519 "asm_parser.tab.c"
+#line 1540 "asm_parser.tab.c"
     break;
 
-  case 62: /* equ_stmt: TOKEN_EQU TOKEN_IDENTIFIER TOKEN_COMMA expression  */
-#line 288 "Step1/asm_parser.y"
+  case 64: /* equ_stmt: TOKEN_EQU TOKEN_IDENTIFIER TOKEN_COMMA expression  */
+#line 301 "Step1/asm_parser.y"
                     {
                         if(get_symbol_value(yyvsp[-2]) != UNINITIALIZED_VALUE){
                             LOG_ERROR("[ASSEMBLER] ERROR: Constant redefinition: %s in line %ld\n", get_symbol_name(yyvsp[-3]), get_line_number());
@@ -1529,11 +1550,11 @@ yyreduce:
                             yyval = yyvsp[-2];
                         }
                     }
-#line 1533 "asm_parser.tab.c"
+#line 1554 "asm_parser.tab.c"
     break;
 
-  case 63: /* label: TOKEN_IDENTIFIER TOKEN_COLON  */
-#line 300 "Step1/asm_parser.y"
+  case 65: /* label: TOKEN_IDENTIFIER TOKEN_COLON  */
+#line 313 "Step1/asm_parser.y"
                     { 
                         if(get_symbol_value(yyvsp[-1]) != UNINITIALIZED_VALUE){
                             LOG_ERROR("[ASSEMBLER] ERROR: Label redefinition: %s in line %ld\n", get_symbol_name(yyvsp[-1]), get_line_number());
@@ -1543,59 +1564,59 @@ yyreduce:
                             yyval = yyvsp[-1];
                         }
                     }
-#line 1547 "asm_parser.tab.c"
+#line 1568 "asm_parser.tab.c"
     break;
 
-  case 64: /* expression: TOKEN_LEFT_PAREN expression TOKEN_RIGHT_PAREN  */
-#line 312 "Step1/asm_parser.y"
+  case 66: /* expression: TOKEN_LEFT_PAREN expression TOKEN_RIGHT_PAREN  */
+#line 325 "Step1/asm_parser.y"
                     {
                         yyval = yyvsp[-1];
                     }
-#line 1555 "asm_parser.tab.c"
+#line 1576 "asm_parser.tab.c"
     break;
 
-  case 65: /* expression: expression TOKEN_PLUS expression  */
-#line 316 "Step1/asm_parser.y"
+  case 67: /* expression: expression TOKEN_PLUS expression  */
+#line 329 "Step1/asm_parser.y"
                     {
                         yyval = yyval + yyvsp[0];
                     }
-#line 1563 "asm_parser.tab.c"
+#line 1584 "asm_parser.tab.c"
     break;
 
-  case 66: /* expression: expression TOKEN_MINUS expression  */
-#line 320 "Step1/asm_parser.y"
+  case 68: /* expression: expression TOKEN_MINUS expression  */
+#line 333 "Step1/asm_parser.y"
                     {
                         yyval = yyval - yyvsp[0];
                     }
-#line 1571 "asm_parser.tab.c"
+#line 1592 "asm_parser.tab.c"
     break;
 
-  case 67: /* expression: TOKEN_PLUS TOKEN_NUMBER  */
-#line 324 "Step1/asm_parser.y"
+  case 69: /* expression: TOKEN_PLUS TOKEN_NUMBER  */
+#line 337 "Step1/asm_parser.y"
                     {
                         yyval = yyvsp[0];
                     }
-#line 1579 "asm_parser.tab.c"
+#line 1600 "asm_parser.tab.c"
     break;
 
-  case 68: /* expression: TOKEN_MINUS TOKEN_NUMBER  */
-#line 328 "Step1/asm_parser.y"
+  case 70: /* expression: TOKEN_MINUS TOKEN_NUMBER  */
+#line 341 "Step1/asm_parser.y"
                     {
                         yyval = 0 - yyvsp[0];
                     }
-#line 1587 "asm_parser.tab.c"
+#line 1608 "asm_parser.tab.c"
     break;
 
-  case 69: /* expression: TOKEN_NUMBER  */
-#line 332 "Step1/asm_parser.y"
+  case 71: /* expression: TOKEN_NUMBER  */
+#line 345 "Step1/asm_parser.y"
                     {
                         yyval = yyvsp[0];
                     }
-#line 1595 "asm_parser.tab.c"
+#line 1616 "asm_parser.tab.c"
     break;
 
-  case 70: /* expression: TOKEN_IDENTIFIER  */
-#line 336 "Step1/asm_parser.y"
+  case 72: /* expression: TOKEN_IDENTIFIER  */
+#line 349 "Step1/asm_parser.y"
                     {
                         /* 
                             Checks if the constant has already been defined using the Equ directive.
@@ -1609,11 +1630,11 @@ yyreduce:
 
                         yyval = temp;
                     }
-#line 1613 "asm_parser.tab.c"
+#line 1634 "asm_parser.tab.c"
     break;
 
 
-#line 1617 "asm_parser.tab.c"
+#line 1638 "asm_parser.tab.c"
 
       default: break;
     }
@@ -1806,7 +1827,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 350 "Step1/asm_parser.y"
+#line 363 "Step1/asm_parser.y"
 
 
 

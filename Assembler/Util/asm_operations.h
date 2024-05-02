@@ -18,13 +18,12 @@
 #define LDX_OPCODE      12
 #define ST_OPCODE       13
 #define STX_OPCODE      14
+#define RR_OPCODE       15
+#define RL_OPCODE       16
 #define HLT_OPCODE      31
 
 //extra instructions opcodes
-#define PUSH_OPCODE     15
-#define POP_OPCODE      16
 #define RETI_OPCODE     17
-#define MUL_OPCODE      18
 
 //branch conditions
 #define BRA_COND        0

@@ -23,6 +23,8 @@ int yyerror(char *str);
 %token TOKEN_NOT
 %token TOKEN_XOR
 %token TOKEN_CMP
+%token TOKEN_RR
+%token TOKEN_RL
 %token TOKEN_BRANCH
 %token TOKEN_JUMP
 %token TOKEN_JUMP_LINK
@@ -32,8 +34,6 @@ int yyerror(char *str);
 %token TOKEN_LOAD_INDEXED
 %token TOKEN_STORE_DIRECT
 %token TOKEN_STORE_INDEXED
-%token TOKEN_PUSH
-%token TOKEN_POP
 %token TOKEN_RETI
 %token TOKEN_HALT
 %token TOKEN_NOP
@@ -74,13 +74,13 @@ stmt    :   add_stmt
         |   not_stmt
         |   xor_stmt
         |   cmp_stmt
+        |   rr_stmt
+        |   rl_stmt
         |   branch_stmt
         |   move_stmt
         |   jump_stmt
         |   load_stmt
         |   store_stmt
-        |   push_stmt
-        |   pop_stmt
         |   reti_stmt
         |   halt_stmt
         |   nop_stmt
@@ -170,6 +170,30 @@ cmp_stmt    :   TOKEN_CMP TOKEN_REG TOKEN_COMMA TOKEN_REG
                     }
             ;
 
+/* ROTATE RIGHT Operation */
+rr_stmt     :   TOKEN_RR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG                
+                    { 
+                        add_statement(RR_OPCODE, $2, $4, $6, NO_TYPE);  
+                    }
+
+            |   TOKEN_RR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
+                    {
+                        add_statement(RR_OPCODE, $2, $5, $7, IMMEDIATE);
+                    }
+            ;
+
+/* ROTATE LEFT Operation */
+rl_stmt     :   TOKEN_RL TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG                
+                    { 
+                        add_statement(RL_OPCODE, $2, $4, $6, NO_TYPE);  
+                    }
+
+            |   TOKEN_RL TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
+                    {
+                        add_statement(RL_OPCODE, $2, $5, $7, IMMEDIATE);
+                    }
+            ;
+
 /* BRANCH Operation */
 branch_stmt :   TOKEN_BRANCH TOKEN_IDENTIFIER             
                     {
@@ -189,7 +213,8 @@ branch_stmt :   TOKEN_BRANCH TOKEN_IDENTIFIER
 move_stmt   :   TOKEN_MOVE TOKEN_REG TOKEN_COMMA TOKEN_REG                        
                     {
                         add_statement(ADD_OPCODE, $2, $4, 0, IMMEDIATE);
-                    };     
+                    }
+            ;     
 
 
 /* JUMP and JUMP with link Operations */
@@ -228,18 +253,6 @@ store_stmt  :   TOKEN_STORE_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expressi
                         add_statement(STX_OPCODE, $2, $4, $7, NO_TYPE);
                     }
             ;        
-
-/* Push operation */
-push_stmt   :   TOKEN_PUSH TOKEN_REG 
-                    { 
-                        add_statement(PUSH_OPCODE, $2, NULL_ARG, NULL_ARG, NO_TYPE);
-                    };
-
-/* Pop operation */
-pop_stmt    :   TOKEN_POP TOKEN_REG   
-                    { 
-                        add_statement(POP_OPCODE,$2, NULL_ARG, NULL_ARG, NO_TYPE);
-                    };
 
 /* Reti operation */
 reti_stmt   :   TOKEN_RETI     

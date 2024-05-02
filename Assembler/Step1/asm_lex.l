@@ -93,6 +93,8 @@ whitespace      [ \t]+
 "NOT"   { LOG_DEBUG_SHORT(" NOT");                       return TOKEN_NOT;             }
 "XOR"   { LOG_DEBUG_SHORT(" XOR");                       return TOKEN_XOR;             }
 "CMP"   { LOG_DEBUG_SHORT(" CMP");                       return TOKEN_CMP;             }
+"RR"    { LOG_DEBUG_SHORT(" RR");                        return TOKEN_RR;              }
+"RL"    { LOG_DEBUG_SHORT(" RL");                        return TOKEN_RL;              }
 
 "MOV"   { LOG_DEBUG_SHORT(" MOVE");                      return TOKEN_MOVE;            }
 "JMP"   { LOG_DEBUG_SHORT(" JUMP");                      return TOKEN_JUMP;            }
@@ -102,8 +104,6 @@ whitespace      [ \t]+
 "LDX"   { LOG_DEBUG_SHORT(" LOAD_INDEXED ");             return TOKEN_LOAD_INDEXED;    }
 "ST"    { LOG_DEBUG_SHORT(" STORE_DIRECT");              return TOKEN_STORE_DIRECT;    }
 "STX"   { LOG_DEBUG_SHORT(" STORE_INDEXED");             return TOKEN_STORE_INDEXED;   }
-"PUSH"  { LOG_DEBUG_SHORT(" PUSH");                      return TOKEN_PUSH;            }
-"POP"   { LOG_DEBUG_SHORT(" POP");                       return TOKEN_POP;             }
 
 "RETI"  { LOG_DEBUG_SHORT(" RETI");                      return TOKEN_RETI;            }
 "HALT"  { LOG_DEBUG_SHORT(" HALT");                      return TOKEN_HALT;            }

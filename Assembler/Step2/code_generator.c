@@ -62,6 +62,8 @@ void generate_code()
             case OR_OPCODE:
             case AND_OPCODE:
             case XOR_OPCODE:
+            case RR_OPCODE:
+            case RL_OPCODE:
                 code |= (0x1f & current_statement.op_code)  << 27;
                 code |= (0x1f & current_statement.op1)      << 22;
                 code |= (0x1f & current_statement.op2)      << 17;
@@ -94,7 +96,6 @@ void generate_code()
                     code |= (0x1f & current_statement.op2)  << 11;
                 }
                 break;
-
 
             case BXX_OPCODE:
                 code |= (0x1f & current_statement.op_code)  << 27;
@@ -157,14 +158,6 @@ void generate_code()
                 error |= check_immed((current_statement.op3), IMMED17, i);
                 code  |= (0x1ffff & (current_statement.op3));
                 break;
-
-
-            case PUSH_OPCODE:
-            case POP_OPCODE:
-                code |= (0x1f & current_statement.op_code)  << 27;
-                code |= (0x1f & (current_statement.op1))    << 17;
-                break;
-
 
             case DOT_BYTE_OP:
                 error |= check_immed(current_statement.op1, 8, i);
