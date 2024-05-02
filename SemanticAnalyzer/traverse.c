@@ -134,7 +134,7 @@ int pointerAssignCheck(TreeNode_st* pCurrentNode, VarType_et pLeftVarType, TreeN
     {
         if(pRightValue->pSymbol->symbolType != SYMBOL_POINTER && pRightValue->pSymbol->symbolType != SYMBOL_ARRAY)
         {
-            semanticError(pCurrentNode, "Assignemt to a non a pointer expression! \n");
+            semanticError(pCurrentNode, "Assignment to a non a pointer expression! \n");
             return SEMANTIC_ERROR;
         }
     }
@@ -144,13 +144,13 @@ int pointerAssignCheck(TreeNode_st* pCurrentNode, VarType_et pLeftVarType, TreeN
         {
             if(pRightValue->childNumber == 0)       //ptr = &array (not permited)
             {
-                semanticError(pCurrentNode, "Incompatible assignemt! \n");
+                semanticError(pCurrentNode, "Incompatible array to pointer assignemt! \n");
                 return SEMANTIC_ERROR; 
             }
         } 
         else if(pRightValue->pSymbol->symbolType != SYMBOL_VARIABLE)
         {
-            semanticError(pCurrentNode, "Incompatible assignemt! \n");
+            semanticError(pCurrentNode, "Incompatible non-variable to pointer assignemt! \n");
             return SEMANTIC_ERROR; 
         }
     }
@@ -164,9 +164,27 @@ int pointerAssignCheck(TreeNode_st* pCurrentNode, VarType_et pLeftVarType, TreeN
         else
             return SEMANTIC_OK;
     }
+    else if (pRightValue->nodeType == NODE_POINTER)
+    {
+        TreeNode_st* pChild_aux;
+        pChild_aux = &pCurrentNode->pChilds[1];
+        pChild_aux = &pChild_aux->pChilds[1];
+
+        if(pRightValue->nodeVarType != pLeftVarType)
+        {
+            semanticError(pCurrentNode, "Typecast type and pointer type don't match! \n");
+            return SEMANTIC_ERROR; 
+        }
+        else if (pChild_aux->nodeVarType != TYPE_CHAR && pChild_aux->nodeVarType != TYPE_INT && 
+                 pChild_aux->nodeVarType != TYPE_SHORT && pChild_aux->nodeVarType != TYPE_LONG)
+        {
+            semanticError(pCurrentNode, "Typecast type not supported!\n");
+            return SEMANTIC_ERROR; 
+        }
+    }
     else
     {
-        semanticError(pCurrentNode, "Incompatible assignemt! \n");
+        semanticError(pCurrentNode, "Incompatible assignment to pointer! \n");
         pCurrentNode->nodeVarType = TYPE_VOID;
         return SEMANTIC_ERROR;   
     }
@@ -218,21 +236,22 @@ static int checkOperator(TreeNode_st * pNode)
         case OP_ASSIGN:
         case OP_PLUS_ASSIGN:
         case OP_MINUS_ASSIGN:
+            TreeNode_st* pChild_aux;
+
             pChild1 = &pNode->pChilds[0];
             pChild2 = &pNode->pChilds[1];
-
             varType1 = pChild1->nodeVarType;
 
             if(pChild2->nodeType == NODE_TYPE_CAST)
             {
                 varType2 = pChild2->nodeVarType;
                 pChild2 = pChild2->pChilds;
+                pChild2->nodeVarType = varType2;            // TESTE
             }
             else
             {
                 varType2 = pChild2->nodeVarType;
             }
-
             if(pChild1->pSymbol != NULL)
             {
                 if(!(pChild1->pSymbol->symbolType == SYMBOL_POINTER && varType2 == TYPE_STRING && varType1 == TYPE_CHAR) && (varType1 != varType2))
@@ -241,27 +260,20 @@ static int checkOperator(TreeNode_st * pNode)
                     return SEMANTIC_ERROR; 
                 }
 
-
                 switch (pChild1->nodeType)
                 {
                 case NODE_POINTER_CONTENT:
                 case NODE_ARRAY_INDEX:
-                    if(pChild1->pSymbol->modifier == MOD_CONST)         //check if a variable is const
+                    if (pChild2->nodeType == NODE_REFERENCE) 
                     {
-                        /*semanticError(pNode, "Can not assign a constant variable! \n");
-                        pNode->nodeVarType = TYPE_VOID;
-                        return SEMANTIC_ERROR;*/
-                    }
-                    else if (pChild2->nodeType == NODE_REFERENCE) 
-                    {
-                        semanticError(pNode, "Incompatible assignemt! \n");
+                        semanticError(pNode, "Incompatible reference to pointer assignemt! \n");
                         return SEMANTIC_ERROR;
                     }
                     else if (pChild2->nodeType == NODE_IDENTIFIER) 
                     {
                         if(pChild2->pSymbol->symbolType == SYMBOL_POINTER)
                         {
-                            semanticError(pNode, "Incompatible assignemt! \n");
+                            semanticError(pNode, "Incompatible pointer assignemt! \n");
                             return SEMANTIC_ERROR;
                         }
                     }
@@ -275,25 +287,19 @@ static int checkOperator(TreeNode_st * pNode)
                     } 
                     else if(pChild1->pSymbol->symbolType == SYMBOL_FUNCTION) 
                     {
-                        semanticError(pNode, "Incompatible assignemt! \n");
+                        semanticError(pNode, "Assignment to function is not permited! \n");
                         return SEMANTIC_ERROR;   
                     }
                     else
                     {
-                        if(pChild1->pSymbol->modifier == MOD_CONST)         //check if a variable is const
+                        if(pChild2->pSymbol != NULL && pChild2->pSymbol->symbolType == SYMBOL_POINTER && pChild2->nodeType != NODE_POINTER_CONTENT)
                         {
-                            /*semanticError(pNode, "Can not assign a constant variable! \n");
-                            pNode->nodeVarType = TYPE_VOID;
-                            return SEMANTIC_ERROR;*/
-                        }
-                        else if(pChild2->pSymbol != NULL && pChild2->pSymbol->symbolType == SYMBOL_POINTER && pChild2->nodeType != NODE_POINTER_CONTENT)
-                        {
-                            semanticError(pNode, "Incompatible assignemt! \n");
+                            semanticError(pNode, "Incompatible pointer to identifier assignemt! \n");
                             return SEMANTIC_ERROR; 
                         }
                         else if(pChild2->nodeType == NODE_REFERENCE)
                         {
-                            semanticError(pNode, "Incompatible assignemt! \n");
+                            semanticError(pNode, "Incompatible reference to identifier assignemt! \n");
                             return SEMANTIC_ERROR;   
                         }
                     }
@@ -301,7 +307,7 @@ static int checkOperator(TreeNode_st * pNode)
                 
 
                 default:
-                    semanticError(pNode, "Incompatible assignemt! \n");
+                    semanticError(pNode, "Default incompatible assignemt! \n");
                     pNode->nodeVarType = TYPE_VOID;
                     break;
                 }
@@ -665,6 +671,11 @@ static void checkNode(TreeNode_st * pNode)
 
         case NODE_TYPE_CAST:
             pChild1 = &pNode->pChilds[0];
+
+            if (pChild1->nodeType == NODE_POINTER)
+            {
+                pChild1 = &pChild1->pChilds[0];
+            }
 
             pNode->nodeVarType = pChild1->nodeData.dVal;
             break; 
