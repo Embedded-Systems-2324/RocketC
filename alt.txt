@@ -1,2 +1,0 @@
-mkdir -p Output
-bison -dv -k --graph Parser/Parser.y
