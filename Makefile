@@ -11,7 +11,7 @@ parser:
 	mv Parser.* Output/
 
 src:
-	gcc -o Output/RocketC Util/Util.c Util/Logger.c SemanticAnalyzer/SymbolTable.c SemanticAnalyzer/traverse.c Output/Parser.tab.c Output/lex.yy.c CodeGeneration/CodeGeneration.c main.c
+	gcc -o Output/RocketC Util/Util.c Util/Logger.c SemanticAnalyzer/SymbolTable.c SemanticAnalyzer/traverse.c ASTOptimization/Optimization.c Output/Parser.tab.c Output/lex.yy.c CodeGeneration/CodeGeneration.c main.c
 
 clean:
 	rm -r Output

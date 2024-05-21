@@ -11,8 +11,6 @@ SymbolTable_st* pCurrentScope;
 static bool initialized = false;
 static uint32_t errorCounter = 0;
 
-static void traverse (TreeNode_st* pNode, void (*preOrder) (TreeNode_st* ), void (*postOrder) (TreeNode_st* ));
-static void nullProc(TreeNode_st * st);
 static void buildSymbolTables(TreeNode_st* pNode);
 static void checkNode(TreeNode_st * pNode);
 
@@ -53,7 +51,7 @@ static int semanticError(TreeNode_st* pNode, char * message)
  * @param preOrder pointer to the pre-order function to be applied at each node
  * @param postOrder pointer to the post-order function to be applied at each node
  */
-static void traverse (TreeNode_st* pNode, void (*preOrder) (TreeNode_st* ), void (*postOrder) (TreeNode_st* ))
+void traverse (TreeNode_st* pNode, void (*preOrder) (TreeNode_st* ), void (*postOrder) (TreeNode_st* ))
 {
     if (pNode != NULL)
     {
@@ -72,7 +70,7 @@ static void traverse (TreeNode_st* pNode, void (*preOrder) (TreeNode_st* ), void
 /**
  * @brief placeholder function that doesn't really do anything
  */
-static void nullProc(TreeNode_st * st)
+void nullProc(TreeNode_st * st)
 { 
     if (st==NULL) 
         return;

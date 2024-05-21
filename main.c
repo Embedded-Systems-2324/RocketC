@@ -12,6 +12,7 @@
 
 #include "SemanticAnalyzer/SymbolTable.h"
 #include "SemanticAnalyzer/traverse.h"
+#include "ASTOptimization/Optimization.h"
 
 #include "Util/Globals.h"
 #include "Util/TreeNode.h"
@@ -92,6 +93,12 @@ int main(int argc, char *argv[])
                 printSymbolTables();
                 LOG_WARNING_SHORT("\n\n-----------------SYMBOLS END-----------------\n");
             //}
+
+            LOG_WARNING_SHORT("\n-------------------OPTIMIZED AST-------------------\n\n");
+            executeOptimization(pTreeRoot);
+            PrintNode(pTreeRoot);
+            LOG_WARNING_SHORT("\n\n-----------------OPTIMIZED  AST END-----------------\n\n\n");
+
 
             // Free Symbol Table resources
             LOG_MESSAGE_SHORT("\nReleasing Symbol Table resources...\n");

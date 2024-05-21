@@ -14,6 +14,8 @@ int executeSemanticAnalisys(TreeNode_st* pTreeRoot, SymbolTable_st** ppGlobalTab
 
 #endif
 
+void traverse (TreeNode_st* pNode, void (*preOrder) (TreeNode_st* ), void (*postOrder) (TreeNode_st* ));
+void nullProc(TreeNode_st * st);
 
 /*
 1ª travessia - preorder
