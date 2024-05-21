@@ -1,6 +1,5 @@
 float function1(int x, float y, float z);
 
-
 int main()
 {
     //float z, y;

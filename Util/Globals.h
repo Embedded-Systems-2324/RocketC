@@ -58,7 +58,7 @@ typedef enum
     TYPE_DOUBLE,
     TYPE_LONG_DOUBLE, 
     TYPE_STRING,
-    TYPE_VOID
+    TYPE_VOID,
 }VarType_et;
 
 typedef enum

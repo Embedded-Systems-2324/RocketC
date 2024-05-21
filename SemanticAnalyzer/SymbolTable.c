@@ -180,6 +180,7 @@ void freeSymbolTable()
         }
         free(curTable);
     }
+
     endCompiling();
 }
 

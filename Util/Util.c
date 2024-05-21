@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <locale.h>
 #include "Util.h"
 #include "Globals.h"
 #include "Logger.h"
@@ -569,10 +570,7 @@ void PrintNode(TreeNode_st* pNode)
 
 
 
-
-
-
 void endCompiling(void)
 {
-    printf("\n\nmake: *** [Makefile:19: prog] Error segmentation fault (core dumped)\n");
+    //printf("\n\nmake: *** [Makefile:19: prog] Error segmentation fault (core dumped)\n");
 }
