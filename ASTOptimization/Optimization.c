@@ -7,7 +7,10 @@
 
 static void optimizeAST(TreeNode_st* pTreeRoot);
 static int operationInt(int a, int b, long op);
-static double operationDouble(double a, double b, long op);
+static double operationFloat(double a, double b, long op);
+static void checkIntType(TreeNode_st* pTreeRoot);
+static void checkFloatType(TreeNode_st* pTreeRoot);
+
 
 static void optimizeAST(TreeNode_st* pTreeRoot)
 {   
@@ -23,10 +26,7 @@ static void optimizeAST(TreeNode_st* pTreeRoot)
                 case OP_BITWISE_NOT:
                     if(pChild1->nodeType == NODE_INTEGER)
                     {	
-                        pTreeRoot->nodeType = NODE_INTEGER;
-                        pTreeRoot->nodeData.dVal = operationInt(pChild1->nodeData.dVal, 0, pTreeRoot->nodeData.dVal);
-                        free(pTreeRoot->pChilds);
-                        pTreeRoot->childNumber = 0;
+                        checkIntType(pTreeRoot);
                     }
                 break;
 
@@ -38,17 +38,11 @@ static void optimizeAST(TreeNode_st* pTreeRoot)
 
                     if(pChild1->nodeType == NODE_INTEGER && pChild2->nodeType == NODE_INTEGER)
                     {	
-                        pTreeRoot->nodeType = NODE_INTEGER;
-                        pTreeRoot->nodeData.dVal = operationInt(pChild1->nodeData.dVal, pChild2->nodeData.dVal, pTreeRoot->nodeData.dVal);
-                        free(pTreeRoot->pChilds);
-                        pTreeRoot->childNumber = 0;
+                        checkIntType(pTreeRoot);
                         
                     }else if(pChild1->nodeType == NODE_FLOAT && pChild2->nodeType == NODE_FLOAT){
 
-                        pTreeRoot->nodeType = NODE_FLOAT;
-                        pTreeRoot->nodeData.fVal = operationDouble(pChild1->nodeData.fVal, pChild2->nodeData.fVal, pTreeRoot->nodeData.dVal);
-                        free(pTreeRoot->pChilds);
-                        pTreeRoot->childNumber = 0;
+                        checkFloatType(pTreeRoot);
                     }
                 break;
 
@@ -60,11 +54,7 @@ static void optimizeAST(TreeNode_st* pTreeRoot)
 
                     if(pChild1->nodeType == NODE_INTEGER && pChild2->nodeType == NODE_INTEGER)
                     {	
-                        pTreeRoot->nodeType = NODE_INTEGER;
-                        pTreeRoot->nodeData.dVal = operationInt(pChild1->nodeData.dVal, pChild2->nodeData.dVal, pTreeRoot->nodeData.dVal);
-                        free(pTreeRoot->pChilds);
-                        pTreeRoot->childNumber = 0;
-                        
+                        checkIntType(pTreeRoot);
                     }
                 break;
 
@@ -75,7 +65,27 @@ static void optimizeAST(TreeNode_st* pTreeRoot)
     return;
 }
 
-static double operationDouble(double a, double b, long op){
+static void checkIntType(TreeNode_st* pTreeRoot){
+
+    pTreeRoot->nodeType = NODE_INTEGER;
+    int var2 = pTreeRoot->pChilds[1].nodeData.dVal;
+    if (pTreeRoot->nodeData.dVal == OP_BITWISE_NOT)
+        var2 = 0;
+
+    pTreeRoot->nodeData.dVal = operationInt(pTreeRoot->pChilds[0].nodeData.dVal, var2, pTreeRoot->nodeData.dVal);
+    free(pTreeRoot->pChilds);
+    pTreeRoot->childNumber = 0;
+}
+
+static void checkFloatType(TreeNode_st* pTreeRoot){
+
+    pTreeRoot->nodeType = NODE_FLOAT;
+    pTreeRoot->nodeData.fVal = operationFloat(pTreeRoot->pChilds[0].nodeData.fVal, pTreeRoot->pChilds[1].nodeData.fVal, pTreeRoot->nodeData.dVal);
+    free(pTreeRoot->pChilds);
+    pTreeRoot->childNumber = 0;
+}
+
+static double operationFloat(double a, double b, long op){
 
     switch(op) {
         case OP_PLUS:
