@@ -18,6 +18,7 @@
 #include "Util/TreeNode.h"
 #include "Util/Logger.h"
 #include "Util/Util.h"
+#include "CodeGeneration/CodeGeneration.h"
 
 static TreeNode_st* pTreeRoot;
 static SymbolTable_st* pGlobalSymTable;
@@ -51,6 +52,9 @@ int getSourceFile(FILE** ppSourceFile)
 
 int main(int argc, char *argv[])
 {
+    codeGenerationTestUnit();
+    return 0;
+
     char* pMode;
 
     if (argc < 2 || argc > 3)

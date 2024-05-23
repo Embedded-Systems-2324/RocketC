@@ -103,9 +103,7 @@ int NodeAddNewChild(TreeNode_st* pParent, TreeNode_st** ppNewChild, NodeType_et 
     (*ppNewChild)->pSymbol = NULL;
 
     return 0;
-}   
-
-
+}
 
 int NodeAddChildCopy(TreeNode_st* pParent, TreeNode_st *pChild)
 {
@@ -126,8 +124,6 @@ int NodeAddChildCopy(TreeNode_st* pParent, TreeNode_st *pChild)
 
     return 0;
 }
-
-
 
 int StringCreateAndCopy(char** ppDest, char* pSrc, size_t strLen)
 {
@@ -344,6 +340,7 @@ void PrintNode(TreeNode_st* pNode)
         pNode = pNode->pSibling;
     }
     UNINDENT;
+
     return;
 }
 

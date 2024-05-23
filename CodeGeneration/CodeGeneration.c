@@ -1,13 +1,14 @@
 #include "../Util/Logger.h"
 #include "CodeGeneration.h"
 #include "CodeGenerationTypes.h"
+#include "../Util/Util.h"
 
 #define MAX_IMMED_ALU ((1 << 16) - 1)
-#define MAX_IMMED_LD  ((1 << 23) - 1)
-#define MAX_IMMED_LDI ((1 << 23) - 1)
-#define MAX_IMMED_LDX ((1 << 18) - 1)
-#define MAX_IMMED_ST  ((1 << 23) - 1)
-#define MAX_IMMED_STX ((1 << 18) - 1)
+#define MAX_IMMED_LD  ((1 << 22) - 1)
+#define MAX_IMMED_LDI ((1 << 22) - 1)
+#define MAX_IMMED_LDX ((1 << 17) - 1)
+#define MAX_IMMED_ST  ((1 << 22) - 1)
+#define MAX_IMMED_STX ((1 << 17) - 1)
 
 #define INSTRUCTION(x) (instructionLut[(x)])
 #define REGISTER(x) (regNameLut[(x)])
@@ -15,7 +16,10 @@
 #define R_CHILD_TYPE(p) ((p)->pChilds[1].nodeType)
 #define L_CHILD_DVAL(p) ((p)->pChilds[0].nodeData.dVal)
 #define R_CHILD_DVAL(p) ((p)->pChilds[1].nodeData.dVal)
-#define SYMB_MEM_LOC(p) ((p)->symbolContent_u.memoryLocation)
+
+#define L_CHILD_MEM_LOC(p) ((p)->pChilds[0].pSymbol->symbolContent_u.memoryLocation)
+#define R_CHILD_MEM_LOC(p) ((p)->pChilds[1].pSymbol->symbolContent_u.memoryLocation)
+
 #define L_CHILD(p) ((p)->pChilds[0])
 #define R_CHILD(p) ((p)->pChilds[1])
 #define VALID_ALU_IMMED(x) ((x) <= MAX_IMMED_ALU)
@@ -34,11 +38,13 @@ typedef struct
 }operator_pair_st;
 
 static FILE* pAsmFile;
-static int generateCode(TreeNode_st* pTreeNode);
-static int parseNode(TreeNode_st* pTreeNode);
+static reg_et contextRegister;
 
-static reg_et getNextAvailableReg();
 static int releaseReg(reg_et reg);
+static reg_et getNextAvailableReg();
+static int parseNode(TreeNode_st* pTreeNode);
+static int generateCode(TreeNode_st* pTreeNode);
+
 static reg_state_st regStateList[] =
 {
     {.regName = REG_R12, .isFree = true},
@@ -59,6 +65,13 @@ static operator_pair_st operatorLut[] =
 {
     {.operatorType = OP_PLUS, .asmInstruction = INST_ADD},
     {.operatorType = OP_MINUS, .asmInstruction = INST_SUB},
+    {.operatorType = OP_RIGHT_SHIFT, .asmInstruction = INST_RR},
+    {.operatorType = OP_LEFT_SHIFT, .asmInstruction = INST_RL},
+    {.operatorType = OP_BITWISE_AND, .asmInstruction = INST_AND},
+    {.operatorType = OP_BITWISE_NOT, .asmInstruction = INST_NOT},
+    {.operatorType = OP_BITWISE_OR, .asmInstruction = INST_OR},
+    {.operatorType = OP_BITWISE_XOR, .asmInstruction = INST_XOR},
+
 };
 
 #define OPERATOR_LUT_SIZE (sizeof(operatorLut) / sizeof(operator_pair_st))
@@ -106,6 +119,14 @@ static int generateCode(TreeNode_st* pTreeNode)
     return 0;
 }
 
+/// \brief This function allows to generate code for ALU instructions
+/// \param instructionType Enum representing the ALU instruction to emit
+/// \param isImed Boolean value that defines if the right hand operand should be an immediate or from memory
+/// \param imedValue If isImed is set to true, this value is used as the right hand operand
+/// \param resultReg Register to put the operation result into
+/// \param leftOperand Left side operand
+/// \param rightOperand Right side operand, only used if isImed is equal to false
+/// \return -EINVAL if invalid arguments are passed, -EPERM if the combination of arguments is invalid, 0 on success
 static int emitAluInstruction(asm_instr_et instructionType,
                               uint8_t isImed,
                               uint32_t imedValue,
@@ -113,9 +134,6 @@ static int emitAluInstruction(asm_instr_et instructionType,
                               reg_et leftOperand,
                               reg_et rightOperand)
 {
-    //Check if it is a valid ALU instruction
-    if (instructionType > INST_XOR)
-        return -EINVAL;
 
     //NOT instruction can't use immediate as a parameter
     if ((instructionType == INST_NOT) && (isImed))
@@ -175,7 +193,7 @@ static int emitAluInstruction(asm_instr_et instructionType,
 /// \param instructionType Enum representing the instruction to generate assembly for
 /// \param reg Register used for the memory operation
 /// \param idx Index register used for LDX and STX operations
-/// \param dVal Immediate value sued for the memory operation
+/// \param dVal Immediate value used for the memory operation
 /// \return -EINVAL if invalid arguments are passed, -EPERM if the passed instruction is not a valid memory instruction
 /// returns 0 on success.
 static int emitMemoryInstruction(asm_instr_et instructionType, reg_et reg, reg_et idx, uint32_t dVal)
@@ -253,28 +271,71 @@ static int loadImmOptimized(uint32_t dVal, reg_et destReg)
 static int generateAluOperation(OperatorType_et opType, TreeNode_st* pTreeNode, reg_et destReg)
 {
     uint32_t memAddr;
+    uint32_t leftAddr;
+    uint32_t rightAddr;
     reg_et lReg = getNextAvailableReg();
     reg_et rReg = getNextAvailableReg();
     asm_instr_et asmInstruction = mapInstructionFromOperator(opType);
 
-    if (L_CHILD_TYPE(pTreeNode) == NODE_INTEGER && R_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
+    if ((L_CHILD_TYPE(pTreeNode) == NODE_INTEGER) && (R_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER))
     {
-        if (VALID_ALU_IMMED(L_CHILD_DVAL(pTreeNode)))
+        memAddr = R_CHILD_MEM_LOC(pTreeNode);
+        emitMemoryInstruction(INST_LD, rReg, REG_NONE, memAddr);
+
+        //Since ALU always performs Immed - RLeft, for performing subtractions with immediate, instead of a SUB
+        //an ADD with the immediate negated is performed
+        if (opType == OP_MINUS)
         {
-            emitAluInstruction(asmInstruction, true, L_CHILD_DVAL(pTreeNode), destReg, lReg, REG_NONE);
+            if (VALID_ALU_IMMED(L_CHILD_DVAL(pTreeNode)))
+            {
+                emitAluInstruction(INST_ADD, true, -L_CHILD_DVAL(pTreeNode), destReg, rReg, REG_NONE);
+            }
+            else
+            {
+                loadImmOptimized(-L_CHILD_DVAL(pTreeNode), lReg);
+                emitAluInstruction(INST_ADD, false, 0, destReg, lReg, rReg);
+            }
         }
         else
         {
+            if (VALID_ALU_IMMED(L_CHILD_DVAL(pTreeNode)))
+            {
+                emitAluInstruction(asmInstruction, true, L_CHILD_DVAL(pTreeNode), destReg, rReg, REG_NONE);
+            }
+            else
+            {
+                loadImmOptimized(L_CHILD_DVAL(pTreeNode), lReg);
+                emitAluInstruction(asmInstruction, false, 0, destReg, lReg, rReg);
+            }
+        }
+    }
+    else if((L_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER) && (R_CHILD_TYPE(pTreeNode) == NODE_INTEGER))
+    {
+        memAddr = L_CHILD_MEM_LOC(pTreeNode);
+        emitMemoryInstruction(INST_LD, lReg, REG_NONE, memAddr);
 
+        if (VALID_ALU_IMMED(R_CHILD_DVAL(pTreeNode)))
+        {
+            emitAluInstruction(asmInstruction, true, destReg, lReg, R_CHILD_DVAL(pTreeNode), REG_NONE);
+        }
+        else
+        {
+            loadImmOptimized(R_CHILD_DVAL(pTreeNode), lReg);
+            emitAluInstruction(asmInstruction, false, 0, destReg, lReg, rReg);
         }
     }
     else if (L_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER && R_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
     {
-        LOG_DEBUG("Un-Implemented condition!\n");
+        leftAddr = L_CHILD_MEM_LOC(pTreeNode);
+        rightAddr = R_CHILD_MEM_LOC(pTreeNode);
+
+        loadImmOptimized(leftAddr, lReg);
+        loadImmOptimized(rightAddr, rReg);
+        emitAluInstruction(asmInstruction, false, 0, destReg, lReg, rReg);
     }
     else
     {
-        LOG_DEBUG("Un-Implemented condition!\n");
+        LOG_ERROR("Un-Implemented condition!\n");
     }
 
     releaseReg(lReg);
@@ -283,20 +344,46 @@ static int generateAluOperation(OperatorType_et opType, TreeNode_st* pTreeNode, 
     return 0;
 }
 
+static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st* pTreeNode)
+{
+    reg_et tempReg = getNextAvailableReg();
+
+    switch (operatorType)
+    {
+        case OP_ASSIGN:
+        {
+            if (R_CHILD_TYPE(pTreeNode) == NODE_INTEGER)
+            {
+                loadImmOptimized(R_CHILD_DVAL(pTreeNode), tempReg);
+                emitMemoryInstruction(INST_ST, tempReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
+            }
+            break;
+        }
+        default:
+            LOG_ERROR("Un-Implemented assignment operation!\n");
+    }
+
+    releaseReg(tempReg);
+}
+
 static int parseOperatorNode(TreeNode_st* pTreeNode)
 {
-    reg_et lReg, rReg, dReg;
+    reg_et dReg;
+    dReg = getNextAvailableReg();
     OperatorType_et opType = (OperatorType_et) pTreeNode->nodeData.dVal;
 
     switch (opType)
     {
         case OP_PLUS:
         {
-
+            generateAluOperation(opType, pTreeNode, dReg);
+            contextRegister = dReg;
             break;
         }
         case OP_MINUS:
+        {
             break;
+        }
         case OP_RIGHT_SHIFT:
             break;
         case OP_LEFT_SHIFT:
@@ -459,7 +546,10 @@ static reg_et getNextAvailableReg()
     for (size_t i = 0; i < NOF_SCRATCH_REGISTER; ++i)
     {
         if (regStateList[i].isFree)
+        {
+            regStateList[i].isFree = false;
             return regStateList[i].regName;
+        }
     }
 
     LOG_ERROR("No register available!\n");
@@ -488,4 +578,48 @@ static int releaseReg(reg_et reg)
     }
 
     return -ENODATA;
+}
+
+
+void codeGenerationTestUnit()
+{
+    reg_et reg;
+    TreeNode_st treeRoot;
+    TreeNode_st* pLeftChild;
+    TreeNode_st* pRightChild;
+    SymbolEntry_st symbolEntry = {.symbolContent_u.memoryLocation = 0xDEADC0DE};
+
+    reg = getNextAvailableReg();
+    pAsmFile = stdout;
+
+//    Un-Comment for testing ALU operations of type L:Immediate R:Variable
+//    treeRoot.nodeType = NODE_OPERATOR;
+//    treeRoot.nodeData.dVal = OP_PLUS;
+//
+//    NodeAddNewChild(&treeRoot, &pLeftChild, NODE_INTEGER);
+//    NodeAddNewChild(&treeRoot, &pRightChild, NODE_IDENTIFIER);
+//
+//    pLeftChild->nodeData.dVal = 0xFAFEDEAD;
+//    pRightChild->pSymbol = &symbolEntry;
+//
+//    generateAluOperation(OP_PLUS, &treeRoot, reg);
+//    generateAluOperation(OP_MINUS, &treeRoot, reg);
+
+//    Un-Comment for testing ALU operations of type  L:Variable R:Immediate
+//    treeRoot.nodeType = NODE_OPERATOR;
+//    treeRoot.nodeData.dVal = OP_PLUS;
+//
+//    NodeAddNewChild(&treeRoot, &pLeftChild, NODE_IDENTIFIER);
+//    NodeAddNewChild(&treeRoot, &pRightChild, NODE_INTEGER);
+//
+//    pLeftChild->pSymbol = &symbolEntry;
+//    pRightChild->nodeData.dVal = 0xFAFEDEAD;
+//
+//    generateAluOperation(OP_PLUS, &treeRoot, reg);
+//    generateAluOperation(OP_MINUS, &treeRoot, reg);
+//    generateAluOperation(OP_BITWISE_XOR, &treeRoot, reg);
+
+    treeRoot.nodeType = NODE_OPERATOR;
+    treeRoot.nodeData.dVal = OP_ASSIGN;
+
 }

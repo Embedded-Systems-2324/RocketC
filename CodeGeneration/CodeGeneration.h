@@ -4,5 +4,6 @@
 #include "../Util/TreeNode.h"
 
 int executeCodeGeneration(TreeNode_st* pTreeRoot, const char* pDestFile);
+void codeGenerationTestUnit();
 
 #endif
