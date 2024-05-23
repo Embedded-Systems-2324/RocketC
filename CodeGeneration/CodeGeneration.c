@@ -9,10 +9,17 @@
 #define MAX_IMMED_ST  ((1 << 23) - 1)
 #define MAX_IMMED_STX ((1 << 18) - 1)
 
-#define INSTRUCTION(x) (instructionLut[x])
-#define REGISTER(x) (regNameLut[x])
-#define L_CHILD_TYPE(p) (p->pChilds[0].nodeType)
-#define R_CHILD_TYPE(p) (p->pChilds[1].nodeType)
+#define INSTRUCTION(x) (instructionLut[(x)])
+#define REGISTER(x) (regNameLut[(x)])
+#define L_CHILD_TYPE(p) ((p)->pChilds[0].nodeType)
+#define R_CHILD_TYPE(p) ((p)->pChilds[1].nodeType)
+#define L_CHILD_DVAL(p) ((p)->pChilds[0].nodeData.dVal)
+#define R_CHILD_DVAL(p) ((p)->pChilds[1].nodeData.dVal)
+#define SYMB_MEM_LOC(p) ((p)->symbolContent_u.memoryLocation)
+#define L_CHILD(p) ((p)->pChilds[0])
+#define R_CHILD(p) ((p)->pChilds[1])
+#define VALID_ALU_IMMED(x) ((x) <= MAX_IMMED_ALU)
+#define VALID_LDI_IMMED(x) ((x) <= MAX_IMMED_LDI)
 
 typedef struct
 {
@@ -54,7 +61,21 @@ static operator_pair_st operatorLut[] =
     {.operatorType = OP_MINUS, .asmInstruction = INST_SUB},
 };
 
+#define OPERATOR_LUT_SIZE (sizeof(operatorLut) / sizeof(operator_pair_st))
 #define NOF_SCRATCH_REGISTER (sizeof(regStateList) / sizeof(reg_state_st))
+
+static asm_instr_et mapInstructionFromOperator(OperatorType_et opType)
+{
+    size_t i;
+
+    for (i = 0; i < OPERATOR_LUT_SIZE; ++i)
+    {
+        if (operatorLut[i].operatorType == opType)
+            return operatorLut[i].asmInstruction;
+    }
+
+    return INST_NOP;
+}
 
 int executeCodeGeneration(TreeNode_st* pTreeRoot, const char* pDestFile)
 {
@@ -193,9 +214,53 @@ static int loadImm32(uint32_t dVal, reg_et destReg)
     return ret;
 }
 
-static int generateAluOperation(OperatorType_et op, TreeNode_st* pLeftOp, TreeNode_st* pRightOp)
+static int loadImmOptimized(uint32_t dVal, reg_et destReg)
 {
+    int ret;
 
+    if (VALID_LDI_IMMED(dVal))
+    {
+        ret = emitMemoryInstruction(INST_LDI, destReg, REG_NONE, dVal);
+    }
+    else
+    {
+        ret = loadImm32(dVal, destReg);
+    }
+
+    return ret;
+}
+
+static int generateAluOperation(OperatorType_et opType, TreeNode_st* pTreeNode, reg_et destReg)
+{
+    uint32_t memAddr;
+    reg_et lReg = getNextAvailableReg();
+    reg_et rReg = getNextAvailableReg();
+    asm_instr_et asmInstruction = mapInstructionFromOperator(opType);
+
+    if (L_CHILD_TYPE(pTreeNode) == NODE_INTEGER && R_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
+    {
+        if (VALID_ALU_IMMED(L_CHILD_DVAL(pTreeNode)))
+        {
+            emitAluInstruction(asmInstruction, true, L_CHILD_DVAL(pTreeNode), destReg, lReg, REG_NONE);
+        }
+        else
+        {
+
+        }
+    }
+    else if (L_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER && R_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
+    {
+        LOG_DEBUG("Un-Implemented condition!\n");
+    }
+    else
+    {
+        LOG_DEBUG("Un-Implemented condition!\n");
+    }
+
+    releaseReg(lReg);
+    releaseReg(rReg);
+
+    return 0;
 }
 
 static int parseOperatorNode(TreeNode_st* pTreeNode)
@@ -207,19 +272,6 @@ static int parseOperatorNode(TreeNode_st* pTreeNode)
     {
         case OP_PLUS:
         {
-            if (L_CHILD_TYPE(pTreeNode) == NODE_INTEGER && R_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
-            {
-                lReg = getNextAvailableReg();
-
-            }
-            else if (L_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER && R_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
-            {
-
-            }
-            else
-            {
-                LOG_DEBUG("Un-Implemented condition!\n");
-            }
 
             break;
         }

@@ -50,25 +50,26 @@ typedef struct SymbolEntry
     ModQualifier_et modifier;       // Variable modifier
     VisQualifier_et visibility;     // Variable visibility   
 
-    union{
+    union
+    {
         //pointers and variables
-        int memoryLocation;                 // memory offset        
+        uint32_t memoryLocation;                 // memory offset
 
         //functions
-        struct{
+        struct
+        {
             uint8_t parameterNumber;        // Number of Function Params
             parameter_st* parameters;       // List of parameters
             bool isImplemented;             // Flag to signal whether it's just the signature or the implementation
         }SymbolFunction_s;
 
         //arrays
-        struct{
-            int memoryLocation;             // Array Location
+        struct
+        {
+            uint32_t memoryLocation;             // Array Location
             uint32_t arraySize;             // Array size
         }SymbolArray_s;
-
     }symbolContent_u;
-
 } SymbolEntry_st;
 
 
