@@ -8,7 +8,6 @@
 #include <ctype.h>
 #include "Types.h"
 
-
 #define FLAG_REGISTER 1
 
 typedef enum

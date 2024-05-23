@@ -123,28 +123,48 @@ static int emitAluInstruction(asm_instr_et instructionType,
 
     if (isImed)
     {
-        fprintf(pAsmFile, "%s %s,%s,#%d\n",
-                INSTRUCTION(instructionType),
-                REGISTER(resultReg),
-                REGISTER(leftOperand),
-                imedValue);
-    }
-    else
-    {
-        if (rightOperand == REG_NONE)
+        if (instructionType == INST_CMP)
         {
-            fprintf(pAsmFile, "%s %s,%s\n",
+            fprintf(pAsmFile, "%s %s,#%d\n",
                     INSTRUCTION(instructionType),
-                    REGISTER(resultReg),
-                    REGISTER(leftOperand));
+                    REGISTER(leftOperand),
+                    imedValue);
         }
         else
         {
-            fprintf(pAsmFile, "%s %s,%s,%s\n",
+            fprintf(pAsmFile, "%s %s,%s,#%d\n",
                     INSTRUCTION(instructionType),
                     REGISTER(resultReg),
                     REGISTER(leftOperand),
+                    imedValue);
+        }
+    }
+    else
+    {
+        if (instructionType == INST_CMP)
+        {
+            fprintf(pAsmFile, "%s %s,%s\n",
+                    INSTRUCTION(instructionType),
+                    REGISTER(leftOperand),
                     REGISTER(rightOperand));
+        }
+        else
+        {
+            if (rightOperand == REG_NONE)
+            {
+                fprintf(pAsmFile, "%s %s,%s\n",
+                        INSTRUCTION(instructionType),
+                        REGISTER(resultReg),
+                        REGISTER(leftOperand));
+            }
+            else
+            {
+                fprintf(pAsmFile, "%s %s,%s,%s\n",
+                        INSTRUCTION(instructionType),
+                        REGISTER(resultReg),
+                        REGISTER(leftOperand),
+                        REGISTER(rightOperand));
+            }
         }
     }
 
