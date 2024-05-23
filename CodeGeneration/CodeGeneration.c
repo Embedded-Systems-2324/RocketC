@@ -489,3 +489,62 @@ static int releaseReg(reg_et reg)
 
     return -ENODATA;
 }
+
+static int generateMultiplication()
+{
+    int ret = 0;
+    
+    // Init Regs to contain result and condition
+    reg_et regResult, regCondition;
+    ret = emitMemoryInstruction(INST_LDI, regResult, REG_NONE, 0);
+
+    // Emit all 32 iterations
+    for(size_t i = 0; i < 32; i++)
+    {
+        //Label = SKIP_MUL_ADD_BITi
+
+        ret |= emitAluInstruction(INST_ADD, 1, 1, regCondition, REG_R5, REG_NONE);
+        ret |= emitAluInstruction(INST_CMP, 1, 0, REG_NONE, regCondition, REG_NONE);
+        // Emit BNE to label bellow
+        ret |= emitAluInstruction(INST_ADD, 0, 0, regResult, regResult, REG_R4);
+        // Emit Label
+        ret |= emitAluInstruction(INST_RL, 1, 1, REG_R4, REG_R4, REG_NONE);
+        ret |= emitAluInstruction(INST_RR, 1, 1, REG_R5, REG_R5, REG_NONE);
+    }
+
+    // Move result to return register
+    ret |= emitMemoryInstruction(INST_LD, REG_R4, regResult, 0);
+    return 0;
+}
+
+static int generateDivision()
+{
+    int ret = 0;
+
+    reg_et regQuocient, regRemainder, regCondition, regTemp1, regTemp2;
+    ret = emitMemoryInstruction(INST_LDI, regQuocient, REG_NONE, 0);
+    ret |= emitMemoryInstruction(INST_LDI, regRemainder, REG_NONE, 0);
+
+    for(size_t i = 0; i < 32; i++)
+    {
+        ret |= emitAluInstruction(INST_RR, 1, (31 - i), regTemp1, REG_R4, REG_NONE);
+        ret |= emitAluInstruction(INST_AND, 1, 1, regTemp1, regTemp1, REG_NONE);
+        ret |= emitAluInstruction(INST_RL, 1, 1, regTemp2, regRemainder, REG_NONE);
+        ret |= emitAluInstruction(INST_OR, 0, 0, regRemainder, regTemp1, regTemp2);
+
+        ret |= emitAluInstruction(INST_SUB, 0, 0, regCondition, regRemainder, REG_R5);
+        // Emit BGE to label bellow
+        ret |= emitAluInstruction(INST_SUB, 0, 0, regRemainder, regRemainder, REG_R5);
+        ret |= emitMemoryInstruction(INST_LDI, regTemp1, 0, 1);
+        ret |= emitAluInstruction(INST_RL, 1, (31-i), regTemp1, regTemp1, REG_NONE);
+        ret |= emitAluInstruction(INST_OR, 0, 0, regQuocient, regQuocient, regTemp1);
+        
+        // Emit label SKIP_DIV_BITi
+    }
+
+    // Load Quocient and Remainder to return registers
+    ret |= emitMemoryInstruction(INST_LD, REG_R4, regQuocient, 0);
+    ret |= emitMemoryInstruction(INST_LD, REG_R5, regRemainder, 0);
+
+    return ret;
+}
