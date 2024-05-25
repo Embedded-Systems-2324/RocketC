@@ -29,50 +29,53 @@ typedef struct
 {
     reg_et regName;
     bool isFree;
-}reg_state_st;
+} reg_state_st;
 
 typedef struct
 {
     OperatorType_et operatorType;
     asm_instr_et asmInstruction;
-}operator_pair_st;
+} operator_pair_st;
 
-static FILE* pAsmFile;
+static FILE *pAsmFile;
 static reg_et contextRegister;
 
 static int releaseReg(reg_et reg);
+
 static reg_et getNextAvailableReg();
-static int parseNode(TreeNode_st* pTreeNode);
-static int generateCode(TreeNode_st* pTreeNode);
+
+static int parseNode(TreeNode_st *pTreeNode);
+
+static int generateCode(TreeNode_st *pTreeNode);
 
 static reg_state_st regStateList[] =
-{
-    {.regName = REG_R12, .isFree = true},
-    {.regName = REG_R13, .isFree = true},
-    {.regName = REG_R14, .isFree = true},
-    {.regName = REG_R15, .isFree = true},
-    {.regName = REG_R24, .isFree = true},
-    {.regName = REG_R25, .isFree = true},
-    {.regName = REG_R26, .isFree = true},
-    {.regName = REG_R27, .isFree = true},
-    {.regName = REG_R28, .isFree = true},
-    {.regName = REG_R29, .isFree = true},
-    {.regName = REG_R30, .isFree = true},
-    {.regName = REG_R31, .isFree = true}
-};
+        {
+                {.regName = REG_R12, .isFree = true},
+                {.regName = REG_R13, .isFree = true},
+                {.regName = REG_R14, .isFree = true},
+                {.regName = REG_R15, .isFree = true},
+                {.regName = REG_R24, .isFree = true},
+                {.regName = REG_R25, .isFree = true},
+                {.regName = REG_R26, .isFree = true},
+                {.regName = REG_R27, .isFree = true},
+                {.regName = REG_R28, .isFree = true},
+                {.regName = REG_R29, .isFree = true},
+                {.regName = REG_R30, .isFree = true},
+                {.regName = REG_R31, .isFree = true}
+        };
 
 static operator_pair_st operatorLut[] =
-{
-    {.operatorType = OP_PLUS, .asmInstruction = INST_ADD},
-    {.operatorType = OP_MINUS, .asmInstruction = INST_SUB},
-    {.operatorType = OP_RIGHT_SHIFT, .asmInstruction = INST_RR},
-    {.operatorType = OP_LEFT_SHIFT, .asmInstruction = INST_RL},
-    {.operatorType = OP_BITWISE_AND, .asmInstruction = INST_AND},
-    {.operatorType = OP_BITWISE_NOT, .asmInstruction = INST_NOT},
-    {.operatorType = OP_BITWISE_OR, .asmInstruction = INST_OR},
-    {.operatorType = OP_BITWISE_XOR, .asmInstruction = INST_XOR},
+        {
+                {.operatorType = OP_PLUS, .asmInstruction = INST_ADD},
+                {.operatorType = OP_MINUS, .asmInstruction = INST_SUB},
+                {.operatorType = OP_RIGHT_SHIFT, .asmInstruction = INST_RR},
+                {.operatorType = OP_LEFT_SHIFT, .asmInstruction = INST_RL},
+                {.operatorType = OP_BITWISE_AND, .asmInstruction = INST_AND},
+                {.operatorType = OP_BITWISE_NOT, .asmInstruction = INST_NOT},
+                {.operatorType = OP_BITWISE_OR, .asmInstruction = INST_OR},
+                {.operatorType = OP_BITWISE_XOR, .asmInstruction = INST_XOR},
 
-};
+        };
 
 #define OPERATOR_LUT_SIZE (sizeof(operatorLut) / sizeof(operator_pair_st))
 #define NOF_SCRATCH_REGISTER (sizeof(regStateList) / sizeof(reg_state_st))
@@ -90,7 +93,7 @@ static asm_instr_et mapInstructionFromOperator(OperatorType_et opType)
     return INST_NOP;
 }
 
-int executeCodeGeneration(TreeNode_st* pTreeRoot, const char* pDestFile)
+int executeCodeGeneration(TreeNode_st *pTreeRoot, const char *pDestFile)
 {
     if (!pTreeRoot || !pDestFile)
         return -EINVAL;
@@ -102,9 +105,9 @@ int executeCodeGeneration(TreeNode_st* pTreeRoot, const char* pDestFile)
     return 0;
 }
 
-static int generateCode(TreeNode_st* pTreeNode)
+static int generateCode(TreeNode_st *pTreeNode)
 {
-    TreeNode_st* pSib;
+    TreeNode_st *pSib;
     int ret = parseNode(pTreeNode);
     if (ret < 0)
         return ret;
@@ -268,7 +271,7 @@ static int loadImmOptimized(uint32_t dVal, reg_et destReg)
     return ret;
 }
 
-static int generateAluOperation(OperatorType_et opType, TreeNode_st* pTreeNode, reg_et destReg)
+static int generateAluOperation(OperatorType_et opType, TreeNode_st *pTreeNode, reg_et destReg)
 {
     uint32_t memAddr;
     uint32_t leftAddr;
@@ -309,7 +312,7 @@ static int generateAluOperation(OperatorType_et opType, TreeNode_st* pTreeNode, 
             }
         }
     }
-    else if((L_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER) && (R_CHILD_TYPE(pTreeNode) == NODE_INTEGER))
+    else if ((L_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER) && (R_CHILD_TYPE(pTreeNode) == NODE_INTEGER))
     {
         memAddr = L_CHILD_MEM_LOC(pTreeNode);
         emitMemoryInstruction(INST_LD, lReg, REG_NONE, memAddr);
@@ -344,7 +347,7 @@ static int generateAluOperation(OperatorType_et opType, TreeNode_st* pTreeNode, 
     return 0;
 }
 
-static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st* pTreeNode)
+static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pTreeNode)
 {
     reg_et tempReg = getNextAvailableReg();
 
@@ -366,7 +369,7 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st* pT
     releaseReg(tempReg);
 }
 
-static int parseOperatorNode(TreeNode_st* pTreeNode)
+static int parseOperatorNode(TreeNode_st *pTreeNode)
 {
     reg_et dReg;
     dReg = getNextAvailableReg();
@@ -449,7 +452,7 @@ static int parseOperatorNode(TreeNode_st* pTreeNode)
     }
 }
 
-static int parseNode(TreeNode_st* pTreeNode)
+static int parseNode(TreeNode_st *pTreeNode)
 {
     switch (pTreeNode->nodeType)
     {
@@ -580,13 +583,12 @@ static int releaseReg(reg_et reg)
     return -ENODATA;
 }
 
-
 void codeGenerationTestUnit()
 {
     reg_et reg;
     TreeNode_st treeRoot;
-    TreeNode_st* pLeftChild;
-    TreeNode_st* pRightChild;
+    TreeNode_st *pLeftChild;
+    TreeNode_st *pRightChild;
     SymbolEntry_st symbolEntry = {.symbolContent_u.memoryLocation = 0xDEADC0DE};
 
     reg = getNextAvailableReg();
@@ -621,5 +623,63 @@ void codeGenerationTestUnit()
 
     treeRoot.nodeType = NODE_OPERATOR;
     treeRoot.nodeData.dVal = OP_ASSIGN;
+}
 
+static int generateMultiplication()
+{
+    int ret = 0;
+
+    // Init Regs to contain result and condition
+    reg_et regResult, regCondition;
+    ret = emitMemoryInstruction(INST_LDI, regResult, REG_NONE, 0);
+
+    // Emit all 32 iterations
+    for (size_t i = 0; i < 32; i++)
+    {
+        //Label = SKIP_MUL_ADD_BITi
+
+        ret |= emitAluInstruction(INST_ADD, 1, 1, regCondition, REG_R5, REG_NONE);
+        ret |= emitAluInstruction(INST_CMP, 1, 0, REG_NONE, regCondition, REG_NONE);
+        // Emit BNE to label bellow
+        ret |= emitAluInstruction(INST_ADD, 0, 0, regResult, regResult, REG_R4);
+        // Emit Label
+        ret |= emitAluInstruction(INST_RL, 1, 1, REG_R4, REG_R4, REG_NONE);
+        ret |= emitAluInstruction(INST_RR, 1, 1, REG_R5, REG_R5, REG_NONE);
+    }
+
+    // Move result to return register
+    ret |= emitMemoryInstruction(INST_LD, REG_R4, regResult, 0);
+    return 0;
+}
+
+static int generateDivision()
+{
+    int ret = 0;
+
+    reg_et regQuocient, regRemainder, regCondition, regTemp1, regTemp2;
+    ret = emitMemoryInstruction(INST_LDI, regQuocient, REG_NONE, 0);
+    ret |= emitMemoryInstruction(INST_LDI, regRemainder, REG_NONE, 0);
+
+    for (size_t i = 0; i < 32; i++)
+    {
+        ret |= emitAluInstruction(INST_RR, 1, (31 - i), regTemp1, REG_R4, REG_NONE);
+        ret |= emitAluInstruction(INST_AND, 1, 1, regTemp1, regTemp1, REG_NONE);
+        ret |= emitAluInstruction(INST_RL, 1, 1, regTemp2, regRemainder, REG_NONE);
+        ret |= emitAluInstruction(INST_OR, 0, 0, regRemainder, regTemp1, regTemp2);
+
+        ret |= emitAluInstruction(INST_SUB, 0, 0, regCondition, regRemainder, REG_R5);
+        // Emit BGE to label bellow
+        ret |= emitAluInstruction(INST_SUB, 0, 0, regRemainder, regRemainder, REG_R5);
+        ret |= emitMemoryInstruction(INST_LDI, regTemp1, 0, 1);
+        ret |= emitAluInstruction(INST_RL, 1, (31 - i), regTemp1, regTemp1, REG_NONE);
+        ret |= emitAluInstruction(INST_OR, 0, 0, regQuocient, regQuocient, regTemp1);
+
+        // Emit label SKIP_DIV_BITi
+    }
+
+    // Load Quocient and Remainder to return registers
+    ret |= emitMemoryInstruction(INST_LD, REG_R4, regQuocient, 0);
+    ret |= emitMemoryInstruction(INST_LD, REG_R5, regRemainder, 0);
+
+    return ret;
 }
