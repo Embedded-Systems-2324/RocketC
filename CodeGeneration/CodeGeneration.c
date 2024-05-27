@@ -3,12 +3,14 @@
 #include "CodeGenerationTypes.h"
 #include "../Util/Util.h"
 
-#define MAX_IMMED_ALU ((1 << 16) - 1)
-#define MAX_IMMED_LD  ((1 << 22) - 1)
-#define MAX_IMMED_LDI ((1 << 22) - 1)
-#define MAX_IMMED_LDX ((1 << 17) - 1)
-#define MAX_IMMED_ST  ((1 << 22) - 1)
-#define MAX_IMMED_STX ((1 << 17) - 1)
+#define MAX_32BIT_RANGE  0xFFFFFFFF
+#define MAX_IMMED_ALU   ((1 << 16) - 1)
+#define MAX_IMMED_LD    ((1 << 22) - 1)
+#define MAX_IMMED_LDI   ((1 << 22) - 1)
+#define MAX_IMMED_LDX   ((1 << 17) - 1)
+#define MAX_IMMED_ST    ((1 << 22) - 1)
+#define MAX_IMMED_STX   ((1 << 17) - 1)
+
 
 #define INSTRUCTION(x) (instructionLut[(x)])
 #define REGISTER(x) (regNameLut[(x)])
@@ -24,6 +26,15 @@
 #define R_CHILD(p) ((p)->pChilds[1])
 #define VALID_ALU_IMMED(x) ((x) <= MAX_IMMED_ALU)
 #define VALID_LDI_IMMED(x) ((x) <= MAX_IMMED_LDI)
+#define VALID_LD_IMMED(x) ((x) <= MAX_IMMED_LD)
+#define VALID_ST_IMMED(x) ((x) <= MAX_IMMED_ST)
+#define IS_IN_32BIT_RANGE(x) ((x) <= MAX_32BIT_RANGE)
+
+#define IS_TERMINAL_NODE(x) (((x) == NODE_IDENTIFIER) || ((x) == NODE_INTEGER) || ((x) == NODE_CHAR) || ((x) == NODE_FLOAT))
+
+
+#define TraceCode 1
+
 
 typedef struct
 {
@@ -34,11 +45,14 @@ typedef struct
 typedef struct
 {
     OperatorType_et operatorType;
+    OperatorType_et assignOpType;
     asm_instr_et asmInstruction;
 } operator_pair_st;
 
 static FILE *pAsmFile;
 static reg_et contextRegister;
+
+void emitComment(char * c) {if (TraceCode) fprintf(pAsmFile,"; %s\n",c);}
 
 static int releaseReg(reg_et reg);
 
@@ -66,19 +80,21 @@ static reg_state_st regStateList[] =
 
 static operator_pair_st operatorLut[] =
         {
-                {.operatorType = OP_PLUS, .asmInstruction = INST_ADD},
-                {.operatorType = OP_MINUS, .asmInstruction = INST_SUB},
-                {.operatorType = OP_RIGHT_SHIFT, .asmInstruction = INST_RR},
-                {.operatorType = OP_LEFT_SHIFT, .asmInstruction = INST_RL},
-                {.operatorType = OP_BITWISE_AND, .asmInstruction = INST_AND},
-                {.operatorType = OP_BITWISE_NOT, .asmInstruction = INST_NOT},
-                {.operatorType = OP_BITWISE_OR, .asmInstruction = INST_OR},
-                {.operatorType = OP_BITWISE_XOR, .asmInstruction = INST_XOR},
+                {.operatorType = OP_PLUS, .assignOpType = OP_PLUS_ASSIGN, .asmInstruction = INST_ADD},
+                {.operatorType = OP_MINUS, .assignOpType = OP_MINUS_ASSIGN, .asmInstruction = INST_SUB},
+                {.operatorType = OP_RIGHT_SHIFT, .assignOpType = OP_RIGHT_SHIFT_ASSIGN, .asmInstruction = INST_RR},
+                {.operatorType = OP_LEFT_SHIFT, .assignOpType = OP_LEFT_SHIFT_ASSIGN, .asmInstruction = INST_RL},
+                {.operatorType = OP_BITWISE_AND, .assignOpType = OP_BITWISE_AND_ASSIGN, .asmInstruction = INST_AND},
+                {.operatorType = OP_BITWISE_NOT,.assignOpType = -1, .asmInstruction = INST_NOT},
+                {.operatorType = OP_BITWISE_OR, .assignOpType = OP_BITWISE_OR_ASSIGN, .asmInstruction = INST_OR},
+                {.operatorType = OP_BITWISE_XOR, .assignOpType = OP_BITWISE_XOR_ASSIGN, .asmInstruction = INST_XOR},
 
         };
 
+
 #define OPERATOR_LUT_SIZE (sizeof(operatorLut) / sizeof(operator_pair_st))
 #define NOF_SCRATCH_REGISTER (sizeof(regStateList) / sizeof(reg_state_st))
+
 
 static asm_instr_et mapInstructionFromOperator(OperatorType_et opType)
 {
@@ -86,7 +102,22 @@ static asm_instr_et mapInstructionFromOperator(OperatorType_et opType)
 
     for (i = 0; i < OPERATOR_LUT_SIZE; ++i)
     {
+        
         if (operatorLut[i].operatorType == opType)
+            return operatorLut[i].asmInstruction;
+    }
+
+    return INST_NOP;
+}
+
+static OperatorType_et mapInstructionFromAssignOp(OperatorType_et opType)
+{
+    size_t i;
+
+    for (i = 0; i < OPERATOR_LUT_SIZE; ++i)
+    {
+        
+        if (operatorLut[i].assignOpType == opType)
             return operatorLut[i].asmInstruction;
     }
 
@@ -140,6 +171,9 @@ static int emitAluInstruction(asm_instr_et instructionType,
 
     //NOT instruction can't use immediate as a parameter
     if ((instructionType == INST_NOT) && (isImed))
+        return -EPERM;
+
+    if((isImed) && (rightOperand != REG_NONE))
         return -EPERM;
 
     if (isImed)
@@ -204,30 +238,87 @@ static int emitMemoryInstruction(asm_instr_et instructionType, reg_et reg, reg_e
     if (reg >= REG_NONE)
         return -EINVAL;
 
-    if ((instructionType == INST_LD) || (instructionType == INST_LDI) || (instructionType == INST_ST))
+    switch (instructionType)
     {
-        fprintf(pAsmFile, "%s %s,#%d\n",
-                INSTRUCTION(instructionType),
-                REGISTER(reg),
-                dVal & MAX_IMMED_LDI);
-    }
-    else if ((instructionType == INST_LDX) || (instructionType == INST_STX))
-    {
-        if (idx >= REG_NONE)
-            return -EINVAL;
+        case INST_LD:
 
-        fprintf(pAsmFile, "%s %s,%s,#%d\n",
+            if(VALID_LD_IMMED(dVal))
+            {
+                fprintf(pAsmFile, "%s %s,#%d\n",
                 INSTRUCTION(instructionType),
                 REGISTER(reg),
-                REGISTER(idx),
-                dVal & MAX_IMMED_LDX);
-    }
-    else
-    {
+                dVal & MAX_IMMED_LD);
+            }
+            else
+            {               
+                //Emit LDI of dVal to a Register X
+                //Emit LDX reg, register X, 0
+                reg_et auxReg = getNextAvailableReg();
+                emitMemoryInstruction(INST_LDI, auxReg, REG_NONE, dVal);
+                emitMemoryInstruction(INST_LDX, reg, auxReg, 0);
+                releaseReg(auxReg);                    
+            }  
+        break;
+
+        case INST_LDI:
+
+            if(VALID_LDI_IMMED(dVal))
+            {
+                fprintf(pAsmFile, "%s %s,#%d\n",
+                INSTRUCTION(instructionType),
+                REGISTER(reg),
+                dVal & MAX_IMMED_LD);
+            }
+            else
+                loadImm32(dVal, reg);
+        break;
+
+        case INST_ST:
+
+            if(VALID_ST_IMMED(dVal))
+            {
+                fprintf(pAsmFile, "%s %s,#%d\n",
+                INSTRUCTION(instructionType),
+                REGISTER(reg),
+                dVal & MAX_IMMED_ST);
+            }
+            else
+            {               
+                //Emit LDI of dVal to a Register X
+                //Emit LDX reg, register X, 0
+                reg_et auxReg = getNextAvailableReg();
+                emitMemoryInstruction(INST_LDI, auxReg, REG_NONE, dVal);
+                emitMemoryInstruction(INST_STX, reg, auxReg, 0);
+                releaseReg(auxReg);                    
+            }
+        break;
+
+        case INST_LDX:
+        case INST_STX:
+            
+            if (idx >= REG_NONE)
+                return -EINVAL;
+
+            fprintf(pAsmFile, "%s %s,%s,#%d\n",
+                    INSTRUCTION(instructionType),
+                    REGISTER(reg),
+                    REGISTER(idx),
+                    dVal & MAX_IMMED_LDX);
+        break;
+
+    default:
         return -EPERM;
     }
+        
 
-    return 0;
+    // if ((instructionType == INST_LD) || (instructionType == INST_LDI) || (instructionType == INST_ST))
+    // {
+    //     fprintf(pAsmFile, "%s %s,#%d\n",
+    //             INSTRUCTION(instructionType),
+    //             REGISTER(reg),
+    //             dVal & MAX_IMMED_LDI);
+    // }
+
 }
 
 /// \brief Considering the LDI instruction only allows to load values up to 2^22 - 1, some arithmetic must be used in
@@ -255,21 +346,6 @@ static int loadImm32(uint32_t dVal, reg_et destReg)
     return ret;
 }
 
-static int loadImmOptimized(uint32_t dVal, reg_et destReg)
-{
-    int ret;
-
-    if (VALID_LDI_IMMED(dVal))
-    {
-        ret = emitMemoryInstruction(INST_LDI, destReg, REG_NONE, dVal);
-    }
-    else
-    {
-        ret = loadImm32(dVal, destReg);
-    }
-
-    return ret;
-}
 
 static int generateAluOperation(OperatorType_et opType, TreeNode_st *pTreeNode, reg_et destReg)
 {
@@ -283,6 +359,7 @@ static int generateAluOperation(OperatorType_et opType, TreeNode_st *pTreeNode, 
     if ((L_CHILD_TYPE(pTreeNode) == NODE_INTEGER) && (R_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER))
     {
         memAddr = R_CHILD_MEM_LOC(pTreeNode);
+
         emitMemoryInstruction(INST_LD, rReg, REG_NONE, memAddr);
 
         //Since ALU always performs Immed - RLeft, for performing subtractions with immediate, instead of a SUB
@@ -295,7 +372,7 @@ static int generateAluOperation(OperatorType_et opType, TreeNode_st *pTreeNode, 
             }
             else
             {
-                loadImmOptimized(-L_CHILD_DVAL(pTreeNode), lReg);
+                emitMemoryInstruction(INST_LDI, lReg, REG_NONE, -L_CHILD_DVAL(pTreeNode));
                 emitAluInstruction(INST_ADD, false, 0, destReg, lReg, rReg);
             }
         }
@@ -307,7 +384,7 @@ static int generateAluOperation(OperatorType_et opType, TreeNode_st *pTreeNode, 
             }
             else
             {
-                loadImmOptimized(L_CHILD_DVAL(pTreeNode), lReg);
+                emitMemoryInstruction(INST_LDI, lReg, REG_NONE, L_CHILD_DVAL(pTreeNode));
                 emitAluInstruction(asmInstruction, false, 0, destReg, lReg, rReg);
             }
         }
@@ -323,7 +400,7 @@ static int generateAluOperation(OperatorType_et opType, TreeNode_st *pTreeNode, 
         }
         else
         {
-            loadImmOptimized(R_CHILD_DVAL(pTreeNode), lReg);
+            emitMemoryInstruction(INST_LDI, lReg, REG_NONE, R_CHILD_DVAL(pTreeNode));
             emitAluInstruction(asmInstruction, false, 0, destReg, lReg, rReg);
         }
     }
@@ -332,8 +409,8 @@ static int generateAluOperation(OperatorType_et opType, TreeNode_st *pTreeNode, 
         leftAddr = L_CHILD_MEM_LOC(pTreeNode);
         rightAddr = R_CHILD_MEM_LOC(pTreeNode);
 
-        loadImmOptimized(leftAddr, lReg);
-        loadImmOptimized(rightAddr, rReg);
+        emitMemoryInstruction(INST_LDI, lReg, REG_NONE, leftAddr);
+        emitMemoryInstruction(INST_LDI, rReg, REG_NONE, rightAddr);
         emitAluInstruction(asmInstruction, false, 0, destReg, lReg, rReg);
     }
     else
@@ -347,9 +424,11 @@ static int generateAluOperation(OperatorType_et opType, TreeNode_st *pTreeNode, 
     return 0;
 }
 
-static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pTreeNode)
+
+
+static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pTreeNode, reg_et destReg)
 {
-    reg_et tempReg = getNextAvailableReg();
+    uint32_t memAddr;
 
     switch (operatorType)
     {
@@ -357,16 +436,46 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
         {
             if (R_CHILD_TYPE(pTreeNode) == NODE_INTEGER)
             {
-                loadImmOptimized(R_CHILD_DVAL(pTreeNode), tempReg);
-                emitMemoryInstruction(INST_ST, tempReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
+                emitMemoryInstruction(INST_LDI, destReg, REG_NONE, R_CHILD_DVAL(pTreeNode));
+                emitMemoryInstruction(INST_ST, destReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
+            }
+            else if (R_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
+            {
+                emitMemoryInstruction(INST_LD, destReg, REG_NONE, R_CHILD_MEM_LOC(pTreeNode));
+                emitMemoryInstruction(INST_ST, destReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
             }
             break;
         }
+        case OP_PLUS_ASSIGN:
+        case OP_MINUS_ASSIGN:
+        case OP_LEFT_SHIFT_ASSIGN:
+        case OP_RIGHT_SHIFT_ASSIGN:
+        case OP_BITWISE_AND_ASSIGN:
+        case OP_BITWISE_OR_ASSIGN:
+        case OP_BITWISE_XOR_ASSIGN:
+        //case OP_MULTIPLY_ASSIGN:    Not Yet Handled!
+        //case OP_DIVIDE_ASSIGN:      Not Yet Handled!
+        //case OP_MODULUS_ASSIGN:     Not Yet Handled!
+
+            if (R_CHILD_TYPE(pTreeNode) == NODE_INTEGER)
+            {
+                emitMemoryInstruction(INST_LD, destReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
+                emitAluInstruction(mapInstructionFromAssignOp(operatorType), true, R_CHILD_DVAL(pTreeNode), destReg, destReg, REG_NONE);
+            }
+            else if (R_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
+            {
+                uint32_t tempReg1 = getNextAvailableReg();
+                emitMemoryInstruction(INST_LD, tempReg1, REG_NONE, R_CHILD_MEM_LOC(pTreeNode));
+                emitMemoryInstruction(INST_LD, destReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
+                emitAluInstruction(mapInstructionFromAssignOp(operatorType), false, 0, destReg, destReg, tempReg1);
+                releaseReg(tempReg1);
+            }
+
+            emitMemoryInstruction(INST_ST, destReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
+            break;
         default:
             LOG_ERROR("Un-Implemented assignment operation!\n");
     }
-
-    releaseReg(tempReg);
 }
 
 static int parseOperatorNode(TreeNode_st *pTreeNode)
@@ -467,7 +576,15 @@ static int parseNode(TreeNode_st *pTreeNode)
         case NODE_TYPE:
             break;
         case NODE_OPERATOR:
-            parseOperatorNode(pTreeNode);
+            //Check if childs are terminal Nodes
+            // if(IS_TERMINAL_NODE(L_CHILD_TYPE(pTreeNode)) &&  IS_TERMINAL_NODE(R_CHILD_TYPE(pTreeNode)))
+            // {
+                 parseOperatorNode(pTreeNode);
+            // }
+            // else
+            // {
+
+            // }
             break;
         case NODE_TERNARY:
             break;
@@ -589,23 +706,26 @@ void codeGenerationTestUnit()
     TreeNode_st treeRoot;
     TreeNode_st *pLeftChild;
     TreeNode_st *pRightChild;
-    SymbolEntry_st symbolEntry = {.symbolContent_u.memoryLocation = 0xDEADC0DE};
+    SymbolEntry_st symbolEntry = {.symbolContent_u.memoryLocation = 0x20};
+    SymbolEntry_st symbolEntry2 = {.symbolContent_u.memoryLocation = 0xF};
 
     reg = getNextAvailableReg();
     pAsmFile = stdout;
 
+    emitComment("--> Asm File");
+
 //    Un-Comment for testing ALU operations of type L:Immediate R:Variable
 //    treeRoot.nodeType = NODE_OPERATOR;
-//    treeRoot.nodeData.dVal = OP_PLUS;
-//
-//    NodeAddNewChild(&treeRoot, &pLeftChild, NODE_INTEGER);
-//    NodeAddNewChild(&treeRoot, &pRightChild, NODE_IDENTIFIER);
-//
+//    treeRoot.nodeData.dVal = OP_BITWISE_XOR;
+
+//     NodeAddNewChild(&treeRoot, &pLeftChild, NODE_INTEGER);
+//     NodeAddNewChild(&treeRoot, &pRightChild, NODE_IDENTIFIER);
+
 //    pLeftChild->nodeData.dVal = 0xFAFEDEAD;
 //    pRightChild->pSymbol = &symbolEntry;
-//
-//    generateAluOperation(OP_PLUS, &treeRoot, reg);
-//    generateAluOperation(OP_MINUS, &treeRoot, reg);
+
+   //generateAluOperation(OP_PLUS, &treeRoot, reg);
+ //  generateAluOperation(OP_MINUS, &treeRoot, reg);
 
 //    Un-Comment for testing ALU operations of type  L:Variable R:Immediate
 //    treeRoot.nodeType = NODE_OPERATOR;
@@ -619,10 +739,25 @@ void codeGenerationTestUnit()
 //
 //    generateAluOperation(OP_PLUS, &treeRoot, reg);
 //    generateAluOperation(OP_MINUS, &treeRoot, reg);
-//    generateAluOperation(OP_BITWISE_XOR, &treeRoot, reg);
+// generateAluOperation(treeRoot.nodeData.dVal, &treeRoot, reg);
 
-    treeRoot.nodeType = NODE_OPERATOR;
-    treeRoot.nodeData.dVal = OP_ASSIGN;
+   //ASSIGN TESTS
+   treeRoot.nodeType = NODE_OPERATOR;
+   treeRoot.nodeData.dVal = OP_MINUS_ASSIGN;
+
+   NodeAddNewChild(&treeRoot, &pLeftChild, NODE_IDENTIFIER);
+   NodeAddNewChild(&treeRoot, &pRightChild, NODE_INTEGER);
+
+   pRightChild->nodeData.dVal = 0x1;
+   //pRightChild->pSymbol = &symbolEntry2; //0xF
+   pLeftChild->pSymbol = &symbolEntry;   //0x20
+
+   
+
+   generateAssignOperation(treeRoot.nodeData.dVal, &treeRoot, reg);
+
+   releaseReg(reg);
+    
 }
 
 static int generateMultiplication()
