@@ -1,5 +1,5 @@
-#ifndef _OPTIMIZATION_H_
-#define _OPTIMIZATION_H_
+#ifndef _CONSTFOLDING_H_
+#define _CONSTFOLDING_H_
 
 #include "../Util/Globals.h"
 #include "../Util/TreeNode.h"

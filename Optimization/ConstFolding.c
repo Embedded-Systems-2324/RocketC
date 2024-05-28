@@ -3,7 +3,7 @@
 #include "../Util/Globals.h"
 #include "../Util/Logger.h"
 #include "../SemanticAnalyzer/traverse.h"
-#include "../ASTOptimization/Optimization.h"
+#include "../Optimization/ConstFolding.h"
 
 static void constFolding(TreeNode_st* pTreeRoot);
 static int operationInt(int a, int b, long op);

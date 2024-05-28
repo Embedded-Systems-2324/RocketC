@@ -12,7 +12,7 @@
 
 #include "SemanticAnalyzer/SymbolTable.h"
 #include "SemanticAnalyzer/traverse.h"
-#include "ASTOptimization/Optimization.h"
+#include "Optimization/ConstFolding.h"
 
 #include "Util/Globals.h"
 #include "Util/TreeNode.h"
