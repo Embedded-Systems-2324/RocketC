@@ -68,11 +68,7 @@ static void constFolding(TreeNode_st* pTreeRoot)
 static void opIntType(TreeNode_st* pTreeRoot){
 
     pTreeRoot->nodeType = NODE_INTEGER;
-    int var2 = pTreeRoot->pChilds[1].nodeData.dVal;
-    if (pTreeRoot->nodeData.dVal == OP_BITWISE_NOT)
-        var2 = 0;
-
-    pTreeRoot->nodeData.dVal = operationInt(pTreeRoot->pChilds[0].nodeData.dVal, var2, pTreeRoot->nodeData.dVal);
+    pTreeRoot->nodeData.dVal = operationInt(pTreeRoot->pChilds[0].nodeData.dVal, pTreeRoot->pChilds[1].nodeData.dVal, pTreeRoot->nodeData.dVal);
     free(pTreeRoot->pChilds);
     pTreeRoot->childNumber = 0;
 }
