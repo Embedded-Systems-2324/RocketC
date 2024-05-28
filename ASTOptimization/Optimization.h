@@ -4,6 +4,6 @@
 #include "../Util/Globals.h"
 #include "../Util/TreeNode.h"
 
-int executeOptimization(TreeNode_st* pTreeRoot);
+int execConstFolding(TreeNode_st* pTreeRoot);
 
 #endif

@@ -5,14 +5,14 @@
 #include "../SemanticAnalyzer/traverse.h"
 #include "../ASTOptimization/Optimization.h"
 
-static void optimizeAST(TreeNode_st* pTreeRoot);
+static void constFolding(TreeNode_st* pTreeRoot);
 static int operationInt(int a, int b, long op);
 static double operationFloat(double a, double b, long op);
-static void checkIntType(TreeNode_st* pTreeRoot);
-static void checkFloatType(TreeNode_st* pTreeRoot);
+static void opIntType(TreeNode_st* pTreeRoot);
+static void opFloatType(TreeNode_st* pTreeRoot);
 
 
-static void optimizeAST(TreeNode_st* pTreeRoot)
+static void constFolding(TreeNode_st* pTreeRoot)
 {   
     TreeNode_st* pChild1;
     TreeNode_st* pChild2;
@@ -26,7 +26,7 @@ static void optimizeAST(TreeNode_st* pTreeRoot)
                 case OP_BITWISE_NOT:
                     if(pChild1->nodeType == NODE_INTEGER)
                     {	
-                        checkIntType(pTreeRoot);
+                        opIntType(pTreeRoot);
                     }
                 break;
 
@@ -38,11 +38,11 @@ static void optimizeAST(TreeNode_st* pTreeRoot)
 
                     if(pChild1->nodeType == NODE_INTEGER && pChild2->nodeType == NODE_INTEGER)
                     {	
-                        checkIntType(pTreeRoot);
+                        opIntType(pTreeRoot);
                         
                     }else if(pChild1->nodeType == NODE_FLOAT && pChild2->nodeType == NODE_FLOAT){
 
-                        checkFloatType(pTreeRoot);
+                        opFloatType(pTreeRoot);
                     }
                 break;
 
@@ -54,7 +54,7 @@ static void optimizeAST(TreeNode_st* pTreeRoot)
 
                     if(pChild1->nodeType == NODE_INTEGER && pChild2->nodeType == NODE_INTEGER)
                     {	
-                        checkIntType(pTreeRoot);
+                        opIntType(pTreeRoot);
                     }
                 break;
 
@@ -65,7 +65,7 @@ static void optimizeAST(TreeNode_st* pTreeRoot)
     return;
 }
 
-static void checkIntType(TreeNode_st* pTreeRoot){
+static void opIntType(TreeNode_st* pTreeRoot){
 
     pTreeRoot->nodeType = NODE_INTEGER;
     int var2 = pTreeRoot->pChilds[1].nodeData.dVal;
@@ -77,7 +77,7 @@ static void checkIntType(TreeNode_st* pTreeRoot){
     pTreeRoot->childNumber = 0;
 }
 
-static void checkFloatType(TreeNode_st* pTreeRoot){
+static void opFloatType(TreeNode_st* pTreeRoot){
 
     pTreeRoot->nodeType = NODE_FLOAT;
     pTreeRoot->nodeData.fVal = operationFloat(pTreeRoot->pChilds[0].nodeData.fVal, pTreeRoot->pChilds[1].nodeData.fVal, pTreeRoot->nodeData.dVal);
@@ -142,11 +142,11 @@ static int operationInt(int a, int b, long op) {
     }
 }
 
-int executeOptimization(TreeNode_st* pTreeRoot)
+int execConstFolding(TreeNode_st* pTreeRoot)
 {       
         if (!pTreeRoot)
         return -EINVAL;
 
-        traverse(pTreeRoot,nullProc,optimizeAST);
+        traverse(pTreeRoot,nullProc,constFolding);
         return 0;
 }

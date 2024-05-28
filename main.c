@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
             //}
 
             LOG_WARNING_SHORT("\n-------------------OPTIMIZED AST-------------------\n\n");
-            executeOptimization(pTreeRoot);
+            execConstFolding(pTreeRoot);
             PrintNode(pTreeRoot);
             LOG_WARNING_SHORT("\n\n-----------------OPTIMIZED  AST END-----------------\n\n\n");
 
