@@ -624,7 +624,9 @@ static int parseNode(TreeNode_st *pTreeNode)
                 }
                 else
                 {
+
                     emitAluInstruction(mapInstructionFromOperator(opType), false, 0, dReg, lReg, rReg);
+
                 }
             }
 
@@ -760,8 +762,12 @@ void codeGenerationTestUnit()
     TreeNode_st* pRightGrandChild;
     TreeNode_st* _pLeftGrandChild;
     TreeNode_st* _pRightGrandChild;
+    TreeNode_st* pLeftGrandChild_;
+    TreeNode_st* pRightGrandChild_;
     SymbolEntry_st symbolEntry = {.symbolContent_u.memoryLocation = 0x20};
     SymbolEntry_st symbolEntry2 = {.symbolContent_u.memoryLocation = 0xF};
+    SymbolEntry_st symbolEntry3 = {.symbolContent_u.memoryLocation = 0xAB};
+    SymbolEntry_st symbolEntry4 = {.symbolContent_u.memoryLocation = 0xCD};
 
     //reg = getNextAvailableReg();
     pAsmFile = stdout;
@@ -845,6 +851,81 @@ void codeGenerationTestUnit()
  *           Mem: 0xF #10
  */
 
+    // treeRoot.nodeType = NODE_OPERATOR;
+    // treeRoot.nodeData.dVal = OP_PLUS;
+
+    // NodeAddNewChild(&treeRoot, &pLeftChild, NODE_OPERATOR);
+    // NodeAddNewChild(&treeRoot, &pRightChild, NODE_OPERATOR);
+
+    // pLeftChild->nodeData.dVal = OP_PLUS;
+    // pRightChild->nodeData.dVal = OP_MINUS;
+
+    // NodeAddNewChild(pLeftChild, &pLeftGrandChild, NODE_IDENTIFIER);
+    // NodeAddNewChild(pLeftChild, &pRightGrandChild, NODE_INTEGER);
+
+    // pLeftGrandChild->pSymbol = &symbolEntry;
+    // pRightGrandChild->nodeData.dVal = 2;
+
+    // NodeAddNewChild(pRightChild, &_pLeftGrandChild, NODE_IDENTIFIER);
+    // NodeAddNewChild(pRightChild, &_pRightGrandChild, NODE_INTEGER);
+
+    // _pLeftGrandChild->pSymbol = &symbolEntry2;
+    // _pRightGrandChild->nodeData.dVal = 10;
+
+
+/*
+ *                 +
+ *             /      \
+ *            +        \
+ *           / \        \
+ *          /  #2        \
+ *         +              -
+ *       /   \          /   \
+ *   M:0xAB M:0xCD  Mem:0xF  #10
+ */
+
+    // treeRoot.nodeType = NODE_OPERATOR;
+    // treeRoot.nodeData.dVal = OP_PLUS;
+
+    // NodeAddNewChild(&treeRoot, &pLeftChild, NODE_OPERATOR);
+    // NodeAddNewChild(&treeRoot, &pRightChild, NODE_OPERATOR);
+
+    // pLeftChild->nodeData.dVal = OP_PLUS;
+    // pRightChild->nodeData.dVal = OP_MINUS;
+
+    // NodeAddNewChild(pLeftChild, &pLeftGrandChild, NODE_OPERATOR);
+    // NodeAddNewChild(pLeftChild, &pRightGrandChild, NODE_INTEGER);
+
+    // pLeftGrandChild->nodeData.dVal = OP_PLUS;
+    // pRightGrandChild->nodeData.dVal = 2;
+
+    // NodeAddNewChild(pRightChild, &_pLeftGrandChild, NODE_IDENTIFIER);
+    // NodeAddNewChild(pRightChild, &_pRightGrandChild, NODE_INTEGER);
+
+    // _pLeftGrandChild->pSymbol = &symbolEntry2;
+    // _pRightGrandChild->nodeData.dVal = 10;
+
+    // NodeAddNewChild(pLeftGrandChild, &pLeftGrandChild_, NODE_IDENTIFIER);
+    // NodeAddNewChild(pLeftGrandChild, &pRightGrandChild_, NODE_IDENTIFIER);
+
+    // pLeftGrandChild_->pSymbol = &symbolEntry3;
+    // pRightGrandChild_->pSymbol = &symbolEntry4;
+
+
+/*
+ *              +
+ *             / \
+ *            +   \
+ *           / \   \
+ *   Mem: 0x20 #2   \
+ *                   -
+ *                  / \
+ *           Mem: 0xF  +
+                      /  \
+                   0XAB  0xCD        
+ */                     
+
+
     treeRoot.nodeType = NODE_OPERATOR;
     treeRoot.nodeData.dVal = OP_PLUS;
 
@@ -861,12 +942,19 @@ void codeGenerationTestUnit()
     pRightGrandChild->nodeData.dVal = 2;
 
     NodeAddNewChild(pRightChild, &_pLeftGrandChild, NODE_IDENTIFIER);
-    NodeAddNewChild(pRightChild, &_pRightGrandChild, NODE_INTEGER);
+    NodeAddNewChild(pRightChild, &_pRightGrandChild, NODE_OPERATOR);
 
     _pLeftGrandChild->pSymbol = &symbolEntry2;
-    _pRightGrandChild->nodeData.dVal = 10;
+    _pRightGrandChild->nodeData.dVal = OP_PLUS;
 
-    generateCode(&treeRoot);
+    NodeAddNewChild(_pRightGrandChild, &pLeftGrandChild_, NODE_IDENTIFIER);
+    NodeAddNewChild(_pRightGrandChild, &pRightGrandChild_, NODE_IDENTIFIER);
+
+    pLeftGrandChild_->pSymbol = &symbolEntry3;
+    pRightGrandChild_->pSymbol = &symbolEntry4;
+
+
+     generateCode(&treeRoot);
 
     //releaseReg(reg);
 
