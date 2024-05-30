@@ -622,12 +622,19 @@ static int parseNode(TreeNode_st *pTreeNode)
                     //IDEIA: Talvez chamar aqui o parseNode e colocar estes emits nos templates dos INTEGER, IDENTIFIER, etc 
                     if (L_CHILD_TYPE(pTreeNode) == NODE_INTEGER)
                     {
-
-                        emitAluInstruction(mapInstructionFromOperator(opType), true, L_CHILD_DVAL(pTreeNode), dReg, lReg, REG_NONE);
+                        lReg = ctxReg;
+                        //Foi necessário colocar aqui a mesma verificação que está na func generateALUOperation 
+                        if(opType == OP_MINUS)
+                        {
+                            emitAluInstruction(INST_ADD, true, -L_CHILD_DVAL(pTreeNode), dReg, lReg, REG_NONE);
+                        }
+                        else
+                            emitAluInstruction(mapInstructionFromOperator(opType), true, L_CHILD_DVAL(pTreeNode), dReg, lReg, REG_NONE);
                         ctxReg = dReg;
                     }
                     else if (R_CHILD_TYPE(pTreeNode) == NODE_INTEGER)
                     {   
+                        lReg = ctxReg;
                         emitAluInstruction(mapInstructionFromOperator(opType), true, R_CHILD_DVAL(pTreeNode), dReg, lReg, REG_NONE);
                         ctxReg = dReg;  
                     }
@@ -649,23 +656,19 @@ static int parseNode(TreeNode_st *pTreeNode)
                     }
                     
                 }
-                //Se Ambos os childs forem terminais vai gerar a instrução da ALU completa 
+                //If both childs are terminals, parse the node to generate the ALU operation
                 else if (IS_TERMINAL_NODE(L_CHILD_TYPE(pTreeNode)) && IS_TERMINAL_NODE(R_CHILD_TYPE(pTreeNode)))
                 {
                     parseOperatorNode(pTreeNode, dReg);
                     ctxReg = dReg;
                 }
+                //If both childs are NOT Terminals
                 else
                 {
                     rReg = ctxReg;
                     emitAluInstruction(mapInstructionFromOperator(opType), false, 0, dReg, lReg, rReg);
                     ctxReg = dReg;
                 }
-
-                
-            
-            
-
 
             break;
         case NODE_TERNARY:
@@ -847,12 +850,21 @@ void codeGenerationTestUnit()
 //
 //    generateAssignOperation(treeRoot.nodeData.dVal, &treeRoot, reg);
 
-/* TEST 0
+
+
+
+
+
+
+
+/* TEST 0 
+ * M (Mem)-> Means it is an identifier 
+ *
  *              +
  *             / \
  *            +   1
  *           / \
- *    Mem: 32   #2
+ *       M:32   #2
  */
 
 //    treeRoot.nodeType = NODE_OPERATOR;
@@ -904,14 +916,17 @@ void codeGenerationTestUnit()
 
 
 /* TEST 2
- *                 +
- *             /      \
- *            +        \
- *           / \        \
- *          /  #2        \
- *         +              -
- *       /   \          /   \
- *   M:0xAB M:0xCD  Mem:0xF  #10
+ *                  +
+ *                /   \ 
+ *               /     \ 
+ *              /       \
+ *             /         \    
+ *            +           -
+ *           / \        /   \ 
+ *          /   #2    M:0xF  #10      
+ *         +                
+ *       /   \              
+ *   M:0xAB M:0xCD    
  */
 
     // treeRoot.nodeType = NODE_OPERATOR;
@@ -944,13 +959,16 @@ void codeGenerationTestUnit()
 
 /* TEST 3
  *                  +
- *             /        \
- *            +          \
- *           / \          \
- *          / M:0x20       \
- *         +                -
- *       /   \            /   \
- *   M:0xAB M:0xCD   Mem:0xF   #10
+ *                /   \ 
+ *               /     \ 
+ *              /       \
+ *             /         \    
+ *            +           -
+ *           / \        /   \ 
+ *          / M:0x20  #10  M:0xF
+ *         +                
+ *       /   \              
+ *   M:0xAB M:0xCD    
  */
 
     // treeRoot.nodeType = NODE_OPERATOR;
@@ -968,11 +986,12 @@ void codeGenerationTestUnit()
     // pLeftGrandChild->nodeData.dVal = OP_PLUS;
     // pRightGrandChild->pSymbol = &symbolEntry;
 
-    // NodeAddNewChild(pRightChild, &_pLeftGrandChild, NODE_IDENTIFIER);
-    // NodeAddNewChild(pRightChild, &_pRightGrandChild, NODE_INTEGER);
+    // NodeAddNewChild(pRightChild, &_pLeftGrandChild, NODE_INTEGER);
+    // NodeAddNewChild(pRightChild, &_pRightGrandChild, NODE_IDENTIFIER);
 
-    // _pLeftGrandChild->pSymbol = &symbolEntry2;
-    // _pRightGrandChild->nodeData.dVal = 10;
+    // _pLeftGrandChild->nodeData.dVal = 10;
+    // _pRightGrandChild->pSymbol = &symbolEntry2;
+    
 
     // NodeAddNewChild(pLeftGrandChild, &pLeftGrandChild_, NODE_IDENTIFIER);
     // NodeAddNewChild(pLeftGrandChild, &pRightGrandChild_, NODE_IDENTIFIER);
@@ -982,31 +1001,35 @@ void codeGenerationTestUnit()
 
 
 /* TEST 4
- *                  +  
- *             /        \
- *            +          \
- *           / \          \
- *     M:0x20    +         \
- *              / \          -
- *         M:0xAB M:0xCD   /   \
- *                      Mem:0xF #10
+ *                  -
+ *                /   \  
+ *               /     \ 
+ *              /       \
+ *             /         \
+ *            -           -
+ *           / \         / \  
+ *     M:0x20   \   Mem:0xF #10 
+ *               -         
+ *              / \          
+ *         M:0xAB M:0xCD      
+ *                 
  */
 
 
     // treeRoot.nodeType = NODE_OPERATOR;
-    // treeRoot.nodeData.dVal = OP_PLUS;
+    // treeRoot.nodeData.dVal = OP_MINUS;
 
     // NodeAddNewChild(&treeRoot, &pLeftChild, NODE_OPERATOR);
     // NodeAddNewChild(&treeRoot, &pRightChild, NODE_OPERATOR);
 
-    // pLeftChild->nodeData.dVal = OP_PLUS;
+    // pLeftChild->nodeData.dVal = OP_MINUS;
     // pRightChild->nodeData.dVal = OP_MINUS;
 
     // NodeAddNewChild(pLeftChild, &pLeftGrandChild, NODE_IDENTIFIER);
     // NodeAddNewChild(pLeftChild, &pRightGrandChild, NODE_OPERATOR);
 
     // pLeftGrandChild->pSymbol = &symbolEntry;
-    // pRightGrandChild->nodeData.dVal = OP_PLUS;
+    // pRightGrandChild->nodeData.dVal = OP_MINUS;
 
     // NodeAddNewChild(pRightChild, &_pLeftGrandChild, NODE_IDENTIFIER);
     // NodeAddNewChild(pRightChild, &_pRightGrandChild, NODE_INTEGER);
@@ -1021,23 +1044,115 @@ void codeGenerationTestUnit()
     // pRightGrandChild_->pSymbol = &symbolEntry4;
 
 
-
 /* TEST 5
  *              +
  *             / \
  *            +   \
  *           / \   \
- *   Mem: 0x20 #2   \
+ *   Mem:0x20  #2   \
  *                   -
  *                  / \
- *           Mem: 0xF   +
-                      /  \
-                   0XAB  0xCD        
+ *                 +   Mem:0xF
+ *                / \
+ *         Mem:0XAB Mem:0xCD        
  */                     
 
 
+    // treeRoot.nodeType = NODE_OPERATOR;
+    // treeRoot.nodeData.dVal = OP_PLUS;
+
+    // NodeAddNewChild(&treeRoot, &pLeftChild, NODE_OPERATOR);
+    // NodeAddNewChild(&treeRoot, &pRightChild, NODE_OPERATOR);
+
+    // pLeftChild->nodeData.dVal = OP_PLUS;
+    // pRightChild->nodeData.dVal = OP_MINUS;
+
+    // NodeAddNewChild(pLeftChild, &pLeftGrandChild, NODE_IDENTIFIER);
+    // NodeAddNewChild(pLeftChild, &pRightGrandChild, NODE_INTEGER);
+
+    // pLeftGrandChild->pSymbol = &symbolEntry;
+    // pRightGrandChild->nodeData.dVal = 2;
+
+    // NodeAddNewChild(pRightChild, &_pLeftGrandChild, NODE_OPERATOR);
+    // NodeAddNewChild(pRightChild, &_pRightGrandChild, NODE_IDENTIFIER);
+
+    // _pLeftGrandChild->nodeData.dVal = OP_PLUS;
+    // _pRightGrandChild->pSymbol = &symbolEntry2;
+
+    // NodeAddNewChild(_pLeftGrandChild, &pLeftGrandChild_, NODE_IDENTIFIER);
+    // NodeAddNewChild(_pLeftGrandChild, &pRightGrandChild_, NODE_IDENTIFIER);
+
+    // pLeftGrandChild_->pSymbol = &symbolEntry3;
+    // pRightGrandChild_->pSymbol = &symbolEntry4;
+
+
+
+
+/* TEST 6
+ *              +
+ *             / \
+ *            +   \
+ *           / \   \
+ *      M:0x20 #2   \
+ *                   -
+ *                  / \
+ *               #20   \ 
+ *                      +
+ *                    /   \
+ *                  0XAB  0xCD        
+ */                     
+
+
+    // treeRoot.nodeType = NODE_OPERATOR;
+    // treeRoot.nodeData.dVal = OP_PLUS;
+
+    // NodeAddNewChild(&treeRoot, &pLeftChild, NODE_OPERATOR);
+    // NodeAddNewChild(&treeRoot, &pRightChild, NODE_OPERATOR);
+
+    // pLeftChild->nodeData.dVal = OP_PLUS;
+    // pRightChild->nodeData.dVal = OP_MINUS;
+
+    // NodeAddNewChild(pLeftChild, &pLeftGrandChild, NODE_IDENTIFIER);
+    // NodeAddNewChild(pLeftChild, &pRightGrandChild, NODE_INTEGER);
+
+    // pLeftGrandChild->pSymbol = &symbolEntry;
+    // pRightGrandChild->nodeData.dVal = 2;
+
+    // NodeAddNewChild(pRightChild, &_pLeftGrandChild, NODE_INTEGER);
+    // NodeAddNewChild(pRightChild, &_pRightGrandChild, NODE_OPERATOR);
+
+    // _pLeftGrandChild->nodeData.dVal = 20;
+    // _pRightGrandChild->nodeData.dVal = OP_PLUS;
+
+    // NodeAddNewChild(_pRightGrandChild, &pLeftGrandChild_, NODE_IDENTIFIER);
+    // NodeAddNewChild(_pRightGrandChild, &pRightGrandChild_, NODE_IDENTIFIER);
+
+    // pLeftGrandChild_->pSymbol = &symbolEntry3;
+    // pRightGrandChild_->pSymbol = &symbolEntry4;
+
+
+
+/* TEST 7
+                     -
+                    / \
+                  /     \
+                /         \
+              /             \
+            +                 -
+          /  \               /  \
+        /      \            /    \
+      -         +         #255     -
+     / \       / \                / \
+    /   \     /   \              /   \
+ M:0xF #32  M:0xAB M:0xCD      #42  M:0x20         
+      
+ */
+
+
+TreeNode_st* pLastLevelChild_1, *pLastLevelChild_2, *pLastLevelChild_3, *pLastLevelChild_4, *pLastLevelChild_5, *pLastLevelChild_6;    
+
     treeRoot.nodeType = NODE_OPERATOR;
-    treeRoot.nodeData.dVal = OP_PLUS;
+    treeRoot.nodeData.dVal = OP_MINUS;
 
     NodeAddNewChild(&treeRoot, &pLeftChild, NODE_OPERATOR);
     NodeAddNewChild(&treeRoot, &pRightChild, NODE_OPERATOR);
@@ -1045,23 +1160,35 @@ void codeGenerationTestUnit()
     pLeftChild->nodeData.dVal = OP_PLUS;
     pRightChild->nodeData.dVal = OP_MINUS;
 
-    NodeAddNewChild(pLeftChild, &pLeftGrandChild, NODE_IDENTIFIER);
-    NodeAddNewChild(pLeftChild, &pRightGrandChild, NODE_INTEGER);
+    NodeAddNewChild(pLeftChild, &pLeftGrandChild, NODE_OPERATOR);
+    NodeAddNewChild(pLeftChild, &pRightGrandChild, NODE_OPERATOR);
 
-    pLeftGrandChild->pSymbol = &symbolEntry;
-    pRightGrandChild->nodeData.dVal = 2;
+    pLeftGrandChild->nodeData.dVal = OP_MINUS;   //1º OP da ultima linha
+    pRightGrandChild->nodeData.dVal = OP_PLUS;   //2º OP da ultima linha
 
-    NodeAddNewChild(pRightChild, &_pLeftGrandChild, NODE_IDENTIFIER);
+    NodeAddNewChild(pRightChild, &_pLeftGrandChild, NODE_INTEGER);
     NodeAddNewChild(pRightChild, &_pRightGrandChild, NODE_OPERATOR);
 
-    _pLeftGrandChild->pSymbol = &symbolEntry2;
-    _pRightGrandChild->nodeData.dVal = OP_PLUS;
+    _pLeftGrandChild->nodeData.dVal = 255;
+    _pRightGrandChild->nodeData.dVal = OP_MINUS;   //3º OP da ultima linha
 
-    NodeAddNewChild(_pRightGrandChild, &pLeftGrandChild_, NODE_IDENTIFIER);
-    NodeAddNewChild(_pRightGrandChild, &pRightGrandChild_, NODE_IDENTIFIER);
+    NodeAddNewChild(pLeftGrandChild, &pLastLevelChild_1, NODE_IDENTIFIER);
+    NodeAddNewChild(pLeftGrandChild, &pLastLevelChild_2, NODE_INTEGER);
 
-    pLeftGrandChild_->pSymbol = &symbolEntry3;
-    pRightGrandChild_->pSymbol = &symbolEntry4;
+    pLastLevelChild_1->pSymbol = &symbolEntry2;
+    pLastLevelChild_2->nodeData.dVal = 32;
+
+    NodeAddNewChild(pRightGrandChild, &pLastLevelChild_3, NODE_IDENTIFIER);
+    NodeAddNewChild(pRightGrandChild, &pLastLevelChild_4, NODE_IDENTIFIER);
+
+    pLastLevelChild_3->pSymbol = &symbolEntry3;
+    pLastLevelChild_4->pSymbol = &symbolEntry4;
+
+    NodeAddNewChild(_pRightGrandChild, &pLastLevelChild_5, NODE_INTEGER);
+    NodeAddNewChild(_pRightGrandChild, &pLastLevelChild_6, NODE_IDENTIFIER);
+
+    pLastLevelChild_5->nodeData.dVal = 42;
+    pLastLevelChild_6->pSymbol = &symbolEntry;
 
 
     generateCode(&treeRoot);
