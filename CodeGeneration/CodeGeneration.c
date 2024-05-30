@@ -573,6 +573,7 @@ static int parseOperatorNode(TreeNode_st *pTreeNode, reg_et dReg)
     return 0;
 }
 
+//IDEIA: O Parse node recebe também o nó do pai e uma variavel que diz se o nó atual está à esquerda ou direita do pai....assim criavam-se templates dos INTEGER,IDs, etc no "Case integer"/"Case ID", etc
 static int parseNode(TreeNode_st *pTreeNode)
 {
     reg_et lReg = REG_NONE;
@@ -595,8 +596,7 @@ static int parseNode(TreeNode_st *pTreeNode)
             break;
         case NODE_TYPE:
             break;
-        case NODE_OPERATOR:
-                
+        case NODE_OPERATOR:                
 
                 //Gen Code for Left Child If its not a terminal node
                 if (!IS_TERMINAL_NODE(L_CHILD_TYPE(pTreeNode)))
@@ -618,7 +618,7 @@ static int parseNode(TreeNode_st *pTreeNode)
                 if (((IS_TERMINAL_NODE(L_CHILD_TYPE(pTreeNode))) &&  (!IS_TERMINAL_NODE(R_CHILD_TYPE(pTreeNode)))) || 
                 ((IS_TERMINAL_NODE(R_CHILD_TYPE(pTreeNode))) &&  (!IS_TERMINAL_NODE(L_CHILD_TYPE(pTreeNode)))))
                 {
-                    //Falta o caso em que é outro tipo de não terminais (NODE_POINTER;...)
+                    //Falta o caso em que é outro tipo de não terminais (NODE_POINTER;... )
                     //IDEIA: Talvez chamar aqui o parseNode e colocar estes emits nos templates dos INTEGER, IDENTIFIER, etc 
                     if (L_CHILD_TYPE(pTreeNode) == NODE_INTEGER)
                     {
@@ -1149,48 +1149,139 @@ void codeGenerationTestUnit()
  */
 
 
-TreeNode_st* pLastLevelChild_1, *pLastLevelChild_2, *pLastLevelChild_3, *pLastLevelChild_4, *pLastLevelChild_5, *pLastLevelChild_6;    
+// TreeNode_st* pThirdLevelChild_1, *pThirdLevelChild_2, *pThirdLevelChild_3, *pThirdLevelChild_4, *pThirdLevelChild_5, *pThirdLevelChild_6;    
 
-    treeRoot.nodeType = NODE_OPERATOR;
-    treeRoot.nodeData.dVal = OP_MINUS;
+//     treeRoot.nodeType = NODE_OPERATOR;
+//     treeRoot.nodeData.dVal = OP_MINUS;
 
-    NodeAddNewChild(&treeRoot, &pLeftChild, NODE_OPERATOR);
-    NodeAddNewChild(&treeRoot, &pRightChild, NODE_OPERATOR);
+//     NodeAddNewChild(&treeRoot, &pLeftChild, NODE_OPERATOR);
+//     NodeAddNewChild(&treeRoot, &pRightChild, NODE_OPERATOR);
 
-    pLeftChild->nodeData.dVal = OP_PLUS;
-    pRightChild->nodeData.dVal = OP_MINUS;
+//     pLeftChild->nodeData.dVal = OP_PLUS;
+//     pRightChild->nodeData.dVal = OP_MINUS;
 
-    NodeAddNewChild(pLeftChild, &pLeftGrandChild, NODE_OPERATOR);
-    NodeAddNewChild(pLeftChild, &pRightGrandChild, NODE_OPERATOR);
+//     NodeAddNewChild(pLeftChild, &pLeftGrandChild, NODE_OPERATOR);
+//     NodeAddNewChild(pLeftChild, &pRightGrandChild, NODE_OPERATOR);
 
-    pLeftGrandChild->nodeData.dVal = OP_MINUS;   //1º OP da ultima linha
-    pRightGrandChild->nodeData.dVal = OP_PLUS;   //2º OP da ultima linha
+//     pLeftGrandChild->nodeData.dVal = OP_MINUS;   //1º OP da ultima linha
+//     pRightGrandChild->nodeData.dVal = OP_PLUS;   //2º OP da ultima linha
 
-    NodeAddNewChild(pRightChild, &_pLeftGrandChild, NODE_INTEGER);
-    NodeAddNewChild(pRightChild, &_pRightGrandChild, NODE_OPERATOR);
+//     NodeAddNewChild(pRightChild, &_pLeftGrandChild, NODE_INTEGER);
+//     NodeAddNewChild(pRightChild, &_pRightGrandChild, NODE_OPERATOR);
 
-    _pLeftGrandChild->nodeData.dVal = 255;
-    _pRightGrandChild->nodeData.dVal = OP_MINUS;   //3º OP da ultima linha
+//     _pLeftGrandChild->nodeData.dVal = 255;
+//     _pRightGrandChild->nodeData.dVal = OP_MINUS;   //3º OP da ultima linha
 
-    NodeAddNewChild(pLeftGrandChild, &pLastLevelChild_1, NODE_IDENTIFIER);
-    NodeAddNewChild(pLeftGrandChild, &pLastLevelChild_2, NODE_INTEGER);
+//     NodeAddNewChild(pLeftGrandChild, &pThirdLevelChild_1, NODE_IDENTIFIER);
+//     NodeAddNewChild(pLeftGrandChild, &pThirdLevelChild_2, NODE_INTEGER);
 
-    pLastLevelChild_1->pSymbol = &symbolEntry2;
-    pLastLevelChild_2->nodeData.dVal = 32;
+//     pThirdLevelChild_1->pSymbol = &symbolEntry2;
+//     pThirdLevelChild_2->nodeData.dVal = 32;
 
-    NodeAddNewChild(pRightGrandChild, &pLastLevelChild_3, NODE_IDENTIFIER);
-    NodeAddNewChild(pRightGrandChild, &pLastLevelChild_4, NODE_IDENTIFIER);
+//     NodeAddNewChild(pRightGrandChild, &pThirdLevelChild_3, NODE_IDENTIFIER);
+//     NodeAddNewChild(pRightGrandChild, &pThirdLevelChild_4, NODE_IDENTIFIER);
 
-    pLastLevelChild_3->pSymbol = &symbolEntry3;
-    pLastLevelChild_4->pSymbol = &symbolEntry4;
+//     pThirdLevelChild_3->pSymbol = &symbolEntry3;
+//     pThirdLevelChild_4->pSymbol = &symbolEntry4;
 
-    NodeAddNewChild(_pRightGrandChild, &pLastLevelChild_5, NODE_INTEGER);
-    NodeAddNewChild(_pRightGrandChild, &pLastLevelChild_6, NODE_IDENTIFIER);
+//     NodeAddNewChild(_pRightGrandChild, &pThirdLevelChild_5, NODE_INTEGER);
+//     NodeAddNewChild(_pRightGrandChild, &pThirdLevelChild_6, NODE_IDENTIFIER);
 
-    pLastLevelChild_5->nodeData.dVal = 42;
-    pLastLevelChild_6->pSymbol = &symbolEntry;
+//     pThirdLevelChild_5->nodeData.dVal = 42;
+//     pThirdLevelChild_6->pSymbol = &symbolEntry;
 
 
+
+/* TEST 8
+                                -
+                               / \
+                             /     \
+                           /         \
+                         /             \
+                        +                 -
+                      /  \               /  \
+                    /      \            /    \
+                  -         +         #255     -
+                 / \       / \                / \
+                /   \     /   \              /   \
+            M:0xF #32  M:0xAB  -          M:0x20  + 
+                              / \                / \
+                            /     \             /   \        
+                          #20      +           -     M:0xAB
+                                  / \         / \  
+                                 /   \       /   \
+                               0xAB  0xCD   #1  M:0xF      
+*/
+// TreeNode_st *pThirdLevelChild_1, *pThirdLevelChild_2, *pThirdLevelChild_3, *pThirdLevelChild_4, *pThirdLevelChild_5, *pThirdLevelChild_6;
+// TreeNode_st *pFourthLevelChild_1, *pFourthLevelChild_2, *pFourthLevelChild_3, *pFourthLevelChild_4;
+// TreeNode_st *pFifthLevelChild_1, *pFifthLevelChild_2, *pFifthLevelChild_3, *pFifthLevelChild_4;     
+
+//     treeRoot.nodeType = NODE_OPERATOR;
+//     treeRoot.nodeData.dVal = OP_MINUS;
+
+//     NodeAddNewChild(&treeRoot, &pLeftChild, NODE_OPERATOR);
+//     NodeAddNewChild(&treeRoot, &pRightChild, NODE_OPERATOR);
+
+//     pLeftChild->nodeData.dVal = OP_PLUS;
+//     pRightChild->nodeData.dVal = OP_MINUS;
+
+//     NodeAddNewChild(pLeftChild, &pLeftGrandChild, NODE_OPERATOR);
+//     NodeAddNewChild(pLeftChild, &pRightGrandChild, NODE_OPERATOR);
+
+//     pLeftGrandChild->nodeData.dVal = OP_MINUS;  
+//     pRightGrandChild->nodeData.dVal = OP_PLUS;   
+
+//     NodeAddNewChild(pRightChild, &_pLeftGrandChild, NODE_INTEGER);
+//     NodeAddNewChild(pRightChild, &_pRightGrandChild, NODE_OPERATOR);
+
+//     _pLeftGrandChild->nodeData.dVal = 255;
+//     _pRightGrandChild->nodeData.dVal = OP_MINUS;  
+
+//     NodeAddNewChild(pLeftGrandChild, &pThirdLevelChild_1, NODE_IDENTIFIER);
+//     NodeAddNewChild(pLeftGrandChild, &pThirdLevelChild_2, NODE_INTEGER);
+
+//     pThirdLevelChild_1->pSymbol = &symbolEntry2;
+//     pThirdLevelChild_2->nodeData.dVal = 32;
+
+//     NodeAddNewChild(pRightGrandChild, &pThirdLevelChild_3, NODE_IDENTIFIER);
+//     NodeAddNewChild(pRightGrandChild, &pThirdLevelChild_4, NODE_OPERATOR);
+
+//     pThirdLevelChild_3->pSymbol = &symbolEntry3;
+//     pThirdLevelChild_4->nodeData.dVal = OP_MINUS;
+
+//     NodeAddNewChild(_pRightGrandChild, &pThirdLevelChild_5, NODE_IDENTIFIER);
+//     NodeAddNewChild(_pRightGrandChild, &pThirdLevelChild_6, NODE_OPERATOR);
+
+//     pThirdLevelChild_5->pSymbol = &symbolEntry;
+//     pThirdLevelChild_6->nodeData.dVal = OP_PLUS;
+
+//     NodeAddNewChild(pThirdLevelChild_6, &pFourthLevelChild_3, NODE_OPERATOR);
+//     NodeAddNewChild(pThirdLevelChild_6, &pFourthLevelChild_4, NODE_IDENTIFIER);
+    
+//     pFourthLevelChild_3->nodeData.dVal = OP_MINUS;
+//     pFourthLevelChild_4->pSymbol = &symbolEntry3;
+    
+//     NodeAddNewChild(pFourthLevelChild_3, &pFifthLevelChild_3, NODE_INTEGER);
+//     NodeAddNewChild(pFourthLevelChild_3, &pFifthLevelChild_4, NODE_IDENTIFIER);
+    
+//     pFifthLevelChild_3->nodeData.dVal = 1;
+//     pFifthLevelChild_4->pSymbol = &symbolEntry2;
+    
+//     NodeAddNewChild(pThirdLevelChild_4, &pFourthLevelChild_1, NODE_INTEGER);
+//     NodeAddNewChild(pThirdLevelChild_4, &pFourthLevelChild_2, NODE_OPERATOR);
+
+//     pFourthLevelChild_1->nodeData.dVal = 20;
+//     pFourthLevelChild_2->nodeData.dVal = OP_PLUS;
+
+//     NodeAddNewChild(pFourthLevelChild_2, &pFifthLevelChild_1, NODE_IDENTIFIER);
+//     NodeAddNewChild(pFourthLevelChild_2, &pFifthLevelChild_2, NODE_IDENTIFIER);
+
+//     pFifthLevelChild_1->pSymbol = &symbolEntry3;
+//     pFifthLevelChild_2->pSymbol = &symbolEntry4;
+    
+    
+    
+    
     generateCode(&treeRoot);
 
     //releaseReg(reg);
