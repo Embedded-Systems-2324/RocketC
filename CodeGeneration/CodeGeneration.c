@@ -618,7 +618,7 @@ static int parseNode(TreeNode_st *pTreeNode)
                 if (((IS_TERMINAL_NODE(L_CHILD_TYPE(pTreeNode))) &&  (!IS_TERMINAL_NODE(R_CHILD_TYPE(pTreeNode)))) || 
                 ((IS_TERMINAL_NODE(R_CHILD_TYPE(pTreeNode))) &&  (!IS_TERMINAL_NODE(L_CHILD_TYPE(pTreeNode)))))
                 {
-                    //Falta o caso em que é outro tipo de não terminais (NODE_POINTER; IDENTIFIER...)
+                    //Falta o caso em que é outro tipo de não terminais (NODE_POINTER;...)
                     //IDEIA: Talvez chamar aqui o parseNode e colocar estes emits nos templates dos INTEGER, IDENTIFIER, etc 
                     if (L_CHILD_TYPE(pTreeNode) == NODE_INTEGER)
                     {
@@ -662,7 +662,7 @@ static int parseNode(TreeNode_st *pTreeNode)
                     parseOperatorNode(pTreeNode, dReg);
                     ctxReg = dReg;
                 }
-                //If both childs are NOT Terminals
+                //If both childs are Non-Terminals
                 else
                 {
                     rReg = ctxReg;
