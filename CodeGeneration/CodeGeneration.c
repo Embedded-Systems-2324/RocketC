@@ -54,6 +54,7 @@ typedef struct
 
 static FILE *pAsmFile;
 static reg_et ctxReg;
+static reg_et R_ctxReg;
 
 void emitComment(char *c)
 {
@@ -429,8 +430,8 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
         leftAddr = L_CHILD_MEM_LOC(pTreeNode);
         rightAddr = R_CHILD_MEM_LOC(pTreeNode);
 
-        emitMemoryInstruction(INST_LDI, lReg, REG_NONE, leftAddr);
-        emitMemoryInstruction(INST_LDI, rReg, REG_NONE, rightAddr);
+        emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr);
+        emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
         emitAluInstruction(asmInstruction, false, 0, destReg, lReg, rReg);
     }
     else
@@ -440,7 +441,6 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
 
     releaseReg(lReg);
     releaseReg(rReg);
-    ctxReg = destReg;
 
     return 0;
 }
@@ -596,45 +596,77 @@ static int parseNode(TreeNode_st *pTreeNode)
         case NODE_TYPE:
             break;
         case NODE_OPERATOR:
-            if (IS_TERMINAL_NODE(L_CHILD_TYPE(pTreeNode)) && IS_TERMINAL_NODE(R_CHILD_TYPE(pTreeNode)))
-            {
-                parseOperatorNode(pTreeNode, dReg);
-            }
-            else
-            {
+                
+
+                //Gen Code for Left Child If its not a terminal node
                 if (!IS_TERMINAL_NODE(L_CHILD_TYPE(pTreeNode)))
                 {
                     generateCode(&pTreeNode->pChilds[0]);
                     lReg = ctxReg;
                 }
 
+                
+                //Gen Code for Right Child If its not terminal node
                 if (!IS_TERMINAL_NODE(R_CHILD_TYPE(pTreeNode)))
                 {
                     generateCode(&pTreeNode->pChilds[1]);
                     rReg = ctxReg;
                 }
+                
 
-                if (L_CHILD_TYPE(pTreeNode) == NODE_INTEGER)
+                //If One Is a terminal node and the other Is Not 
+                if (((IS_TERMINAL_NODE(L_CHILD_TYPE(pTreeNode))) &&  (!IS_TERMINAL_NODE(R_CHILD_TYPE(pTreeNode)))) || 
+                ((IS_TERMINAL_NODE(R_CHILD_TYPE(pTreeNode))) &&  (!IS_TERMINAL_NODE(L_CHILD_TYPE(pTreeNode)))))
                 {
-                    emitAluInstruction(mapInstructionFromOperator(opType), true, L_CHILD_DVAL(pTreeNode), dReg, lReg, REG_NONE);
+                    //Falta o caso em que é outro tipo de não terminais (NODE_POINTER; IDENTIFIER...)
+                    //IDEIA: Talvez chamar aqui o parseNode e colocar estes emits nos templates dos INTEGER, IDENTIFIER, etc 
+                    if (L_CHILD_TYPE(pTreeNode) == NODE_INTEGER)
+                    {
+
+                        emitAluInstruction(mapInstructionFromOperator(opType), true, L_CHILD_DVAL(pTreeNode), dReg, lReg, REG_NONE);
+                        ctxReg = dReg;
+                    }
+                    else if (R_CHILD_TYPE(pTreeNode) == NODE_INTEGER)
+                    {   
+                        emitAluInstruction(mapInstructionFromOperator(opType), true, R_CHILD_DVAL(pTreeNode), dReg, lReg, REG_NONE);
+                        ctxReg = dReg;  
+                    }
+                    else if (R_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
+                    {
+                        uint32_t memAddr = R_CHILD_MEM_LOC(pTreeNode);
+                        emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr);
+                        ctxReg = dReg;
+                        rReg = dReg;
+                        emitAluInstruction(mapInstructionFromOperator(opType), false, 0, dReg, lReg, rReg);
+                    }
+                    else if(L_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
+                    {
+                        uint32_t memAddr = L_CHILD_MEM_LOC(pTreeNode);
+                        emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr);
+                        ctxReg = dReg;
+                        lReg = dReg;
+                        emitAluInstruction(mapInstructionFromOperator(opType), false, 0, dReg, lReg, rReg);
+                    }
+                    
                 }
-                else if (R_CHILD_TYPE(pTreeNode) == NODE_INTEGER)
+                //Se Ambos os childs forem terminais vai gerar a instrução da ALU completa 
+                else if (IS_TERMINAL_NODE(L_CHILD_TYPE(pTreeNode)) && IS_TERMINAL_NODE(R_CHILD_TYPE(pTreeNode)))
                 {
-                    emitAluInstruction(mapInstructionFromOperator(opType), true, R_CHILD_DVAL(pTreeNode), dReg, lReg, REG_NONE);
+                    parseOperatorNode(pTreeNode, dReg);
+                    ctxReg = dReg;
                 }
                 else
                 {
-
+                    rReg = ctxReg;
                     emitAluInstruction(mapInstructionFromOperator(opType), false, 0, dReg, lReg, rReg);
-
+                    ctxReg = dReg;
                 }
-            }
 
-            // }
-            // else
-            // {
+                
+            
+            
 
-            // }
+
             break;
         case NODE_TERNARY:
             break;
@@ -815,7 +847,7 @@ void codeGenerationTestUnit()
 //
 //    generateAssignOperation(treeRoot.nodeData.dVal, &treeRoot, reg);
 
-/*
+/* TEST 0
  *              +
  *             / \
  *            +   1
@@ -825,30 +857,28 @@ void codeGenerationTestUnit()
 
 //    treeRoot.nodeType = NODE_OPERATOR;
 //    treeRoot.nodeData.dVal = OP_PLUS;
-//
+
 //    NodeAddNewChild(&treeRoot, &pLeftChild, NODE_OPERATOR);
 //    NodeAddNewChild(&treeRoot, &pRightChild, NODE_INTEGER);
-//
+
 //    pLeftChild->nodeData.dVal = OP_PLUS;
 //    pRightChild->nodeData.dVal = 1;
-//
+
 //    NodeAddNewChild(pLeftChild, &pLeftGrandChild, NODE_IDENTIFIER);
 //    NodeAddNewChild(pLeftChild, &pRightGrandChild, NODE_INTEGER);
-//
+
 //    pLeftGrandChild->pSymbol = &symbolEntry;
 //    pRightGrandChild->nodeData.dVal = 2;
-//
-//    generateCode(&treeRoot);
 
-/*
- *              +
- *             / \
- *            +   \
- *           / \   \
- *   Mem: 0x20 #2   \
- *                   -
- *                  / \
- *           Mem: 0xF #10
+/*  TEST 1
+ *                 +
+ *              /     \
+ *             /       \
+ *            /         \
+ *           +           -    
+ *          / \        /   \
+ *   Mem:0x20 #2  Mem:0xF  #10
+ *                  
  */
 
     // treeRoot.nodeType = NODE_OPERATOR;
@@ -873,7 +903,7 @@ void codeGenerationTestUnit()
     // _pRightGrandChild->nodeData.dVal = 10;
 
 
-/*
+/* TEST 2
  *                 +
  *             /      \
  *            +        \
@@ -912,7 +942,87 @@ void codeGenerationTestUnit()
     // pRightGrandChild_->pSymbol = &symbolEntry4;
 
 
-/*
+/* TEST 3
+ *                  +
+ *             /        \
+ *            +          \
+ *           / \          \
+ *          / M:0x20       \
+ *         +                -
+ *       /   \            /   \
+ *   M:0xAB M:0xCD   Mem:0xF   #10
+ */
+
+    // treeRoot.nodeType = NODE_OPERATOR;
+    // treeRoot.nodeData.dVal = OP_PLUS;
+
+    // NodeAddNewChild(&treeRoot, &pLeftChild, NODE_OPERATOR);
+    // NodeAddNewChild(&treeRoot, &pRightChild, NODE_OPERATOR);
+
+    // pLeftChild->nodeData.dVal = OP_PLUS;
+    // pRightChild->nodeData.dVal = OP_MINUS;
+
+    // NodeAddNewChild(pLeftChild, &pLeftGrandChild, NODE_OPERATOR);
+    // NodeAddNewChild(pLeftChild, &pRightGrandChild, NODE_IDENTIFIER);
+
+    // pLeftGrandChild->nodeData.dVal = OP_PLUS;
+    // pRightGrandChild->pSymbol = &symbolEntry;
+
+    // NodeAddNewChild(pRightChild, &_pLeftGrandChild, NODE_IDENTIFIER);
+    // NodeAddNewChild(pRightChild, &_pRightGrandChild, NODE_INTEGER);
+
+    // _pLeftGrandChild->pSymbol = &symbolEntry2;
+    // _pRightGrandChild->nodeData.dVal = 10;
+
+    // NodeAddNewChild(pLeftGrandChild, &pLeftGrandChild_, NODE_IDENTIFIER);
+    // NodeAddNewChild(pLeftGrandChild, &pRightGrandChild_, NODE_IDENTIFIER);
+
+    // pLeftGrandChild_->pSymbol = &symbolEntry3;
+    // pRightGrandChild_->pSymbol = &symbolEntry4;
+
+
+/* TEST 4
+ *                  +  
+ *             /        \
+ *            +          \
+ *           / \          \
+ *     M:0x20    +         \
+ *              / \          -
+ *         M:0xAB M:0xCD   /   \
+ *                      Mem:0xF #10
+ */
+
+
+    // treeRoot.nodeType = NODE_OPERATOR;
+    // treeRoot.nodeData.dVal = OP_PLUS;
+
+    // NodeAddNewChild(&treeRoot, &pLeftChild, NODE_OPERATOR);
+    // NodeAddNewChild(&treeRoot, &pRightChild, NODE_OPERATOR);
+
+    // pLeftChild->nodeData.dVal = OP_PLUS;
+    // pRightChild->nodeData.dVal = OP_MINUS;
+
+    // NodeAddNewChild(pLeftChild, &pLeftGrandChild, NODE_IDENTIFIER);
+    // NodeAddNewChild(pLeftChild, &pRightGrandChild, NODE_OPERATOR);
+
+    // pLeftGrandChild->pSymbol = &symbolEntry;
+    // pRightGrandChild->nodeData.dVal = OP_PLUS;
+
+    // NodeAddNewChild(pRightChild, &_pLeftGrandChild, NODE_IDENTIFIER);
+    // NodeAddNewChild(pRightChild, &_pRightGrandChild, NODE_INTEGER);
+
+    // _pLeftGrandChild->pSymbol = &symbolEntry2;
+    // _pRightGrandChild->nodeData.dVal = 10;
+
+    // NodeAddNewChild(pRightGrandChild, &pLeftGrandChild_, NODE_IDENTIFIER);
+    // NodeAddNewChild(pRightGrandChild, &pRightGrandChild_, NODE_IDENTIFIER);
+
+    // pLeftGrandChild_->pSymbol = &symbolEntry3;
+    // pRightGrandChild_->pSymbol = &symbolEntry4;
+
+
+
+/* TEST 5
  *              +
  *             / \
  *            +   \
@@ -920,7 +1030,7 @@ void codeGenerationTestUnit()
  *   Mem: 0x20 #2   \
  *                   -
  *                  / \
- *           Mem: 0xF  +
+ *           Mem: 0xF   +
                       /  \
                    0XAB  0xCD        
  */                     
@@ -954,7 +1064,7 @@ void codeGenerationTestUnit()
     pRightGrandChild_->pSymbol = &symbolEntry4;
 
 
-     generateCode(&treeRoot);
+    generateCode(&treeRoot);
 
     //releaseReg(reg);
 

@@ -150,7 +150,8 @@ static const char* regNameLut[] =
     "R28",
     "R29",
     "R30",
-    "R31"
+    "R31",
+    "REG_NONE"
 };
 
 #endif
