@@ -44,7 +44,8 @@ typedef enum
     OP_MULTIPLY_ASSIGN,         // 29
     OP_DIVIDE_ASSIGN,           // 30
     OP_SIZEOF,                  // 31
-    OP_NEGATIVE
+    OP_NEGATIVE,
+    OP_NOT_DEFINED
 }OperatorType_et;
 
 typedef enum
@@ -57,7 +58,7 @@ typedef enum
     TYPE_DOUBLE,
     TYPE_LONG_DOUBLE, 
     TYPE_STRING,
-    TYPE_VOID,
+    TYPE_VOID
 }VarType_et;
 
 typedef enum
@@ -132,7 +133,9 @@ typedef enum
 
     NODE_NULL,
     NODE_END_SCOPE,
-    NODE_START_SCOPE
+    NODE_START_SCOPE,
+
+    NODE_TYPE_NOT_DEFINED
 }NodeType_et;
 
 typedef union
