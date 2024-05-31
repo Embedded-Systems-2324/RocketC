@@ -81,7 +81,8 @@ static const char *OperatorStrings[] = {
     "*= ",     // 29
     "/= ",     // 30
     "sizeof",   // 31
-    "negative"
+    "negative",
+    "not_defined"
 };
 
 static const char *VarTypeStrings[] = {
