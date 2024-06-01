@@ -382,6 +382,84 @@ static int loadImm32(uint32_t dVal, reg_et destReg)
 //     return 0;
 // }
 
+
+static int generateImmediateAluOperation(TreeNode_st *pTreeNode, asm_instr_et asmInstruction, reg_et destReg, reg_et tempReg)
+{
+    // i = 1 if the integer is the left child
+    uint8_t i = ((L_CHILD_TYPE(pTreeNode)) == NODE_INTEGER) ? 1 : 0;
+
+    uint32_t addr = pTreeNode->pChilds[i].pSymbol->symbolContent_u.memoryLocation;
+
+    //Gen Code for the Terminal Node that is not an INTEGER
+    //Nodes with 2 constants will never exist 
+    switch (pTreeNode->pChilds[i].nodeType)
+    {
+        case NODE_IDENTIFIER:
+            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr);
+            break;
+        case NODE_POINTER_CONTENT:
+            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr);
+            emitMemoryInstruction(INST_LDX, tempReg, tempReg, 0);
+            break;
+        case NODE_REFERENCE:
+            emitMemoryInstruction(INST_LDI, tempReg, REG_NONE, addr);
+            break;
+        case NODE_POST_INC:
+            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr);
+            LOG_ERROR("Incrementing the variable with POST_INC is not being supported\n");
+            break;
+        case NODE_PRE_INC:
+            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr);
+            emitAluInstruction(INST_ADD, true, 1, tempReg, tempReg, REG_NONE);
+            break;
+        case NODE_POST_DEC:
+            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr);
+            LOG_ERROR("Incrementing the variable with POST_INC is not being supported\n");
+            break;
+        case NODE_PRE_DEC:
+            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr);
+            emitAluInstruction(INST_SUB, true, 1, tempReg, tempReg, REG_NONE);
+            break;
+        default:
+            LOG_ERROR("Un-Implemented condition!\n");
+            break;
+    }
+
+    //now switch the i var to the INTEGER POSITION
+    i = !i;
+
+    //Since ALU always performs Immed - RLeft, for performing subtractions with immediate, instead of a SUB
+    //an ADD with the immediate negated is performed and then we negate the result using R0_REG
+    //Enters this if when the operation is a SUB and the integer is at the left
+    if ((asmInstruction == INST_SUB) && (!i))
+    {
+        if (VALID_ALU_IMMED(L_CHILD_DVAL(pTreeNode)))
+        {
+            emitAluInstruction(INST_ADD, true, -L_CHILD_DVAL(pTreeNode), destReg, tempReg, REG_NONE);
+            emitAluInstruction(INST_SUB, false, 0, destReg, REG_R0, destReg);
+
+        }
+        else //In case Immediate value is bigger then 16 bits
+        {
+            emitMemoryInstruction(INST_LDI, destReg, REG_NONE, -L_CHILD_DVAL(pTreeNode));
+            emitAluInstruction(INST_ADD, false, 0, destReg, destReg, tempReg);
+        }
+    }
+    else
+    {
+        if(pTreeNode->pChilds[i].nodeData.dVal <= MAX_IMMED_ALU)
+        {
+            emitAluInstruction(asmInstruction, true, pTreeNode->pChilds[i].nodeData.dVal, destReg, tempReg, REG_NONE);
+        }
+        else //In case Immediate value is bigger then 16 bits
+        {
+            emitMemoryInstruction(INST_LDI, destReg, REG_NONE, pTreeNode->pChilds[i].nodeData.dVal);
+            emitAluInstruction(asmInstruction, false, 0, destReg, destReg, tempReg);
+        }
+    }
+}
+
+
 static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
 {
     uint32_t memAddr;
@@ -392,116 +470,92 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
     OperatorType_et opType = (OperatorType_et) pTreeNode->nodeData.dVal;
     asm_instr_et asmInstruction = mapInstructionFromOperator(opType);
 
-    //Handle here the cases where there is only one terminal child node (example: -X, -*X). 
-    //Handle this case first to avoid SegFault error
-    //The child will never be an integer
-    if(NODE_CHILD_NUM(pTreeNode) < 2)
-    {
-        if(opType == OP_MINUS)
-        {
-            //OP_MINUS with only an IDENTIFIER CHILD (eg: -X)
-            if(L_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
-            {
-                memAddr = L_CHILD_MEM_LOC(pTreeNode);
-                emitMemoryInstruction(INST_LD, destReg, REG_NONE, memAddr);
-                //Use the R0 register to do de Negation(-X), R0 is always tied to 0
-                emitAluInstruction(INST_SUB, false, 0, destReg, REG_R0, destReg);
-            }
-            //OP_MINUS with only a NODE_POINTER_CONTENT CHILD (eg: -*X)
-            else if(L_CHILD_TYPE(pTreeNode) == NODE_POINTER_CONTENT)
-            {
-                memAddr = L_CHILD_MEM_LOC(pTreeNode);
-                emitMemoryInstruction(INST_LD, lReg, REG_NONE, memAddr);
-                emitMemoryInstruction(INST_LDX, destReg, lReg, 0);
 
-            }
-            else 
-                LOG_ERROR("Un-implemented Condition!");
-
-        }    
-
-    }
-    else if ((L_CHILD_TYPE(pTreeNode) == NODE_INTEGER) && (R_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER))
+    if((L_CHILD_TYPE(pTreeNode) == NODE_INTEGER) || (R_CHILD_TYPE(pTreeNode)) == NODE_INTEGER)
     {
-        memAddr = R_CHILD_MEM_LOC(pTreeNode);
+        generateImmediateAluOperation(pTreeNode, asmInstruction, destReg, lReg);
+        releaseReg(lReg);
+        releaseReg(rReg);
+        return 0;
+    }
 
-        emitMemoryInstruction(INST_LD, rReg, REG_NONE, memAddr);
+    switch (L_CHILD_TYPE(pTreeNode))
+    {
+        case NODE_IDENTIFIER:
+            leftAddr = L_CHILD_MEM_LOC(pTreeNode);
+            emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr);
+            break;
+        case NODE_POINTER_CONTENT:
+            leftAddr = L_CHILD_MEM_LOC(pTreeNode);
+            emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr);
+            emitMemoryInstruction(INST_LDX, lReg, lReg, 0);
+            break;
+        case NODE_REFERENCE:
+            leftAddr = L_CHILD_MEM_LOC(pTreeNode);
+            emitMemoryInstruction(INST_LDI, lReg, REG_NONE, leftAddr);
+            break;
+        case NODE_POST_INC:
+            leftAddr = L_CHILD_MEM_LOC(pTreeNode);
+            emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr);
+            LOG_ERROR("Incrementing the variable with POST_INC is not being supported\n");
+            break;
+        case NODE_PRE_INC:
+            leftAddr = L_CHILD_MEM_LOC(pTreeNode);
+            emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr);
+            emitAluInstruction(INST_ADD, true, 1, lReg, lReg, REG_NONE);
+            break;
+        case NODE_POST_DEC:
+            leftAddr = L_CHILD_MEM_LOC(pTreeNode);
+            emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr);
+            LOG_ERROR("Incrementing the variable with POST_INC is not being supported\n");
+            break;
+        case NODE_PRE_DEC:
+            leftAddr = L_CHILD_MEM_LOC(pTreeNode);
+            emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr);
+            emitAluInstruction(INST_ADD, true, 1, lReg, lReg, REG_NONE);
+            break;
+        default:
+            LOG_ERROR("Un-Implemented condition!\n");
+            break;
+    }
 
-        //Since ALU always performs Immed - RLeft, for performing subtractions with immediate, instead of a SUB
-        //an ADD with the immediate negated is performed
-        if (opType == OP_MINUS)
-        {
-            if (VALID_ALU_IMMED(L_CHILD_DVAL(pTreeNode)))
-            {
-                emitAluInstruction(INST_ADD, true, -L_CHILD_DVAL(pTreeNode), destReg, rReg, REG_NONE);
-            }
-            else
-            {
-                emitMemoryInstruction(INST_LDI, lReg, REG_NONE, -L_CHILD_DVAL(pTreeNode));
-                emitAluInstruction(INST_ADD, false, 0, destReg, lReg, rReg);
-            }
-        }
-        else
-        {
-            if (VALID_ALU_IMMED(L_CHILD_DVAL(pTreeNode)))
-            {
-                emitAluInstruction(asmInstruction, true, L_CHILD_DVAL(pTreeNode), destReg, rReg, REG_NONE);
-            }
-            else
-            {
-                emitMemoryInstruction(INST_LDI, lReg, REG_NONE, L_CHILD_DVAL(pTreeNode));
-                emitAluInstruction(asmInstruction, false, 0, destReg, lReg, rReg);
-            }
-        }
-    }
-    else if ((L_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER) && (R_CHILD_TYPE(pTreeNode) == NODE_INTEGER))
-    {
-        memAddr = L_CHILD_MEM_LOC(pTreeNode);
-        emitMemoryInstruction(INST_LD, lReg, REG_NONE, memAddr);
 
-        if (VALID_ALU_IMMED(R_CHILD_DVAL(pTreeNode)))
-        {
-            emitAluInstruction(asmInstruction, true, R_CHILD_DVAL(pTreeNode), destReg, lReg, REG_NONE);
-        }
-        else
-        {
-            emitMemoryInstruction(INST_LDI, lReg, REG_NONE, R_CHILD_DVAL(pTreeNode));
-            emitAluInstruction(asmInstruction, false, 0, destReg, lReg, rReg);
-        }
-    }
-    else if (L_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER && R_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
+    switch (R_CHILD_TYPE(pTreeNode))
     {
-        leftAddr = L_CHILD_MEM_LOC(pTreeNode);
-        rightAddr = R_CHILD_MEM_LOC(pTreeNode);
+        case NODE_IDENTIFIER:
+            emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
+            break;
+        case NODE_POINTER_CONTENT:
+            emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
+            emitMemoryInstruction(INST_LDX, rReg, rReg, 0);
+            break;
+        case NODE_REFERENCE:
+            emitMemoryInstruction(INST_LDI, rReg, REG_NONE, rightAddr);
+            break;
+        case NODE_POST_INC:
+            emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
+            LOG_ERROR("Incrementing the variable with POST_INC is not being supported\n");
+            break;
+        case NODE_PRE_INC:
+            emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
+            emitAluInstruction(INST_ADD, true, 1, rReg, rReg, REG_NONE);
+            break;
+        case NODE_POST_DEC:
+            emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
+            LOG_ERROR("Incrementing the variable with POST_INC is not being supported\n");
+            break;
+        case NODE_PRE_DEC:
+            emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
+            emitAluInstruction(INST_ADD, true, 1, rReg, rReg, REG_NONE);
+            break;
+        default:
+            LOG_ERROR("Un-Implemented condition!\n");
+            break;
+    }
 
-        emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr);
-        emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
-        emitAluInstruction(asmInstruction, false, 0, destReg, lReg, rReg);
-    }
-    else if (L_CHILD_TYPE(pTreeNode) == NODE_POINTER_CONTENT && R_CHILD_TYPE(pTreeNode) == NODE_POINTER_CONTENT)
-    {
 
-    }
-    else if (L_CHILD_TYPE(pTreeNode) == NODE_POINTER_CONTENT && R_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
-    {
-        
-    }
-    else if (L_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER && R_CHILD_TYPE(pTreeNode) == NODE_POINTER_CONTENT)
-    {
+    emitAluInstruction(asmInstruction, false, 0, destReg, lReg, rReg);
 
-    }
-    else if (L_CHILD_TYPE(pTreeNode) == NODE_POINTER_CONTENT && R_CHILD_TYPE(pTreeNode) == NODE_INTEGER)
-    {
-        
-    }
-    else if (L_CHILD_TYPE(pTreeNode) == NODE_INTEGER && R_CHILD_TYPE(pTreeNode) == NODE_POINTER_CONTENT)
-    {
-
-    }
-    else
-    {
-        LOG_ERROR("Un-Implemented condition!\n");
-    }
 
     releaseReg(lReg);
     releaseReg(rReg);
@@ -915,25 +969,8 @@ static int parseNode2(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Ope
             }               
             
 
-
             //TERMINAL NODE CASES
             //Should only enter these cases when we find Terminal nodes and when we start going upwards in the AST
-            if((NODE_CHILD_NUM(pCurrentNode) < 2))
-            {
-                //If there is only one child, it will always be at the left
-                if(IS_TERMINAL_NODE(L_CHILD_TYPE(pCurrentNode)))
-                {
-                    parseOperatorNode(pCurrentNode, dReg);
-                    dRegSave = dReg;
-                }
-                else
-                {
-                    //Not sure if there is a case where it will enter here
-                    //In the future see if it enters here when we have an OP_MINUS node with only 1 function_Call Child (eg: x = -func1();) 
-                    LOG_ERROR("Not implemented!");
-                }
-                
-            }
             else if (IS_TERMINAL_NODE(L_CHILD_TYPE(pCurrentNode)) && IS_TERMINAL_NODE(R_CHILD_TYPE(pCurrentNode)))
             {
                 //If both childs are terminals, parse the node to generate the ALU operation
@@ -1262,6 +1299,24 @@ void codeGenerationTestUnit()
 //    generateAssignOperation(treeRoot.nodeData.dVal, &treeRoot, reg);
 
 
+/* TEST SIMPLE Arithmetic
+ * M (Mem)-> Means it is an identifier 
+ *
+ *              -
+ *             / \
+ *         1       *X:0xF
+ *           
+ *       
+ */
+
+   treeRoot.nodeType = NODE_OPERATOR;
+   treeRoot.nodeData.dVal = OP_MINUS;
+
+   NodeAddNewChild(&treeRoot, &pLeftChild, NODE_POINTER_CONTENT);
+   NodeAddNewChild(&treeRoot, &pRightChild, NODE_INTEGER);
+
+   pRightChild->nodeData.dVal = 1;
+   pLeftChild->pSymbol = &symbolEntry2;
 
 
 
@@ -1689,91 +1744,6 @@ void codeGenerationTestUnit()
 
 //     pFifthLevelChild_1->pSymbol = &symbolEntry3;
 //     pFifthLevelChild_2->pSymbol = &symbolEntry4;
-    
-
-/* TEST 9 - TEST OP_MINUS WITH ONLY ONE CHILD
-
-                                -
-                               / \
-                             /     \
-                           /         \
-                         /             \
-                        +                 -
-                      /  \               /  \
-                    /      \            /    \
-                  -         +         #255     -
-                 / \       / \                / \
-                /   \     /   \              /   \
-            M:0xF  #32 M:0xAB  -          M:0x20  + 
-                              / \                / \
-                            /     \             /   \        
-                          #20      -           -     M:0xAB
-                                  /           /   
-                                 /           /   
-                           M:0xAB         M:0xCD       
-*/
-// TreeNode_st *pThirdLevelChild_1, *pThirdLevelChild_2, *pThirdLevelChild_3, *pThirdLevelChild_4, *pThirdLevelChild_5, *pThirdLevelChild_6;
-// TreeNode_st *pFourthLevelChild_1, *pFourthLevelChild_2, *pFourthLevelChild_3, *pFourthLevelChild_4;
-// TreeNode_st *pFifthLevelChild_1, *pFifthLevelChild_2;     
-
-//     treeRoot.nodeType = NODE_OPERATOR;
-//     treeRoot.nodeData.dVal = OP_MINUS;
-
-//     NodeAddNewChild(&treeRoot, &pLeftChild, NODE_OPERATOR);
-//     NodeAddNewChild(&treeRoot, &pRightChild, NODE_OPERATOR);
-
-//     pLeftChild->nodeData.dVal = OP_PLUS;
-//     pRightChild->nodeData.dVal = OP_MINUS;
-
-//     NodeAddNewChild(pLeftChild, &pLeftGrandChild, NODE_OPERATOR);
-//     NodeAddNewChild(pLeftChild, &pRightGrandChild, NODE_OPERATOR);
-
-//     pLeftGrandChild->nodeData.dVal = OP_MINUS;  
-//     pRightGrandChild->nodeData.dVal = OP_PLUS;   
-
-//     NodeAddNewChild(pRightChild, &_pLeftGrandChild, NODE_INTEGER);
-//     NodeAddNewChild(pRightChild, &_pRightGrandChild, NODE_OPERATOR);
-
-//     _pLeftGrandChild->nodeData.dVal = 255;
-//     _pRightGrandChild->nodeData.dVal = OP_MINUS;  
-
-//     NodeAddNewChild(pLeftGrandChild, &pThirdLevelChild_1, NODE_IDENTIFIER);
-//     NodeAddNewChild(pLeftGrandChild, &pThirdLevelChild_2, NODE_INTEGER);
-
-//     pThirdLevelChild_1->pSymbol = &symbolEntry2;
-//     pThirdLevelChild_2->nodeData.dVal = 32;
-
-//     NodeAddNewChild(pRightGrandChild, &pThirdLevelChild_3, NODE_IDENTIFIER);
-//     NodeAddNewChild(pRightGrandChild, &pThirdLevelChild_4, NODE_OPERATOR);
-
-//     pThirdLevelChild_3->pSymbol = &symbolEntry3;
-//     pThirdLevelChild_4->nodeData.dVal = OP_MINUS;
-
-//     NodeAddNewChild(_pRightGrandChild, &pThirdLevelChild_5, NODE_IDENTIFIER);
-//     NodeAddNewChild(_pRightGrandChild, &pThirdLevelChild_6, NODE_OPERATOR);
-
-//     pThirdLevelChild_5->pSymbol = &symbolEntry;
-//     pThirdLevelChild_6->nodeData.dVal = OP_PLUS;
-
-//     NodeAddNewChild(pThirdLevelChild_6, &pFourthLevelChild_3, NODE_OPERATOR);
-//     NodeAddNewChild(pThirdLevelChild_6, &pFourthLevelChild_4, NODE_IDENTIFIER);
-    
-//     pFourthLevelChild_3->nodeData.dVal = OP_MINUS;
-//     pFourthLevelChild_4->pSymbol = &symbolEntry3;
-    
-//     NodeAddNewChild(pFourthLevelChild_3, &pFifthLevelChild_2, NODE_IDENTIFIER);
-    
-//     pFifthLevelChild_2->pSymbol = &symbolEntry4;
-    
-//     NodeAddNewChild(pThirdLevelChild_4, &pFourthLevelChild_1, NODE_INTEGER);
-//     NodeAddNewChild(pThirdLevelChild_4, &pFourthLevelChild_2, NODE_OPERATOR);
-
-//     pFourthLevelChild_1->nodeData.dVal = 20;
-//     pFourthLevelChild_2->nodeData.dVal = OP_MINUS;
-
-//     NodeAddNewChild(pFourthLevelChild_2, &pFifthLevelChild_1, NODE_IDENTIFIER);
-
-//     pFifthLevelChild_1->pSymbol = &symbolEntry3;
 
 
 
@@ -1819,17 +1789,17 @@ void codeGenerationTestUnit()
  *                  
  */
 
-    treeRoot.nodeType = NODE_OPERATOR;
-    treeRoot.nodeData.dVal = OP_ASSIGN;
+    // treeRoot.nodeType = NODE_OPERATOR;
+    // treeRoot.nodeData.dVal = OP_ASSIGN;
+
+    // // NodeAddNewChild(&treeRoot, &pLeftChild, NODE_POINTER_CONTENT);
+    // // NodeAddNewChild(&treeRoot, &pRightChild, NODE_REFERENCE);
 
     // NodeAddNewChild(&treeRoot, &pLeftChild, NODE_POINTER_CONTENT);
     // NodeAddNewChild(&treeRoot, &pRightChild, NODE_REFERENCE);
 
-    NodeAddNewChild(&treeRoot, &pLeftChild, NODE_POINTER_CONTENT);
-    NodeAddNewChild(&treeRoot, &pRightChild, NODE_REFERENCE);
-
-    pLeftChild->pSymbol = &symbolEntry2;
-    pRightChild->pSymbol = &symbolEntry3;
+    // pLeftChild->pSymbol = &symbolEntry2;
+    // pRightChild->pSymbol = &symbolEntry3;
 
 
 

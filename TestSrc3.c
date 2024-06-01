@@ -3,13 +3,16 @@ int res = 0;
 
 int CalcDOWhile(int y, int res)
 {
-    int array[5];   
-    
-    int x = 5; 
-    int *p = &x;
-    
-    int y = -*p;
+    res =  0 -res + &y;
 
-    //array[5] = 0;
+    int b = 4;
+    int *a = &b;
+
+    1 + ++res;
+
+    int array[6];
+
+    array[5] = 0;
+    res = 1 + array[5];
 }
 
