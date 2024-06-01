@@ -38,7 +38,7 @@
 #define VALID_ST_IMMED(x) ((x) <= MAX_IMMED_ST)
 #define IS_IN_32BIT_RANGE(x) ((x) <= MAX_32BIT_RANGE)
 
-#define IS_TERMINAL_NODE(x) (((x) == NODE_IDENTIFIER) || ((x) == NODE_INTEGER) || ((x) == NODE_CHAR) || ((x) == NODE_FLOAT) || ((x) == NODE_POINTER_CONTENT))
+#define IS_TERMINAL_NODE(x) (((x) == NODE_IDENTIFIER) || ((x) == NODE_INTEGER) || ((x) == NODE_CHAR) || ((x) == NODE_FLOAT) || ((x) == NODE_POINTER_CONTENT) || ((x) == NODE_REFERENCE))
 #define IS_ALU_OPERATION(x) (((x) == OP_PLUS) || ((x) == OP_MINUS) || ((x) == OP_RIGHT_SHIFT) || ((x) == OP_LEFT_SHIFT) || ((x) == OP_MULTIPLY) || ((x) == OP_DIVIDE) || ((x) == OP_REMAIN))
 #define IS_ASSIGN_OPERATION(x) (((x) == OP_ASSIGN) || ((x) == OP_PLUS_ASSIGN) || ((x) == OP_MINUS_ASSIGN) || ((x) == OP_LEFT_SHIFT_ASSIGN) || ((x) == OP_RIGHT_SHIFT_ASSIGN) || ((x) == OP_BITWISE_AND_ASSIGN) || ((x) == OP_BITWISE_OR_ASSIGN) || ((x) == OP_BITWISE_XOR_ASSIGN) || ((x) == OP_MULTIPLY_ASSIGN) || ((x) == OP_DIVIDE_ASSIGN) || ((x) == OP_MODULUS_ASSIGN))
 
@@ -509,24 +509,62 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
     return 0;
 }
 
-
+/// @brief function for emiting assign operations 
+/// @param operatorType -> Type of assign(=, +=, <<=, &=,*x = &y, etc.)
+/// @param pTreeNode -> current node being processed
+/// @param destReg -> destiny register used for code emition
+/// @return 
 static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pTreeNode, reg_et destReg)
 {
-    uint32_t memAddr;
+    uint32_t leftAddr;
+    uint32_t rightAddr;
 
     switch (operatorType)
     {
+        //Normal assigns plus pointer assigns
         case OP_ASSIGN:
-        {   
-            if (R_CHILD_TYPE(pTreeNode) == NODE_INTEGER)
+        {
+            if(L_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
             {
-                emitMemoryInstruction(INST_LDI, destReg, REG_NONE, R_CHILD_DVAL(pTreeNode));
-                emitMemoryInstruction(INST_ST, destReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
+                if (R_CHILD_TYPE(pTreeNode) == NODE_INTEGER)
+                {
+                    leftAddr = L_CHILD_MEM_LOC(pTreeNode);
+
+                    emitMemoryInstruction(INST_LDI, destReg, REG_NONE, R_CHILD_DVAL(pTreeNode));
+                    emitMemoryInstruction(INST_ST, destReg, REG_NONE, leftAddr);
+                }
+                else if (R_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
+                {
+                    leftAddr = L_CHILD_MEM_LOC(pTreeNode);
+                    rightAddr = R_CHILD_MEM_LOC(pTreeNode);
+
+                    emitMemoryInstruction(INST_LD, destReg, REG_NONE, rightAddr);
+                    emitMemoryInstruction(INST_ST, destReg, REG_NONE, leftAddr);
+                }             
             }
-            else if (R_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
+            else if(L_CHILD_TYPE(pTreeNode) == NODE_POINTER_CONTENT)
             {
-                emitMemoryInstruction(INST_LD, destReg, REG_NONE, R_CHILD_MEM_LOC(pTreeNode));
-                emitMemoryInstruction(INST_ST, destReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
+                if(R_CHILD_TYPE(pTreeNode) == NODE_REFERENCE)
+                {
+                    leftAddr = L_CHILD_MEM_LOC(pTreeNode);
+                    rightAddr = R_CHILD_MEM_LOC(pTreeNode);
+
+                    emitMemoryInstruction(INST_LDI, destReg, REG_NONE, rightAddr);
+                    emitMemoryInstruction(INST_ST, destReg, REG_NONE, leftAddr);
+                }
+                else if(R_CHILD_TYPE(pTreeNode) == NODE_ARRAY_INDEX)
+                {
+
+
+                }
+                else
+                {
+                    LOG_ERROR("Incorrect pointer assignment!\n");
+                }
+            }
+            else
+            {
+                LOG_ERROR("Un-Implemented condition!\n");
             }
             break;
         }
@@ -537,27 +575,40 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
         case OP_BITWISE_AND_ASSIGN:
         case OP_BITWISE_OR_ASSIGN:
         case OP_BITWISE_XOR_ASSIGN:
-            //case OP_MULTIPLY_ASSIGN:    Not Yet Handled!
-            //case OP_DIVIDE_ASSIGN:      Not Yet Handled!
-            //case OP_MODULUS_ASSIGN:     Not Yet Handled!
-
-            if (R_CHILD_TYPE(pTreeNode) == NODE_INTEGER)
+        //case OP_MULTIPLY_ASSIGN:    Not Yet Handled!
+        //case OP_DIVIDE_ASSIGN:      Not Yet Handled!
+        //case OP_MODULUS_ASSIGN:     Not Yet Handled!
+        {
+            if(L_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
             {
-                emitMemoryInstruction(INST_LD, destReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
-                emitAluInstruction(mapInstructionFromAssignOp(operatorType), true, R_CHILD_DVAL(pTreeNode), destReg,
-                                   destReg, REG_NONE);
-            }
-            else if (R_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
-            {
-                uint32_t tempReg1 = getNextAvailableReg();
-                emitMemoryInstruction(INST_LD, tempReg1, REG_NONE, R_CHILD_MEM_LOC(pTreeNode));
-                emitMemoryInstruction(INST_LD, destReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
-                emitAluInstruction(mapInstructionFromAssignOp(operatorType), false, 0, destReg, destReg, tempReg1);
-                releaseReg(tempReg1);
-            }
+                if (R_CHILD_TYPE(pTreeNode) == NODE_INTEGER)
+                {
+                    leftAddr = L_CHILD_MEM_LOC(pTreeNode);
+                    emitMemoryInstruction(INST_LD, destReg, REG_NONE, leftAddr);
+                    emitAluInstruction(mapInstructionFromAssignOp(operatorType), true, R_CHILD_DVAL(pTreeNode), destReg, destReg, REG_NONE);
+                }
+                else if (R_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
+                {
+                    uint32_t tempReg1 = getNextAvailableReg();
 
-            emitMemoryInstruction(INST_ST, destReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
+                    leftAddr = L_CHILD_MEM_LOC(pTreeNode);
+                    rightAddr = R_CHILD_MEM_LOC(pTreeNode);
+
+                    emitMemoryInstruction(INST_LD, tempReg1, REG_NONE, rightAddr);
+                    emitMemoryInstruction(INST_LD, destReg, REG_NONE, leftAddr);
+                    emitAluInstruction(mapInstructionFromAssignOp(operatorType), false, 0, destReg, destReg, tempReg1);
+
+                    releaseReg(tempReg1);
+                }
+                emitMemoryInstruction(INST_ST, destReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
+            }
+            else
+            {
+                LOG_ERROR("Un-Implemented condition!\n");
+            }
             break;
+        }
+
         default:
             LOG_ERROR("Un-Implemented assignment operation!\n");
     }
@@ -607,26 +658,17 @@ static int parseOperatorNode(TreeNode_st *pTreeNode, reg_et dReg)
         case OP_BITWISE_XOR:
             break;
         case OP_ASSIGN:
-            break;
         case OP_PLUS_ASSIGN:
-            break;
         case OP_MINUS_ASSIGN:
-            break;
         case OP_MODULUS_ASSIGN:
-            break;
         case OP_LEFT_SHIFT_ASSIGN:
-            break;
         case OP_RIGHT_SHIFT_ASSIGN:
-            break;
         case OP_BITWISE_AND_ASSIGN:
-            break;
         case OP_BITWISE_OR_ASSIGN:
-            break;
         case OP_BITWISE_XOR_ASSIGN:
-            break;
         case OP_MULTIPLY_ASSIGN:
-            break;
         case OP_DIVIDE_ASSIGN:
+            generateAssignOperation(opType, pTreeNode, dReg);
             break;
         case OP_SIZEOF:
             break;
@@ -1670,78 +1712,124 @@ void codeGenerationTestUnit()
                                  /           /   
                            M:0xAB         M:0xCD       
 */
-TreeNode_st *pThirdLevelChild_1, *pThirdLevelChild_2, *pThirdLevelChild_3, *pThirdLevelChild_4, *pThirdLevelChild_5, *pThirdLevelChild_6;
-TreeNode_st *pFourthLevelChild_1, *pFourthLevelChild_2, *pFourthLevelChild_3, *pFourthLevelChild_4;
-TreeNode_st *pFifthLevelChild_1, *pFifthLevelChild_2;     
+// TreeNode_st *pThirdLevelChild_1, *pThirdLevelChild_2, *pThirdLevelChild_3, *pThirdLevelChild_4, *pThirdLevelChild_5, *pThirdLevelChild_6;
+// TreeNode_st *pFourthLevelChild_1, *pFourthLevelChild_2, *pFourthLevelChild_3, *pFourthLevelChild_4;
+// TreeNode_st *pFifthLevelChild_1, *pFifthLevelChild_2;     
+
+//     treeRoot.nodeType = NODE_OPERATOR;
+//     treeRoot.nodeData.dVal = OP_MINUS;
+
+//     NodeAddNewChild(&treeRoot, &pLeftChild, NODE_OPERATOR);
+//     NodeAddNewChild(&treeRoot, &pRightChild, NODE_OPERATOR);
+
+//     pLeftChild->nodeData.dVal = OP_PLUS;
+//     pRightChild->nodeData.dVal = OP_MINUS;
+
+//     NodeAddNewChild(pLeftChild, &pLeftGrandChild, NODE_OPERATOR);
+//     NodeAddNewChild(pLeftChild, &pRightGrandChild, NODE_OPERATOR);
+
+//     pLeftGrandChild->nodeData.dVal = OP_MINUS;  
+//     pRightGrandChild->nodeData.dVal = OP_PLUS;   
+
+//     NodeAddNewChild(pRightChild, &_pLeftGrandChild, NODE_INTEGER);
+//     NodeAddNewChild(pRightChild, &_pRightGrandChild, NODE_OPERATOR);
+
+//     _pLeftGrandChild->nodeData.dVal = 255;
+//     _pRightGrandChild->nodeData.dVal = OP_MINUS;  
+
+//     NodeAddNewChild(pLeftGrandChild, &pThirdLevelChild_1, NODE_IDENTIFIER);
+//     NodeAddNewChild(pLeftGrandChild, &pThirdLevelChild_2, NODE_INTEGER);
+
+//     pThirdLevelChild_1->pSymbol = &symbolEntry2;
+//     pThirdLevelChild_2->nodeData.dVal = 32;
+
+//     NodeAddNewChild(pRightGrandChild, &pThirdLevelChild_3, NODE_IDENTIFIER);
+//     NodeAddNewChild(pRightGrandChild, &pThirdLevelChild_4, NODE_OPERATOR);
+
+//     pThirdLevelChild_3->pSymbol = &symbolEntry3;
+//     pThirdLevelChild_4->nodeData.dVal = OP_MINUS;
+
+//     NodeAddNewChild(_pRightGrandChild, &pThirdLevelChild_5, NODE_IDENTIFIER);
+//     NodeAddNewChild(_pRightGrandChild, &pThirdLevelChild_6, NODE_OPERATOR);
+
+//     pThirdLevelChild_5->pSymbol = &symbolEntry;
+//     pThirdLevelChild_6->nodeData.dVal = OP_PLUS;
+
+//     NodeAddNewChild(pThirdLevelChild_6, &pFourthLevelChild_3, NODE_OPERATOR);
+//     NodeAddNewChild(pThirdLevelChild_6, &pFourthLevelChild_4, NODE_IDENTIFIER);
+    
+//     pFourthLevelChild_3->nodeData.dVal = OP_MINUS;
+//     pFourthLevelChild_4->pSymbol = &symbolEntry3;
+    
+//     NodeAddNewChild(pFourthLevelChild_3, &pFifthLevelChild_2, NODE_IDENTIFIER);
+    
+//     pFifthLevelChild_2->pSymbol = &symbolEntry4;
+    
+//     NodeAddNewChild(pThirdLevelChild_4, &pFourthLevelChild_1, NODE_INTEGER);
+//     NodeAddNewChild(pThirdLevelChild_4, &pFourthLevelChild_2, NODE_OPERATOR);
+
+//     pFourthLevelChild_1->nodeData.dVal = 20;
+//     pFourthLevelChild_2->nodeData.dVal = OP_MINUS;
+
+//     NodeAddNewChild(pFourthLevelChild_2, &pFifthLevelChild_1, NODE_IDENTIFIER);
+
+//     pFifthLevelChild_1->pSymbol = &symbolEntry3;
+
+
+
+
+/*  ASSIGN TEST 1
+ *                 =
+ *              /     \
+ *           M:0xF     #1    
+ *                  
+ */
+
+    // treeRoot.nodeType = NODE_OPERATOR;
+    // treeRoot.nodeData.dVal = OP_ASSIGN;
+
+    // NodeAddNewChild(&treeRoot, &pLeftChild, NODE_IDENTIFIER);
+    // NodeAddNewChild(&treeRoot, &pRightChild, NODE_INTEGER);
+
+    // pLeftChild->pSymbol = &symbolEntry2;
+    // pRightChild->nodeData.dVal = 1;
+
+
+/*  ASSIGN TEST 2
+ *                 =
+ *              /     \
+ *           M:0xF   M:0xAB       
+ *                  
+ */
+
+    // treeRoot.nodeType = NODE_OPERATOR;
+    // treeRoot.nodeData.dVal = OP_ASSIGN;
+
+    // NodeAddNewChild(&treeRoot, &pLeftChild, NODE_IDENTIFIER);
+    // NodeAddNewChild(&treeRoot, &pRightChild, NODE_IDENTIFIER);
+
+    // pLeftChild->pSymbol = &symbolEntry2;
+    // pRightChild->pSymbol = &symbolEntry3;
+
+
+/*  ASSIGN TEST 3
+ *                 =
+ *              /     \
+ *          *p:0xF  &a:0xAB       
+ *                  
+ */
 
     treeRoot.nodeType = NODE_OPERATOR;
-    treeRoot.nodeData.dVal = OP_MINUS;
+    treeRoot.nodeData.dVal = OP_ASSIGN;
 
-    NodeAddNewChild(&treeRoot, &pLeftChild, NODE_OPERATOR);
-    NodeAddNewChild(&treeRoot, &pRightChild, NODE_OPERATOR);
+    // NodeAddNewChild(&treeRoot, &pLeftChild, NODE_POINTER_CONTENT);
+    // NodeAddNewChild(&treeRoot, &pRightChild, NODE_REFERENCE);
 
-    pLeftChild->nodeData.dVal = OP_PLUS;
-    pRightChild->nodeData.dVal = OP_MINUS;
+    NodeAddNewChild(&treeRoot, &pLeftChild, NODE_POINTER_CONTENT);
+    NodeAddNewChild(&treeRoot, &pRightChild, NODE_REFERENCE);
 
-    NodeAddNewChild(pLeftChild, &pLeftGrandChild, NODE_OPERATOR);
-    NodeAddNewChild(pLeftChild, &pRightGrandChild, NODE_OPERATOR);
-
-    pLeftGrandChild->nodeData.dVal = OP_MINUS;  
-    pRightGrandChild->nodeData.dVal = OP_PLUS;   
-
-    NodeAddNewChild(pRightChild, &_pLeftGrandChild, NODE_INTEGER);
-    NodeAddNewChild(pRightChild, &_pRightGrandChild, NODE_OPERATOR);
-
-    _pLeftGrandChild->nodeData.dVal = 255;
-    _pRightGrandChild->nodeData.dVal = OP_MINUS;  
-
-    NodeAddNewChild(pLeftGrandChild, &pThirdLevelChild_1, NODE_IDENTIFIER);
-    NodeAddNewChild(pLeftGrandChild, &pThirdLevelChild_2, NODE_INTEGER);
-
-    pThirdLevelChild_1->pSymbol = &symbolEntry2;
-    pThirdLevelChild_2->nodeData.dVal = 32;
-
-    NodeAddNewChild(pRightGrandChild, &pThirdLevelChild_3, NODE_IDENTIFIER);
-    NodeAddNewChild(pRightGrandChild, &pThirdLevelChild_4, NODE_OPERATOR);
-
-    pThirdLevelChild_3->pSymbol = &symbolEntry3;
-    pThirdLevelChild_4->nodeData.dVal = OP_MINUS;
-
-    NodeAddNewChild(_pRightGrandChild, &pThirdLevelChild_5, NODE_IDENTIFIER);
-    NodeAddNewChild(_pRightGrandChild, &pThirdLevelChild_6, NODE_OPERATOR);
-
-    pThirdLevelChild_5->pSymbol = &symbolEntry;
-    pThirdLevelChild_6->nodeData.dVal = OP_PLUS;
-
-    NodeAddNewChild(pThirdLevelChild_6, &pFourthLevelChild_3, NODE_OPERATOR);
-    NodeAddNewChild(pThirdLevelChild_6, &pFourthLevelChild_4, NODE_IDENTIFIER);
-    
-    pFourthLevelChild_3->nodeData.dVal = OP_MINUS;
-    pFourthLevelChild_4->pSymbol = &symbolEntry3;
-    
-    NodeAddNewChild(pFourthLevelChild_3, &pFifthLevelChild_2, NODE_IDENTIFIER);
-    
-    pFifthLevelChild_2->pSymbol = &symbolEntry4;
-    
-    NodeAddNewChild(pThirdLevelChild_4, &pFourthLevelChild_1, NODE_INTEGER);
-    NodeAddNewChild(pThirdLevelChild_4, &pFourthLevelChild_2, NODE_OPERATOR);
-
-    pFourthLevelChild_1->nodeData.dVal = 20;
-    pFourthLevelChild_2->nodeData.dVal = OP_MINUS;
-
-    NodeAddNewChild(pFourthLevelChild_2, &pFifthLevelChild_1, NODE_IDENTIFIER);
-
-    pFifthLevelChild_1->pSymbol = &symbolEntry3;
-
-
-
-
-
-
-
-
-
-
+    pLeftChild->pSymbol = &symbolEntry2;
+    pRightChild->pSymbol = &symbolEntry3;
 
 
 
