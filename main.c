@@ -52,9 +52,6 @@ int getSourceFile(FILE** ppSourceFile)
 
 int main(int argc, char *argv[])
 {
-    codeGenerationTestUnit();
-    return 0;
-
     char* pMode;
 
     if (argc < 2 || argc > 3)
@@ -103,6 +100,7 @@ int main(int argc, char *argv[])
             PrintNode(pTreeRoot);
             LOG_WARNING_SHORT("\n\n-----------------OPTIMIZED  AST END-----------------\n\n\n");
 
+            executeCodeGeneration(pTreeRoot, stdout);
 
             // Free Symbol Table resources
             LOG_MESSAGE_SHORT("\nReleasing Symbol Table resources...\n");
