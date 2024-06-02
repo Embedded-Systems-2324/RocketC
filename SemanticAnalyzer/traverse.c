@@ -680,50 +680,6 @@ static void checkNode(TreeNode_st * pNode)
 ******************************************************************************************/
 
 /**
- * @brief sets the memory offset accordingly variable type
-
- * @param varLocation   save the current memory offset 
- * @param varType       varibale type
- * @param multiplier    used in arrays - array size
- * */
-static int setMemoryLocation(int* varLocation, VarType_et varType, int multiplier)
-{
-    static int currentLocation = 0;
-    
-    *varLocation = currentLocation; 
-
-    switch(varType)
-    {
-        case TYPE_CHAR:
-            currentLocation += 1*multiplier;
-            break;
-
-        case TYPE_SHORT:
-            currentLocation += 2*multiplier;
-            break;    
-  
-        case TYPE_LONG:
-        case TYPE_INT:
-        case TYPE_FLOAT:
-            currentLocation += 4*multiplier;
-            break;
-
-        case TYPE_DOUBLE:
-            currentLocation += 8*multiplier;
-            break;   
-
-        case TYPE_LONG_DOUBLE:
-            currentLocation += 16*multiplier;
-            break; 
-
-        default:
-            LOG_DEBUG("Invalid variable type");
-            break;                                 
-    }
-}
-
-
-/**
  * @brief goes through all the siblings in the preamble and saves qualifiers
 
  * @param pNode current node
@@ -776,6 +732,52 @@ static int setMemoryLocation(int* varLocation, VarType_et varType, int multiplie
             break;                                 
     }
 }
+
+
+/**
+ * @brief goes through all the siblings in the preamble and saves qualifiers
+
+ * @param pNode current node
+ * @param type 
+ * @param sign 
+ * @param modifier
+ * @param visibility
+ */
+static void setVariblesType(TreeNode_st* pNode, VarType_et* type, SignQualifier_et* sign, ModQualifier_et* modifier, VisQualifier_et* visibility)
+{
+    TreeNode_st* pNodeTemp = pNode;
+    *sign = 0;
+    *modifier = 0;
+    *visibility = 0;
+
+    while (pNodeTemp != NULL)
+    {
+        switch(pNodeTemp->nodeType)
+        {
+            case NODE_TYPE:
+                *type = pNodeTemp->nodeData.dVal;
+                break;
+
+            case NODE_SIGN:
+                *sign = pNodeTemp->nodeData.dVal;
+                break;
+
+            case NODE_MODIFIER:
+                *modifier = pNodeTemp->nodeData.dVal;
+                break;
+
+            case NODE_VISIBILITY:
+                *visibility = pNodeTemp->nodeData.dVal;
+                break;       
+
+            default:
+                LOG_DEBUG("Invalid node");
+                break;
+        }
+        pNodeTemp = pNodeTemp->pSibling;
+    }
+}
+
 
 
 /**
