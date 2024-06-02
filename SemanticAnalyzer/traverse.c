@@ -11,6 +11,9 @@ SymbolTable_st* pCurrentScope;
 static bool initialized = false;
 static uint32_t errorCounter = 0;
 
+static int globalMemoryLocation = 0;
+static int localMemoryLocation = 0;
+
 static void buildSymbolTables(TreeNode_st* pNode);
 static void checkNode(TreeNode_st * pNode);
 
@@ -729,38 +732,48 @@ static int setMemoryLocation(int* varLocation, VarType_et varType, int multiplie
  * @param modifier
  * @param visibility
  */
-static void setVariblesType(TreeNode_st* pNode, VarType_et* type, SignQualifier_et* sign, ModQualifier_et* modifier, VisQualifier_et* visibility)
+static int setMemoryLocation(int* varLocation, VarType_et varType, int multiplier)
 {
-    TreeNode_st* pNodeTemp = pNode;
-    *sign = 0;
-    *modifier = 0;
-    *visibility = 0;
+    int* currentLocation;
 
-    while (pNodeTemp != NULL)
+    if(pCurrentScope == pGlobalSymTable)
     {
-        switch(pNodeTemp->nodeType)
-        {
-            case NODE_TYPE:
-                *type = pNodeTemp->nodeData.dVal;
-                break;
+        currentLocation = &globalMemoryLocation;
+    }
+    else
+    {
+        currentLocation = &localMemoryLocation;
+    }
 
-            case NODE_SIGN:
-                *sign = pNodeTemp->nodeData.dVal;
-                break;
+    *varLocation = *currentLocation; 
 
-            case NODE_MODIFIER:
-                *modifier = pNodeTemp->nodeData.dVal;
-                break;
+    switch(varType)
+    {
+        case TYPE_CHAR:
+            *currentLocation += 1*multiplier;
+            break;
 
-            case NODE_VISIBILITY:
-                *visibility = pNodeTemp->nodeData.dVal;
-                break;       
+        case TYPE_SHORT:
+            *currentLocation += 2*multiplier;
+            break;    
+  
+        case TYPE_LONG:
+        case TYPE_INT:
+        case TYPE_FLOAT:
+            *currentLocation += 4*multiplier;
+            break;
 
-            default:
-                LOG_DEBUG("Invalid node");
-                break;
-        }
-        pNodeTemp = pNodeTemp->pSibling;
+        case TYPE_DOUBLE:
+            *currentLocation += 8*multiplier;
+            break;   
+
+        case TYPE_LONG_DOUBLE:
+            *currentLocation += 16*multiplier;
+            break; 
+
+        default:
+            LOG_DEBUG("Invalid variable type");
+            break;                                 
     }
 }
 
@@ -881,6 +894,8 @@ static void buildSymbolTables(TreeNode_st* pNode)
 
         //Function prototip and implementation
         case NODE_FUNCTION:
+            localMemoryLocation = 0;
+
             //inserts the new symbol into the table if it doesn't exist
             if(insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_FUNCTION) == SYMBOL_ADDED)
             {
@@ -1126,5 +1141,3 @@ static void buildSymbolTables(TreeNode_st* pNode)
             break;
     }
 }
-
-
