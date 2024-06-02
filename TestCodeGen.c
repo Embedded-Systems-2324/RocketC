@@ -1,6 +1,8 @@
-int x;
+int* x;
+int y;
+int z;
 
 void main()
 {
-    x = x + 1;
+
 }

@@ -151,6 +151,7 @@ int executeCodeGeneration(TreeNode_st *pTreeRoot, FILE* pDestStream)
 
     generateCode(pTreeRoot);
 
+
     return 0;
 }
 
@@ -420,9 +421,10 @@ static int generateImmediateAluOperation(TreeNode_st *pTreeNode, asm_instr_et as
             break;
         case NODE_ARRAY_INDEX:
             //Get the left child dVal, which is the array index
-            uint32_t index = L_CHILD_DVAL(pTreeNode);
+            uint32_t index = L_CHILD_DVAL(&L_CHILD(pTreeNode));
             emitMemoryInstruction(INST_LDI, tempReg, REG_NONE, addr);
             emitMemoryInstruction(INST_LDX, tempReg, tempReg, index);
+            break;
         default:
             LOG_ERROR("Un-Implemented condition!\n");
             break;
@@ -526,9 +528,10 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
             break;
         case NODE_ARRAY_INDEX:
             //Get the left child dVal, which is the array index
-            uint32_t index = L_CHILD_DVAL(pTreeNode);
+            uint32_t index = L_CHILD_DVAL(&L_CHILD(pTreeNode));
             emitMemoryInstruction(INST_LDI, lReg, REG_NONE, leftAddr);
             emitMemoryInstruction(INST_LDX, lReg, lReg, index);
+            break;
         default:
             LOG_ERROR("Un-Implemented condition!\n");
             break;
@@ -555,7 +558,6 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
             emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
             emitAluInstruction(INST_ADD, true, 1, rReg, rReg, REG_NONE);
             emitMemoryInstruction(INST_ST, rReg, REG_NONE, rightAddr);
-
             break;
         case NODE_POST_DEC:
             emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
@@ -565,9 +567,10 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
             emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
             emitAluInstruction(INST_SUB, true, 1, rReg, rReg, REG_NONE);
             emitMemoryInstruction(INST_ST, rReg, REG_NONE, rightAddr);
+            break;
         case NODE_ARRAY_INDEX:
             //Get the left child dVal, which is the array index
-            uint32_t index = L_CHILD_DVAL(pTreeNode);
+            uint32_t index = L_CHILD_DVAL(&L_CHILD(pTreeNode));
             emitMemoryInstruction(INST_LDI, rReg, REG_NONE, rightAddr);
             emitMemoryInstruction(INST_LDX, rReg, rReg, index);
             break;
@@ -597,6 +600,8 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
     uint32_t rightAddr;
 
     reg_et tempReg = getNextAvailableReg();
+    reg_et lReg = getNextAvailableReg();
+
 
 
     //will use in case the right child is an array
@@ -656,6 +661,7 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
             index = pTreeNode->pChilds[1].pChilds[0].nodeData.dVal;
             emitMemoryInstruction(INST_LDI, tempReg, REG_NONE, rightAddr);
             emitMemoryInstruction(INST_LDX, tempReg, tempReg, index);
+            break;
         default:
             LOG_ERROR("Un-Implemented condition!\n");
             break;
@@ -666,6 +672,10 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
     switch (L_CHILD_TYPE(pTreeNode))
     {
         case NODE_IDENTIFIER:
+            if (operatorType != OP_ASSIGN)
+            {
+                emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr);
+            }
             break;
         case NODE_POINTER_CONTENT:
             emitMemoryInstruction(INST_LD, destReg, REG_NONE, rightAddr);
@@ -683,15 +693,14 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
         if (operatorType == OP_MULTIPLY_ASSIGN || operatorType == OP_DIVIDE_ASSIGN || operatorType == OP_MODULUS_ASSIGN)
             LOG_ERROR("multiplies, divides and modulus assigns are not being handled right now!\n");
 
-        emitAluInstruction(mapInstructionFromAssignOp(operatorType), false, 0, tempReg, tempReg, tempReg);
-
+        emitAluInstruction(mapInstructionFromAssignOp(operatorType), false, 0, tempReg, lReg, tempReg);
     }
 
     //Templates for the left child of an assignement
     switch (L_CHILD_TYPE(pTreeNode))
     {
         case NODE_IDENTIFIER:
-            emitMemoryInstruction(INST_ST, tempReg, REG_NONE, rightAddr);
+            emitMemoryInstruction(INST_ST, tempReg, REG_NONE, leftAddr);
             break;
         case NODE_POINTER_CONTENT:
             emitMemoryInstruction(INST_STX, tempReg, destReg, 0);
@@ -703,6 +712,7 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
 
 
     releaseReg(tempReg);
+    releaseReg(lReg);
 
     return 0;
 }
@@ -785,7 +795,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
 
     OperatorType_et CurrentNodeOpType = (OperatorType_et) pCurrentNode->nodeData.dVal;
 
-    if (!IS_TERMINAL_NODE(NODE_TYPE(pCurrentNode)))
+    if (!IS_TERMINAL_NODE(NODE_TYPE(pCurrentNode)) && NODE_TYPE(pCurrentNode) == NODE_OPERATOR)
     {
         //If we enter a non terminal node we allocate a new dReg for that operation
         dReg = getNextAvailableReg();
@@ -1166,7 +1176,6 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
         case NODE_TYPE:
             break;
         case NODE_VAR_DECLARATION:
-            generateCode(pCurrentNode->pSibling);
             break;
         case NODE_FUNCTION:
             generateCode(pCurrentNode->pChilds + 2);
@@ -1180,7 +1189,6 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
         case NODE_END_SCOPE:
             break;
         case NODE_START_SCOPE:
-            generateCode(pCurrentNode->pSibling);
             break;
     }
 
