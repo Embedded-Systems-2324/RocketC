@@ -344,10 +344,55 @@ void PrintNode(TreeNode_st* pNode)
     return;
 }
 
+extern postinc_list_st* postIncList;
 
+int PostIncListInit() 
+{
+    postIncList = (postinc_list_st*)malloc(sizeof(postinc_list_st));
+    if (postIncList == NULL) 
+    {
+        return -EPERM;
+    }
+    postIncList->size = 0;
+    postIncList->savedAddr = NULL;
+}
 
+int PostIncListInsert(postinc_list_st* address_list, bool is_increment, uint32_t Addr) 
+{
+    if (address_list->size == 0) 
+    address_list->savedAddr = (list_item_st*)malloc(sizeof(list_item_st));
+    else 
+    address_list->savedAddr = (list_item_st*)realloc(address_list->savedAddr, sizeof(list_item_st) * (address_list->size + 1));
 
+    if (address_list->savedAddr == NULL) 
+    {
+        return -EPERM;
+    }
 
+    list_item_st* new_item = &address_list->savedAddr[address_list->size];
+    new_item->is_increment = is_increment;
+    new_item->Addr = Addr;
+    address_list->size++;
+}
+
+int PostIncListDelete(postinc_list_st* address_list) 
+{
+  if (address_list->size > 0)
+  {
+    address_list->size--;
+  }
+
+  return 0;
+}
+
+void PostIncListDestroy(postinc_list_st* address_list) 
+{
+  if (address_list->savedAddr != NULL)
+  {
+    free(address_list->savedAddr);
+  }
+  free(address_list);
+}
 
 
 

@@ -126,6 +126,7 @@ static const char *MiscTokensStrings[] = {
 };
 
 
+
 int NodeCreate(TreeNode_st** ppNewNode, NodeType_et nodeType);
 
 int NodeAddChild(TreeNode_st* pParent, TreeNode_st* pChild);
@@ -140,13 +141,28 @@ void PrintNode(TreeNode_st* pNode);
 
 
 
+//Code generation utils
+
+typedef struct 
+{
+  bool is_increment;
+  uint32_t Addr;
+}list_item_st;
+
+typedef struct 
+{
+  uint8_t size;
+  list_item_st* savedAddr;
+} postinc_list_st;
 
 
+int PostIncListInit();
 
+int PostIncListInsert(postinc_list_st* address_list, bool is_increment, uint32_t Addr);
 
+int PostIncListDelete(postinc_list_st* address_list);
 
-
-
+void PostIncListDestroy(postinc_list_st* address_list);
 
 
 

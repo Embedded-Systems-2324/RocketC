@@ -59,12 +59,16 @@ typedef struct
     asm_instr_et asmInstruction;
 } operator_pair_st;
 
+
 static FILE *pAsmFile;
-// static reg_et ctxReg;
+
 static reg_et dRegSave;
 static reg_et lRegSave;
 static reg_et rRegSave;
-static reg_et ctxReg;
+
+
+postinc_list_st* postIncList;
+static bool delayPostIncDec = 0;
 
 void emitComment(char *c)
 {
@@ -77,8 +81,7 @@ static int releaseReg(reg_et reg);
 
 static reg_et getNextAvailableReg();
 
-static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, OperatorType_et parentOperatorType,
-                     bool isLeftInherited);
+static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, OperatorType_et parentOperatorType, bool isLeftInherited);
 
 static int generateCode(TreeNode_st *pTreeNode);
 
@@ -149,6 +152,8 @@ int executeCodeGeneration(TreeNode_st *pTreeRoot, FILE* pDestStream)
 
     pAsmFile = pDestStream;
 
+    PostIncListInit();
+    
     generateCode(pTreeRoot);
 
 
@@ -329,15 +334,6 @@ static int emitMemoryInstruction(asm_instr_et instructionType, reg_et reg, reg_e
             return -EPERM;
     }
 
-
-    // if ((instructionType == INST_LD) || (instructionType == INST_LDI) || (instructionType == INST_ST))
-    // {
-    //     fprintf(pAsmFile, "%s %s,#%d\n",
-    //             INSTRUCTION(instructionType),
-    //             REGISTER(reg),
-    //             dVal & MAX_IMMED_LDI);
-    // }
-
     return 0;
 }
 
@@ -366,19 +362,35 @@ static int loadImm32(uint32_t dVal, reg_et destReg)
     return ret;
 }
 
-// static int generateChildNodes(TreeNode_st* pTreeNode)
-// {
-//     if (!pTreeNode)
-//         return -EINVAL;
 
-//     for (size_t i = 0; i < pTreeNode->childNumber; ++i)
-//     {
-//         generateCode(&pTreeNode->pChilds[i]);
-//     }
+/// \brief Goes through the postIncList and emits all the increments of the addresses that were added to it
+/// \param reg_et auxReg to perform operations
+/// \return -ENODATA if list is empty
+static int handlePostIncDecOperations(reg_et auxReg)
+{
 
-//     return 0;
-// }
+    delayPostIncDec = 0;
 
+    if(postIncList->size <= 0)
+        return -ENODATA;
+    
+    while (postIncList->size > 0) 
+    {        
+        list_item_st* current_item = &postIncList->savedAddr[postIncList->size - 1];
+        emitMemoryInstruction(INST_LD, auxReg, REG_NONE, current_item->Addr);
+
+        if(current_item->is_increment)
+            emitAluInstruction(INST_ADD, true, 1, auxReg, auxReg, REG_NONE);
+        else
+            emitAluInstruction(INST_SUB, true, 1, auxReg, auxReg, REG_NONE);
+
+        emitMemoryInstruction(INST_ST, auxReg, REG_NONE, current_item->Addr);
+
+        PostIncListDelete(postIncList);
+    }
+
+    return 0;
+}
 
 static int generateImmediateAluOperation(TreeNode_st *pTreeNode, asm_instr_et asmInstruction,
                                          reg_et destReg, reg_et tempReg)
@@ -404,7 +416,9 @@ static int generateImmediateAluOperation(TreeNode_st *pTreeNode, asm_instr_et as
             break;
         case NODE_POST_INC:
             emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr);
-            LOG_ERROR("Incrementing the variable with POST_INC is not being supported\n");
+            //If an assign was detected earlier, add this addr to the list so that it can be incremented later on
+            if(delayPostIncDec)
+                PostIncListInsert(postIncList, true, addr); 
             break;
         case NODE_PRE_INC:
             emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr);
@@ -413,11 +427,14 @@ static int generateImmediateAluOperation(TreeNode_st *pTreeNode, asm_instr_et as
             break;
         case NODE_POST_DEC:
             emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr);
-            LOG_ERROR("Incrementing the variable with POST_INC is not being supported\n");
+            //If an assign was detected earlier, add this addr to the list so that it can be decremented later on
+            if(delayPostIncDec)
+                PostIncListInsert(postIncList, false, addr);           
             break;
         case NODE_PRE_DEC:
             emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr);
             emitAluInstruction(INST_SUB, true, 1, tempReg, tempReg, REG_NONE);
+            emitMemoryInstruction(INST_ST, tempReg, 0, addr);         
             break;
         case NODE_ARRAY_INDEX:
             //Get the left child dVal, which is the array index
@@ -462,6 +479,23 @@ static int generateImmediateAluOperation(TreeNode_st *pTreeNode, asm_instr_et as
             emitAluInstruction(asmInstruction, false, 0, destReg, destReg, tempReg);
         }
     }
+
+
+    //Post Inc/Dec here if no assign was found during traverse
+    if(!delayPostIncDec && (pTreeNode->pChilds[!i].nodeData.dVal == NODE_POST_INC))
+    {
+        emitAluInstruction(INST_ADD, true, 1, tempReg, tempReg, REG_NONE);
+        emitMemoryInstruction(INST_ST, tempReg, 0, addr);
+    }
+
+    if(!delayPostIncDec && (pTreeNode->pChilds[!i].nodeData.dVal == NODE_POST_DEC))
+    {
+        emitAluInstruction(INST_SUB, true, 1, tempReg, tempReg, REG_NONE);
+        emitMemoryInstruction(INST_ST, tempReg, 0, addr);
+        delayPostIncDec = 0;
+    }
+
+    return 0;
 }
 
 
@@ -477,6 +511,9 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
     bool post_inc_left = 0;
     bool post_inc_right = 0;
 
+    int childPos = 0;
+    bool is_postdec= 0;
+    bool is_postinc= 0;
 
     if ((L_CHILD_TYPE(pTreeNode) == NODE_INTEGER) || (R_CHILD_TYPE(pTreeNode)) == NODE_INTEGER)
     {
@@ -507,7 +544,10 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
         case NODE_POST_INC:
             leftAddr = L_CHILD_MEM_LOC(pTreeNode);
             emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr);
-            LOG_ERROR("Incrementing the variable with POST_INC is not being supported\n");
+            if(delayPostIncDec)
+                PostIncListInsert(postIncList, true, leftAddr);
+            childPos = 0;
+            is_postinc = 1;
             break;
         case NODE_PRE_INC:
             leftAddr = L_CHILD_MEM_LOC(pTreeNode);
@@ -518,7 +558,10 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
         case NODE_POST_DEC:
             leftAddr = L_CHILD_MEM_LOC(pTreeNode);
             emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr);
-            LOG_ERROR("Decrementing the variable with POST_DEC is not being supported\n");
+            if(delayPostIncDec)
+                PostIncListInsert(postIncList, false, leftAddr);
+            childPos = 0;
+            is_postdec = 1;
             break;
         case NODE_PRE_DEC:
             leftAddr = L_CHILD_MEM_LOC(pTreeNode);
@@ -552,7 +595,10 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
             break;
         case NODE_POST_INC:
             emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
-            LOG_ERROR("Incrementing the variable with POST_INC is not being supported\n");
+            if(delayPostIncDec)
+                PostIncListInsert(postIncList, true, rightAddr);
+            childPos = 1;
+            is_postinc = 1;
             break;
         case NODE_PRE_INC:
             emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
@@ -561,7 +607,10 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
             break;
         case NODE_POST_DEC:
             emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
-            LOG_ERROR("Incrementing the variable with POST_INC is not being supported\n");
+            if(delayPostIncDec)
+                PostIncListInsert(postIncList, false, rightAddr);
+            childPos = 1;
+            is_postdec = 1;
             break;
         case NODE_PRE_DEC:
             emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
@@ -582,6 +631,40 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
 
     emitAluInstruction(asmInstruction, false, 0, destReg, lReg, rReg);
 
+    //Post Inc/Dec here if no assign was found during traverse
+    if(!delayPostIncDec && is_postinc)
+    {
+        //rReg already has the value contained in the address of the right child
+        //lreg already has the value contained in the address of the left child
+        if(childPos == 1)
+        {
+            emitAluInstruction(INST_ADD, true, 1, rReg, rReg, REG_NONE);
+            emitMemoryInstruction(INST_ST, rReg, REG_NONE, R_CHILD_MEM_LOC(pTreeNode));
+        }
+        else
+        {
+            emitAluInstruction(INST_ADD, true, 1, lReg, lReg, REG_NONE);
+            emitMemoryInstruction(INST_ST, lReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
+        }
+        
+    }
+
+    if(!delayPostIncDec && is_postdec)
+    {
+        //rReg already has the value contained in the address of the right child
+        //lreg already has the value contained in the address of the left child
+        if(childPos == 1)
+        {
+            emitAluInstruction(INST_SUB, true, 1, rReg, rReg, REG_NONE);
+            emitMemoryInstruction(INST_ST, rReg, REG_NONE, R_CHILD_MEM_LOC(pTreeNode));
+        }
+        else
+        {
+            emitAluInstruction(INST_SUB, true, 1, lReg, lReg, REG_NONE);
+            emitMemoryInstruction(INST_ST, lReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
+        }
+        
+    }
 
     releaseReg(lReg);
     releaseReg(rReg);
@@ -602,7 +685,8 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
     reg_et tempReg = getNextAvailableReg();
     reg_et lReg = getNextAvailableReg();
 
-
+    bool is_postdec= 0;
+    bool is_postinc= 0;
 
     //will use in case the right child is an array
     uint32_t index = 0;
@@ -612,13 +696,9 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
 
 
     if (R_CHILD_TYPE(pTreeNode) != NODE_INTEGER)
-    {
         rightAddr = R_CHILD_MEM_LOC(pTreeNode);
 
-        // //If the right child is the same variable as the left child we only need one register (eg: *X = X)
-        // if(leftAddr == rightAddr)
-        //     tempReg = destReg; 
-    }
+        
 
     //Templates for the Right childs of an assignement
     switch (R_CHILD_TYPE(pTreeNode))
@@ -638,7 +718,7 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
             break;
         case NODE_POST_INC:
             emitMemoryInstruction(INST_LD, tempReg, REG_NONE, rightAddr);
-            LOG_ERROR("Incrementing the variable with POST_INC is not being supported\n");
+            is_postinc = 1;
             break;
         case NODE_PRE_INC:
             //We are storing in the middle of the assign operation?? Keep it like this??
@@ -648,7 +728,7 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
             break;
         case NODE_POST_DEC:
             emitMemoryInstruction(INST_LD, tempReg, REG_NONE, rightAddr);
-            LOG_ERROR("Decrementing the variable with POST_DEC is not being supported\n");
+            is_postdec = 1;
             break;
         case NODE_PRE_DEC:
             //We are storing in the middle of the assign operation?? Keep it like this??
@@ -693,23 +773,40 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
         if (operatorType == OP_MULTIPLY_ASSIGN || operatorType == OP_DIVIDE_ASSIGN || operatorType == OP_MODULUS_ASSIGN)
             LOG_ERROR("multiplies, divides and modulus assigns are not being handled right now!\n");
 
-        emitAluInstruction(mapInstructionFromAssignOp(operatorType), false, 0, tempReg, lReg, tempReg);
+        emitAluInstruction(mapInstructionFromAssignOp(operatorType), false, 0, lReg, lReg, tempReg);
     }
 
     //Templates for the left child of an assignement
     switch (L_CHILD_TYPE(pTreeNode))
     {
         case NODE_IDENTIFIER:
-            emitMemoryInstruction(INST_ST, tempReg, REG_NONE, leftAddr);
+            if(operatorType != OP_ASSIGN)
+                emitMemoryInstruction(INST_ST, lReg, REG_NONE, leftAddr);
+            else
+                emitMemoryInstruction(INST_ST, tempReg, REG_NONE, leftAddr);
             break;
         case NODE_POINTER_CONTENT:
-            emitMemoryInstruction(INST_STX, tempReg, destReg, 0);
+            if(operatorType != OP_ASSIGN)
+                emitMemoryInstruction(INST_STX, lReg, destReg, 0);
+            else
+                emitMemoryInstruction(INST_STX, tempReg, destReg, 0);
             break;
         default:
             LOG_ERROR("Un-Implemented condition!\n");
             break;
     }
 
+    //Post Inc/Dec here if no assign was found during traverse
+    if(!delayPostIncDec && is_postinc)
+    {       
+        emitAluInstruction(INST_ADD, true, 1, tempReg, tempReg, REG_NONE);
+        emitMemoryInstruction(INST_ST, tempReg, REG_NONE, R_CHILD_MEM_LOC(pTreeNode));       
+    }
+    if(!delayPostIncDec && is_postdec)
+    {     
+        emitAluInstruction(INST_SUB, true, 1, tempReg, tempReg, REG_NONE);
+        emitMemoryInstruction(INST_ST, tempReg, REG_NONE, R_CHILD_MEM_LOC(pTreeNode));  
+    }
 
     releaseReg(tempReg);
     releaseReg(lReg);
@@ -819,6 +916,9 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             break;
         case NODE_OPERATOR:
 
+            if(IS_ASSIGN_OPERATION(CurrentNodeOpType))
+                delayPostIncDec = 1;
+
             if (!IS_TERMINAL_NODE(L_CHILD_TYPE(pCurrentNode)))
             {
                 //Gen Code for Left Child If its not a terminal node
@@ -848,8 +948,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 rRegSave = rReg;  //Save lReg and dReg because we will enter a new calling stack
                 dRegSave = dReg;
                 parseNode(&pCurrentNode->pChilds[0], NODE_OPERATOR, CurrentNodeOpType, true);
-                releaseReg(
-                        rReg); //Release the right reg when going up in the tree. But it will be used to generate an instruction for this node
+                releaseReg(rReg); //Release the right reg when going up in the tree. But it will be used to generate an instruction for this node
             }
             else if ((IS_TERMINAL_NODE(R_CHILD_TYPE(pCurrentNode))) && (!IS_TERMINAL_NODE(L_CHILD_TYPE(pCurrentNode))))
             {
@@ -857,8 +956,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 lRegSave = lReg; //Save lReg and dReg because we will enter a new calling stack
                 dRegSave = dReg;
                 parseNode(&pCurrentNode->pChilds[1], NODE_OPERATOR, CurrentNodeOpType, false);
-                releaseReg(
-                        lReg); //Release the right reg when going up in the tree. But it will be used to generate an instruction for this node
+                releaseReg(lReg); //Release the right reg when going up in the tree. But it will be used to generate an instruction for this node
             }
             else
             {
@@ -868,6 +966,10 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 releaseReg(lReg);
                 releaseReg(rReg);
             }
+
+            //If there are Post Increments or Decrements to emit, handle it here
+            if(IS_ASSIGN_OPERATION(CurrentNodeOpType))
+                handlePostIncDecOperations(dReg);
 
             break;
         case NODE_TERNARY:
@@ -907,6 +1009,8 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
 
                 emitMemoryInstruction(INST_ST, rReg, REG_NONE, memAddr);
             }
+
+            
 
             break;
         case NODE_STRING:
@@ -1017,7 +1121,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
 
                 //If its an assign with an operation (+=, -=), GenCode for the operation
-                if (parentOperatorType)
+                if (parentOperatorType != OP_ASSIGN)
                     emitAluInstruction(mapInstructionFromAssignOp(parentOperatorType), false, 0, rReg, rReg, rReg);
 
                 emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr);
@@ -1035,7 +1139,6 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
 
                 uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
                 emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr);
-                LOG_ERROR("Decrementing the variable with POST_DEC is not being supported\n");
 
                 if (isLeftInherited)
                 {
@@ -1047,11 +1150,30 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                     lReg = lRegSave;
                     emitAluInstruction(mapInstructionFromOperator(parentOperatorType), false, 0, dReg, lReg, dReg);
                 }
+
+                //If an assign wasnt found before, do the post inc here
+                if(!delayPostIncDec)
+                {
+                    emitAluInstruction(INST_SUB, true, 1, dReg, dReg, REG_NONE);
+                    emitMemoryInstruction(INST_ST, dReg, REG_NONE, memAddr);
+                }
+                else
+                    PostIncListInsert(postIncList, true, memAddr);
             }
                 //If the identifier is a child of an ASSIGN_OPERATION (=, +=, -=, *=, /=, %=, |=, <<=, >>=, &=, ^=,)
             else if (parentNodeType == NODE_OPERATOR && IS_ASSIGN_OPERATION(parentOperatorType))
             {
+                
+            }
+            else //its a dec statement (eg i--)
+            {
+                uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
+                reg_et tReg = getNextAvailableReg();
 
+                emitMemoryInstruction(INST_LD, tReg, REG_NONE, memAddr);
+                emitAluInstruction(INST_SUB, true, 1, tReg, tReg, REG_NONE);
+                emitMemoryInstruction(INST_ST, tReg, REG_NONE, memAddr);
+                releaseReg(tReg);
             }
             break;
         case NODE_PRE_DEC:
@@ -1082,7 +1204,17 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 //If the identifier is a child of an ASSIGN_OPERATION (=, +=, -=, *=, /=, %=, |=, <<=, >>=, &=, ^=,)
             else if (parentNodeType == NODE_OPERATOR && IS_ASSIGN_OPERATION(parentOperatorType))
             {
+                
+            }
+            else //its a dec statement (eg --i)
+            {
+                uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
+                reg_et tReg = getNextAvailableReg();
 
+                emitMemoryInstruction(INST_LD, tReg, REG_NONE, memAddr);
+                emitAluInstruction(INST_SUB, true, 1, tReg, tReg, REG_NONE);
+                emitMemoryInstruction(INST_ST, tReg, REG_NONE, memAddr);
+                releaseReg(tReg);
             }
             break;
         case NODE_POST_INC:
@@ -1091,30 +1223,48 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             if (parentNodeType == NODE_OPERATOR && IS_ALU_OPERATION(parentOperatorType))
             {
                 dReg = dRegSave;
-
                 uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
                 emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr);
-                LOG_ERROR("Incrementing the variable with POST_INC is not being supported\n");
+                
 
                 if (isLeftInherited)
                 {
                     rReg = rRegSave;
                     emitAluInstruction(mapInstructionFromOperator(parentOperatorType), false, 0, dReg, dReg, rReg);
+                    
                 }
                 else
                 {
                     lReg = lRegSave;
                     emitAluInstruction(mapInstructionFromOperator(parentOperatorType), false, 0, dReg, lReg, dReg);
                 }
+                //If an assign wasnt found before, do the post inc here
+                if(!delayPostIncDec)
+                {
+                    emitAluInstruction(INST_ADD, true, 1, dReg, dReg, REG_NONE);
+                    emitMemoryInstruction(INST_ST, dReg, REG_NONE, memAddr);
+                }
+                else
+                    PostIncListInsert(postIncList, true, memAddr);
             }
-                //If the identifier is a child of an ASSIGN_OPERATION (=, +=, -=, *=, /=, %=, |=, <<=, >>=, &=, ^=,)
+            //If is a child of an ASSIGN_OPERATION (=, +=, -=, *=, /=, %=, |=, <<=, >>=, &=, ^=,)
             else if (parentNodeType == NODE_OPERATOR && IS_ASSIGN_OPERATION(parentOperatorType))
             {
 
             }
+            else //Is just an increment statement (ex i++)
+            {
+                uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
+                reg_et tReg = getNextAvailableReg();
+
+                emitMemoryInstruction(INST_LD, tReg, REG_NONE, memAddr);
+                emitAluInstruction(INST_ADD, true, 1, tReg, tReg, REG_NONE);
+                emitMemoryInstruction(INST_ST, tReg, REG_NONE, memAddr);
+                releaseReg(tReg);
+            }
             break;
         case NODE_PRE_INC:
-            //If the Identifier is a child of an ALU_OPERATION (+, -, *, /, %, <<, >>)
+            //If is a child of an ALU_OPERATION (+, -, *, /, %, <<, >>)
             if (parentNodeType == NODE_OPERATOR && IS_ALU_OPERATION(parentOperatorType))
             {
                 dReg = dRegSave;
@@ -1136,10 +1286,20 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                     emitAluInstruction(mapInstructionFromOperator(parentOperatorType), false, 0, dReg, lReg, dReg);
                 }
             }
-                //If the identifier is a child of an ASSIGN_OPERATION (=, +=, -=, *=, /=, %=, |=, <<=, >>=, &=, ^=,)
+            //If is a child of an ASSIGN_OPERATION (=, +=, -=, *=, /=, %=, |=, <<=, >>=, &=, ^=,)
             else if (parentNodeType == NODE_OPERATOR && IS_ASSIGN_OPERATION(parentOperatorType))
             {
 
+            }
+            else //its an inc statement (eg ++i)
+            {
+                uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
+                reg_et tReg = getNextAvailableReg();
+
+                emitMemoryInstruction(INST_LD, tReg, REG_NONE, memAddr);
+                emitAluInstruction(INST_ADD, true, 1, tReg, tReg, REG_NONE);
+                emitMemoryInstruction(INST_ST, tReg, REG_NONE, memAddr);
+                releaseReg(tReg);
             }
             break;
         case NODE_ARRAY_DECLARATION:
