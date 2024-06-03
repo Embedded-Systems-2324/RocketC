@@ -1,18 +1,24 @@
 static unsigned int y = 0;
 int res = 0;
 
+int func()
+{
+    return 1;
+}
+
+
 int CalcDOWhile(int y, int res)
 {
-    res =  0 -res + &y;
+    /* res =  0 -res + &y;
 
     int b = 4;
     int *a = &b;
 
     1 + ++res;
+*/
+    int array[5]; 
 
-    int array[6];
+    array[func()] = 0;
 
-    array[5] = 0;
-    res = 1 + array[5];
 }
 
