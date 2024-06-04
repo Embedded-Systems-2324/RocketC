@@ -1,9 +1,5 @@
 /* Program to calculate some fibonacci numbers */
-<<<<<<< HEAD
 .org 0x10
-=======
-.org 0x0c
->>>>>>> d399122 (hexToCoe (first addr != 0 correction))
 .equ VAR1, 100
 
 INIT :      ;Init variables
@@ -15,14 +11,11 @@ ADD R2, R0, R1
 
 .equ VAR2, - 40+10
 
-<<<<<<< HEAD
 //BYTE_ZONE :
 //.byte 23
 
 .org 0x200
 
-=======
->>>>>>> d399122 (hexToCoe (first addr != 0 correction))
 LOOP :      //Computing Loop 
 MOV R1, R0
 MOV R0, R2
