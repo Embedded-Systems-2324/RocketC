@@ -444,7 +444,7 @@ R_DEFAULT       :   TOKEN_DEFAULT TOKEN_COLON R_LOCAL_STATEMENT_LIST
 
 // An IF statement can only be a simple IF or a IF ELSE                                                     
 // The commonly seen ELSE IF is just a new IF statement inside the first ELSE                                   // Examples: 
-R_IF_STATEMENT  :   TOKEN_IF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES R_LOCAL_STATEMENT_LIST       // if (var==1) { stmts }
+R_IF_STATEMENT  :   TOKEN_IF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES R_LOCAL_STATEMENT       // if (var==1) { stmts }
                     {
                         NodeCreate(&($$.treeNode), NODE_IF);
 
@@ -452,7 +452,7 @@ R_IF_STATEMENT  :   TOKEN_IF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESE
                         NodeAddChild($$.treeNode, $5.treeNode);                      // if true
                     }
 
-                |   TOKEN_IF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES R_LOCAL_STATEMENT_LIST TOKEN_ELSE  R_LOCAL_STATEMENT_LIST     // if (var==1) { stmts } else { stmts }
+                |   TOKEN_IF TOKEN_LEFT_PARENTHESES R_EXP TOKEN_RIGHT_PARENTHESES R_LOCAL_STATEMENT TOKEN_ELSE  R_LOCAL_STATEMENT     // if (var==1) { stmts } else { stmts }
                     {
                         NodeCreate(&($$.treeNode), NODE_IF);
 

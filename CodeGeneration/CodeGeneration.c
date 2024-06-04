@@ -95,43 +95,42 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
 static int generateCode(TreeNode_st *pTreeNode);
 
 static reg_state_st regStateList[] =
-        {
-                {.regName = REG_R12, .isFree = true},
-                {.regName = REG_R13, .isFree = true},
-                {.regName = REG_R14, .isFree = true},
-                {.regName = REG_R15, .isFree = true},
-                {.regName = REG_R24, .isFree = true},
-                {.regName = REG_R25, .isFree = true},
-                {.regName = REG_R26, .isFree = true},
-                {.regName = REG_R27, .isFree = true},
-                {.regName = REG_R28, .isFree = true},
-                {.regName = REG_R29, .isFree = true},
-                {.regName = REG_R30, .isFree = true},
-                {.regName = REG_R31, .isFree = true}
-        };
+{
+    {.regName = REG_R12, .isFree = true},
+    {.regName = REG_R13, .isFree = true},
+    {.regName = REG_R14, .isFree = true},
+    {.regName = REG_R15, .isFree = true},
+    {.regName = REG_R24, .isFree = true},
+    {.regName = REG_R25, .isFree = true},
+    {.regName = REG_R26, .isFree = true},
+    {.regName = REG_R27, .isFree = true},
+    {.regName = REG_R28, .isFree = true},
+    {.regName = REG_R29, .isFree = true},
+    {.regName = REG_R30, .isFree = true},
+    {.regName = REG_R31, .isFree = true}
+};
 
 static operator_pair_st operatorLut[] =
-        {
-                {.operatorType = OP_PLUS, .assignOpType = OP_PLUS_ASSIGN, .asmInstruction = INST_ADD},
-                {.operatorType = OP_MINUS, .assignOpType = OP_MINUS_ASSIGN, .asmInstruction = INST_SUB},
-                {.operatorType = OP_RIGHT_SHIFT, .assignOpType = OP_RIGHT_SHIFT_ASSIGN, .asmInstruction = INST_RR},
-                {.operatorType = OP_LEFT_SHIFT, .assignOpType = OP_LEFT_SHIFT_ASSIGN, .asmInstruction = INST_RL},
-                {.operatorType = OP_BITWISE_AND, .assignOpType = OP_BITWISE_AND_ASSIGN, .asmInstruction = INST_AND},
-                {.operatorType = OP_BITWISE_NOT, .assignOpType = -1, .asmInstruction = INST_NOT},
-                {.operatorType = OP_BITWISE_OR, .assignOpType = OP_BITWISE_OR_ASSIGN, .asmInstruction = INST_OR},
-                {.operatorType = OP_BITWISE_XOR, .assignOpType = OP_BITWISE_XOR_ASSIGN, .asmInstruction = INST_XOR},
+{
+    {.operatorType = OP_PLUS, .assignOpType = OP_PLUS_ASSIGN, .asmInstruction = INST_ADD},
+    {.operatorType = OP_MINUS, .assignOpType = OP_MINUS_ASSIGN, .asmInstruction = INST_SUB},
+    {.operatorType = OP_RIGHT_SHIFT, .assignOpType = OP_RIGHT_SHIFT_ASSIGN, .asmInstruction = INST_RR},
+    {.operatorType = OP_LEFT_SHIFT, .assignOpType = OP_LEFT_SHIFT_ASSIGN, .asmInstruction = INST_RL},
+    {.operatorType = OP_BITWISE_AND, .assignOpType = OP_BITWISE_AND_ASSIGN, .asmInstruction = INST_AND},
+    {.operatorType = OP_BITWISE_NOT, .assignOpType = -1, .asmInstruction = INST_NOT},
+    {.operatorType = OP_BITWISE_OR, .assignOpType = OP_BITWISE_OR_ASSIGN, .asmInstruction = INST_OR},
+    {.operatorType = OP_BITWISE_XOR, .assignOpType = OP_BITWISE_XOR_ASSIGN, .asmInstruction = INST_XOR},
 
-                {.operatorType = (OperatorType_et) OP_GREATER_THAN, .assignOpType = -1, .asmInstruction = INST_BGT},
-                {.operatorType = (OperatorType_et) OP_LESS_THAN_OR_EQUAL, .assignOpType = -1, .asmInstruction = INST_BLE},
-                {.operatorType = (OperatorType_et) OP_GREATER_THAN_OR_EQUAL, .assignOpType = -1, .asmInstruction = INST_BGE},
-                {.operatorType = (OperatorType_et) OP_LESS_THAN, .assignOpType = -1, .asmInstruction = INST_BLT},
-                {.operatorType = (OperatorType_et) OP_EQUAL, .assignOpType = -1, .asmInstruction = INST_BEQ},
-                {.operatorType = (OperatorType_et) OP_NOT_EQUAL, .assignOpType = -1, .asmInstruction = INST_BNE},
-                {.operatorType = (OperatorType_et) OP_LOGICAL_AND, .assignOpType = -1, .asmInstruction = INST_BEQ},
-                {.operatorType = (OperatorType_et) OP_LOGICAL_OR, .assignOpType = -1, .asmInstruction = INST_BNE},
-                {.operatorType = (OperatorType_et) OP_LOGICAL_NOT, .assignOpType = -1, .asmInstruction = INST_BEQ},
-
-        };
+    {.operatorType = (OperatorType_et) OP_GREATER_THAN, .assignOpType = -1, .asmInstruction = INST_BGT},
+    {.operatorType = (OperatorType_et) OP_LESS_THAN_OR_EQUAL, .assignOpType = -1, .asmInstruction = INST_BLE},
+    {.operatorType = (OperatorType_et) OP_GREATER_THAN_OR_EQUAL, .assignOpType = -1, .asmInstruction = INST_BGE},
+    {.operatorType = (OperatorType_et) OP_LESS_THAN, .assignOpType = -1, .asmInstruction = INST_BLT},
+    {.operatorType = (OperatorType_et) OP_EQUAL, .assignOpType = -1, .asmInstruction = INST_BEQ},
+    {.operatorType = (OperatorType_et) OP_NOT_EQUAL, .assignOpType = -1, .asmInstruction = INST_BNE},
+    {.operatorType = (OperatorType_et) OP_LOGICAL_AND, .assignOpType = -1, .asmInstruction = INST_BEQ},
+    {.operatorType = (OperatorType_et) OP_LOGICAL_OR, .assignOpType = -1, .asmInstruction = INST_BNE},
+    {.operatorType = (OperatorType_et) OP_LOGICAL_NOT, .assignOpType = -1, .asmInstruction = INST_BEQ},
+};
 
 #define OPERATOR_LUT_SIZE (sizeof(operatorLut) / sizeof(operator_pair_st))
 #define NOF_SCRATCH_REGISTER (sizeof(regStateList) / sizeof(reg_state_st))
@@ -355,52 +354,45 @@ static int emitMemoryInstruction(asm_instr_et instructionType, reg_et reg, reg_e
     return 0;
 }
 
-/// \brief this function emit the loop labels 
+static uint32_t labelCounters[LABEL_MAX] = {0};
 
-static int counter[6]= {0,0,0,0,0,0};  //counter for while, if, do and for loops
-
-static int emitLabelInstruction(label_et labeltype, int count, char* nameLabel)
+static int emitLabelInstruction(label_et labelType, uint32_t count, char* nameLabel)
 {
-    //CheckLabel type
-    if (labeltype < WHILE_CONDITION || labeltype > FUNCTION_NAME)
+    if (labelType < WHILE_CONDITION || labelType >= LABEL_MAX)
         return -EINVAL;
 
-    if(labeltype != FUNCTION_NAME)
-        fprintf(pAsmFile, "%s%d:\n",
-                LABEL(labeltype),
+    if(labelType != FUNCTION_NAME)
+        fprintf(pAsmFile, "%s%u:\n",
+                LABEL(labelType),
                 count);
     else
         fprintf(pAsmFile, "%s:\n",
-            nameLabel);;
+            nameLabel);
     
     return 0;
 }
 
-static int getPostIncLabelCounter(label_et labeltype) 
+static uint32_t getPostIncLabelCounter(label_et labeltype)
 {
-
-    if (labeltype < WHILE_CONDITION || labeltype > SKIP) {
+    if (labeltype < WHILE_CONDITION || labeltype >= LABEL_MAX)
         return -EINVAL;
-    }    
-    
-    return counter[labeltype]++;
+
+    return labelCounters[labeltype]++;
 }
 
-static int getLabelCounter(label_et labeltype)
+static uint32_t getLabelCounter(label_et labelType)
 {
-    if (labeltype < WHILE_CONDITION || labeltype > SKIP) {
+    if (labelType < WHILE_CONDITION || labelType >= LABEL_MAX)
         return -EINVAL;
-    }
-    return counter[labeltype];
+
+    return labelCounters[labelType];
 }
 
 /// \brief this function emit the branch labels
-
-static int emitBranchInstruction(asm_instr_et instructionType, label_et labeltype, int counter) 
+static int emitBranchInstruction(asm_instr_et instructionType, label_et labelType, uint32_t counter)
 {
-
    //CheckLabel type
-    if (labeltype < WHILE_CONDITION || labeltype > SKIP)
+    if (labelType < WHILE_CONDITION || labelType >= LABEL_MAX)
         return -EINVAL;
 
     if (instructionType < INST_BGT || instructionType > INST_BMI)
@@ -409,10 +401,12 @@ static int emitBranchInstruction(asm_instr_et instructionType, label_et labeltyp
     if(counter < 0)
         return -EINVAL;
 
-    fprintf(pAsmFile, "%s %s%d\n",
+    fprintf(pAsmFile, "%s %s%u\n",
             INSTRUCTION(instructionType),
-            LABEL(labeltype),
+            LABEL(labelType),
             counter);
+
+    return 0;
 }
 
 /// \brief Considering the LDI instruction only allows to load values up to 2^22 - 1, some arithmetic must be used in
@@ -1208,7 +1202,6 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
         case NODE_TERNARY:
             break;
         case NODE_IDENTIFIER:
-
             dReg = dRegSave;
 
             //If the Identifier is a child of an ALU_OPERATION (+, -, *, /, %, <<, >>)
@@ -1318,6 +1311,20 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             break;
         case NODE_IF:
             parseNode(&L_CHILD(pCurrentNode), NODE_TYPE(pCurrentNode), CurrentNodeOpType, true);
+            emitAluInstruction(INST_CMP, true, 0, REG_NONE, dRegSave, REG_NONE);
+            emitBranchInstruction(INST_BEQ, IF_FALSE, getLabelCounter(IF_FALSE));
+            generateCode(&pCurrentNode->pChilds[1]);
+
+            //If statement with else
+            if (pCurrentNode->childNumber > 2)
+            {
+                emitBranchInstruction(INST_BRA, IF_EXIT, getLabelCounter(IF_EXIT));
+                emitLabelInstruction(IF_FALSE, getPostIncLabelCounter(IF_FALSE), NULL);
+                generateCode(&pCurrentNode->pChilds[2]);
+            }
+
+            emitLabelInstruction(IF_EXIT, getPostIncLabelCounter(IF_EXIT), NULL);
+
             break;
         case NODE_WHILE:
             break;

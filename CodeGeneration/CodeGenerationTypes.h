@@ -154,8 +154,8 @@ static const char* regNameLut[] =
     "REG_NONE"
 };
 
-typedef enum{
-
+typedef enum
+{
     WHILE_CONDITION = 0x00,
     IF_CONDITION,
     DO,
@@ -166,10 +166,8 @@ typedef enum{
     IF_TRUE,
     IF_FALSE,
     IF_EXIT,
-    
-
     FUNCTION_NAME,
-   
+    LABEL_MAX
 }label_et;
 
 static const char *labelLut[] = 

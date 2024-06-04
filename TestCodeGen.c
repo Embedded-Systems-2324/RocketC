@@ -1,18 +1,33 @@
-int *x;
+int x;
 int y;
 int z;
 int array[6];
 
 void main()
 {
-    
-    if((y && x) || (z || array[1]))
+    if(y == 5)
     {
-
+        int a;
+        x = 1;
     }
-    //array[1 + z] = z + y; 
+    x++;
+    if (x == 10)
+    {
+        x = 2;
+    }
 
-      
+//        while (x == 10)
+//        {
+//            x = 0;
+//            y = 2;
+//        }
+//        x++;
+//        while (x == 10)
+//        {
+//
+//        }
+//        x++;
+    //array[1 + z] = z + y; 
 }
 
 
