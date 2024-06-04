@@ -96,7 +96,20 @@ void print_code_binary(FILE *fp, const sLineParams* lineParams, int index){
         }
         else {
             first = 0;
+            if (lineParams[0].addr != 0){
+
+            int auxAddr = 0;
+            printf("estou aqui\n");
+            while(auxAddr < lineParams[0].addr){
+                
+                auxAddr += 4;
+                print_bin_number(fp, 0);
+                fprintf(fp, ",\n");
+            }
         }
+        }
+
+       
 
         if( (i > 0) && (lineParams[i].addr != lineParams[i-1].addr + 4)){
 
@@ -152,7 +165,7 @@ int main(int argc, char *argv[]) {
     const char *hex_file = argv[1];
 
     FILE* file_hex = openFile(hex_file, "r");
-    FILE* file_bin = openFile("code.coe", "w");
+    FILE* file_bin = openFile("Output/code.coe", "w");
 
     sLineParams *lineParams;
     init_statements_list(&lineParams, &strSize);

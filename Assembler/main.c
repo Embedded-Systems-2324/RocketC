@@ -126,7 +126,7 @@ int main(int argc, char *argv[]){
     if(flag_step1_only == 0){
         if(!pOutputFile){
 
-            pOutputFile = fopen("out.hex", "w");
+            pOutputFile = fopen("Output/out.hex", "w");
 
             if (!pOutputFile){
                 printf("Failed to open output file!\n");
