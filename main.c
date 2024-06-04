@@ -52,6 +52,11 @@ int getSourceFile(FILE** ppSourceFile)
 
 int main(int argc, char *argv[])
 {
+
+    /* codeGenerationTestUnit();
+    return 0; */
+
+    
     char* pMode;
 
     if (argc < 2 || argc > 3)

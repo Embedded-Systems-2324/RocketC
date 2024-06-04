@@ -5,11 +5,11 @@ int array[6];
 
 void main()
 {
-   // x = &y;
-    x = 1;
-    z = 3;
-    array[x + z - x] = array[1 + z] + y;
+    
+    if((y && x) || (z || array[1]))
+    {
 
+    }
     //array[1 + z] = z + y; 
 
       
@@ -36,11 +36,11 @@ int CalcDOWhile(int y, int res)
     1 + ++res;
     
 */
-
+/* 
     x = &res;
     int array[5]; 
 
     y = array[res++ + 1];
 
-} */
+} */ 
 
