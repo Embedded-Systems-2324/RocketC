@@ -44,6 +44,8 @@
 #define IS_ASSIGN_OPERATION(x) (((x) == OP_ASSIGN) || ((x) == OP_PLUS_ASSIGN) || ((x) == OP_MINUS_ASSIGN) || ((x) == OP_LEFT_SHIFT_ASSIGN) || ((x) == OP_RIGHT_SHIFT_ASSIGN) || ((x) == OP_BITWISE_AND_ASSIGN) || ((x) == OP_BITWISE_OR_ASSIGN) || ((x) == OP_BITWISE_XOR_ASSIGN) || ((x) == OP_MULTIPLY_ASSIGN) || ((x) == OP_DIVIDE_ASSIGN) || ((x) == OP_MODULUS_ASSIGN))
 #define IS_BOOLEAN_OPERATION(x) (((x) == OP_GREATER_THAN) || ((x) == OP_LESS_THAN_OR_EQUAL) || ((x) == OP_GREATER_THAN_OR_EQUAL) || ((x) == OP_LESS_THAN) || ((x) == OP_EQUAL) || ((x) == OP_NOT_EQUAL) || ((x) == OP_LOGICAL_AND) || ((x) == OP_LOGICAL_OR) || ((x) == OP_LOGICAL_NOT))
 
+#define IS_CONDITIONAL_NODE(x) (((x) == NODE_WHILE) || ((x) == NODE_SWITCH) || ((x) == NODE_CASE) || ((x) == NODE_DO_WHILE) || ((x) == NODE_IF))
+
 
 #define LABEL(x) (labelLut[x])
 
@@ -1113,13 +1115,16 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
 
     OperatorType_et CurrentNodeOpType = (OperatorType_et) pCurrentNode->nodeData.dVal;
 
-    if (!IS_TERMINAL_NODE(NODE_TYPE(pCurrentNode)) && NODE_TYPE(pCurrentNode) == NODE_OPERATOR)
+    if (!IS_TERMINAL_NODE(pCurrentNode->nodeType) && NODE_TYPE(pCurrentNode) == NODE_OPERATOR)
     {
         //If we enter a non terminal node we allocate a new dReg for that operation
         dReg = getNextAvailableReg();
         lReg = REG_NONE;
         rReg = REG_NONE;
     }
+    
+    if(IS_TERMINAL_NODE(pCurrentNode->nodeType) && IS_CONDITIONAL_NODE(parentNodeType))
+        dReg = getNextAvailableReg();
 
     if(parentNodeType == NODE_ARRAY_INDEX)
         arrayIndexRegSave = dReg;
@@ -1204,11 +1209,12 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
         case NODE_TERNARY:
             break;
         case NODE_IDENTIFIER:
-            dReg = dRegSave;
+            
 
             //If the Identifier is a child of an ALU_OPERATION (+, -, *, /, %, <<, >>)
             if (parentNodeType == NODE_OPERATOR && IS_ALU_OPERATION(parentOperatorType))
             {
+                dReg = dRegSave;
                 uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
                 emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr);
 
@@ -1226,6 +1232,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             //If the identifier is a child of an ASSIGN_OPERATION (=, +=, -=, *=, /=, %=, |=, <<=, >>=, &=, ^=,)
             else if (parentNodeType == NODE_OPERATOR && IS_ASSIGN_OPERATION(parentOperatorType))
             {
+                dReg = dRegSave;
                 //Will always be left inherited so the value to assign is always at rReg
                 rReg = rRegSave;
 
@@ -1244,6 +1251,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             }
             else if (parentNodeType == NODE_OPERATOR && IS_BOOLEAN_OPERATION(parentOperatorType))
             {
+                dReg = dRegSave;
                 reg_et tempreg = getNextAvailableReg(); 
                 emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
 
@@ -1259,6 +1267,11 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 }
                 releaseReg(tempreg);
             }
+            else //Used for Simple Conditions if(x), while(x)...
+            {
+                emitMemoryInstruction(INST_LD, dReg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
+                dRegSave = dReg;
+            }
 
             break;
         case NODE_STRING:
@@ -1269,12 +1282,12 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             //rReg is not used in imm operation so in case it is left inherited we reload the rRegSave to the lReg  
             lReg = isLeftInherited ? rRegSave : lRegSave;
 
-            dReg = dRegSave;
+            
 
             //If the integer is a child of an ALU_OPERATION (+, -, *, /, %, <<, >>)
             if (parentNodeType == NODE_OPERATOR && IS_ALU_OPERATION(parentOperatorType))
             {
-
+                dReg = dRegSave;
                 //Foi necessário colocar aqui a mesma verificação que está na func generateALUOperation (se for operaçao menos trocar para ADD e negar o imediato)
                 if ((parentOperatorType == OP_MINUS) && isLeftInherited)
                 {
@@ -1288,6 +1301,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             }
             else if(parentNodeType == NODE_OPERATOR && IS_BOOLEAN_OPERATION(parentOperatorType))
             {
+                dReg = dRegSave;
                 reg_et tempreg = getNextAvailableReg(); 
                 emitMemoryInstruction(INST_LDI, tempreg, REG_NONE, pCurrentNode->nodeData.dVal);
 
@@ -1303,6 +1317,11 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 }
                 releaseReg(tempreg);
             }
+            else //Used for Simple Conditions if(1), while(1)...
+            {
+                emitMemoryInstruction(INST_LDI, dReg, REG_NONE, pCurrentNode->nodeData.dVal);
+                dRegSave = dReg;
+            }
 
             break;
         case NODE_FLOAT:
@@ -1312,7 +1331,9 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
         case NODE_STRUCT:
             break;
         case NODE_IF:
+            
             parseNode(&L_CHILD(pCurrentNode), NODE_TYPE(pCurrentNode),(OperatorType_et) L_CHILD_DVAL(pCurrentNode), true);
+            
             emitAluInstruction(INST_CMP, true, 0, REG_NONE, dRegSave, REG_NONE);
             emitBranchInstruction(INST_BEQ, IF_FALSE, getLabelCounter(IF_FALSE));
             if (pCurrentNode->childNumber > 1)
@@ -1334,12 +1355,41 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             generateCode(&L_CHILD(pCurrentNode));
             emitAluInstruction(INST_CMP, true, 0, REG_NONE, dRegSave, REG_NONE);
             emitBranchInstruction(INST_BEQ, WHILE_EXIT, getLabelCounter(WHILE_EXIT));
+
+            //While can be empty
             if (pCurrentNode->childNumber > 1)
                 generateCode(&R_CHILD(pCurrentNode));
+
             emitBranchInstruction(INST_BRA, WHILE_START, getPostIncLabelCounter(WHILE_START));
             emitLabelInstruction(WHILE_EXIT, getPostIncLabelCounter(WHILE_EXIT), NULL);
             break;
+
         case NODE_DO_WHILE:
+            emitLabelInstruction(WHILE_START, getLabelCounter(WHILE_START), NULL);
+            
+            //Do can be empty
+            //Gen code inside do
+            if (pCurrentNode->childNumber > 1)
+                generateCode(&R_CHILD(pCurrentNode));
+
+            //Generate while condition
+            generateCode(&L_CHILD(pCurrentNode));
+            emitAluInstruction(INST_CMP, true, 0, REG_NONE, dRegSave, REG_NONE);
+            emitBranchInstruction(INST_BNE, WHILE_START, getPostIncLabelCounter(WHILE_START));
+            
+
+            /*
+            DO:
+                (CODIGO)
+                (CONDIITON)
+                LD R,
+                CMP R, #0
+                BNE DO
+                 
+                 ...
+
+            */
+
             break;
         case NODE_RETURN:
             // Place return values in R4
@@ -1360,65 +1410,69 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
         case NODE_CONTINUE:
             break;
         case NODE_BREAK:
+        
+            if(parentNodeType != NODE_DEFAULT)
+                emitBranchInstruction(INST_BRA, CASE_EXIT, getLabelCounter(CASE_EXIT));
+        
             break;
         case NODE_GOTO:
             break;
         case NODE_LABEL:
             break;
         case NODE_SWITCH:
-            //Generate code for expression inside switch
-            parseNode(&L_CHILD(pCurrentNode), NODE_TYPE(pCurrentNode),(OperatorType_et) L_CHILD_DVAL(pCurrentNode), true);
+            //Generate code for expression inside switch     
+             parseNode(&L_CHILD(pCurrentNode), NODE_TYPE(pCurrentNode),(OperatorType_et) L_CHILD_DVAL(pCurrentNode), true);
             
             // dRegSave
-            reg_et tempreg = getNextAvailableReg(); 
-            emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
-            emitAluInstruction(INST_CMP, true, 0, REG_NONE, dRegSave, REG_NONE);
-            //emitBranchInstruction(INST_BEQ, )
+            
+            reg_et compareReg = getNextAvailableReg();
 
+            //generateCode(&R_CHILD(pCurrentNode));
 
-/*
+            TreeNode_st *pCases, pDefault;
+            pCases = &pCurrentNode->pChilds[1];
 
-Switch (identifier){
-  case 1:
-    code;
-  break;
+            int keepCounter = labelCounters[CASE];
 
-  case 2:
-    code;
-  break;
+            while(pCases->pSibling != NULL ){
+                reg_et tempreg = getNextAvailableReg(); 
+                emitMemoryInstruction(INST_LDI, tempreg, REG_NONE, pCases->nodeData.dVal);
+            
+                emitAluInstruction(INST_CMP, false, 0, REG_NONE, dRegSave, tempreg);
+                emitBranchInstruction(INST_BEQ, CASE, getPostIncLabelCounter(CASE));
+                
+                releaseReg(tempreg);                
 
-  default:
-    code;
-  break;
-}
-*/
+                if(pCases->pSibling->nodeType == NODE_DEFAULT)
+                {
+                    emitBranchInstruction(INST_BRA, DEFAULT, getLabelCounter(DEFAULT));  
+                }
+                else if(pCases->pSibling == NULL)
+                    emitBranchInstruction(INST_BRA, CASE_EXIT, getLabelCounter(CASE_EXIT));  
 
-            /*LD Rexp, #exp
-            LD R1, #Case1
-            CMP R1, Rexp
-            BEQ Case1L
-            LD R1, #Case2
-            CMP R1, Rexp
-            BEQ Case2L
-            (CODE DEFAULT)
-            BRA EXIT
-            CASE1L:
-            (CODE CASE1)
+                pCases = pCases->pSibling;
+            }
 
-            CASE2L:
-            (CODE CASE2L)
-
-            EXIT:
-            */
-
-
-
-
+            labelCounters[CASE]= keepCounter;
+            
+            generateCode(&R_CHILD(pCurrentNode));
+            
+            emitLabelInstruction(CASE_EXIT, getPostIncLabelCounter(CASE_EXIT), NULL);
 
             break;
-        case NODE_CASE:
+        case NODE_CASE:             
+            //Emit Label for Case
+            reg_et tempreg = getNextAvailableReg(); 
+            emitLabelInstruction(CASE, getPostIncLabelCounter(CASE), NULL);
+            //Gen the case Code 
+            generateCode(&L_CHILD(pCurrentNode));
+            
+
+            releaseReg(tempreg);
             break;
         case NODE_DEFAULT:
+            emitLabelInstruction(DEFAULT, getPostIncLabelCounter(DEFAULT), NULL);
+            generateCode(&L_CHILD(pCurrentNode));
             break;
         case NODE_REFERENCE:
             //If the Identifier is a child of an ALU_OPERATION (+, -, *, /, %, <<, >>)
@@ -1441,6 +1495,7 @@ Switch (identifier){
             }
             else if (parentNodeType == NODE_OPERATOR && IS_BOOLEAN_OPERATION(parentOperatorType))
             {
+                dReg = dRegSave;
                 reg_et tempreg = getNextAvailableReg(); 
                 emitMemoryInstruction(INST_LDI, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
 
@@ -1461,11 +1516,12 @@ Switch (identifier){
             break;
         case NODE_POINTER_CONTENT:
 
-            dReg = dRegSave;
+            
 
             //If the Identifier is a child of an ALU_OPERATION (+, -, *, /, %, <<, >>)
             if (parentNodeType == NODE_OPERATOR && IS_ALU_OPERATION(parentOperatorType))
             {
+                dReg = dRegSave;
                 uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
                 emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr);
                 emitMemoryInstruction(INST_LDX, dReg, dReg, memAddr);
@@ -1484,6 +1540,7 @@ Switch (identifier){
                 //If the identifier is a child of an ASSIGN_OPERATION (=, +=, -=, *=, /=, %=, |=, <<=, >>=, &=, ^=,)
             else if (parentNodeType == NODE_OPERATOR && IS_ASSIGN_OPERATION(parentOperatorType))
             {
+                dReg = dRegSave;
                 //Will always be left inherited so the value to assign is always at rReg
                 rReg = rRegSave;
                 uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
@@ -1498,6 +1555,7 @@ Switch (identifier){
             }
             else if (parentNodeType == NODE_OPERATOR && IS_BOOLEAN_OPERATION(parentOperatorType))
             {
+                dReg = dRegSave;
                 reg_et tempreg = getNextAvailableReg(); 
                 emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
                 emitMemoryInstruction(INST_LDX, tempreg, tempreg, 0);
@@ -1513,6 +1571,12 @@ Switch (identifier){
                     handleRootBooleanNode(parentOperatorType, dReg, lReg, tempreg);
                 }
                 releaseReg(tempreg);
+            }
+            else //Used for Simple Conditions if(*x), while(*x)...
+            {
+                emitMemoryInstruction(INST_LD, dReg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
+                emitMemoryInstruction(INST_LDX, dReg, dReg, 0);
+                dRegSave = dReg;
             }
 
             break;
@@ -1549,6 +1613,7 @@ Switch (identifier){
             }
             else if (parentNodeType == NODE_OPERATOR && IS_BOOLEAN_OPERATION(parentOperatorType))
             {
+                dReg = dRegSave;
                 reg_et tempreg = getNextAvailableReg(); 
                 emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
 
@@ -1610,6 +1675,7 @@ Switch (identifier){
             }
             else if (parentNodeType == NODE_OPERATOR && IS_BOOLEAN_OPERATION(parentOperatorType))
             {
+                dReg = dRegSave;
                 reg_et tempreg = getNextAvailableReg(); 
                 emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
                 emitAluInstruction(INST_SUB, true, 1, tempreg, tempreg, REG_NONE);
@@ -1676,6 +1742,7 @@ Switch (identifier){
             }
             else if (parentNodeType == NODE_OPERATOR && IS_BOOLEAN_OPERATION(parentOperatorType))
             {
+                dReg = dRegSave;
                 reg_et tempreg = getNextAvailableReg(); 
                 emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
 
@@ -1735,6 +1802,7 @@ Switch (identifier){
             }
             else if (parentNodeType == NODE_OPERATOR && IS_BOOLEAN_OPERATION(parentOperatorType))
             {
+                dReg = dRegSave;
                 reg_et tempreg = getNextAvailableReg(); 
                 emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
                 emitAluInstruction(INST_ADD, true, 1, tempreg, tempreg, REG_NONE);
@@ -1773,11 +1841,10 @@ Switch (identifier){
             break;
         case NODE_ARRAY_INDEX:
 
-            dReg = dRegSave;
-
+            
             if (parentNodeType == NODE_OPERATOR && IS_ALU_OPERATION(parentOperatorType))
             {
-                             
+                dReg = dRegSave;             
                 handleArrayIndexedExpressions(pCurrentNode, dReg);
                 emitMemoryInstruction(INST_LDX, dReg, dReg, 0);
 
@@ -1795,6 +1862,7 @@ Switch (identifier){
             //If the array is a child of an ASSIGN_OPERATION (=, +=, -=, *=, /=, %=, |=, <<=, >>=, &=, ^=,)
             else if (parentNodeType == NODE_OPERATOR && IS_ASSIGN_OPERATION(parentOperatorType))
             {
+                dReg = dRegSave;
                 //Dreg will have the value of the memory location of array[exp]
                 handleArrayIndexedExpressions(pCurrentNode, dReg);
 
@@ -1809,6 +1877,7 @@ Switch (identifier){
             }
             else if (parentNodeType == NODE_OPERATOR && IS_BOOLEAN_OPERATION(parentOperatorType))
             {
+                dReg = dRegSave;
                 reg_et tempreg = getNextAvailableReg(); 
                 handleArrayIndexedExpressions(pCurrentNode, tempreg);
                 emitMemoryInstruction(INST_LDX, tempreg, tempreg, 0);
@@ -1826,7 +1895,13 @@ Switch (identifier){
                 
                 releaseReg(tempreg);
             }
-            
+            else //used for while(array[x]), if (array[x])
+            {
+                handleArrayIndexedExpressions(pCurrentNode, dReg);
+                emitMemoryInstruction(INST_LDX, dReg, dReg, 0);
+                dRegSave = dReg;
+            }
+
             break;
         case NODE_TYPE:
             break;

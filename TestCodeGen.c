@@ -5,24 +5,13 @@ int array[6];
 
 void main()
 {
-    /* switch (x + 1)
-    {
-        case 1:
-            x = 2;
-            break;
-        case 3:
-            x = 7;
-            break;
-        default:
-            break;
-    } */
+    int v;
 
-    if(1)
-    {
-        x = 1 + z;
-    }
+    v = 5;
+    x = 10;
+
+
 }
-
 
 /* static unsigned int y = 0;
 int res = 0;
