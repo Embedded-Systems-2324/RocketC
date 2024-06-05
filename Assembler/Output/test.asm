@@ -11,4 +11,3 @@ LDI R0, :LOOP
 LOOP :      //Computing Loop 
 MOV R1, R0
 BNE LOOP
-s
