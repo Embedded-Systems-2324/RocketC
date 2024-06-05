@@ -5,7 +5,7 @@ int array[6];
 
 void main()
 {
-    switch (x)
+    /* switch (x + 1)
     {
         case 1:
             x = 2;
@@ -15,6 +15,11 @@ void main()
             break;
         default:
             break;
+    } */
+
+    if(1)
+    {
+        x = 1 + z;
     }
 }
 

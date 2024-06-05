@@ -161,10 +161,12 @@ typedef enum
     TRUE            = 0x02,
     FALSE           = 0x03,
     SKIP            = 0x04,
-    IF_FALSE        = 0x05,
-    IF_EXIT         = 0x06,
-    FUNCTION_NAME   = 0x07,
-    LABEL_MAX
+    CASE            = 0x05,
+    IF_FALSE        = 0x06,
+    IF_EXIT         = 0x07,
+    FUNCTION_NAME   = 0x08,
+    LABEL_MAX,
+    
 }label_et;
 
 static const char* labelLut[] =
@@ -174,9 +176,10 @@ static const char* labelLut[] =
     "TRUE_",
     "FALSE_",
     "SKIP_",
+    "CASE_",
     "IF_FALSE_",
     "IF_EXIT_",
-    "FUNCTION_"
+    "FUNCTION_",
 };
 
 #endif

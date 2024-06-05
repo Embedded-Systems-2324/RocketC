@@ -1366,7 +1366,55 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
         case NODE_LABEL:
             break;
         case NODE_SWITCH:
-            __asm__("nop");
+            //Generate code for expression inside switch
+            parseNode(&L_CHILD(pCurrentNode), NODE_TYPE(pCurrentNode),(OperatorType_et) L_CHILD_DVAL(pCurrentNode), true);
+            
+            // dRegSave
+            reg_et tempreg = getNextAvailableReg(); 
+            emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
+            emitAluInstruction(INST_CMP, true, 0, REG_NONE, dRegSave, REG_NONE);
+            //emitBranchInstruction(INST_BEQ, )
+
+
+/*
+
+Switch (identifier){
+  case 1:
+    code;
+  break;
+
+  case 2:
+    code;
+  break;
+
+  default:
+    code;
+  break;
+}
+*/
+
+            /*LD Rexp, #exp
+            LD R1, #Case1
+            CMP R1, Rexp
+            BEQ Case1L
+            LD R1, #Case2
+            CMP R1, Rexp
+            BEQ Case2L
+            (CODE DEFAULT)
+            BRA EXIT
+            CASE1L:
+            (CODE CASE1)
+
+            CASE2L:
+            (CODE CASE2L)
+
+            EXIT:
+            */
+
+
+
+
+
             break;
         case NODE_CASE:
             break;
