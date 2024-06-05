@@ -237,6 +237,10 @@ load_stmt   :   TOKEN_LOAD_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expressio
                     {
                         add_statement(LDI_OPCODE, $2, $5, NULL_ARG, NO_TYPE); 
                     }
+            |   TOKEN_LOAD_IMMEDIATE TOKEN_REG TOKEN_COMMA TOKEN_COLON TOKEN_IDENTIFIER
+                    {
+                        add_statement(LDI_OPCODE, $2, $5, NULL_ARG, LABEL);
+                    }
             |   TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  
                     { 
                         add_statement(LDX_OPCODE, $2, $4, $7, NO_TYPE); 
@@ -352,6 +356,8 @@ expression  :   TOKEN_LEFT_PAREN expression TOKEN_RIGHT_PAREN
                             The constant must be declared before use (SEMANTIC PART) 
                         */
                         int temp = get_symbol_value($1);
+
+                        LOG_MESSAGE("Symbol Value: %d\n",get_symbol_value($1));
 
                         if(temp == UNINITIALIZED_VALUE){
                             LOG_ERROR("[ASSEMBLER] ERROR: Constant not defined: %s in line %ld\n", get_symbol_name($1), get_line_number());

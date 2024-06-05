@@ -33,6 +33,7 @@ void generate_code()
     uint8_t inst_size = 0;
     uint8_t error = 0;
     int32_t bxx_value = 0;
+    int32_t label_value = 0;
 
     get_output_file(&fp_hex);
 
@@ -140,12 +141,36 @@ void generate_code()
 
             case ST_OPCODE:
             case LD_OPCODE:
-            case LDI_OPCODE:
                 code |= (0x1f & current_statement.op_code)  << 27;
                 code |= (0x1f & current_statement.op1)      << 22;
                 
                 error |= check_immed((current_statement.op2), IMMED22, i);
                 code  |= (0x3fffff & (current_statement.op2));
+                break;
+            case LDI_OPCODE:
+                code |= (0x1f & current_statement.op_code)  << 27;
+                code |= (0x1f & current_statement.op1)      << 22;
+                if(current_statement.misc == LABEL)
+                {
+                    if(get_symbol_value(current_statement.op2) == UNINITIALIZED_VALUE)
+                    {
+                        LOG_ERROR("Uninitialized symbol %d\n", get_symbol_value(current_statement.op2));
+                        error = 1;
+                        label_value = 0;
+                    }
+                    else
+                    {
+                        label_value = get_symbol_value(current_statement.op2);
+                    }
+                    error |= check_immed((label_value), IMMED22, i);
+                    code  |= (0x3fffff & (label_value));
+                }
+                else
+                {
+                    error |= check_immed((current_statement.op2), IMMED22, i);
+                    code  |= (0x3fffff & (current_statement.op2));
+                }
+                
                 break;
 
 

@@ -73,36 +73,37 @@ Grammar
 
    51 load_stmt: TOKEN_LOAD_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
    52          | TOKEN_LOAD_IMMEDIATE TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
-   53          | TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
+   53          | TOKEN_LOAD_IMMEDIATE TOKEN_REG TOKEN_COMMA TOKEN_COLON TOKEN_IDENTIFIER
+   54          | TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-   54 store_stmt: TOKEN_STORE_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
-   55           | TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
+   55 store_stmt: TOKEN_STORE_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
+   56           | TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-   56 reti_stmt: TOKEN_RETI
+   57 reti_stmt: TOKEN_RETI
 
-   57 halt_stmt: TOKEN_HALT
+   58 halt_stmt: TOKEN_HALT
 
-   58 nop_stmt: TOKEN_NOP
+   59 nop_stmt: TOKEN_NOP
 
-   59 byte_stmt: TOKEN_BYTE TOKEN_NUMBER
+   60 byte_stmt: TOKEN_BYTE TOKEN_NUMBER
 
-   60 word_stmt: TOKEN_WORD TOKEN_NUMBER
+   61 word_stmt: TOKEN_WORD TOKEN_NUMBER
 
-   61 alloc_stmt: TOKEN_ALLOC TOKEN_IDENTIFIER TOKEN_NUMBER
+   62 alloc_stmt: TOKEN_ALLOC TOKEN_IDENTIFIER TOKEN_NUMBER
 
-   62 org_stmt: TOKEN_ORG TOKEN_NUMBER
+   63 org_stmt: TOKEN_ORG TOKEN_NUMBER
 
-   63 equ_stmt: TOKEN_EQU TOKEN_IDENTIFIER TOKEN_COMMA expression
+   64 equ_stmt: TOKEN_EQU TOKEN_IDENTIFIER TOKEN_COMMA expression
 
-   64 label: TOKEN_IDENTIFIER TOKEN_COLON
+   65 label: TOKEN_IDENTIFIER TOKEN_COLON
 
-   65 expression: TOKEN_LEFT_PAREN expression TOKEN_RIGHT_PAREN
-   66           | expression TOKEN_PLUS expression
-   67           | expression TOKEN_MINUS expression
-   68           | TOKEN_PLUS TOKEN_NUMBER
-   69           | TOKEN_MINUS TOKEN_NUMBER
-   70           | TOKEN_NUMBER
-   71           | TOKEN_IDENTIFIER
+   66 expression: TOKEN_LEFT_PAREN expression TOKEN_RIGHT_PAREN
+   67           | expression TOKEN_PLUS expression
+   68           | expression TOKEN_MINUS expression
+   69           | TOKEN_PLUS TOKEN_NUMBER
+   70           | TOKEN_MINUS TOKEN_NUMBER
+   71           | TOKEN_NUMBER
+   72           | TOKEN_IDENTIFIER
 
 
 Terminals, with rules where they appear
@@ -123,31 +124,31 @@ Terminals, with rules where they appear
     TOKEN_JUMP_LINK (269) 50
     TOKEN_MOVE (270) 48
     TOKEN_LOAD_DIRECT (271) 51
-    TOKEN_LOAD_IMMEDIATE (272) 52
-    TOKEN_LOAD_INDEXED (273) 53
-    TOKEN_STORE_DIRECT (274) 54
-    TOKEN_STORE_INDEXED (275) 55
-    TOKEN_RETI (276) 56
-    TOKEN_HALT (277) 57
-    TOKEN_NOP (278) 58
-    TOKEN_NUMBER (279) 59 60 61 62 68 69 70
-    TOKEN_REG (280) 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 48 49 50 51 52 53 54 55
-    TOKEN_IDENTIFIER (281) 45 61 63 64 71
+    TOKEN_LOAD_IMMEDIATE (272) 52 53
+    TOKEN_LOAD_INDEXED (273) 54
+    TOKEN_STORE_DIRECT (274) 55
+    TOKEN_STORE_INDEXED (275) 56
+    TOKEN_RETI (276) 57
+    TOKEN_HALT (277) 58
+    TOKEN_NOP (278) 59
+    TOKEN_NUMBER (279) 60 61 62 63 69 70 71
+    TOKEN_REG (280) 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 48 49 50 51 52 53 54 55 56
+    TOKEN_IDENTIFIER (281) 45 53 62 64 65 72
     TOKEN_ENDFILE (282) 1
     TOKEN_ERROR (283)
-    TOKEN_COMMA (284) 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 48 49 50 51 52 53 54 55 63
-    TOKEN_CARDINAL (285) 28 30 32 34 36 38 40 42 44 46 49 50 51 52 53 54 55
-    TOKEN_COLON (286) 64
+    TOKEN_COMMA (284) 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 48 49 50 51 52 53 54 55 56 64
+    TOKEN_CARDINAL (285) 28 30 32 34 36 38 40 42 44 46 49 50 51 52 54 55 56
+    TOKEN_COLON (286) 53 65
     TOKEN_DOLLAR (287) 47
-    TOKEN_BYTE (288) 59
-    TOKEN_WORD (289) 60
-    TOKEN_ALLOC (290) 61
-    TOKEN_ORG (291) 62
-    TOKEN_EQU (292) 63
-    TOKEN_PLUS (293) 66 68
-    TOKEN_MINUS (294) 67 69
-    TOKEN_LEFT_PAREN (295) 65
-    TOKEN_RIGHT_PAREN (296) 65
+    TOKEN_BYTE (288) 60
+    TOKEN_WORD (289) 61
+    TOKEN_ALLOC (290) 62
+    TOKEN_ORG (291) 63
+    TOKEN_EQU (292) 64
+    TOKEN_PLUS (293) 67 69
+    TOKEN_MINUS (294) 68 70
+    TOKEN_LEFT_PAREN (295) 66
+    TOKEN_RIGHT_PAREN (296) 66
 
 
 Nonterminals, with rules where they appear
@@ -197,41 +198,41 @@ Nonterminals, with rules where they appear
         on left: 49 50
         on right: 15
     load_stmt (57)
-        on left: 51 52 53
+        on left: 51 52 53 54
         on right: 16
     store_stmt (58)
-        on left: 54 55
+        on left: 55 56
         on right: 17
     reti_stmt (59)
-        on left: 56
+        on left: 57
         on right: 18
     halt_stmt (60)
-        on left: 57
+        on left: 58
         on right: 19
     nop_stmt (61)
-        on left: 58
+        on left: 59
         on right: 20
     byte_stmt (62)
-        on left: 59
+        on left: 60
         on right: 21
     word_stmt (63)
-        on left: 60
+        on left: 61
         on right: 22
     alloc_stmt (64)
-        on left: 61
+        on left: 62
         on right: 23
     org_stmt (65)
-        on left: 62
+        on left: 63
         on right: 24
     equ_stmt (66)
-        on left: 63
+        on left: 64
         on right: 25
     label (67)
-        on left: 64
+        on left: 65
         on right: 26
     expression (68)
-        on left: 65 66 67 68 69 70 71
-        on right: 28 30 32 34 36 38 40 42 44 46 49 50 51 52 53 54 55 63 65 66 67
+        on left: 66 67 68 69 70 71 72
+        on right: 28 30 32 34 36 38 40 42 44 46 49 50 51 52 54 55 56 64 66 67 68
 
 
 State 0
@@ -407,90 +408,91 @@ State 14
 State 15
 
    52 load_stmt: TOKEN_LOAD_IMMEDIATE • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
+   53          | TOKEN_LOAD_IMMEDIATE • TOKEN_REG TOKEN_COMMA TOKEN_COLON TOKEN_IDENTIFIER
 
     TOKEN_REG  shift, and go to state 69
 
 
 State 16
 
-   53 load_stmt: TOKEN_LOAD_INDEXED • TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
+   54 load_stmt: TOKEN_LOAD_INDEXED • TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
     TOKEN_REG  shift, and go to state 70
 
 
 State 17
 
-   54 store_stmt: TOKEN_STORE_DIRECT • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
+   55 store_stmt: TOKEN_STORE_DIRECT • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
     TOKEN_REG  shift, and go to state 71
 
 
 State 18
 
-   55 store_stmt: TOKEN_STORE_INDEXED • TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
+   56 store_stmt: TOKEN_STORE_INDEXED • TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
     TOKEN_REG  shift, and go to state 72
 
 
 State 19
 
-   56 reti_stmt: TOKEN_RETI •
+   57 reti_stmt: TOKEN_RETI •
 
-    $default  reduce using rule 56 (reti_stmt)
+    $default  reduce using rule 57 (reti_stmt)
 
 
 State 20
 
-   57 halt_stmt: TOKEN_HALT •
+   58 halt_stmt: TOKEN_HALT •
 
-    $default  reduce using rule 57 (halt_stmt)
+    $default  reduce using rule 58 (halt_stmt)
 
 
 State 21
 
-   58 nop_stmt: TOKEN_NOP •
+   59 nop_stmt: TOKEN_NOP •
 
-    $default  reduce using rule 58 (nop_stmt)
+    $default  reduce using rule 59 (nop_stmt)
 
 
 State 22
 
-   64 label: TOKEN_IDENTIFIER • TOKEN_COLON
+   65 label: TOKEN_IDENTIFIER • TOKEN_COLON
 
     TOKEN_COLON  shift, and go to state 73
 
 
 State 23
 
-   59 byte_stmt: TOKEN_BYTE • TOKEN_NUMBER
+   60 byte_stmt: TOKEN_BYTE • TOKEN_NUMBER
 
     TOKEN_NUMBER  shift, and go to state 74
 
 
 State 24
 
-   60 word_stmt: TOKEN_WORD • TOKEN_NUMBER
+   61 word_stmt: TOKEN_WORD • TOKEN_NUMBER
 
     TOKEN_NUMBER  shift, and go to state 75
 
 
 State 25
 
-   61 alloc_stmt: TOKEN_ALLOC • TOKEN_IDENTIFIER TOKEN_NUMBER
+   62 alloc_stmt: TOKEN_ALLOC • TOKEN_IDENTIFIER TOKEN_NUMBER
 
     TOKEN_IDENTIFIER  shift, and go to state 76
 
 
 State 26
 
-   62 org_stmt: TOKEN_ORG • TOKEN_NUMBER
+   63 org_stmt: TOKEN_ORG • TOKEN_NUMBER
 
     TOKEN_NUMBER  shift, and go to state 77
 
 
 State 27
 
-   63 equ_stmt: TOKEN_EQU • TOKEN_IDENTIFIER TOKEN_COMMA expression
+   64 equ_stmt: TOKEN_EQU • TOKEN_IDENTIFIER TOKEN_COMMA expression
 
     TOKEN_IDENTIFIER  shift, and go to state 78
 
@@ -855,69 +857,70 @@ State 68
 State 69
 
    52 load_stmt: TOKEN_LOAD_IMMEDIATE TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
+   53          | TOKEN_LOAD_IMMEDIATE TOKEN_REG • TOKEN_COMMA TOKEN_COLON TOKEN_IDENTIFIER
 
     TOKEN_COMMA  shift, and go to state 101
 
 
 State 70
 
-   53 load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG • TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
+   54 load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG • TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
     TOKEN_COMMA  shift, and go to state 102
 
 
 State 71
 
-   54 store_stmt: TOKEN_STORE_DIRECT TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
+   55 store_stmt: TOKEN_STORE_DIRECT TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
     TOKEN_COMMA  shift, and go to state 103
 
 
 State 72
 
-   55 store_stmt: TOKEN_STORE_INDEXED TOKEN_REG • TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
+   56 store_stmt: TOKEN_STORE_INDEXED TOKEN_REG • TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
     TOKEN_COMMA  shift, and go to state 104
 
 
 State 73
 
-   64 label: TOKEN_IDENTIFIER TOKEN_COLON •
+   65 label: TOKEN_IDENTIFIER TOKEN_COLON •
 
-    $default  reduce using rule 64 (label)
+    $default  reduce using rule 65 (label)
 
 
 State 74
 
-   59 byte_stmt: TOKEN_BYTE TOKEN_NUMBER •
+   60 byte_stmt: TOKEN_BYTE TOKEN_NUMBER •
 
-    $default  reduce using rule 59 (byte_stmt)
+    $default  reduce using rule 60 (byte_stmt)
 
 
 State 75
 
-   60 word_stmt: TOKEN_WORD TOKEN_NUMBER •
+   61 word_stmt: TOKEN_WORD TOKEN_NUMBER •
 
-    $default  reduce using rule 60 (word_stmt)
+    $default  reduce using rule 61 (word_stmt)
 
 
 State 76
 
-   61 alloc_stmt: TOKEN_ALLOC TOKEN_IDENTIFIER • TOKEN_NUMBER
+   62 alloc_stmt: TOKEN_ALLOC TOKEN_IDENTIFIER • TOKEN_NUMBER
 
     TOKEN_NUMBER  shift, and go to state 105
 
 
 State 77
 
-   62 org_stmt: TOKEN_ORG TOKEN_NUMBER •
+   63 org_stmt: TOKEN_ORG TOKEN_NUMBER •
 
-    $default  reduce using rule 62 (org_stmt)
+    $default  reduce using rule 63 (org_stmt)
 
 
 State 78
 
-   63 equ_stmt: TOKEN_EQU TOKEN_IDENTIFIER • TOKEN_COMMA expression
+   64 equ_stmt: TOKEN_EQU TOKEN_IDENTIFIER • TOKEN_COMMA expression
 
     TOKEN_COMMA  shift, and go to state 106
 
@@ -1019,35 +1022,35 @@ State 90
 
 State 91
 
-   70 expression: TOKEN_NUMBER •
-
-    $default  reduce using rule 70 (expression)
-
-
-State 92
-
-   71 expression: TOKEN_IDENTIFIER •
+   71 expression: TOKEN_NUMBER •
 
     $default  reduce using rule 71 (expression)
 
 
+State 92
+
+   72 expression: TOKEN_IDENTIFIER •
+
+    $default  reduce using rule 72 (expression)
+
+
 State 93
 
-   68 expression: TOKEN_PLUS • TOKEN_NUMBER
+   69 expression: TOKEN_PLUS • TOKEN_NUMBER
 
     TOKEN_NUMBER  shift, and go to state 118
 
 
 State 94
 
-   69 expression: TOKEN_MINUS • TOKEN_NUMBER
+   70 expression: TOKEN_MINUS • TOKEN_NUMBER
 
     TOKEN_NUMBER  shift, and go to state 119
 
 
 State 95
 
-   65 expression: TOKEN_LEFT_PAREN • expression TOKEN_RIGHT_PAREN
+   66 expression: TOKEN_LEFT_PAREN • expression TOKEN_RIGHT_PAREN
 
     TOKEN_NUMBER      shift, and go to state 91
     TOKEN_IDENTIFIER  shift, and go to state 92
@@ -1061,8 +1064,8 @@ State 95
 State 96
 
    46 branch_stmt: TOKEN_BRANCH TOKEN_CARDINAL expression •
-   66 expression: expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
+   67 expression: expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
 
     TOKEN_PLUS   shift, and go to state 121
     TOKEN_MINUS  shift, and go to state 122
@@ -1101,41 +1104,43 @@ State 100
 State 101
 
    52 load_stmt: TOKEN_LOAD_IMMEDIATE TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
+   53          | TOKEN_LOAD_IMMEDIATE TOKEN_REG TOKEN_COMMA • TOKEN_COLON TOKEN_IDENTIFIER
 
     TOKEN_CARDINAL  shift, and go to state 127
+    TOKEN_COLON     shift, and go to state 128
 
 
 State 102
 
-   53 load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
+   54 load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    TOKEN_REG  shift, and go to state 128
+    TOKEN_REG  shift, and go to state 129
 
 
 State 103
 
-   54 store_stmt: TOKEN_STORE_DIRECT TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
+   55 store_stmt: TOKEN_STORE_DIRECT TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
-    TOKEN_CARDINAL  shift, and go to state 129
+    TOKEN_CARDINAL  shift, and go to state 130
 
 
 State 104
 
-   55 store_stmt: TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
+   56 store_stmt: TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA • TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 
-    TOKEN_REG  shift, and go to state 130
+    TOKEN_REG  shift, and go to state 131
 
 
 State 105
 
-   61 alloc_stmt: TOKEN_ALLOC TOKEN_IDENTIFIER TOKEN_NUMBER •
+   62 alloc_stmt: TOKEN_ALLOC TOKEN_IDENTIFIER TOKEN_NUMBER •
 
-    $default  reduce using rule 61 (alloc_stmt)
+    $default  reduce using rule 62 (alloc_stmt)
 
 
 State 106
 
-   63 equ_stmt: TOKEN_EQU TOKEN_IDENTIFIER TOKEN_COMMA • expression
+   64 equ_stmt: TOKEN_EQU TOKEN_IDENTIFIER TOKEN_COMMA • expression
 
     TOKEN_NUMBER      shift, and go to state 91
     TOKEN_IDENTIFIER  shift, and go to state 92
@@ -1143,7 +1148,7 @@ State 106
     TOKEN_MINUS       shift, and go to state 94
     TOKEN_LEFT_PAREN  shift, and go to state 95
 
-    expression  go to state 131
+    expression  go to state 132
 
 
 State 107
@@ -1151,7 +1156,7 @@ State 107
    27 add_stmt: TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_REG
    28         | TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    TOKEN_COMMA  shift, and go to state 132
+    TOKEN_COMMA  shift, and go to state 133
 
 
 State 108
@@ -1159,7 +1164,7 @@ State 108
    29 sub_stmt: TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_REG
    30         | TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    TOKEN_COMMA  shift, and go to state 133
+    TOKEN_COMMA  shift, and go to state 134
 
 
 State 109
@@ -1167,7 +1172,7 @@ State 109
    31 or_stmt: TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_REG
    32        | TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    TOKEN_COMMA  shift, and go to state 134
+    TOKEN_COMMA  shift, and go to state 135
 
 
 State 110
@@ -1175,7 +1180,7 @@ State 110
    33 and_stmt: TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_REG
    34         | TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    TOKEN_COMMA  shift, and go to state 135
+    TOKEN_COMMA  shift, and go to state 136
 
 
 State 111
@@ -1195,7 +1200,7 @@ State 112
     TOKEN_MINUS       shift, and go to state 94
     TOKEN_LEFT_PAREN  shift, and go to state 95
 
-    expression  go to state 136
+    expression  go to state 137
 
 
 State 113
@@ -1203,7 +1208,7 @@ State 113
    35 xor_stmt: TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_REG
    36         | TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    TOKEN_COMMA  shift, and go to state 137
+    TOKEN_COMMA  shift, and go to state 138
 
 
 State 114
@@ -1223,7 +1228,7 @@ State 115
     TOKEN_MINUS       shift, and go to state 94
     TOKEN_LEFT_PAREN  shift, and go to state 95
 
-    expression  go to state 138
+    expression  go to state 139
 
 
 State 116
@@ -1231,7 +1236,7 @@ State 116
    41 rr_stmt: TOKEN_RR TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_REG
    42        | TOKEN_RR TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    TOKEN_COMMA  shift, and go to state 139
+    TOKEN_COMMA  shift, and go to state 140
 
 
 State 117
@@ -1239,50 +1244,37 @@ State 117
    43 rl_stmt: TOKEN_RL TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_REG
    44        | TOKEN_RL TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    TOKEN_COMMA  shift, and go to state 140
+    TOKEN_COMMA  shift, and go to state 141
 
 
 State 118
 
-   68 expression: TOKEN_PLUS TOKEN_NUMBER •
-
-    $default  reduce using rule 68 (expression)
-
-
-State 119
-
-   69 expression: TOKEN_MINUS TOKEN_NUMBER •
+   69 expression: TOKEN_PLUS TOKEN_NUMBER •
 
     $default  reduce using rule 69 (expression)
 
 
+State 119
+
+   70 expression: TOKEN_MINUS TOKEN_NUMBER •
+
+    $default  reduce using rule 70 (expression)
+
+
 State 120
 
-   65 expression: TOKEN_LEFT_PAREN expression • TOKEN_RIGHT_PAREN
-   66           | expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
+   66 expression: TOKEN_LEFT_PAREN expression • TOKEN_RIGHT_PAREN
+   67           | expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
 
     TOKEN_PLUS         shift, and go to state 121
     TOKEN_MINUS        shift, and go to state 122
-    TOKEN_RIGHT_PAREN  shift, and go to state 141
+    TOKEN_RIGHT_PAREN  shift, and go to state 142
 
 
 State 121
 
-   66 expression: expression TOKEN_PLUS • expression
-
-    TOKEN_NUMBER      shift, and go to state 91
-    TOKEN_IDENTIFIER  shift, and go to state 92
-    TOKEN_PLUS        shift, and go to state 93
-    TOKEN_MINUS       shift, and go to state 94
-    TOKEN_LEFT_PAREN  shift, and go to state 95
-
-    expression  go to state 142
-
-
-State 122
-
-   67 expression: expression TOKEN_MINUS • expression
+   67 expression: expression TOKEN_PLUS • expression
 
     TOKEN_NUMBER      shift, and go to state 91
     TOKEN_IDENTIFIER  shift, and go to state 92
@@ -1291,6 +1283,19 @@ State 122
     TOKEN_LEFT_PAREN  shift, and go to state 95
 
     expression  go to state 143
+
+
+State 122
+
+   68 expression: expression TOKEN_MINUS • expression
+
+    TOKEN_NUMBER      shift, and go to state 91
+    TOKEN_IDENTIFIER  shift, and go to state 92
+    TOKEN_PLUS        shift, and go to state 93
+    TOKEN_MINUS       shift, and go to state 94
+    TOKEN_LEFT_PAREN  shift, and go to state 95
+
+    expression  go to state 144
 
 
 State 123
@@ -1303,14 +1308,14 @@ State 123
     TOKEN_MINUS       shift, and go to state 94
     TOKEN_LEFT_PAREN  shift, and go to state 95
 
-    expression  go to state 144
+    expression  go to state 145
 
 
 State 124
 
    50 jump_stmt: TOKEN_JUMP_LINK TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    TOKEN_COMMA  shift, and go to state 145
+    TOKEN_COMMA  shift, and go to state 146
 
 
 State 125
@@ -1330,7 +1335,7 @@ State 126
     TOKEN_MINUS       shift, and go to state 94
     TOKEN_LEFT_PAREN  shift, and go to state 95
 
-    expression  go to state 146
+    expression  go to state 147
 
 
 State 127
@@ -1343,19 +1348,26 @@ State 127
     TOKEN_MINUS       shift, and go to state 94
     TOKEN_LEFT_PAREN  shift, and go to state 95
 
-    expression  go to state 147
+    expression  go to state 148
 
 
 State 128
 
-   53 load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
+   53 load_stmt: TOKEN_LOAD_IMMEDIATE TOKEN_REG TOKEN_COMMA TOKEN_COLON • TOKEN_IDENTIFIER
 
-    TOKEN_COMMA  shift, and go to state 148
+    TOKEN_IDENTIFIER  shift, and go to state 149
 
 
 State 129
 
-   54 store_stmt: TOKEN_STORE_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
+   54 load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
+
+    TOKEN_COMMA  shift, and go to state 150
+
+
+State 130
+
+   55 store_stmt: TOKEN_STORE_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
 
     TOKEN_NUMBER      shift, and go to state 91
     TOKEN_IDENTIFIER  shift, and go to state 92
@@ -1363,41 +1375,32 @@ State 129
     TOKEN_MINUS       shift, and go to state 94
     TOKEN_LEFT_PAREN  shift, and go to state 95
 
-    expression  go to state 149
-
-
-State 130
-
-   55 store_stmt: TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
-
-    TOKEN_COMMA  shift, and go to state 150
+    expression  go to state 151
 
 
 State 131
 
-   63 equ_stmt: TOKEN_EQU TOKEN_IDENTIFIER TOKEN_COMMA expression •
-   66 expression: expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
+   56 store_stmt: TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG • TOKEN_COMMA TOKEN_CARDINAL expression
 
-    TOKEN_PLUS   shift, and go to state 121
-    TOKEN_MINUS  shift, and go to state 122
-
-    $default  reduce using rule 63 (equ_stmt)
+    TOKEN_COMMA  shift, and go to state 152
 
 
 State 132
 
-   27 add_stmt: TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_REG
-   28         | TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
+   64 equ_stmt: TOKEN_EQU TOKEN_IDENTIFIER TOKEN_COMMA expression •
+   67 expression: expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
 
-    TOKEN_REG       shift, and go to state 151
-    TOKEN_CARDINAL  shift, and go to state 152
+    TOKEN_PLUS   shift, and go to state 121
+    TOKEN_MINUS  shift, and go to state 122
+
+    $default  reduce using rule 64 (equ_stmt)
 
 
 State 133
 
-   29 sub_stmt: TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_REG
-   30         | TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
+   27 add_stmt: TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_REG
+   28         | TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
     TOKEN_REG       shift, and go to state 153
     TOKEN_CARDINAL  shift, and go to state 154
@@ -1405,8 +1408,8 @@ State 133
 
 State 134
 
-   31 or_stmt: TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_REG
-   32        | TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
+   29 sub_stmt: TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_REG
+   30         | TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
     TOKEN_REG       shift, and go to state 155
     TOKEN_CARDINAL  shift, and go to state 156
@@ -1414,8 +1417,8 @@ State 134
 
 State 135
 
-   33 and_stmt: TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_REG
-   34         | TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
+   31 or_stmt: TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_REG
+   32        | TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
     TOKEN_REG       shift, and go to state 157
     TOKEN_CARDINAL  shift, and go to state 158
@@ -1423,9 +1426,18 @@ State 135
 
 State 136
 
+   33 and_stmt: TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_REG
+   34         | TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
+
+    TOKEN_REG       shift, and go to state 159
+    TOKEN_CARDINAL  shift, and go to state 160
+
+
+State 137
+
    38 not_stmt: TOKEN_NOT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
-   66 expression: expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
+   67 expression: expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
 
     TOKEN_PLUS   shift, and go to state 121
     TOKEN_MINUS  shift, and go to state 122
@@ -1433,20 +1445,20 @@ State 136
     $default  reduce using rule 38 (not_stmt)
 
 
-State 137
+State 138
 
    35 xor_stmt: TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_REG
    36         | TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
-    TOKEN_REG       shift, and go to state 159
-    TOKEN_CARDINAL  shift, and go to state 160
+    TOKEN_REG       shift, and go to state 161
+    TOKEN_CARDINAL  shift, and go to state 162
 
 
-State 138
+State 139
 
    40 cmp_stmt: TOKEN_CMP TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
-   66 expression: expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
+   67 expression: expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
 
     TOKEN_PLUS   shift, and go to state 121
     TOKEN_MINUS  shift, and go to state 122
@@ -1454,19 +1466,10 @@ State 138
     $default  reduce using rule 40 (cmp_stmt)
 
 
-State 139
+State 140
 
    41 rr_stmt: TOKEN_RR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_REG
    42        | TOKEN_RR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
-
-    TOKEN_REG       shift, and go to state 161
-    TOKEN_CARDINAL  shift, and go to state 162
-
-
-State 140
-
-   43 rl_stmt: TOKEN_RL TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_REG
-   44        | TOKEN_RL TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
     TOKEN_REG       shift, and go to state 163
     TOKEN_CARDINAL  shift, and go to state 164
@@ -1474,34 +1477,43 @@ State 140
 
 State 141
 
-   65 expression: TOKEN_LEFT_PAREN expression TOKEN_RIGHT_PAREN •
+   43 rl_stmt: TOKEN_RL TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_REG
+   44        | TOKEN_RL TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
-    $default  reduce using rule 65 (expression)
+    TOKEN_REG       shift, and go to state 165
+    TOKEN_CARDINAL  shift, and go to state 166
 
 
 State 142
 
-   66 expression: expression • TOKEN_PLUS expression
-   66           | expression TOKEN_PLUS expression •
-   67           | expression • TOKEN_MINUS expression
+   66 expression: TOKEN_LEFT_PAREN expression TOKEN_RIGHT_PAREN •
 
     $default  reduce using rule 66 (expression)
 
 
 State 143
 
-   66 expression: expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
-   67           | expression TOKEN_MINUS expression •
+   67 expression: expression • TOKEN_PLUS expression
+   67           | expression TOKEN_PLUS expression •
+   68           | expression • TOKEN_MINUS expression
 
     $default  reduce using rule 67 (expression)
 
 
 State 144
 
+   67 expression: expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
+   68           | expression TOKEN_MINUS expression •
+
+    $default  reduce using rule 68 (expression)
+
+
+State 145
+
    49 jump_stmt: TOKEN_JUMP TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
-   66 expression: expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
+   67 expression: expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
 
     TOKEN_PLUS   shift, and go to state 121
     TOKEN_MINUS  shift, and go to state 122
@@ -1509,18 +1521,18 @@ State 144
     $default  reduce using rule 49 (jump_stmt)
 
 
-State 145
+State 146
 
    50 jump_stmt: TOKEN_JUMP_LINK TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
-    TOKEN_CARDINAL  shift, and go to state 165
+    TOKEN_CARDINAL  shift, and go to state 167
 
 
-State 146
+State 147
 
    51 load_stmt: TOKEN_LOAD_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
-   66 expression: expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
+   67 expression: expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
 
     TOKEN_PLUS   shift, and go to state 121
     TOKEN_MINUS  shift, and go to state 122
@@ -1528,11 +1540,11 @@ State 146
     $default  reduce using rule 51 (load_stmt)
 
 
-State 147
+State 148
 
    52 load_stmt: TOKEN_LOAD_IMMEDIATE TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
-   66 expression: expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
+   67 expression: expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
 
     TOKEN_PLUS   shift, and go to state 121
     TOKEN_MINUS  shift, and go to state 122
@@ -1540,82 +1552,49 @@ State 147
     $default  reduce using rule 52 (load_stmt)
 
 
-State 148
-
-   53 load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
-
-    TOKEN_CARDINAL  shift, and go to state 166
-
-
 State 149
 
-   54 store_stmt: TOKEN_STORE_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
-   66 expression: expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
+   53 load_stmt: TOKEN_LOAD_IMMEDIATE TOKEN_REG TOKEN_COMMA TOKEN_COLON TOKEN_IDENTIFIER •
 
-    TOKEN_PLUS   shift, and go to state 121
-    TOKEN_MINUS  shift, and go to state 122
-
-    $default  reduce using rule 54 (store_stmt)
+    $default  reduce using rule 53 (load_stmt)
 
 
 State 150
 
-   55 store_stmt: TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
+   54 load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
 
-    TOKEN_CARDINAL  shift, and go to state 167
+    TOKEN_CARDINAL  shift, and go to state 168
 
 
 State 151
+
+   55 store_stmt: TOKEN_STORE_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
+   67 expression: expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
+
+    TOKEN_PLUS   shift, and go to state 121
+    TOKEN_MINUS  shift, and go to state 122
+
+    $default  reduce using rule 55 (store_stmt)
+
+
+State 152
+
+   56 store_stmt: TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA • TOKEN_CARDINAL expression
+
+    TOKEN_CARDINAL  shift, and go to state 169
+
+
+State 153
 
    27 add_stmt: TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG •
 
     $default  reduce using rule 27 (add_stmt)
 
 
-State 152
-
-   28 add_stmt: TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
-
-    TOKEN_NUMBER      shift, and go to state 91
-    TOKEN_IDENTIFIER  shift, and go to state 92
-    TOKEN_PLUS        shift, and go to state 93
-    TOKEN_MINUS       shift, and go to state 94
-    TOKEN_LEFT_PAREN  shift, and go to state 95
-
-    expression  go to state 168
-
-
-State 153
-
-   29 sub_stmt: TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG •
-
-    $default  reduce using rule 29 (sub_stmt)
-
-
 State 154
 
-   30 sub_stmt: TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
-
-    TOKEN_NUMBER      shift, and go to state 91
-    TOKEN_IDENTIFIER  shift, and go to state 92
-    TOKEN_PLUS        shift, and go to state 93
-    TOKEN_MINUS       shift, and go to state 94
-    TOKEN_LEFT_PAREN  shift, and go to state 95
-
-    expression  go to state 169
-
-
-State 155
-
-   31 or_stmt: TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG •
-
-    $default  reduce using rule 31 (or_stmt)
-
-
-State 156
-
-   32 or_stmt: TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
+   28 add_stmt: TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
 
     TOKEN_NUMBER      shift, and go to state 91
     TOKEN_IDENTIFIER  shift, and go to state 92
@@ -1626,16 +1605,16 @@ State 156
     expression  go to state 170
 
 
-State 157
+State 155
 
-   33 and_stmt: TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG •
+   29 sub_stmt: TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG •
 
-    $default  reduce using rule 33 (and_stmt)
+    $default  reduce using rule 29 (sub_stmt)
 
 
-State 158
+State 156
 
-   34 and_stmt: TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
+   30 sub_stmt: TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
 
     TOKEN_NUMBER      shift, and go to state 91
     TOKEN_IDENTIFIER  shift, and go to state 92
@@ -1646,16 +1625,16 @@ State 158
     expression  go to state 171
 
 
-State 159
+State 157
 
-   35 xor_stmt: TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG •
+   31 or_stmt: TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG •
 
-    $default  reduce using rule 35 (xor_stmt)
+    $default  reduce using rule 31 (or_stmt)
 
 
-State 160
+State 158
 
-   36 xor_stmt: TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
+   32 or_stmt: TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
 
     TOKEN_NUMBER      shift, and go to state 91
     TOKEN_IDENTIFIER  shift, and go to state 92
@@ -1666,16 +1645,16 @@ State 160
     expression  go to state 172
 
 
-State 161
+State 159
 
-   41 rr_stmt: TOKEN_RR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG •
+   33 and_stmt: TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG •
 
-    $default  reduce using rule 41 (rr_stmt)
+    $default  reduce using rule 33 (and_stmt)
 
 
-State 162
+State 160
 
-   42 rr_stmt: TOKEN_RR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
+   34 and_stmt: TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
 
     TOKEN_NUMBER      shift, and go to state 91
     TOKEN_IDENTIFIER  shift, and go to state 92
@@ -1686,16 +1665,16 @@ State 162
     expression  go to state 173
 
 
-State 163
+State 161
 
-   43 rl_stmt: TOKEN_RL TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG •
+   35 xor_stmt: TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG •
 
-    $default  reduce using rule 43 (rl_stmt)
+    $default  reduce using rule 35 (xor_stmt)
 
 
-State 164
+State 162
 
-   44 rl_stmt: TOKEN_RL TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
+   36 xor_stmt: TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
 
     TOKEN_NUMBER      shift, and go to state 91
     TOKEN_IDENTIFIER  shift, and go to state 92
@@ -1706,9 +1685,16 @@ State 164
     expression  go to state 174
 
 
-State 165
+State 163
 
-   50 jump_stmt: TOKEN_JUMP_LINK TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
+   41 rr_stmt: TOKEN_RR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG •
+
+    $default  reduce using rule 41 (rr_stmt)
+
+
+State 164
+
+   42 rr_stmt: TOKEN_RR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
 
     TOKEN_NUMBER      shift, and go to state 91
     TOKEN_IDENTIFIER  shift, and go to state 92
@@ -1719,9 +1705,16 @@ State 165
     expression  go to state 175
 
 
+State 165
+
+   43 rl_stmt: TOKEN_RL TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_REG •
+
+    $default  reduce using rule 43 (rl_stmt)
+
+
 State 166
 
-   53 load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
+   44 rl_stmt: TOKEN_RL TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
 
     TOKEN_NUMBER      shift, and go to state 91
     TOKEN_IDENTIFIER  shift, and go to state 92
@@ -1734,7 +1727,7 @@ State 166
 
 State 167
 
-   55 store_stmt: TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
+   50 jump_stmt: TOKEN_JUMP_LINK TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
 
     TOKEN_NUMBER      shift, and go to state 91
     TOKEN_IDENTIFIER  shift, and go to state 92
@@ -1747,9 +1740,35 @@ State 167
 
 State 168
 
+   54 load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
+
+    TOKEN_NUMBER      shift, and go to state 91
+    TOKEN_IDENTIFIER  shift, and go to state 92
+    TOKEN_PLUS        shift, and go to state 93
+    TOKEN_MINUS       shift, and go to state 94
+    TOKEN_LEFT_PAREN  shift, and go to state 95
+
+    expression  go to state 178
+
+
+State 169
+
+   56 store_stmt: TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL • expression
+
+    TOKEN_NUMBER      shift, and go to state 91
+    TOKEN_IDENTIFIER  shift, and go to state 92
+    TOKEN_PLUS        shift, and go to state 93
+    TOKEN_MINUS       shift, and go to state 94
+    TOKEN_LEFT_PAREN  shift, and go to state 95
+
+    expression  go to state 179
+
+
+State 170
+
    28 add_stmt: TOKEN_ADD TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
-   66 expression: expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
+   67 expression: expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
 
     TOKEN_PLUS   shift, and go to state 121
     TOKEN_MINUS  shift, and go to state 122
@@ -1757,11 +1776,11 @@ State 168
     $default  reduce using rule 28 (add_stmt)
 
 
-State 169
+State 171
 
    30 sub_stmt: TOKEN_SUB TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
-   66 expression: expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
+   67 expression: expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
 
     TOKEN_PLUS   shift, and go to state 121
     TOKEN_MINUS  shift, and go to state 122
@@ -1769,11 +1788,11 @@ State 169
     $default  reduce using rule 30 (sub_stmt)
 
 
-State 170
+State 172
 
    32 or_stmt: TOKEN_OR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
-   66 expression: expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
+   67 expression: expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
 
     TOKEN_PLUS   shift, and go to state 121
     TOKEN_MINUS  shift, and go to state 122
@@ -1781,11 +1800,11 @@ State 170
     $default  reduce using rule 32 (or_stmt)
 
 
-State 171
+State 173
 
    34 and_stmt: TOKEN_AND TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
-   66 expression: expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
+   67 expression: expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
 
     TOKEN_PLUS   shift, and go to state 121
     TOKEN_MINUS  shift, and go to state 122
@@ -1793,11 +1812,11 @@ State 171
     $default  reduce using rule 34 (and_stmt)
 
 
-State 172
+State 174
 
    36 xor_stmt: TOKEN_XOR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
-   66 expression: expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
+   67 expression: expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
 
     TOKEN_PLUS   shift, and go to state 121
     TOKEN_MINUS  shift, and go to state 122
@@ -1805,11 +1824,11 @@ State 172
     $default  reduce using rule 36 (xor_stmt)
 
 
-State 173
+State 175
 
    42 rr_stmt: TOKEN_RR TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
-   66 expression: expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
+   67 expression: expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
 
     TOKEN_PLUS   shift, and go to state 121
     TOKEN_MINUS  shift, and go to state 122
@@ -1817,11 +1836,11 @@ State 173
     $default  reduce using rule 42 (rr_stmt)
 
 
-State 174
+State 176
 
    44 rl_stmt: TOKEN_RL TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
-   66 expression: expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
+   67 expression: expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
 
     TOKEN_PLUS   shift, and go to state 121
     TOKEN_MINUS  shift, and go to state 122
@@ -1829,11 +1848,11 @@ State 174
     $default  reduce using rule 44 (rl_stmt)
 
 
-State 175
+State 177
 
    50 jump_stmt: TOKEN_JUMP_LINK TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
-   66 expression: expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
+   67 expression: expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
 
     TOKEN_PLUS   shift, and go to state 121
     TOKEN_MINUS  shift, and go to state 122
@@ -1841,25 +1860,25 @@ State 175
     $default  reduce using rule 50 (jump_stmt)
 
 
-State 176
+State 178
 
-   53 load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
-   66 expression: expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
-
-    TOKEN_PLUS   shift, and go to state 121
-    TOKEN_MINUS  shift, and go to state 122
-
-    $default  reduce using rule 53 (load_stmt)
-
-
-State 177
-
-   55 store_stmt: TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
-   66 expression: expression • TOKEN_PLUS expression
-   67           | expression • TOKEN_MINUS expression
+   54 load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
+   67 expression: expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
 
     TOKEN_PLUS   shift, and go to state 121
     TOKEN_MINUS  shift, and go to state 122
 
-    $default  reduce using rule 55 (store_stmt)
+    $default  reduce using rule 54 (load_stmt)
+
+
+State 179
+
+   56 store_stmt: TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression •
+   67 expression: expression • TOKEN_PLUS expression
+   68           | expression • TOKEN_MINUS expression
+
+    TOKEN_PLUS   shift, and go to state 121
+    TOKEN_MINUS  shift, and go to state 122
+
+    $default  reduce using rule 56 (store_stmt)
