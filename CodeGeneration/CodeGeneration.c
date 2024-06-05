@@ -358,7 +358,7 @@ static uint32_t labelCounters[LABEL_MAX] = {0};
 
 static int emitLabelInstruction(label_et labelType, uint32_t count, char* nameLabel)
 {
-    if (labelType < WHILE_CONDITION || labelType >= LABEL_MAX)
+    if (labelType < WHILE_START || labelType >= LABEL_MAX)
         return -EINVAL;
 
     if(labelType != FUNCTION_NAME)
@@ -374,7 +374,7 @@ static int emitLabelInstruction(label_et labelType, uint32_t count, char* nameLa
 
 static uint32_t getPostIncLabelCounter(label_et labeltype)
 {
-    if (labeltype < WHILE_CONDITION || labeltype >= LABEL_MAX)
+    if (labeltype < WHILE_START || labeltype >= LABEL_MAX)
         return -EINVAL;
 
     return labelCounters[labeltype]++;
@@ -382,7 +382,7 @@ static uint32_t getPostIncLabelCounter(label_et labeltype)
 
 static uint32_t getLabelCounter(label_et labelType)
 {
-    if (labelType < WHILE_CONDITION || labelType >= LABEL_MAX)
+    if (labelType < WHILE_START || labelType >= LABEL_MAX)
         return -EINVAL;
 
     return labelCounters[labelType];
@@ -392,7 +392,7 @@ static uint32_t getLabelCounter(label_et labelType)
 static int emitBranchInstruction(asm_instr_et instructionType, label_et labelType, uint32_t counter)
 {
    //CheckLabel type
-    if (labelType < WHILE_CONDITION || labelType >= LABEL_MAX)
+    if (labelType < WHILE_START || labelType >= LABEL_MAX)
         return -EINVAL;
 
     if (instructionType < INST_BGT || instructionType > INST_BMI)
@@ -888,6 +888,8 @@ static int generateBooleanOperation(OperatorType_et operatorType, TreeNode_st *p
         releaseReg(tempReg1);
     if(allocTemp2) 
         releaseReg(tempReg2);
+
+    return 0;
 }
 
 
@@ -1310,10 +1312,11 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
         case NODE_STRUCT:
             break;
         case NODE_IF:
-            parseNode(&L_CHILD(pCurrentNode), NODE_TYPE(pCurrentNode), CurrentNodeOpType, true);
+            parseNode(&L_CHILD(pCurrentNode), NODE_TYPE(pCurrentNode),(OperatorType_et) L_CHILD_DVAL(pCurrentNode), true);
             emitAluInstruction(INST_CMP, true, 0, REG_NONE, dRegSave, REG_NONE);
             emitBranchInstruction(INST_BEQ, IF_FALSE, getLabelCounter(IF_FALSE));
-            generateCode(&pCurrentNode->pChilds[1]);
+            if (pCurrentNode->childNumber > 1)
+                generateCode(&pCurrentNode->pChilds[1]);
 
             //If statement with else
             if (pCurrentNode->childNumber > 2)
@@ -1327,6 +1330,14 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
 
             break;
         case NODE_WHILE:
+            emitLabelInstruction(WHILE_START, getLabelCounter(WHILE_START), NULL);
+            generateCode(&L_CHILD(pCurrentNode));
+            emitAluInstruction(INST_CMP, true, 0, REG_NONE, dRegSave, REG_NONE);
+            emitBranchInstruction(INST_BEQ, WHILE_EXIT, getLabelCounter(WHILE_EXIT));
+            if (pCurrentNode->childNumber > 1)
+                generateCode(&R_CHILD(pCurrentNode));
+            emitBranchInstruction(INST_BRA, WHILE_START, getPostIncLabelCounter(WHILE_START));
+            emitLabelInstruction(WHILE_EXIT, getPostIncLabelCounter(WHILE_EXIT), NULL);
             break;
         case NODE_DO_WHILE:
             break;
@@ -1355,6 +1366,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
         case NODE_LABEL:
             break;
         case NODE_SWITCH:
+            __asm__("nop");
             break;
         case NODE_CASE:
             break;

@@ -156,34 +156,27 @@ static const char* regNameLut[] =
 
 typedef enum
 {
-    WHILE_CONDITION = 0x00,
-    IF_CONDITION,
-    DO,
-    TRUE,
-    FALSE,
-    SKIP,
-    WHILE_BODY,
-    IF_TRUE,
-    IF_FALSE,
-    IF_EXIT,
-    FUNCTION_NAME,
+    WHILE_START     = 0x00,
+    WHILE_EXIT      = 0x01,
+    TRUE            = 0x02,
+    FALSE           = 0x03,
+    SKIP            = 0x04,
+    IF_FALSE        = 0x05,
+    IF_EXIT         = 0x06,
+    FUNCTION_NAME   = 0x07,
     LABEL_MAX
 }label_et;
 
-static const char *labelLut[] = 
+static const char* labelLut[] =
 {
-    "WHILE_CONDITION_",
-    "IF_CONDITION_",
-    "DO_",
+    "WHILE_START_",
+    "WHILE_EXIT_",
     "TRUE_",
     "FALSE_",
     "SKIP_",
-    "WHILE_BODY_",
-    "IF_TRUE_",
     "IF_FALSE_",
     "IF_EXIT_",
-
-    "FUNCTION"
+    "FUNCTION_"
 };
 
 #endif

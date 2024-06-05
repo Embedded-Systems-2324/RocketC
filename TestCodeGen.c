@@ -5,29 +5,17 @@ int array[6];
 
 void main()
 {
-    if(y == 5)
+    switch (x)
     {
-        int a;
-        x = 1;
+        case 1:
+            x = 2;
+            break;
+        case 3:
+            x = 7;
+            break;
+        default:
+            break;
     }
-    x++;
-    if (x == 10)
-    {
-        x = 2;
-    }
-
-//        while (x == 10)
-//        {
-//            x = 0;
-//            y = 2;
-//        }
-//        x++;
-//        while (x == 10)
-//        {
-//
-//        }
-//        x++;
-    //array[1 + z] = z + y; 
 }
 
 
