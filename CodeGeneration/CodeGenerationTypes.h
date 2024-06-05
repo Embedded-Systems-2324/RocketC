@@ -166,8 +166,8 @@ typedef enum
     DEFAULT         = 0x07,
     IF_FALSE        = 0x08,
     IF_EXIT         = 0x09,
-    FUNCTION_NAME   = 0x10,
-    LABEL_MAX       = 0x11,
+    FUNCTION_NAME   = 0x0A,
+    LABEL_MAX       = 0x0B,
     
 }label_et;
 
@@ -184,6 +184,7 @@ static const char* labelLut[] =
     "IF_FALSE_",
     "IF_EXIT_",
     "FUNCTION_",
+    "LABEL_MAX"
 };
 
 #endif

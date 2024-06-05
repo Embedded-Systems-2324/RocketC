@@ -3,13 +3,19 @@ int y;
 int z;
 int array[6];
 
+void foo(int a, int b)
+{
+    int c;
+
+    return;
+}
+
 void main()
 {
     int v;
 
-    v = 5;
-    x = 10;
-
+    foo(x +3 , x + 4);
+   
 
 }
 

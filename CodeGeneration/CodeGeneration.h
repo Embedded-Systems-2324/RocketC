@@ -6,6 +6,7 @@
 
 int executeCodeGeneration(TreeNode_st *pTreeRoot, FILE* pDestStream);
 void codeGenerationTestUnit();
+void functionGenerationTestUnit();
 static int loadImm32(uint32_t dVal, reg_et destReg);
 
 #endif

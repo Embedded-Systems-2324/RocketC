@@ -44,7 +44,7 @@
 #define IS_ASSIGN_OPERATION(x) (((x) == OP_ASSIGN) || ((x) == OP_PLUS_ASSIGN) || ((x) == OP_MINUS_ASSIGN) || ((x) == OP_LEFT_SHIFT_ASSIGN) || ((x) == OP_RIGHT_SHIFT_ASSIGN) || ((x) == OP_BITWISE_AND_ASSIGN) || ((x) == OP_BITWISE_OR_ASSIGN) || ((x) == OP_BITWISE_XOR_ASSIGN) || ((x) == OP_MULTIPLY_ASSIGN) || ((x) == OP_DIVIDE_ASSIGN) || ((x) == OP_MODULUS_ASSIGN))
 #define IS_BOOLEAN_OPERATION(x) (((x) == OP_GREATER_THAN) || ((x) == OP_LESS_THAN_OR_EQUAL) || ((x) == OP_GREATER_THAN_OR_EQUAL) || ((x) == OP_LESS_THAN) || ((x) == OP_EQUAL) || ((x) == OP_NOT_EQUAL) || ((x) == OP_LOGICAL_AND) || ((x) == OP_LOGICAL_OR) || ((x) == OP_LOGICAL_NOT))
 
-#define IS_CONDITIONAL_NODE(x) (((x) == NODE_WHILE) || ((x) == NODE_SWITCH) || ((x) == NODE_CASE) || ((x) == NODE_DO_WHILE) || ((x) == NODE_IF))
+#define IS_CONDITIONAL_NODE(x) (((x) == NODE_WHILE) || ((x) == NODE_SWITCH) || ((x) == NODE_CASE) || ((x) == NODE_DO_WHILE) || ((x) == NODE_IF) || ((x) == NODE_RETURN) || ((x) == NODE_FUNCTION_CALL))
 
 
 #define LABEL(x) (labelLut[x])
@@ -102,6 +102,14 @@ static reg_state_st regStateList[] =
     {.regName = REG_R13, .isFree = true},
     {.regName = REG_R14, .isFree = true},
     {.regName = REG_R15, .isFree = true},
+    {.regName = REG_R16, .isFree = true},
+    {.regName = REG_R17, .isFree = true},
+    {.regName = REG_R18, .isFree = true},
+    {.regName = REG_R19, .isFree = true},
+    {.regName = REG_R20, .isFree = true},
+    {.regName = REG_R21, .isFree = true},
+    {.regName = REG_R22, .isFree = true},
+    {.regName = REG_R23, .isFree = true},
     {.regName = REG_R24, .isFree = true},
     {.regName = REG_R25, .isFree = true},
     {.regName = REG_R26, .isFree = true},
@@ -276,7 +284,7 @@ static int emitAluInstruction(asm_instr_et instructionType,
 /// \param dVal Immediate value used for the memory operation
 /// \return -EINVAL if invalid arguments are passed, -EPERM if the passed instruction is not a valid memory instruction
 /// returns 0 on success.
-static int emitMemoryInstruction(asm_instr_et instructionType, reg_et reg, reg_et idx, uint32_t dVal)
+static int emitMemoryInstruction(asm_instr_et instructionType, reg_et reg, reg_et idx, uint32_t dVal, char* Label)
 {
     if (reg >= REG_NONE)
         return -EINVAL;
@@ -297,21 +305,27 @@ static int emitMemoryInstruction(asm_instr_et instructionType, reg_et reg, reg_e
                 //Emit LDI of dVal to a Register X
                 //Emit LDX reg, register X, 0
                 reg_et auxReg = getNextAvailableReg();
-                emitMemoryInstruction(INST_LDI, auxReg, REG_NONE, dVal);
-                emitMemoryInstruction(INST_LDX, reg, auxReg, 0);
+                emitMemoryInstruction(INST_LDI, auxReg, REG_NONE, dVal, NULL);
+                emitMemoryInstruction(INST_LDX, reg, auxReg, 0, NULL);
                 releaseReg(auxReg);
             }
             break;
 
         case INST_LDI:
 
-            if (VALID_LDI_IMMED(dVal))
+            if(Label != NULL)
+                fprintf(pAsmFile, "%s %s, :FUNCTION_%s\n",
+                        INSTRUCTION(instructionType),
+                        REGISTER(reg),
+                        Label
+                );
+            else if (VALID_LDI_IMMED(dVal))
             {
                 fprintf(pAsmFile, "%s %s,#%d\n",
                         INSTRUCTION(instructionType),
                         REGISTER(reg),
                         dVal & MAX_IMMED_LD);
-            }
+            }        
             else
                 loadImm32(dVal, reg);
             break;
@@ -330,8 +344,8 @@ static int emitMemoryInstruction(asm_instr_et instructionType, reg_et reg, reg_e
                 //Emit LDI of dVal to a Register X
                 //Emit LDX reg, register X, 0
                 reg_et auxReg = getNextAvailableReg();
-                emitMemoryInstruction(INST_LDI, auxReg, REG_NONE, dVal);
-                emitMemoryInstruction(INST_STX, reg, auxReg, 0);
+                emitMemoryInstruction(INST_LDI, auxReg, REG_NONE, dVal, NULL);
+                emitMemoryInstruction(INST_STX, reg, auxReg, 0, NULL);
                 releaseReg(auxReg);
             }
             break;
@@ -362,14 +376,14 @@ static int emitLabelInstruction(label_et labelType, uint32_t count, char* nameLa
 {
     if (labelType < WHILE_START || labelType >= LABEL_MAX)
         return -EINVAL;
-
     if(labelType != FUNCTION_NAME)
         fprintf(pAsmFile, "%s%u:\n",
                 LABEL(labelType),
                 count);
     else
-        fprintf(pAsmFile, "%s:\n",
-            nameLabel);
+        fprintf(pAsmFile, "%s%s:\n",
+                LABEL(labelType),
+                nameLabel);
     
     return 0;
 }
@@ -411,6 +425,32 @@ static int emitBranchInstruction(asm_instr_et instructionType, label_et labelTyp
     return 0;
 }
 
+static int emitJumpInstruction(asm_instr_et instructionType, reg_et dReg, reg_et lReg, uint32_t dVal)
+{
+    if (dReg >= REG_NONE) 
+        return -EINVAL;
+        
+    if(instructionType == INST_JMP)
+        fprintf(pAsmFile, "%s %s, #%u\n",
+            INSTRUCTION(instructionType),
+            REGISTER(dReg),
+            dVal
+            );
+
+    else if (instructionType == INST_JMPL)
+        fprintf(pAsmFile, "%s %s, %s, #%u\n",
+            INSTRUCTION(instructionType),
+            REGISTER(dReg),
+            REGISTER(lReg),
+            dVal
+            );
+    else
+        return -EINVAL;
+
+    return 0;
+    
+}
+
 /// \brief Considering the LDI instruction only allows to load values up to 2^22 - 1, some arithmetic must be used in
 /// order to use immediate values larger than this. This function generates boilerplate code to perform this operation
 /// \param dVal Value of the immediate to load
@@ -428,7 +468,7 @@ static int loadImm32(uint32_t dVal, reg_et destReg)
     if (workingReg == REG_NONE)
         return -ENOMEM;
 
-    ret = emitMemoryInstruction(INST_LDI, workingReg, REG_NONE, hp16);
+    ret = emitMemoryInstruction(INST_LDI, workingReg, REG_NONE, hp16, NULL);
     ret |= emitAluInstruction(INST_RL, true, 16, workingReg, workingReg, REG_NONE);
     ret |= emitAluInstruction(INST_OR, true, lw16, destReg, workingReg, REG_NONE);
     ret |= releaseReg(workingReg);
@@ -451,14 +491,14 @@ static int handlePostIncDecOperations(reg_et auxReg)
     while (postIncList->size > 0) 
     {        
         list_item_st* current_item = &postIncList->savedAddr[postIncList->size - 1];
-        emitMemoryInstruction(INST_LD, auxReg, REG_NONE, current_item->Addr);
+        emitMemoryInstruction(INST_LD, auxReg, REG_NONE, current_item->Addr, NULL);
 
         if(current_item->is_increment)
             emitAluInstruction(INST_ADD, true, 1, auxReg, auxReg, REG_NONE);
         else
             emitAluInstruction(INST_SUB, true, 1, auxReg, auxReg, REG_NONE);
 
-        emitMemoryInstruction(INST_ST, auxReg, REG_NONE, current_item->Addr);
+        emitMemoryInstruction(INST_ST, auxReg, REG_NONE, current_item->Addr, NULL);
 
         PostIncListDelete(postIncList);
     }
@@ -486,7 +526,7 @@ static int handleArrayIndexedExpressions(TreeNode_st *pTreeNode, reg_et ArrayLoc
         parseNode(&L_CHILD(pTreeNode), NODE_ARRAY_INDEX, OP_NOT_DEFINED, true);
         //Get the reg alocated as dreg in the parseNode func
         IndexValReg = arrayIndexRegSave;
-        emitMemoryInstruction(INST_LD, ArrayLocationReg, REG_NONE, NODE_MEM_LOC(pTreeNode));
+        emitMemoryInstruction(INST_LD, ArrayLocationReg, REG_NONE, NODE_MEM_LOC(pTreeNode), NULL);
         emitAluInstruction(INST_ADD, false, 0, ArrayLocationReg, IndexValReg, ArrayLocationReg);
         return 0;
     }
@@ -494,15 +534,15 @@ static int handleArrayIndexedExpressions(TreeNode_st *pTreeNode, reg_et ArrayLoc
     {
         if(L_CHILD_TYPE(pTreeNode) == NODE_INTEGER)
         {
-            emitMemoryInstruction(INST_LD, ArrayLocationReg, REG_NONE, NODE_MEM_LOC(pTreeNode));
+            emitMemoryInstruction(INST_LD, ArrayLocationReg, REG_NONE, NODE_MEM_LOC(pTreeNode), NULL);
             emitAluInstruction(INST_ADD, true, L_CHILD_DVAL(pTreeNode), ArrayLocationReg, ArrayLocationReg, REG_NONE);
         }
         else
         if(L_CHILD_TYPE(pTreeNode) == NODE_IDENTIFIER)
         {
             reg_et tempReg = getNextAvailableReg();
-            emitMemoryInstruction(INST_LD, ArrayLocationReg, REG_NONE, NODE_MEM_LOC(pTreeNode));
-            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
+            emitMemoryInstruction(INST_LD, ArrayLocationReg, REG_NONE, NODE_MEM_LOC(pTreeNode), NULL);
+            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode), NULL);
             releaseReg(tempReg);
         }
     }
@@ -511,8 +551,7 @@ static int handleArrayIndexedExpressions(TreeNode_st *pTreeNode, reg_et ArrayLoc
     return 0;
 }
 
-static int generateImmediateAluOperation(TreeNode_st *pTreeNode, asm_instr_et asmInstruction,
-                                         reg_et destReg, reg_et tempReg)
+static int generateImmediateAluOperation(TreeNode_st *pTreeNode, asm_instr_et asmInstruction, reg_et destReg, reg_et tempReg)
 {
     // i = 1 if the integer is the left child
     uint8_t i = ((L_CHILD_TYPE(pTreeNode)) == NODE_INTEGER) ? 1 : 0;
@@ -524,40 +563,40 @@ static int generateImmediateAluOperation(TreeNode_st *pTreeNode, asm_instr_et as
     switch (pTreeNode->pChilds[i].nodeType)
     {
         case NODE_IDENTIFIER:
-            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr);
+            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr, NULL);
             break;
         case NODE_POINTER_CONTENT:
-            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr);
-            emitMemoryInstruction(INST_LDX, tempReg, tempReg, 0);
+            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr, NULL);
+            emitMemoryInstruction(INST_LDX, tempReg, tempReg, 0, NULL);
             break;
         case NODE_REFERENCE:
-            emitMemoryInstruction(INST_LDI, tempReg, REG_NONE, addr);
+            emitMemoryInstruction(INST_LDI, tempReg, REG_NONE, addr, NULL);
             break;
         case NODE_POST_INC:
-            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr);
+            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr, NULL);
             //If an assign was detected earlier, add this addr to the list so that it can be incremented later on
             if(delayPostIncDec)
                 PostIncListInsert(postIncList, true, addr); 
             break;
         case NODE_PRE_INC:
-            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr);
+            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr, NULL);
             emitAluInstruction(INST_ADD, true, 1, tempReg, tempReg, REG_NONE);
-            emitMemoryInstruction(INST_ST, tempReg, 0, addr);
+            emitMemoryInstruction(INST_ST, tempReg, 0, addr, NULL);
             break;
         case NODE_POST_DEC:
-            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr);
+            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr, NULL);
             //If an assign was detected earlier, add this addr to the list so that it can be decremented later on
             if(delayPostIncDec)
                 PostIncListInsert(postIncList, false, addr);           
             break;
         case NODE_PRE_DEC:
-            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr);
+            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, addr, NULL);
             emitAluInstruction(INST_SUB, true, 1, tempReg, tempReg, REG_NONE);
-            emitMemoryInstruction(INST_ST, tempReg, 0, addr);         
+            emitMemoryInstruction(INST_ST, tempReg, 0, addr, NULL);         
             break;
         case NODE_ARRAY_INDEX:
             handleArrayIndexedExpressions(&pTreeNode->pChilds[i], tempReg);
-            emitMemoryInstruction(INST_LDX, tempReg, tempReg, 0);
+            emitMemoryInstruction(INST_LDX, tempReg, tempReg, 0, NULL);
             break;
         default:
             LOG_ERROR("Un-Implemented condition!\n");
@@ -580,7 +619,7 @@ static int generateImmediateAluOperation(TreeNode_st *pTreeNode, asm_instr_et as
         }
         else //In case Immediate value is bigger then 16 bits
         {
-            emitMemoryInstruction(INST_LDI, destReg, REG_NONE, -L_CHILD_DVAL(pTreeNode));
+            emitMemoryInstruction(INST_LDI, destReg, REG_NONE, -L_CHILD_DVAL(pTreeNode), NULL);
             emitAluInstruction(INST_ADD, false, 0, destReg, destReg, tempReg);
         }
     }
@@ -592,7 +631,7 @@ static int generateImmediateAluOperation(TreeNode_st *pTreeNode, asm_instr_et as
         }
         else //In case Immediate value is bigger then 16 bits
         {
-            emitMemoryInstruction(INST_LDI, destReg, REG_NONE, pTreeNode->pChilds[i].nodeData.dVal);
+            emitMemoryInstruction(INST_LDI, destReg, REG_NONE, pTreeNode->pChilds[i].nodeData.dVal, NULL);
             emitAluInstruction(asmInstruction, false, 0, destReg, destReg, tempReg);
         }
     }
@@ -602,13 +641,13 @@ static int generateImmediateAluOperation(TreeNode_st *pTreeNode, asm_instr_et as
     if(!delayPostIncDec && (pTreeNode->pChilds[!i].nodeData.dVal == NODE_POST_INC))
     {
         emitAluInstruction(INST_ADD, true, 1, tempReg, tempReg, REG_NONE);
-        emitMemoryInstruction(INST_ST, tempReg, 0, addr);
+        emitMemoryInstruction(INST_ST, tempReg, 0, addr, NULL);
     }
 
     if(!delayPostIncDec && (pTreeNode->pChilds[!i].nodeData.dVal == NODE_POST_DEC))
     {
         emitAluInstruction(INST_SUB, true, 1, tempReg, tempReg, REG_NONE);
-        emitMemoryInstruction(INST_ST, tempReg, 0, addr);
+        emitMemoryInstruction(INST_ST, tempReg, 0, addr, NULL);
         delayPostIncDec = 0;
     }
 
@@ -647,20 +686,20 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
     {
         case NODE_IDENTIFIER:
             leftAddr = L_CHILD_MEM_LOC(pTreeNode);
-            emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr);
+            emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr, NULL);
             break;
         case NODE_POINTER_CONTENT:
             leftAddr = L_CHILD_MEM_LOC(pTreeNode);
-            emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr);
-            emitMemoryInstruction(INST_LDX, lReg, lReg, 0);
+            emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr, NULL);
+            emitMemoryInstruction(INST_LDX, lReg, lReg, 0, NULL);
             break;
         case NODE_REFERENCE:
             leftAddr = L_CHILD_MEM_LOC(pTreeNode);
-            emitMemoryInstruction(INST_LDI, lReg, REG_NONE, leftAddr);
+            emitMemoryInstruction(INST_LDI, lReg, REG_NONE, leftAddr, NULL);
             break;
         case NODE_POST_INC:
             leftAddr = L_CHILD_MEM_LOC(pTreeNode);
-            emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr);
+            emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr, NULL);
             if(delayPostIncDec)
                 PostIncListInsert(postIncList, true, leftAddr);
             childPos = 0;
@@ -668,13 +707,13 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
             break;
         case NODE_PRE_INC:
             leftAddr = L_CHILD_MEM_LOC(pTreeNode);
-            emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr);
+            emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr, NULL);
             emitAluInstruction(INST_ADD, true, 1, lReg, lReg, REG_NONE);
-            emitMemoryInstruction(INST_ST, lReg, REG_NONE, leftAddr);
+            emitMemoryInstruction(INST_ST, lReg, REG_NONE, leftAddr, NULL);
             break;
         case NODE_POST_DEC:
             leftAddr = L_CHILD_MEM_LOC(pTreeNode);
-            emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr);
+            emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr, NULL);
             if(delayPostIncDec)
                 PostIncListInsert(postIncList, false, leftAddr);
             childPos = 0;
@@ -682,13 +721,13 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
             break;
         case NODE_PRE_DEC:
             leftAddr = L_CHILD_MEM_LOC(pTreeNode);
-            emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr);
+            emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr, NULL);
             emitAluInstruction(INST_SUB, true, 1, lReg, lReg, REG_NONE);
-            emitMemoryInstruction(INST_ST, lReg, REG_NONE, leftAddr);
+            emitMemoryInstruction(INST_ST, lReg, REG_NONE, leftAddr, NULL);
             break;
         case NODE_ARRAY_INDEX:
             handleArrayIndexedExpressions(&L_CHILD(pTreeNode), lReg);
-            emitMemoryInstruction(INST_LDX, lReg, lReg, 0);
+            emitMemoryInstruction(INST_LDX, lReg, lReg, 0, NULL);
             break;
         default:
             LOG_ERROR("Un-Implemented condition!\n");
@@ -699,42 +738,42 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
     switch (R_CHILD_TYPE(pTreeNode))
     {
         case NODE_IDENTIFIER:
-            emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
+            emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr, NULL);
             break;
         case NODE_POINTER_CONTENT:
-            emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
-            emitMemoryInstruction(INST_LDX, rReg, rReg, 0);
+            emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr, NULL);
+            emitMemoryInstruction(INST_LDX, rReg, rReg, 0, NULL);
             break;
         case NODE_REFERENCE:
-            emitMemoryInstruction(INST_LDI, rReg, REG_NONE, rightAddr);
+            emitMemoryInstruction(INST_LDI, rReg, REG_NONE, rightAddr, NULL);
             break;
         case NODE_POST_INC:
-            emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
+            emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr, NULL);
             if(delayPostIncDec)
                 PostIncListInsert(postIncList, true, rightAddr);
             childPos = 1;
             is_postinc = 1;
             break;
         case NODE_PRE_INC:
-            emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
+            emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr, NULL);
             emitAluInstruction(INST_ADD, true, 1, rReg, rReg, REG_NONE);
-            emitMemoryInstruction(INST_ST, rReg, REG_NONE, rightAddr);
+            emitMemoryInstruction(INST_ST, rReg, REG_NONE, rightAddr, NULL);
             break;
         case NODE_POST_DEC:
-            emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
+            emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr, NULL);
             if(delayPostIncDec)
                 PostIncListInsert(postIncList, false, rightAddr);
             childPos = 1;
             is_postdec = 1;
             break;
         case NODE_PRE_DEC:
-            emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr);
+            emitMemoryInstruction(INST_LD, rReg, REG_NONE, rightAddr, NULL);
             emitAluInstruction(INST_SUB, true, 1, rReg, rReg, REG_NONE);
-            emitMemoryInstruction(INST_ST, rReg, REG_NONE, rightAddr);
+            emitMemoryInstruction(INST_ST, rReg, REG_NONE, rightAddr, NULL);
             break;
         case NODE_ARRAY_INDEX:
             handleArrayIndexedExpressions(&R_CHILD(pTreeNode), rReg);
-            emitMemoryInstruction(INST_LDX, rReg, rReg, 0);
+            emitMemoryInstruction(INST_LDX, rReg, rReg, 0, NULL);
             break;
         default:
             LOG_ERROR("Un-Implemented condition!\n");
@@ -752,12 +791,12 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
         if(childPos == 1)
         {
             emitAluInstruction(INST_ADD, true, 1, rReg, rReg, REG_NONE);
-            emitMemoryInstruction(INST_ST, rReg, REG_NONE, R_CHILD_MEM_LOC(pTreeNode));
+            emitMemoryInstruction(INST_ST, rReg, REG_NONE, R_CHILD_MEM_LOC(pTreeNode), NULL);
         }
         else
         {
             emitAluInstruction(INST_ADD, true, 1, lReg, lReg, REG_NONE);
-            emitMemoryInstruction(INST_ST, lReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
+            emitMemoryInstruction(INST_ST, lReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode), NULL);
         }
         
     }
@@ -769,12 +808,12 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
         if(childPos == 1)
         {
             emitAluInstruction(INST_SUB, true, 1, rReg, rReg, REG_NONE);
-            emitMemoryInstruction(INST_ST, rReg, REG_NONE, R_CHILD_MEM_LOC(pTreeNode));
+            emitMemoryInstruction(INST_ST, rReg, REG_NONE, R_CHILD_MEM_LOC(pTreeNode), NULL);
         }
         else
         {
             emitAluInstruction(INST_SUB, true, 1, lReg, lReg, REG_NONE);
-            emitMemoryInstruction(INST_ST, lReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
+            emitMemoryInstruction(INST_ST, lReg, REG_NONE, L_CHILD_MEM_LOC(pTreeNode), NULL);
         }
         
     }
@@ -800,18 +839,18 @@ static int generateBooleanOperation(OperatorType_et operatorType, TreeNode_st *p
         switch (L_CHILD_TYPE(pTreeNode))
         {
             case NODE_INTEGER:
-                emitMemoryInstruction(INST_LDI, tempReg1, REG_NONE, L_CHILD_DVAL(pTreeNode));
+                emitMemoryInstruction(INST_LDI, tempReg1, REG_NONE, L_CHILD_DVAL(pTreeNode), NULL);
                 break;
             case NODE_IDENTIFIER:
-                emitMemoryInstruction(INST_LD, tempReg1, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
+                emitMemoryInstruction(INST_LD, tempReg1, REG_NONE, L_CHILD_MEM_LOC(pTreeNode), NULL);
                 break;
             case NODE_POINTER:
-                emitMemoryInstruction(INST_LD, tempReg1, REG_NONE, L_CHILD_MEM_LOC(pTreeNode));
-                emitMemoryInstruction(INST_LDX, tempReg1, tempReg1, 0);
+                emitMemoryInstruction(INST_LD, tempReg1, REG_NONE, L_CHILD_MEM_LOC(pTreeNode), NULL);
+                emitMemoryInstruction(INST_LDX, tempReg1, tempReg1, 0, NULL);
                 break;
             case NODE_ARRAY_INDEX:
                 handleArrayIndexedExpressions(&L_CHILD(pTreeNode), tempReg1);
-                emitMemoryInstruction(INST_LDX, tempReg1, tempReg1, 0);
+                emitMemoryInstruction(INST_LDX, tempReg1, tempReg1, 0, NULL);
                 break;
             
             default:
@@ -823,18 +862,18 @@ static int generateBooleanOperation(OperatorType_et operatorType, TreeNode_st *p
         switch (R_CHILD_TYPE(pTreeNode))
         {
             case NODE_INTEGER:
-                emitMemoryInstruction(INST_LDI, tempReg2, REG_NONE, R_CHILD_DVAL(pTreeNode));
+                emitMemoryInstruction(INST_LDI, tempReg2, REG_NONE, R_CHILD_DVAL(pTreeNode), NULL);
                 break;
             case NODE_IDENTIFIER:
-                emitMemoryInstruction(INST_LD, tempReg2, REG_NONE, R_CHILD_MEM_LOC(pTreeNode));
+                emitMemoryInstruction(INST_LD, tempReg2, REG_NONE, R_CHILD_MEM_LOC(pTreeNode), NULL);
                 break;
             case NODE_POINTER:
-                emitMemoryInstruction(INST_LD, tempReg2, REG_NONE, R_CHILD_MEM_LOC(pTreeNode));
-                emitMemoryInstruction(INST_LDX, tempReg2, tempReg2, 0);
+                emitMemoryInstruction(INST_LD, tempReg2, REG_NONE, R_CHILD_MEM_LOC(pTreeNode), NULL);
+                emitMemoryInstruction(INST_LDX, tempReg2, tempReg2, 0,NULL);
                 break;
             case NODE_ARRAY_INDEX:
                 handleArrayIndexedExpressions(&R_CHILD(pTreeNode), tempReg2);
-                emitMemoryInstruction(INST_LDX, tempReg2, tempReg2, 0);
+                emitMemoryInstruction(INST_LDX, tempReg2, tempReg2, 0, NULL);
                 break;
             
             default:
@@ -845,7 +884,7 @@ static int generateBooleanOperation(OperatorType_et operatorType, TreeNode_st *p
     
 
     //Pre-load the value 1 to indicate that the condition is true if it doesnt change
-    emitMemoryInstruction(INST_LDI, destReg, REG_NONE, 1);
+    emitMemoryInstruction(INST_LDI, destReg, REG_NONE, 1, NULL);
 
     
     if(operatorType == OP_LOGICAL_AND)
@@ -856,7 +895,7 @@ static int generateBooleanOperation(OperatorType_et operatorType, TreeNode_st *p
         emitBranchInstruction(INST_BEQ, FALSE, getLabelCounter(FALSE));
         emitBranchInstruction(INST_BRA, TRUE, getLabelCounter(TRUE));
         emitLabelInstruction(FALSE, getPostIncLabelCounter(FALSE), NULL);
-        emitMemoryInstruction(INST_LDI, destReg, REG_NONE, 0);
+        emitMemoryInstruction(INST_LDI, destReg, REG_NONE, 0, NULL);
         emitLabelInstruction(TRUE, getPostIncLabelCounter(TRUE), NULL);
 
 
@@ -867,7 +906,7 @@ static int generateBooleanOperation(OperatorType_et operatorType, TreeNode_st *p
         emitBranchInstruction(INST_BNE, TRUE, getLabelCounter(TRUE));
         emitAluInstruction(INST_CMP, true, 0, REG_NONE, tempReg2, REG_NONE);
         emitBranchInstruction(INST_BNE, TRUE, getLabelCounter(TRUE));
-        emitMemoryInstruction(INST_LDI, destReg, REG_NONE, 0);
+        emitMemoryInstruction(INST_LDI, destReg, REG_NONE, 0, NULL);
         emitLabelInstruction(TRUE, getPostIncLabelCounter(TRUE), NULL);
 
     }
@@ -875,14 +914,14 @@ static int generateBooleanOperation(OperatorType_et operatorType, TreeNode_st *p
     {
         emitAluInstruction(INST_CMP, true, 0, REG_NONE, tempReg1, REG_NONE);
         emitBranchInstruction(INST_BNE, TRUE, getLabelCounter(TRUE));
-        emitMemoryInstruction(INST_LDI, destReg, REG_NONE, 0);
+        emitMemoryInstruction(INST_LDI, destReg, REG_NONE, 0, NULL);
         emitLabelInstruction(TRUE, getPostIncLabelCounter(TRUE), NULL);
     }
     else
     { //Cases: !=, ==, >=, <=, etc
         emitAluInstruction(INST_CMP, false, 0, REG_NONE, tempReg1, tempReg2);
         emitBranchInstruction(mapInstructionFromOperator(operatorType), SKIP, getLabelCounter(SKIP));
-        emitMemoryInstruction(INST_LDI, destReg, REG_NONE, 0);
+        emitMemoryInstruction(INST_LDI, destReg, REG_NONE, 0, NULL);
         emitLabelInstruction(SKIP, getLabelCounter(SKIP), NULL);      
     }
     
@@ -930,39 +969,39 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
     switch (R_CHILD_TYPE(pTreeNode))
     {
         case NODE_INTEGER:
-            emitMemoryInstruction(INST_LDI, tempReg, REG_NONE, R_CHILD_DVAL(pTreeNode));
+            emitMemoryInstruction(INST_LDI, tempReg, REG_NONE, R_CHILD_DVAL(pTreeNode), NULL);
             break;
         case NODE_IDENTIFIER:
-            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, rightAddr);
+            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, rightAddr, NULL);
             break;
         case NODE_POINTER_CONTENT:
-            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, rightAddr);
-            emitMemoryInstruction(INST_LDX, tempReg, tempReg, 0);
+            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, rightAddr, NULL);
+            emitMemoryInstruction(INST_LDX, tempReg, tempReg, 0, NULL);
             break;
         case NODE_REFERENCE:
-            emitMemoryInstruction(INST_LDI, tempReg, REG_NONE, rightAddr);
+            emitMemoryInstruction(INST_LDI, tempReg, REG_NONE, rightAddr, NULL);
             break;
         case NODE_POST_INC:
-            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, rightAddr);
+            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, rightAddr, NULL);
             is_postinc = 1;
             break;
         case NODE_PRE_INC:
-            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, rightAddr);
+            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, rightAddr, NULL);
             emitAluInstruction(INST_ADD, true, 1, tempReg, tempReg, REG_NONE);
-            emitMemoryInstruction(INST_ST, tempReg, REG_NONE, rightAddr);
+            emitMemoryInstruction(INST_ST, tempReg, REG_NONE, rightAddr, NULL);
             break;
         case NODE_POST_DEC:
-            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, rightAddr);
+            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, rightAddr, NULL);
             is_postdec = 1;
             break;
         case NODE_PRE_DEC:
-            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, rightAddr);
+            emitMemoryInstruction(INST_LD, tempReg, REG_NONE, rightAddr, NULL);
             emitAluInstruction(INST_SUB, true, 1, tempReg, tempReg, REG_NONE);
-            emitMemoryInstruction(INST_ST, tempReg, REG_NONE, rightAddr);
+            emitMemoryInstruction(INST_ST, tempReg, REG_NONE, rightAddr, NULL);
             break;
         case NODE_ARRAY_INDEX:
             handleArrayIndexedExpressions(&R_CHILD(pTreeNode), tempReg);
-            emitMemoryInstruction(INST_LDX, tempReg, tempReg, 0);
+            emitMemoryInstruction(INST_LDX, tempReg, tempReg, 0, NULL);
             break;
         default:
             LOG_ERROR("Un-Implemented condition!\n");
@@ -976,11 +1015,11 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
         case NODE_IDENTIFIER:
             if (operatorType != OP_ASSIGN)
             {
-                emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr);
+                emitMemoryInstruction(INST_LD, lReg, REG_NONE, leftAddr, NULL);
             }
             break;
         case NODE_POINTER_CONTENT:
-            emitMemoryInstruction(INST_LD, destReg, REG_NONE, leftAddr);
+            emitMemoryInstruction(INST_LD, destReg, REG_NONE, leftAddr, NULL);
             break;
         case NODE_ARRAY_INDEX:
             handleArrayIndexedExpressions(&L_CHILD(pTreeNode), destReg);
@@ -1006,21 +1045,21 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
     {
         case NODE_IDENTIFIER:
             if(operatorType != OP_ASSIGN)
-                emitMemoryInstruction(INST_ST, lReg, REG_NONE, leftAddr);
+                emitMemoryInstruction(INST_ST, lReg, REG_NONE, leftAddr, NULL);
             else
-                emitMemoryInstruction(INST_ST, tempReg, REG_NONE, leftAddr);
+                emitMemoryInstruction(INST_ST, tempReg, REG_NONE, leftAddr, NULL);
             break;
         case NODE_POINTER_CONTENT:
             if(operatorType != OP_ASSIGN)
-                emitMemoryInstruction(INST_STX, lReg, destReg, 0);
+                emitMemoryInstruction(INST_STX, lReg, destReg, 0, NULL);
             else
-                emitMemoryInstruction(INST_STX, tempReg, destReg, 0);
+                emitMemoryInstruction(INST_STX, tempReg, destReg, 0, NULL);
             break;
         case NODE_ARRAY_INDEX:
             if(operatorType != OP_ASSIGN)
-                emitMemoryInstruction(INST_STX, lReg, destReg, 0);
+                emitMemoryInstruction(INST_STX, lReg, destReg, 0, NULL);
             else
-                emitMemoryInstruction(INST_STX, tempReg, destReg, 0);
+                emitMemoryInstruction(INST_STX, tempReg, destReg, 0, NULL);
             break;
         default:
             LOG_ERROR("Un-Implemented condition!\n");
@@ -1031,12 +1070,12 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
     if(!delayPostIncDec && is_postinc)
     {       
         emitAluInstruction(INST_ADD, true, 1, tempReg, tempReg, REG_NONE);
-        emitMemoryInstruction(INST_ST, tempReg, REG_NONE, R_CHILD_MEM_LOC(pTreeNode));       
+        emitMemoryInstruction(INST_ST, tempReg, REG_NONE, R_CHILD_MEM_LOC(pTreeNode), NULL);       
     }
     if(!delayPostIncDec && is_postdec)
     {     
         emitAluInstruction(INST_SUB, true, 1, tempReg, tempReg, REG_NONE);
-        emitMemoryInstruction(INST_ST, tempReg, REG_NONE, R_CHILD_MEM_LOC(pTreeNode));  
+        emitMemoryInstruction(INST_ST, tempReg, REG_NONE, R_CHILD_MEM_LOC(pTreeNode), NULL);  
     }
 
     releaseReg(tempReg);
@@ -1216,7 +1255,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             {
                 dReg = dRegSave;
                 uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
-                emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr);
+                emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr, NULL);
 
                 if (isLeftInherited)
                 {
@@ -1242,18 +1281,18 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 if (parentOperatorType != OP_ASSIGN)
                 {
                     reg_et auxReg = getNextAvailableReg();
-                    emitMemoryInstruction(INST_LD, auxReg, REG_NONE, memAddr);
+                    emitMemoryInstruction(INST_LD, auxReg, REG_NONE, memAddr, NULL);
                     emitAluInstruction(mapInstructionFromAssignOp(parentOperatorType), false, 0, rReg, auxReg, rReg);
                     releaseReg(auxReg);
                 }
 
-                emitMemoryInstruction(INST_ST, rReg, REG_NONE, memAddr);
+                emitMemoryInstruction(INST_ST, rReg, REG_NONE, memAddr, NULL);
             }
             else if (parentNodeType == NODE_OPERATOR && IS_BOOLEAN_OPERATION(parentOperatorType))
             {
                 dReg = dRegSave;
                 reg_et tempreg = getNextAvailableReg(); 
-                emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
+                emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode), NULL);
 
                 if (isLeftInherited)
                 {
@@ -1269,7 +1308,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             }
             else //Used for Simple Conditions if(x), while(x)...
             {
-                emitMemoryInstruction(INST_LD, dReg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
+                emitMemoryInstruction(INST_LD, dReg, REG_NONE, NODE_MEM_LOC(pCurrentNode), NULL);
                 dRegSave = dReg;
             }
 
@@ -1303,7 +1342,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             {
                 dReg = dRegSave;
                 reg_et tempreg = getNextAvailableReg(); 
-                emitMemoryInstruction(INST_LDI, tempreg, REG_NONE, pCurrentNode->nodeData.dVal);
+                emitMemoryInstruction(INST_LDI, tempreg, REG_NONE, pCurrentNode->nodeData.dVal, NULL);
 
                 if (isLeftInherited)
                 {
@@ -1319,7 +1358,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             }
             else //Used for Simple Conditions if(1), while(1)...
             {
-                emitMemoryInstruction(INST_LDI, dReg, REG_NONE, pCurrentNode->nodeData.dVal);
+                emitMemoryInstruction(INST_LDI, dReg, REG_NONE, pCurrentNode->nodeData.dVal, NULL);
                 dRegSave = dReg;
             }
 
@@ -1376,36 +1415,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             generateCode(&L_CHILD(pCurrentNode));
             emitAluInstruction(INST_CMP, true, 0, REG_NONE, dRegSave, REG_NONE);
             emitBranchInstruction(INST_BNE, WHILE_START, getPostIncLabelCounter(WHILE_START));
-            
 
-            /*
-            DO:
-                (CODIGO)
-                (CONDIITON)
-                LD R,
-                CMP R, #0
-                BNE DO
-                 
-                 ...
-
-            */
-
-            break;
-        case NODE_RETURN:
-            // Place return values in R4
-            if(L_CHILD_TYPE(pCurrentNode) == NODE_IDENTIFIER)
-            {
-                emitMemoryInstruction(INST_LD, REG_R4, REG_NONE, L_CHILD_MEM_LOC(pCurrentNode));
-            }
-            // @todo Verificar qual é o melhor metodo para expressões
-            
-            // Restore Registers
-            for (reg_et i = REG_R23; i >= REG_R16; i--)
-            {
-                pop(i);
-            }
-
-            // Instruction to return to program flow before call
             break;
         case NODE_CONTINUE:
             break;
@@ -1422,12 +1432,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
         case NODE_SWITCH:
             //Generate code for expression inside switch     
              parseNode(&L_CHILD(pCurrentNode), NODE_TYPE(pCurrentNode),(OperatorType_et) L_CHILD_DVAL(pCurrentNode), true);
-            
-            // dRegSave
-            
-            reg_et compareReg = getNextAvailableReg();
 
-            //generateCode(&R_CHILD(pCurrentNode));
 
             TreeNode_st *pCases, pDefault;
             pCases = &pCurrentNode->pChilds[1];
@@ -1436,7 +1441,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
 
             while(pCases->pSibling != NULL ){
                 reg_et tempreg = getNextAvailableReg(); 
-                emitMemoryInstruction(INST_LDI, tempreg, REG_NONE, pCases->nodeData.dVal);
+                emitMemoryInstruction(INST_LDI, tempreg, REG_NONE, pCases->nodeData.dVal, NULL);
             
                 emitAluInstruction(INST_CMP, false, 0, REG_NONE, dRegSave, tempreg);
                 emitBranchInstruction(INST_BEQ, CASE, getPostIncLabelCounter(CASE));
@@ -1480,7 +1485,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             {
                 dReg = dRegSave;
                 uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
-                emitMemoryInstruction(INST_LDI, dReg, REG_NONE, memAddr);
+                emitMemoryInstruction(INST_LDI, dReg, REG_NONE, memAddr, NULL);
 
                 if (isLeftInherited)
                 {
@@ -1497,7 +1502,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             {
                 dReg = dRegSave;
                 reg_et tempreg = getNextAvailableReg(); 
-                emitMemoryInstruction(INST_LDI, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
+                emitMemoryInstruction(INST_LDI, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode), NULL);
 
                 if (isLeftInherited)
                 {
@@ -1523,8 +1528,8 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             {
                 dReg = dRegSave;
                 uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
-                emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr);
-                emitMemoryInstruction(INST_LDX, dReg, dReg, memAddr);
+                emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr, NULL);
+                emitMemoryInstruction(INST_LDX, dReg, dReg, memAddr, NULL);
 
                 if (isLeftInherited)
                 {
@@ -1550,15 +1555,15 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 {
                     LOG_ERROR("Not implemented because its not suported by the parser");
                 }
-                emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr);
-                emitMemoryInstruction(INST_STX, rReg, dReg, 0);
+                emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr, NULL);
+                emitMemoryInstruction(INST_STX, rReg, dReg, 0,NULL);
             }
             else if (parentNodeType == NODE_OPERATOR && IS_BOOLEAN_OPERATION(parentOperatorType))
             {
                 dReg = dRegSave;
                 reg_et tempreg = getNextAvailableReg(); 
-                emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
-                emitMemoryInstruction(INST_LDX, tempreg, tempreg, 0);
+                emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode), NULL);
+                emitMemoryInstruction(INST_LDX, tempreg, tempreg, 0, NULL);
 
                 if (isLeftInherited)
                 {
@@ -1574,8 +1579,8 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             }
             else //Used for Simple Conditions if(*x), while(*x)...
             {
-                emitMemoryInstruction(INST_LD, dReg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
-                emitMemoryInstruction(INST_LDX, dReg, dReg, 0);
+                emitMemoryInstruction(INST_LD, dReg, REG_NONE, NODE_MEM_LOC(pCurrentNode), NULL);
+                emitMemoryInstruction(INST_LDX, dReg, dReg, 0, NULL);
                 dRegSave = dReg;
             }
 
@@ -1589,7 +1594,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 dReg = dRegSave;
 
                 uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
-                emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr);
+                emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr, NULL);
 
                 if (isLeftInherited)
                 {
@@ -1606,7 +1611,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 if(!delayPostIncDec)
                 {
                     emitAluInstruction(INST_SUB, true, 1, dReg, dReg, REG_NONE);
-                    emitMemoryInstruction(INST_ST, dReg, REG_NONE, memAddr);
+                    emitMemoryInstruction(INST_ST, dReg, REG_NONE, memAddr, NULL);
                 }
                 else
                     PostIncListInsert(postIncList, true, memAddr);
@@ -1615,7 +1620,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             {
                 dReg = dRegSave;
                 reg_et tempreg = getNextAvailableReg(); 
-                emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
+                emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode), NULL);
 
                 if (isLeftInherited)
                 {
@@ -1629,7 +1634,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 }
 
                 emitAluInstruction(INST_SUB, true, 1, tempreg, tempreg, REG_NONE);
-                emitMemoryInstruction(INST_ST, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
+                emitMemoryInstruction(INST_ST, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode), NULL);
                 releaseReg(tempreg);
             }
                 //If the identifier is a child of an ASSIGN_OPERATION (=, +=, -=, *=, /=, %=, |=, <<=, >>=, &=, ^=,)
@@ -1642,9 +1647,9 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
                 reg_et tReg = getNextAvailableReg();
 
-                emitMemoryInstruction(INST_LD, tReg, REG_NONE, memAddr);
+                emitMemoryInstruction(INST_LD, tReg, REG_NONE, memAddr, NULL);
                 emitAluInstruction(INST_SUB, true, 1, tReg, tReg, REG_NONE);
-                emitMemoryInstruction(INST_ST, tReg, REG_NONE, memAddr);
+                emitMemoryInstruction(INST_ST, tReg, REG_NONE, memAddr, NULL);
                 releaseReg(tReg);
             }
             break;
@@ -1657,9 +1662,9 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
 
                 uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
 
-                emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr);
+                emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr, NULL);
                 emitAluInstruction(INST_SUB, true, 1, dReg, dReg, REG_NONE);
-                emitMemoryInstruction(INST_ST, dReg, REG_NONE, memAddr);
+                emitMemoryInstruction(INST_ST, dReg, REG_NONE, memAddr, NULL);
 
 
                 if (isLeftInherited)
@@ -1677,9 +1682,9 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             {
                 dReg = dRegSave;
                 reg_et tempreg = getNextAvailableReg(); 
-                emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
+                emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode), NULL);
                 emitAluInstruction(INST_SUB, true, 1, tempreg, tempreg, REG_NONE);
-                emitMemoryInstruction(INST_ST, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
+                emitMemoryInstruction(INST_ST, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode), NULL);
 
                 if (isLeftInherited)
                 {
@@ -1704,9 +1709,9 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
                 reg_et tReg = getNextAvailableReg();
 
-                emitMemoryInstruction(INST_LD, tReg, REG_NONE, memAddr);
+                emitMemoryInstruction(INST_LD, tReg, REG_NONE, memAddr,NULL);
                 emitAluInstruction(INST_SUB, true, 1, tReg, tReg, REG_NONE);
-                emitMemoryInstruction(INST_ST, tReg, REG_NONE, memAddr);
+                emitMemoryInstruction(INST_ST, tReg, REG_NONE, memAddr, NULL);
                 releaseReg(tReg);
             }
             break;
@@ -1717,7 +1722,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             {
                 dReg = dRegSave;
                 uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
-                emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr);
+                emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr, NULL);
                 
 
                 if (isLeftInherited)
@@ -1735,7 +1740,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 if(!delayPostIncDec)
                 {
                     emitAluInstruction(INST_ADD, true, 1, dReg, dReg, REG_NONE);
-                    emitMemoryInstruction(INST_ST, dReg, REG_NONE, memAddr);
+                    emitMemoryInstruction(INST_ST, dReg, REG_NONE, memAddr, NULL);
                 }
                 else
                     PostIncListInsert(postIncList, true, memAddr);
@@ -1744,7 +1749,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             {
                 dReg = dRegSave;
                 reg_et tempreg = getNextAvailableReg(); 
-                emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
+                emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode), NULL);
 
                 if (isLeftInherited)
                 {
@@ -1758,7 +1763,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 }
 
                 emitAluInstruction(INST_ADD, true, 1, tempreg, tempreg, REG_NONE);
-                emitMemoryInstruction(INST_ST, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
+                emitMemoryInstruction(INST_ST, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode), NULL);
                 releaseReg(tempreg);
             }
             //If is a child of an ASSIGN_OPERATION (=, +=, -=, *=, /=, %=, |=, <<=, >>=, &=, ^=,)
@@ -1771,9 +1776,9 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
                 reg_et tReg = getNextAvailableReg();
 
-                emitMemoryInstruction(INST_LD, tReg, REG_NONE, memAddr);
+                emitMemoryInstruction(INST_LD, tReg, REG_NONE, memAddr, NULL);
                 emitAluInstruction(INST_ADD, true, 1, tReg, tReg, REG_NONE);
-                emitMemoryInstruction(INST_ST, tReg, REG_NONE, memAddr);
+                emitMemoryInstruction(INST_ST, tReg, REG_NONE, memAddr, NULL);
                 releaseReg(tReg);
             }
             break;
@@ -1784,9 +1789,9 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 dReg = dRegSave;
 
                 uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
-                emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr);
+                emitMemoryInstruction(INST_LD, dReg, REG_NONE, memAddr, NULL);
                 emitAluInstruction(INST_ADD, true, 1, dReg, dReg, REG_NONE);
-                emitMemoryInstruction(INST_ST, dReg, REG_NONE, memAddr);
+                emitMemoryInstruction(INST_ST, dReg, REG_NONE, memAddr,NULL);
 
 
                 if (isLeftInherited)
@@ -1804,9 +1809,9 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             {
                 dReg = dRegSave;
                 reg_et tempreg = getNextAvailableReg(); 
-                emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
+                emitMemoryInstruction(INST_LD, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode), NULL);
                 emitAluInstruction(INST_ADD, true, 1, tempreg, tempreg, REG_NONE);
-                emitMemoryInstruction(INST_ST, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode));
+                emitMemoryInstruction(INST_ST, tempreg, REG_NONE, NODE_MEM_LOC(pCurrentNode), NULL);
 
                 if (isLeftInherited)
                 {
@@ -1831,9 +1836,9 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 uint32_t memAddr = NODE_MEM_LOC(pCurrentNode);
                 reg_et tReg = getNextAvailableReg();
 
-                emitMemoryInstruction(INST_LD, tReg, REG_NONE, memAddr);
+                emitMemoryInstruction(INST_LD, tReg, REG_NONE, memAddr, NULL);
                 emitAluInstruction(INST_ADD, true, 1, tReg, tReg, REG_NONE);
-                emitMemoryInstruction(INST_ST, tReg, REG_NONE, memAddr);
+                emitMemoryInstruction(INST_ST, tReg, REG_NONE, memAddr,NULL);
                 releaseReg(tReg);
             }
             break;
@@ -1846,7 +1851,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             {
                 dReg = dRegSave;             
                 handleArrayIndexedExpressions(pCurrentNode, dReg);
-                emitMemoryInstruction(INST_LDX, dReg, dReg, 0);
+                emitMemoryInstruction(INST_LDX, dReg, dReg, 0, NULL);
 
                 if (isLeftInherited)
                 {
@@ -1871,7 +1876,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 {
                     rReg = rRegSave;
                     //If array child is at the left we need to store to it
-                    emitMemoryInstruction(INST_STX, rReg, dReg, 0);
+                    emitMemoryInstruction(INST_STX, rReg, dReg, 0, NULL);
                 }
 
             }
@@ -1880,7 +1885,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 dReg = dRegSave;
                 reg_et tempreg = getNextAvailableReg(); 
                 handleArrayIndexedExpressions(pCurrentNode, tempreg);
-                emitMemoryInstruction(INST_LDX, tempreg, tempreg, 0);
+                emitMemoryInstruction(INST_LDX, tempreg, tempreg, 0,NULL);
                 
                 if (isLeftInherited)
                 {
@@ -1898,7 +1903,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             else //used for while(array[x]), if (array[x])
             {
                 handleArrayIndexedExpressions(pCurrentNode, dReg);
-                emitMemoryInstruction(INST_LDX, dReg, dReg, 0);
+                emitMemoryInstruction(INST_LDX, dReg, dReg, 0,NULL);
                 dRegSave = dReg;
             }
 
@@ -1909,63 +1914,74 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             break;
         case NODE_FUNCTION:
         
-            /* if(pCurrentNode->childNumber != 3)
+            if(pCurrentNode->childNumber != 3)
             {
                 break; // Function node with no body
             }
 
             // Emit function Label
-
-            // Save Saved Registers
-            for (reg_et i = REG_R16; i <= REG_R23; i++)
-            {
-                push(i);
-            }
+            emitLabelInstruction(FUNCTION_NAME, -1, pCurrentNode->nodeData.sVal);
+            
 
             // Generate Body
             generateCode(pCurrentNode->pChilds + 2);
           
             // Emit Instruction to return for void functions as those won't have return statements
             if(pCurrentNode->nodeVarType != TYPE_VOID)
-            {
-                break;  
-            } 
-            
-            for (reg_et i = REG_R23; i >= REG_R16; i--)
-            {
-                pop(i);
+            {                     
+                 break;  
             }
+            
+            
             // Jump to addr in R1
+            emitJumpInstruction(INST_JMP, REG_R1, REG_NONE, 0);
 
-            break; */
-            generateCode(pCurrentNode->pChilds + 2);
             break;
+
         case NODE_FUNCTION_CALL:
 
             // @todo add expressions and numbers
             // Place Arguments
+          
             TreeNode_st *pParameter = &pCurrentNode->pChilds[0];
             
             for (size_t i = 0; i < pCurrentNode->pSymbol->symbolContent_u.SymbolFunction_s.parameterNumber; i++)
             {
+
                 if(pParameter)
                 {
-                    emitMemoryInstruction(INST_LD, REG_R4 + i, REG_NONE, pParameter->pSymbol->symbolContent_u.memoryLocation);
+                    parseNode(pParameter, NODE_FUNCTION_CALL, OP_NOT_DEFINED, true);
+                    emitAluInstruction(INST_MOV, 0, 0, REG_R4 + i, dRegSave, REG_NONE);
                     pParameter = pParameter->pSibling;
                 }
             }
             
             // Save Register R1
             push(REG_R1);
-            // Emit JMPL??
-            // Emit NOP
-            // Emit Branch
 
+            reg_et labelReg = getNextAvailableReg();
+            emitMemoryInstruction(INST_LDI, labelReg, REG_NONE, 0, pCurrentNode->nodeData.sVal);
+            emitJumpInstruction(INST_JMPL, REG_R1, labelReg, 0);
             
             // Restore R1
             pop(REG_R1);
 
             break;
+
+        case NODE_RETURN:
+            
+            //Return of type void will have no child
+            if(&L_CHILD(pCurrentNode) != NULL)
+            {
+                parseNode(&L_CHILD(pCurrentNode), NODE_TYPE(pCurrentNode), OP_NOT_DEFINED, true);
+                // Place return values in R4
+                emitAluInstruction(INST_MOV, false, 0, REG_R4, dRegSave, REG_NONE);
+            }
+            
+            // Instruction to return to program flow before call
+            emitJumpInstruction(INST_JMP, REG_R1, REG_NONE, 0);
+            break;
+
         case NODE_PARAMETER:
             break;
         case NODE_NULL:
@@ -2028,7 +2044,7 @@ static int releaseReg(reg_et reg)
 static void push(reg_et reg)
 {
     emitAluInstruction(INST_SUB, 1, 1, REG_R3, REG_R3, REG_NONE);
-    emitMemoryInstruction(INST_STX, reg, REG_R3, STACK_START_ADDR);
+    emitMemoryInstruction(INST_STX, reg, REG_R3, STACK_START_ADDR, NULL);
 }
 
 /// @brief Function to pop registers from stack. Updates Stack Pointer
@@ -2037,7 +2053,7 @@ static void push(reg_et reg)
 /// @param reg register to get from stack
 static void pop(reg_et reg)
 {
-    emitMemoryInstruction(INST_LDX, reg, REG_R3, STACK_START_ADDR);
+    emitMemoryInstruction(INST_LDX, reg, REG_R3, STACK_START_ADDR,NULL);
     emitAluInstruction(INST_ADD, 1, 1, REG_R3, REG_R3, REG_NONE);
 }
 
@@ -2732,13 +2748,138 @@ void codeGenerationTestUnit()
 
 }
 
+void functionGenerationTestUnit()
+{
+    pAsmFile = stdout;
+
+    emitComment("\033[1;33m --> Asm File - Function Test 1 \033[1;37m");
+
+    /* Test 1
+     * Function Prototypes
+     * Should not print
+     * 
+     *          Function
+     *            /  \
+     *           /    \
+     *        Type    Parameter X
+     * 
+     */
+    {
+        TreeNode_st treeRoot = {0};
+        TreeNode_st* pLeftChild, *pRightChild;
+        
+        treeRoot.nodeType = NODE_FUNCTION;
+        
+        NodeAddNewChild(&treeRoot, &pLeftChild, NODE_TYPE);
+        NodeAddNewChild(&treeRoot, &pRightChild, NODE_PARAMETER);
+
+        generateCode(&treeRoot);
+    }
+    
+    emitComment("\033[1;33m --> Asm File - Function Test 2 \033[1;37m");
+
+    /** Test 2 
+     * Void Function with Implementation
+     * Prints routine to save registers, generate body, restore registers and jump to before call
+     *
+     *                      Function
+     *                        /|\
+     *                       / | \
+     *                      /  |  \
+     *                   Type  |  Start_Scope
+     *                         |
+     *                     Parameter
+     * 
+     */
+    {
+        TreeNode_st treeRoot = {0};
+        TreeNode_st* pLeftChild, *pMiddleChild, *pRightChild;
+        
+        treeRoot.nodeType = NODE_FUNCTION;
+        treeRoot.nodeVarType = TYPE_VOID;
+        treeRoot.nodeData.sVal = "Test2_Function";
+
+        NodeAddNewChild(&treeRoot, &pLeftChild, NODE_TYPE);
+        NodeAddNewChild(&treeRoot, &pMiddleChild, NODE_PARAMETER);
+        NodeAddNewChild(&treeRoot, &pRightChild, NODE_START_SCOPE);
+
+
+
+        generateCode(&treeRoot);
+    }
+
+    emitComment("\033[1;33m --> Asm File - Function Test 3 \033[1;37m");
+
+    /** Test 3 
+     * Function Call
+     * Prints routine to save registers, generate body, restore registers and jump to before call
+     *
+     *                      Function Call
+     *                        /
+     *                       /
+     *                      / 
+     *                 Identifier a --- Identifier b
+     * 
+     */
+    /* {
+        TreeNode_st treeRoot = {0};
+        TreeNode_st* pLeftChild; 
+        TreeNode_st* pLeftSibling;
+        
+        SymbolEntry_st symbolEntry = {.symbolContent_u.SymbolFunction_s.parameterNumber = 1};
+        SymbolEntry_st symbolEntry2 = {.symbolContent_u.memoryLocation = 0x20};
+        // For some reason uncommenting one of the following statments results in a segmentation fault
+        SymbolEntry_st symbolEntry3 = {.symbolContent_u.memoryLocation = 0xAB};
+
+        treeRoot.nodeType = NODE_FUNCTION_CALL;
+        treeRoot.pSymbol = &symbolEntry;
+        pLeftChild->pSymbol = &symbolEntry2;
+        //pLeftSibling.pSymbol = &symbolEntry2;
+
+        //pLeftChild->pSibling = &pLeftSibling;
+
+        NodeAddNewChild(&treeRoot, &pLeftChild, NODE_IDENTIFIER);
+
+        generateCode(&treeRoot);
+    } */
+
+    emitComment("\033[1;33m --> Asm File - Function Test 4 \033[1;37m");
+
+    /** Test 4 
+     * Returns with Identifier
+     * Prints routine to restore registers and jump to before call
+     *
+     *                      Return
+     *                        /
+     *                       /
+     *                      / 
+     *                 Identifier a
+     * 
+     */
+    {
+        TreeNode_st treeRoot = {0};
+        TreeNode_st* pLeftChild;
+        
+        SymbolEntry_st symbolEntry = {.symbolContent_u.memoryLocation = 0x20};
+
+        treeRoot.nodeType = NODE_RETURN;
+
+        NodeAddNewChild(&treeRoot, &pLeftChild, NODE_IDENTIFIER);
+        pLeftChild->pSymbol = &symbolEntry;
+        generateCode(&treeRoot);
+    }
+
+
+    printf("\n");
+}
+
 static int generateMultiplication()
 {
     int ret = 0;
 
     // Init Regs to contain result and condition
     reg_et regResult, regCondition;
-    ret = emitMemoryInstruction(INST_LDI, regResult, REG_NONE, 0);
+    ret = emitMemoryInstruction(INST_LDI, regResult, REG_NONE, 0, NULL);
 
     // Emit all 32 iterations
     for (size_t i = 0; i < 32; i++)
@@ -2755,7 +2896,7 @@ static int generateMultiplication()
     }
 
     // Move result to return register
-    ret |= emitMemoryInstruction(INST_LD, REG_R4, regResult, 0);
+    ret |= emitMemoryInstruction(INST_LD, REG_R4, regResult, 0, NULL);
     return 0;
 }
 
@@ -2764,8 +2905,8 @@ static int generateDivision()
     int ret = 0;
 
     reg_et regQuocient, regRemainder, regCondition, regTemp1, regTemp2;
-    ret = emitMemoryInstruction(INST_LDI, regQuocient, REG_NONE, 0);
-    ret |= emitMemoryInstruction(INST_LDI, regRemainder, REG_NONE, 0);
+    ret = emitMemoryInstruction(INST_LDI, regQuocient, REG_NONE, 0, NULL);
+    ret |= emitMemoryInstruction(INST_LDI, regRemainder, REG_NONE, 0, NULL);
 
     for (size_t i = 0; i < 32; i++)
     {
@@ -2777,7 +2918,7 @@ static int generateDivision()
         ret |= emitAluInstruction(INST_SUB, 0, 0, regCondition, regRemainder, REG_R5);
         // Emit BGE to label bellow
         ret |= emitAluInstruction(INST_SUB, 0, 0, regRemainder, regRemainder, REG_R5);
-        ret |= emitMemoryInstruction(INST_LDI, regTemp1, 0, 1);
+        ret |= emitMemoryInstruction(INST_LDI, regTemp1, 0, 1, NULL);
         ret |= emitAluInstruction(INST_RL, 1, (31 - i), regTemp1, regTemp1, REG_NONE);
         ret |= emitAluInstruction(INST_OR, 0, 0, regQuocient, regQuocient, regTemp1);
 
@@ -2785,8 +2926,8 @@ static int generateDivision()
     }
 
     // Load Quocient and Remainder to return registers
-    ret |= emitMemoryInstruction(INST_LD, REG_R4, regQuocient, 0);
-    ret |= emitMemoryInstruction(INST_LD, REG_R5, regRemainder, 0);
+    ret |= emitMemoryInstruction(INST_LD, REG_R4, regQuocient, 0, NULL);
+    ret |= emitMemoryInstruction(INST_LD, REG_R5, regRemainder, 0, NULL);
 
     return ret;
 }
