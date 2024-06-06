@@ -118,6 +118,7 @@ int insertSymbol(SymbolTable_st* pSymTable, SymbolEntry_st** ppSymEntry, char *s
 
     int index = hash(symName);
 
+
     SymbolEntry_st* pEntryAux;
 
     // checks if the symbol already exists in the current scope and adds it if not
@@ -388,9 +389,7 @@ int addFunctionParams(SymbolEntry_st* pSymbol, struct parameter* pNewParam)
 
     //copies the parameter data to the allocated space
     memcpy(&pParamList[pSymbol->symbolContent_u.SymbolFunction_s.parameterNumber++], pNewParam, sizeof(parameter_st));
-
     pSymbol->symbolContent_u.SymbolFunction_s.parameters = pParamList;
 
-    pSymbol->scopeLocation = ARGUMENT_SCOPE;
     return 0;
 }

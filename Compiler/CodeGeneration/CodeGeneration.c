@@ -959,11 +959,8 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
     //Address where we will store the value of the assign
     leftAddr = L_CHILD_MEM_LOC(pTreeNode);
 
-
     if (R_CHILD_TYPE(pTreeNode) != NODE_INTEGER)
         rightAddr = R_CHILD_MEM_LOC(pTreeNode);
-
-        
 
     //Templates for the Right childs of an assignement
     switch (R_CHILD_TYPE(pTreeNode))
@@ -1923,7 +1920,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
 
             // Emit function Label
             emitLabelInstruction(FUNCTION_NAME, -1, pCurrentNode->nodeData.sVal);
-            
+
 
             // Generate Body
             generateCode(pCurrentNode->pChilds + 2);
@@ -1937,6 +1934,8 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             
             // Jump to addr in R1
             emitJumpInstruction(INST_JMP, REG_R1, REG_NONE, 0);
+
+
 
             break;
 

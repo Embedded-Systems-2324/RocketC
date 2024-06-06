@@ -5,7 +5,6 @@
 #include "../main.h"
 #include "../SemanticAnalyzer/traverse.h"
 
-
 SymbolTable_st* pGlobalSymTable;
 SymbolTable_st* pCurrentScope;
 static bool initialized = false;
@@ -856,9 +855,8 @@ static void buildSymbolTables(TreeNode_st* pNode)
                                 &pNewSymbol->modifier,
                                 &pNewSymbol->visibility);
 
+                pNewSymbol->scopeLocation = (pCurrentScope == pGlobalSymTable) ? GLOBAL_SCOPE : FUNCTION_SCOPE;
                 pNode->pSymbol = pNewSymbol;
-
-                pNode->pSymbol->scopeLocation = (pCurrentScope == pGlobalSymTable) ? GLOBAL_SCOPE : FUNCTION_SCOPE;                
             }
             else
             {
@@ -988,6 +986,7 @@ static void buildSymbolTables(TreeNode_st* pNode)
                     if(pNode->pChilds[1].nodeType != NODE_NULL)
                     {
                         parameter_st* paramList = pNewSymbol->symbolContent_u.SymbolFunction_s.parameters;
+                        TreeNode_st* pArgs = pNode->pChilds + 1;
 
                         for(int i = 0; i < pNewSymbol->symbolContent_u.SymbolFunction_s.parameterNumber; i++)
                         {
@@ -996,6 +995,12 @@ static void buildSymbolTables(TreeNode_st* pNode)
                             pParamSym->type = paramList[i].varType;
                             pParamSym->signal = paramList[i].varSign;
                             pParamSym->symbolContent_u.memoryLocation = NO_MEMORY;
+
+                            //Add symbol point to parameter
+                            pParamSym->scopeLocation = ARGUMENT_SCOPE;
+                            pParamSym->isPassedByRegister = (i < 8);
+                            pArgs->pSymbol = pParamSym;
+                            pArgs = pArgs->pSibling;
                         }
                     }
 

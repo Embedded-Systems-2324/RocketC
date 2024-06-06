@@ -3,11 +3,10 @@ int y;
 int z;
 int array[6];
 
-int foo(int a, int b)
+int foo(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j)
 {
-    int c;
-
-    return;
+    a = 3;
+    return 0;
 }
 
 void main()

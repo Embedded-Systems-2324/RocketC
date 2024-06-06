@@ -55,6 +55,7 @@ typedef struct SymbolEntry
     ModQualifier_et modifier;       // Variable modifier
     VisQualifier_et visibility;     // Variable visibility   
     VarScope_et scopeLocation;      // Scope of the variable
+    bool isPassedByRegister;
 
     union
     {
