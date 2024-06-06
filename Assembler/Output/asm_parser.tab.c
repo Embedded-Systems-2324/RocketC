@@ -1446,7 +1446,7 @@ yyreduce:
   case 52: /* load_stmt: TOKEN_LOAD_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
 #line 233 "Step1/asm_parser.y"
                     { 
-                        add_statement(LD_OPCODE, yyvsp[-3], NULL_ARG, yyvsp[0], NO_TYPE); 
+                        add_statement(LD_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, NO_TYPE); 
                     }
 #line 1452 "asm_parser.tab.c"
     break;

@@ -231,7 +231,7 @@ jump_stmt   :   TOKEN_JUMP TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression
 /* Direct, Immediate and Indexed Load operations */
 load_stmt   :   TOKEN_LOAD_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression               
                     { 
-                        add_statement(LD_OPCODE, $2, NULL_ARG, $5, NO_TYPE); 
+                        add_statement(LD_OPCODE, $2, $5, NULL_ARG, NO_TYPE); 
                     }
             |   TOKEN_LOAD_IMMEDIATE TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression           
                     {
