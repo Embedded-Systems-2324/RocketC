@@ -1,5 +1,5 @@
 INIT:
-    LDI R0, #1
+    LD R0, #100
     LDI R1, #0
     LDI R2, #0
     LDI R3, #10
