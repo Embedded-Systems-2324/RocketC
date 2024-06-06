@@ -6,7 +6,7 @@
 #define NO_TYPE     0
 #define IMMEDIATE   1
 #define LINK        2
-
+#define LABEL       3
 
 typedef struct{
     uint32_t op_code;

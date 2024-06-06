@@ -1,15 +1,13 @@
-INIT:
-    LD R0,  #1035
-    LDI R1, #0
-    LDI R2, #0
-    LDI R3, #10
-    ADD R2, R0, R1
+.org 0x10
+.equ VAR1, 100
 
-LOOP:
-    MOV R1, R0
-    MOV R0, R2
-    ADD R2, R0, R1
-    SUB R3, R3, #1
-    CMP R3, #1
-    BGT LOOP
-    HALT
+INIT :      ;Init variables
+LDI R0, #VAR1
+ADD R2, R0, R1
+LDI R0, :LOOP
+
+.org 0x2FF
+
+LOOP :      //Computing Loop 
+MOV R1, R0
+BNE LOOP

@@ -508,16 +508,16 @@ union yyalloc
 /* YYFINAL -- State number of the termination state.  */
 #define YYFINAL  79
 /* YYLAST -- Last index in YYTABLE.  */
-#define YYLAST   184
+#define YYLAST   187
 
 /* YYNTOKENS -- Number of terminals.  */
 #define YYNTOKENS  42
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  27
 /* YYNRULES -- Number of rules.  */
-#define YYNRULES  72
+#define YYNRULES  73
 /* YYNSTATES -- Number of states.  */
-#define YYNSTATES  178
+#define YYNSTATES  180
 
 /* YYMAXUTOK -- Last valid token kind.  */
 #define YYMAXUTOK   296
@@ -575,9 +575,9 @@ static const yytype_int16 yyrline[] =
       85,    86,    87,    88,    89,    90,    91,    92,    97,   101,
      108,   112,   119,   123,   130,   134,   141,   145,   152,   156,
      163,   167,   174,   179,   186,   191,   198,   202,   206,   213,
-     221,   225,   232,   236,   240,   247,   251,   258,   264,   270,
-     276,   282,   288,   294,   300,   312,   324,   328,   332,   336,
-     340,   344,   348
+     221,   225,   232,   236,   240,   244,   251,   255,   262,   268,
+     274,   280,   286,   292,   298,   304,   316,   328,   332,   336,
+     340,   344,   348,   352
 };
 #endif
 
@@ -631,24 +631,24 @@ yysymbol_name (yysymbol_kind_t yysymbol)
    STATE-NUM.  */
 static const yytype_int16 yypact[] =
 {
-     108,   -13,   -10,    -9,    14,    20,    22,    23,    24,    25,
-     -24,    26,    27,    28,    29,    30,    31,    33,    35,   -96,
-     -96,   -96,   -30,    38,    40,    42,    50,    49,    73,   -96,
+     110,   -13,    15,    20,    22,    23,    24,    25,    26,    27,
+     -24,    28,    29,    30,    31,    32,    33,    35,    37,   -96,
+     -96,   -96,   -30,    40,    42,    44,    52,    51,    75,   -96,
      -96,   -96,   -96,   -96,   -96,   -96,   -96,   -96,   -96,   -96,
      -96,   -96,   -96,   -96,   -96,   -96,   -96,   -96,   -96,   -96,
-     -96,   -96,   -96,    37,    68,    69,    72,    74,    75,    76,
-     103,   104,   -96,   -17,   -96,   106,   107,   109,   110,   111,
-     117,   118,   119,   -96,   -96,   -96,    78,   -96,   120,   -96,
-     -96,   -96,   112,   125,   126,   127,   -20,   128,   -12,   129,
-     130,   -96,   -96,   132,   133,   -17,   -35,   131,   134,   135,
-     136,   137,   138,   139,   140,   -96,   -17,   141,   142,   143,
-     144,   -96,   -17,   145,   -96,   -17,   146,   147,   -96,   -96,
-       5,   -17,   -17,   -17,   148,   -96,   -17,   -17,   149,   -17,
-     150,   -35,   -11,    -1,     0,     8,   -35,    10,   -35,    11,
-      12,   -96,   -96,   -96,   -35,   151,   -35,   -35,   152,   -35,
-     153,   -96,   -17,   -96,   -17,   -96,   -17,   -96,   -17,   -96,
-     -17,   -96,   -17,   -96,   -17,   -17,   -17,   -17,   -35,   -35,
-     -35,   -35,   -35,   -35,   -35,   -35,   -35,   -35
+     -96,   -96,   -96,    39,    70,    71,    74,    76,    77,    78,
+     105,   106,   -96,   -17,   -96,   108,   109,   111,   112,   113,
+     119,   120,   121,   -96,   -96,   -96,    80,   -96,   122,   -96,
+     -96,   -96,   114,   127,   128,   129,   -20,   130,   -12,   131,
+     132,   -96,   -96,   134,   135,   -17,   -35,   133,   136,   137,
+     138,   -15,   139,   140,   141,   -96,   -17,   142,   143,   144,
+     145,   -96,   -17,   146,   -96,   -17,   147,   148,   -96,   -96,
+       5,   -17,   -17,   -17,   149,   -96,   -17,   -17,   153,   151,
+     -17,   152,   -35,   -11,    -1,     0,     8,   -35,     9,   -35,
+      11,    12,   -96,   -96,   -96,   -35,   154,   -35,   -35,   -96,
+     155,   -35,   156,   -96,   -17,   -96,   -17,   -96,   -17,   -96,
+     -17,   -96,   -17,   -96,   -17,   -96,   -17,   -17,   -17,   -17,
+     -35,   -35,   -35,   -35,   -35,   -35,   -35,   -35,   -35,   -35
 };
 
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
@@ -657,29 +657,29 @@ static const yytype_int16 yypact[] =
 static const yytype_int8 yydefact[] =
 {
        0,     0,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,     0,     0,     0,     0,     0,     0,     0,     0,    57,
-      58,    59,     0,     0,     0,     0,     0,     0,     0,     4,
+       0,     0,     0,     0,     0,     0,     0,     0,     0,    58,
+      59,    60,     0,     0,     0,     0,     0,     0,     0,     4,
        5,     6,     7,     8,    10,     9,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
       25,    26,    27,     0,     0,     0,     0,     0,     0,     0,
        0,     0,    46,     0,    48,     0,     0,     0,     0,     0,
-       0,     0,     0,    65,    60,    61,     0,    63,     0,     1,
+       0,     0,     0,    66,    61,    62,     0,    64,     0,     1,
        2,     3,     0,     0,     0,     0,     0,     0,     0,     0,
-       0,    71,    72,     0,     0,     0,    47,     0,     0,     0,
-       0,     0,     0,     0,     0,    62,     0,     0,     0,     0,
-       0,    38,     0,     0,    40,     0,     0,     0,    69,    70,
+       0,    72,    73,     0,     0,     0,    47,     0,     0,     0,
+       0,     0,     0,     0,     0,    63,     0,     0,     0,     0,
+       0,    38,     0,     0,    40,     0,     0,     0,    70,    71,
        0,     0,     0,     0,     0,    49,     0,     0,     0,     0,
-       0,    64,     0,     0,     0,     0,    39,     0,    41,     0,
-       0,    66,    67,    68,    50,     0,    52,    53,     0,    55,
-       0,    28,     0,    30,     0,    32,     0,    34,     0,    36,
-       0,    42,     0,    44,     0,     0,     0,     0,    29,    31,
-      33,    35,    37,    43,    45,    51,    54,    56
+       0,     0,    65,     0,     0,     0,     0,    39,     0,    41,
+       0,     0,    67,    68,    69,    50,     0,    52,    53,    54,
+       0,    56,     0,    28,     0,    30,     0,    32,     0,    34,
+       0,    36,     0,    42,     0,    44,     0,     0,     0,     0,
+      29,    31,    33,    35,    37,    43,    45,    51,    55,    57
 };
 
 /* YYPGOTO[NTERM-NUM].  */
 static const yytype_int16 yypgoto[] =
 {
-     -96,   -96,   156,   -96,   -96,   -96,   -96,   -96,   -96,   -96,
+     -96,   -96,   159,   -96,   -96,   -96,   -96,   -96,   -96,   -96,
      -96,   -96,   -96,   -96,   -96,   -96,   -96,   -96,   -96,   -96,
      -96,   -96,   -96,   -96,   -96,   -96,   -95
 };
@@ -698,47 +698,47 @@ static const yytype_int8 yydefgoto[] =
 static const yytype_uint8 yytable[] =
 {
      120,    73,    62,   121,   122,   111,    63,    91,    64,    92,
-     112,   131,    53,   114,   151,    54,    55,   136,   115,   152,
-     138,    93,    94,    95,   153,   155,   142,   143,   144,   154,
-     156,   146,   147,   157,   149,   159,   161,   163,   158,    56,
-     160,   162,   164,   121,   122,    57,   141,    58,    59,    60,
-      61,    65,    66,    67,    68,    69,    70,   168,    71,   169,
-      72,   170,    74,   171,    75,   172,    82,   173,    76,   174,
-     175,   176,   177,    79,    77,    78,     1,     2,     3,     4,
-       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
-      15,    16,    17,    18,    19,    20,    21,    83,    84,    22,
-      80,    85,   105,    86,    87,    88,    23,    24,    25,    26,
-      27,     1,     2,     3,     4,     5,     6,     7,     8,     9,
-      10,    11,    12,    13,    14,    15,    16,    17,    18,    19,
-      20,    21,    89,    90,    22,    97,    98,   107,    99,   100,
-     101,    23,    24,    25,    26,    27,   102,   103,   104,   106,
-     108,   109,   110,   113,   116,   117,   118,   119,     0,   124,
-     125,   123,     0,   128,     0,   130,   126,   127,     0,   129,
-     132,   133,   134,   135,   137,   139,   140,   145,   148,   150,
-       0,   165,   166,   167,    81
+     112,   132,    53,   114,   153,   127,   128,   137,   115,   154,
+     139,    93,    94,    95,   155,   157,   143,   144,   145,   156,
+     158,   147,   148,   159,   161,   151,   163,   165,   160,   162,
+      54,   164,   166,   121,   122,    55,   142,    56,    57,    58,
+      59,    60,    61,    65,    66,    67,    68,    69,    70,   170,
+      71,   171,    72,   172,    74,   173,    75,   174,    82,   175,
+      76,   176,   177,   178,   179,    79,    77,    78,     1,     2,
+       3,     4,     5,     6,     7,     8,     9,    10,    11,    12,
+      13,    14,    15,    16,    17,    18,    19,    20,    21,    83,
+      84,    22,    80,    85,   105,    86,    87,    88,    23,    24,
+      25,    26,    27,     1,     2,     3,     4,     5,     6,     7,
+       8,     9,    10,    11,    12,    13,    14,    15,    16,    17,
+      18,    19,    20,    21,    89,    90,    22,    97,    98,   107,
+      99,   100,   101,    23,    24,    25,    26,    27,   102,   103,
+     104,   106,   108,   109,   110,   113,   116,   117,   118,   119,
+       0,   124,   125,   123,   129,     0,   131,     0,   126,     0,
+     130,   133,   134,   135,   136,   138,   140,   141,   146,   149,
+     150,   152,     0,     0,   167,   168,   169,    81
 };
 
 static const yytype_int16 yycheck[] =
 {
       95,    31,    26,    38,    39,    25,    30,    24,    32,    26,
-      30,   106,    25,    25,    25,    25,    25,   112,    30,    30,
+      30,   106,    25,    25,    25,    30,    31,   112,    30,    30,
      115,    38,    39,    40,    25,    25,   121,   122,   123,    30,
-      30,   126,   127,    25,   129,    25,    25,    25,    30,    25,
-      30,    30,    30,    38,    39,    25,    41,    25,    25,    25,
-      25,    25,    25,    25,    25,    25,    25,   152,    25,   154,
-      25,   156,    24,   158,    24,   160,    29,   162,    26,   164,
-     165,   166,   167,     0,    24,    26,     3,     4,     5,     6,
-       7,     8,     9,    10,    11,    12,    13,    14,    15,    16,
-      17,    18,    19,    20,    21,    22,    23,    29,    29,    26,
-      27,    29,    24,    29,    29,    29,    33,    34,    35,    36,
-      37,     3,     4,     5,     6,     7,     8,     9,    10,    11,
-      12,    13,    14,    15,    16,    17,    18,    19,    20,    21,
-      22,    23,    29,    29,    26,    29,    29,    25,    29,    29,
-      29,    33,    34,    35,    36,    37,    29,    29,    29,    29,
-      25,    25,    25,    25,    25,    25,    24,    24,    -1,    25,
-      25,    30,    -1,    25,    -1,    25,    30,    30,    -1,    30,
-      29,    29,    29,    29,    29,    29,    29,    29,    29,    29,
-      -1,    30,    30,    30,    28
+      30,   126,   127,    25,    25,   130,    25,    25,    30,    30,
+      25,    30,    30,    38,    39,    25,    41,    25,    25,    25,
+      25,    25,    25,    25,    25,    25,    25,    25,    25,   154,
+      25,   156,    25,   158,    24,   160,    24,   162,    29,   164,
+      26,   166,   167,   168,   169,     0,    24,    26,     3,     4,
+       5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
+      15,    16,    17,    18,    19,    20,    21,    22,    23,    29,
+      29,    26,    27,    29,    24,    29,    29,    29,    33,    34,
+      35,    36,    37,     3,     4,     5,     6,     7,     8,     9,
+      10,    11,    12,    13,    14,    15,    16,    17,    18,    19,
+      20,    21,    22,    23,    29,    29,    26,    29,    29,    25,
+      29,    29,    29,    33,    34,    35,    36,    37,    29,    29,
+      29,    29,    25,    25,    25,    25,    25,    25,    24,    24,
+      -1,    25,    25,    30,    25,    -1,    25,    -1,    30,    -1,
+      30,    29,    29,    29,    29,    29,    29,    29,    29,    26,
+      29,    29,    -1,    -1,    30,    30,    30,    28
 };
 
 /* YYSTOS[STATE-NUM] -- The symbol kind of the accessing symbol of
@@ -757,12 +757,12 @@ static const yytype_int8 yystos[] =
       29,    24,    26,    38,    39,    40,    68,    29,    29,    29,
       29,    29,    29,    29,    29,    24,    29,    25,    25,    25,
       25,    25,    30,    25,    25,    30,    25,    25,    24,    24,
-      68,    38,    39,    30,    25,    25,    30,    30,    25,    30,
-      25,    68,    29,    29,    29,    29,    68,    29,    68,    29,
-      29,    41,    68,    68,    68,    29,    68,    68,    29,    68,
-      29,    25,    30,    25,    30,    25,    30,    25,    30,    25,
-      30,    25,    30,    25,    30,    30,    30,    30,    68,    68,
-      68,    68,    68,    68,    68,    68,    68,    68
+      68,    38,    39,    30,    25,    25,    30,    30,    31,    25,
+      30,    25,    68,    29,    29,    29,    29,    68,    29,    68,
+      29,    29,    41,    68,    68,    68,    29,    68,    68,    26,
+      29,    68,    29,    25,    30,    25,    30,    25,    30,    25,
+      30,    25,    30,    25,    30,    25,    30,    30,    30,    30,
+      68,    68,    68,    68,    68,    68,    68,    68,    68,    68
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
@@ -773,9 +773,9 @@ static const yytype_int8 yyr1[] =
       44,    44,    44,    44,    44,    44,    44,    44,    45,    45,
       46,    46,    47,    47,    48,    48,    49,    49,    50,    50,
       51,    51,    52,    52,    53,    53,    54,    54,    54,    55,
-      56,    56,    57,    57,    57,    58,    58,    59,    60,    61,
-      62,    63,    64,    65,    66,    67,    68,    68,    68,    68,
-      68,    68,    68
+      56,    56,    57,    57,    57,    57,    58,    58,    59,    60,
+      61,    62,    63,    64,    65,    66,    67,    68,    68,    68,
+      68,    68,    68,    68
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
@@ -786,9 +786,9 @@ static const yytype_int8 yyr2[] =
        1,     1,     1,     1,     1,     1,     1,     1,     6,     7,
        6,     7,     6,     7,     6,     7,     6,     7,     4,     5,
        4,     5,     6,     7,     6,     7,     2,     3,     2,     4,
-       5,     7,     5,     5,     7,     5,     7,     1,     1,     1,
-       2,     2,     3,     2,     4,     2,     3,     3,     3,     2,
-       2,     1,     1
+       5,     7,     5,     5,     5,     7,     5,     7,     1,     1,
+       1,     2,     2,     3,     2,     4,     2,     3,     3,     3,
+       2,     2,     1,     1
 };
 
 
@@ -1459,88 +1459,96 @@ yyreduce:
 #line 1460 "asm_parser.tab.c"
     break;
 
-  case 54: /* load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
+  case 54: /* load_stmt: TOKEN_LOAD_IMMEDIATE TOKEN_REG TOKEN_COMMA TOKEN_COLON TOKEN_IDENTIFIER  */
 #line 241 "Step1/asm_parser.y"
-                    { 
-                        add_statement(LDX_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], NO_TYPE); 
+                    {
+                        add_statement(LDI_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, LABEL);
                     }
 #line 1468 "asm_parser.tab.c"
     break;
 
-  case 55: /* store_stmt: TOKEN_STORE_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
-#line 248 "Step1/asm_parser.y"
+  case 55: /* load_stmt: TOKEN_LOAD_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
+#line 245 "Step1/asm_parser.y"
                     { 
-                        add_statement(ST_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, NO_TYPE); 
+                        add_statement(LDX_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], NO_TYPE); 
                     }
 #line 1476 "asm_parser.tab.c"
     break;
 
-  case 56: /* store_stmt: TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
+  case 56: /* store_stmt: TOKEN_STORE_DIRECT TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
 #line 252 "Step1/asm_parser.y"
                     { 
-                        add_statement(STX_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], NO_TYPE);
+                        add_statement(ST_OPCODE, yyvsp[-3], yyvsp[0], NULL_ARG, NO_TYPE); 
                     }
 #line 1484 "asm_parser.tab.c"
     break;
 
-  case 57: /* reti_stmt: TOKEN_RETI  */
-#line 259 "Step1/asm_parser.y"
-                    {
-                        add_statement(RETI_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
+  case 57: /* store_stmt: TOKEN_STORE_INDEXED TOKEN_REG TOKEN_COMMA TOKEN_REG TOKEN_COMMA TOKEN_CARDINAL expression  */
+#line 256 "Step1/asm_parser.y"
+                    { 
+                        add_statement(STX_OPCODE, yyvsp[-5], yyvsp[-3], yyvsp[0], NO_TYPE);
                     }
 #line 1492 "asm_parser.tab.c"
     break;
 
-  case 58: /* halt_stmt: TOKEN_HALT  */
-#line 265 "Step1/asm_parser.y"
-                    { 
-                        add_statement(HLT_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
+  case 58: /* reti_stmt: TOKEN_RETI  */
+#line 263 "Step1/asm_parser.y"
+                    {
+                        add_statement(RETI_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     }
 #line 1500 "asm_parser.tab.c"
     break;
 
-  case 59: /* nop_stmt: TOKEN_NOP  */
-#line 271 "Step1/asm_parser.y"
+  case 59: /* halt_stmt: TOKEN_HALT  */
+#line 269 "Step1/asm_parser.y"
                     { 
-                        add_statement(NOP_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
+                        add_statement(HLT_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     }
 #line 1508 "asm_parser.tab.c"
     break;
 
-  case 60: /* byte_stmt: TOKEN_BYTE TOKEN_NUMBER  */
-#line 277 "Step1/asm_parser.y"
+  case 60: /* nop_stmt: TOKEN_NOP  */
+#line 275 "Step1/asm_parser.y"
                     { 
-                        add_statement(DOT_BYTE_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
+                        add_statement(NOP_OPCODE, NULL_ARG, NULL_ARG, NULL_ARG, NO_TYPE);
                     }
 #line 1516 "asm_parser.tab.c"
     break;
 
-  case 61: /* word_stmt: TOKEN_WORD TOKEN_NUMBER  */
-#line 283 "Step1/asm_parser.y"
+  case 61: /* byte_stmt: TOKEN_BYTE TOKEN_NUMBER  */
+#line 281 "Step1/asm_parser.y"
                     { 
-                        add_statement(DOT_WORD_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
+                        add_statement(DOT_BYTE_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
 #line 1524 "asm_parser.tab.c"
     break;
 
-  case 62: /* alloc_stmt: TOKEN_ALLOC TOKEN_IDENTIFIER TOKEN_NUMBER  */
-#line 289 "Step1/asm_parser.y"
-                    {
-                        add_statement(DOT_ALLOC_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
+  case 62: /* word_stmt: TOKEN_WORD TOKEN_NUMBER  */
+#line 287 "Step1/asm_parser.y"
+                    { 
+                        add_statement(DOT_WORD_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
 #line 1532 "asm_parser.tab.c"
     break;
 
-  case 63: /* org_stmt: TOKEN_ORG TOKEN_NUMBER  */
-#line 295 "Step1/asm_parser.y"
+  case 63: /* alloc_stmt: TOKEN_ALLOC TOKEN_IDENTIFIER TOKEN_NUMBER  */
+#line 293 "Step1/asm_parser.y"
                     {
-                        add_statement(DOT_ORG_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
+                        add_statement(DOT_ALLOC_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
                     }
 #line 1540 "asm_parser.tab.c"
     break;
 
-  case 64: /* equ_stmt: TOKEN_EQU TOKEN_IDENTIFIER TOKEN_COMMA expression  */
-#line 301 "Step1/asm_parser.y"
+  case 64: /* org_stmt: TOKEN_ORG TOKEN_NUMBER  */
+#line 299 "Step1/asm_parser.y"
+                    {
+                        add_statement(DOT_ORG_OP, yyvsp[0], NULL_ARG, NULL_ARG, NO_TYPE);
+                    }
+#line 1548 "asm_parser.tab.c"
+    break;
+
+  case 65: /* equ_stmt: TOKEN_EQU TOKEN_IDENTIFIER TOKEN_COMMA expression  */
+#line 305 "Step1/asm_parser.y"
                     {
                         if(get_symbol_value(yyvsp[-2]) != UNINITIALIZED_VALUE){
                             LOG_ERROR("[ASSEMBLER] ERROR: Constant redefinition: %s in line %ld\n", get_symbol_name(yyvsp[-3]), get_line_number());
@@ -1550,11 +1558,11 @@ yyreduce:
                             yyval = yyvsp[-2];
                         }
                     }
-#line 1554 "asm_parser.tab.c"
+#line 1562 "asm_parser.tab.c"
     break;
 
-  case 65: /* label: TOKEN_IDENTIFIER TOKEN_COLON  */
-#line 313 "Step1/asm_parser.y"
+  case 66: /* label: TOKEN_IDENTIFIER TOKEN_COLON  */
+#line 317 "Step1/asm_parser.y"
                     { 
                         if(get_symbol_value(yyvsp[-1]) != UNINITIALIZED_VALUE){
                             LOG_ERROR("[ASSEMBLER] ERROR: Label redefinition: %s in line %ld\n", get_symbol_name(yyvsp[-1]), get_line_number());
@@ -1564,59 +1572,59 @@ yyreduce:
                             yyval = yyvsp[-1];
                         }
                     }
-#line 1568 "asm_parser.tab.c"
-    break;
-
-  case 66: /* expression: TOKEN_LEFT_PAREN expression TOKEN_RIGHT_PAREN  */
-#line 325 "Step1/asm_parser.y"
-                    {
-                        yyval = yyvsp[-1];
-                    }
 #line 1576 "asm_parser.tab.c"
     break;
 
-  case 67: /* expression: expression TOKEN_PLUS expression  */
+  case 67: /* expression: TOKEN_LEFT_PAREN expression TOKEN_RIGHT_PAREN  */
 #line 329 "Step1/asm_parser.y"
                     {
-                        yyval = yyval + yyvsp[0];
+                        yyval = yyvsp[-1];
                     }
 #line 1584 "asm_parser.tab.c"
     break;
 
-  case 68: /* expression: expression TOKEN_MINUS expression  */
+  case 68: /* expression: expression TOKEN_PLUS expression  */
 #line 333 "Step1/asm_parser.y"
                     {
-                        yyval = yyval - yyvsp[0];
+                        yyval = yyval + yyvsp[0];
                     }
 #line 1592 "asm_parser.tab.c"
     break;
 
-  case 69: /* expression: TOKEN_PLUS TOKEN_NUMBER  */
+  case 69: /* expression: expression TOKEN_MINUS expression  */
 #line 337 "Step1/asm_parser.y"
                     {
-                        yyval = yyvsp[0];
+                        yyval = yyval - yyvsp[0];
                     }
 #line 1600 "asm_parser.tab.c"
     break;
 
-  case 70: /* expression: TOKEN_MINUS TOKEN_NUMBER  */
+  case 70: /* expression: TOKEN_PLUS TOKEN_NUMBER  */
 #line 341 "Step1/asm_parser.y"
                     {
-                        yyval = 0 - yyvsp[0];
+                        yyval = yyvsp[0];
                     }
 #line 1608 "asm_parser.tab.c"
     break;
 
-  case 71: /* expression: TOKEN_NUMBER  */
+  case 71: /* expression: TOKEN_MINUS TOKEN_NUMBER  */
 #line 345 "Step1/asm_parser.y"
                     {
-                        yyval = yyvsp[0];
+                        yyval = 0 - yyvsp[0];
                     }
 #line 1616 "asm_parser.tab.c"
     break;
 
-  case 72: /* expression: TOKEN_IDENTIFIER  */
+  case 72: /* expression: TOKEN_NUMBER  */
 #line 349 "Step1/asm_parser.y"
+                    {
+                        yyval = yyvsp[0];
+                    }
+#line 1624 "asm_parser.tab.c"
+    break;
+
+  case 73: /* expression: TOKEN_IDENTIFIER  */
+#line 353 "Step1/asm_parser.y"
                     {
                         /* 
                             Checks if the constant has already been defined using the Equ directive.
@@ -1624,17 +1632,19 @@ yyreduce:
                         */
                         int temp = get_symbol_value(yyvsp[0]);
 
+                        LOG_MESSAGE("Symbol Value: %d\n",get_symbol_value(yyvsp[0]));
+
                         if(temp == UNINITIALIZED_VALUE){
                             LOG_ERROR("[ASSEMBLER] ERROR: Constant not defined: %s in line %ld\n", get_symbol_name(yyvsp[0]), get_line_number());
                         }
 
                         yyval = temp;
                     }
-#line 1634 "asm_parser.tab.c"
+#line 1644 "asm_parser.tab.c"
     break;
 
 
-#line 1638 "asm_parser.tab.c"
+#line 1648 "asm_parser.tab.c"
 
       default: break;
     }
@@ -1827,7 +1837,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 363 "Step1/asm_parser.y"
+#line 369 "Step1/asm_parser.y"
 
 
 
