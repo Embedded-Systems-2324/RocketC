@@ -9,6 +9,8 @@
 
 #define IS_BIT_SET(x, n) (((x) >> (n)) & 0b1)
 
+#define MAX_BREAK_POINTS 16
+
 #define CODE_MEM_SIZE_BYTES 4096U
 
 #define DATA_MEM_SIZE_WORDS 1024U
@@ -39,6 +41,9 @@ static uint32_t dataMem[DATA_MEM_SIZE_WORDS] = {0};
 
 static uint32_t regFile[REG_NONE] = {0};
 static uint32_t programCounter = 0;
+
+static uint32_t breakpointList[MAX_BREAK_POINTS] = {0};
+static size_t nofBreakpoints = 0;
 
 static uint8_t zeroFlag = 0;
 static uint8_t carryFlag = 0;
@@ -167,7 +172,6 @@ static int64_t executeNextInstruction()
     }
 
     uint32_t currentInstruction = (*(uint32_t*)&codeMem[programCounter]);
-
     opcode_et currentOpcode = (opcode_et) (currentInstruction >> 27);
     LOG_DEBUG("Executing OpCode: %d\n", currentOpcode);
 
@@ -324,12 +328,6 @@ static int64_t executeLdx(register_et regDest, register_et regLeft, register_et 
 
 static int64_t executeSt(register_et regDest, register_et regLeft, register_et regRight, bool isImed, uint32_t imedVal)
 {
-    if (imedVal >= DATA_MEM_SIZE_WORDS)
-    {
-        LOG_ERROR("Invalid data memory access! Resetting CPU!\n");
-        return -EPERM;
-    }
-
     writeMem(imedVal, regFile[regDest]);
 
     return (int64_t) programCounter + 4U;
@@ -338,11 +336,6 @@ static int64_t executeSt(register_et regDest, register_et regLeft, register_et r
 static int64_t executeStx(register_et regDest, register_et regLeft, register_et regRight, bool isImed, uint32_t imedVal)
 {
     uint32_t targetAddress = regFile[regLeft] + imedVal;
-    if (targetAddress >= DATA_MEM_SIZE_WORDS)
-    {
-        LOG_ERROR("Invalid data memory access! Resetting CPU!\n");
-        return -EPERM;
-    }
 
     writeMem(targetAddress, regFile[regDest]);
 
@@ -432,7 +425,7 @@ static int64_t executeBxx(register_et regDest, register_et regLeft, register_et 
 
 static void updateFlags(uint32_t leftOp, uint32_t rightOp, uint64_t resVal, uint8_t isSub)
 {
-    overflowFlag = (IS_BIT_SET(resVal, 32));
+    overflowFlag = IS_BIT_SET(resVal, 32);
     carryFlag = IS_BIT_SET(resVal, 32);
     negativeFlag = IS_BIT_SET(resVal, 31);
     zeroFlag = resVal == 0;
@@ -467,4 +460,45 @@ static uint32_t readMem(uint32_t memAddr)
     LOG_ERROR("Un-handled memory address: 0x%x!\n", memAddr);
 
     return 0;
+}
+
+static int32_t setBreakPoint(uint32_t memAddr)
+{
+    if ((memAddr % 4) != 0)
+        return -EINVAL;
+
+    if (nofBreakpoints >= MAX_BREAK_POINTS)
+        return -ENOBUFS;
+
+    for (size_t i = 0; i < nofBreakpoints; ++i)
+    {
+        if (memAddr == breakpointList[nofBreakpoints])
+        {
+            LOG_ERROR("Trying to insert breakpoint at already set address!\n");
+            return -EPERM;
+        }
+    }
+
+    breakpointList[nofBreakpoints] = memAddr;
+    nofBreakpoints++;
+
+    return 0;
+}
+
+static int32_t showMenu()
+{
+    int32_t ret;
+    uint32_t menuOption;
+    char msgBuffer[128];
+
+    printf("1. Free Run\n"
+           "2. Goto next breakpoint\n"
+           "3. Set breakpoint\n"
+           "4. Dump registers\n"
+           "5. Dump memory\n");
+
+    fgets(msgBuffer, 128, stdin);
+    ret = sscanf(msgBuffer, "%d", &menuOption);
+    if (ret != 1)
+        return -EPERM;
 }

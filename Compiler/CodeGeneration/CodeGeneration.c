@@ -1469,8 +1469,10 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             //Emit Label for Case
             reg_et tempreg = getNextAvailableReg(); 
             emitLabelInstruction(CASE, getPostIncLabelCounter(CASE), NULL);
-            //Gen the case Code 
-            generateCode(&L_CHILD(pCurrentNode));
+            //Gen the case Code
+            //Code inside case can be empty
+            if(&L_CHILD(pCurrentNode) != NULL)
+                generateCode(&L_CHILD(pCurrentNode));
             
 
             releaseReg(tempreg);
