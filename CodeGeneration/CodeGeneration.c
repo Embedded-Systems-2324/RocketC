@@ -314,7 +314,7 @@ static int emitMemoryInstruction(asm_instr_et instructionType, reg_et reg, reg_e
         case INST_LDI:
 
             if(Label != NULL)
-                fprintf(pAsmFile, "%s %s, :FUNCTION_%s\n",
+                fprintf(pAsmFile, "%s %s,:FUNCTION_%s\n",
                         INSTRUCTION(instructionType),
                         REGISTER(reg),
                         Label
@@ -431,14 +431,14 @@ static int emitJumpInstruction(asm_instr_et instructionType, reg_et dReg, reg_et
         return -EINVAL;
         
     if(instructionType == INST_JMP)
-        fprintf(pAsmFile, "%s %s, #%u\n",
+        fprintf(pAsmFile, "%s %s,#%u\n",
             INSTRUCTION(instructionType),
             REGISTER(dReg),
             dVal
             );
 
     else if (instructionType == INST_JMPL)
-        fprintf(pAsmFile, "%s %s, %s, #%u\n",
+        fprintf(pAsmFile, "%s %s,%s,#%u\n",
             INSTRUCTION(instructionType),
             REGISTER(dReg),
             REGISTER(lReg),
@@ -1913,7 +1913,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
         case NODE_VAR_DECLARATION:
             break;
         case NODE_FUNCTION:
-        
+            
             if(pCurrentNode->childNumber != 3)
             {
                 break; // Function node with no body

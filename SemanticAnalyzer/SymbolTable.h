@@ -27,6 +27,11 @@ typedef enum{
     SYMBOL_ARRAY
 }SymbolType_et;
 
+typedef enum{
+    GLOBAL_SCOPE,
+    ARGUMENT_SCOPE,
+    FUNCTION_SCOPE
+}VarScope_et;
 
 //Function parameters struct
 typedef struct parameter{
@@ -49,11 +54,13 @@ typedef struct SymbolEntry
     SignQualifier_et signal;        // Variable signal
     ModQualifier_et modifier;       // Variable modifier
     VisQualifier_et visibility;     // Variable visibility   
+    VarScope_et scopeLocation;      // Scope of the variable
 
     union
     {
         //pointers and variables
         uint32_t memoryLocation;                 // memory offset
+        
 
         //functions
         struct

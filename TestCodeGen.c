@@ -3,7 +3,7 @@ int y;
 int z;
 int array[6];
 
-void foo(int a, int b)
+int foo(int a, int b)
 {
     int c;
 
@@ -14,7 +14,9 @@ void main()
 {
     int v;
 
-    foo(x +3 , x + 4);
+    //int z = (int) v;
+
+    foo(x, y);
    
 
 }

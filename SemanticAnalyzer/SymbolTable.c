@@ -390,5 +390,7 @@ int addFunctionParams(SymbolEntry_st* pSymbol, struct parameter* pNewParam)
     memcpy(&pParamList[pSymbol->symbolContent_u.SymbolFunction_s.parameterNumber++], pNewParam, sizeof(parameter_st));
 
     pSymbol->symbolContent_u.SymbolFunction_s.parameters = pParamList;
+
+    pSymbol->scopeLocation = ARGUMENT_SCOPE;
     return 0;
 }
