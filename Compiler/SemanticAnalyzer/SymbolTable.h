@@ -55,7 +55,8 @@ typedef struct SymbolEntry
     ModQualifier_et modifier;       // Variable modifier
     VisQualifier_et visibility;     // Variable visibility   
     VarScope_et scopeLocation;      // Scope of the variable
-    bool isPassedByRegister;
+    bool isPassedByRegister;        // = 1 if a function parameter is passed by register 
+    uint8_t paramPosition;          // position of the function parameter
 
     union
     {

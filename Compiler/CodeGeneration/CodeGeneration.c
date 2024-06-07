@@ -18,6 +18,7 @@
 #define L_CHILD_TYPE(p) ((p)->pChilds[0].nodeType)
 #define R_CHILD_TYPE(p) ((p)->pChilds[1].nodeType)
 #define NODE_TYPE(p) ((p)->nodeType)
+#define NODE_OP_TYPE(p) ((p)->nodeData.dVal)
 #define NODE_CHILD_NUM(p) ((p)->childNumber)
 
 #define L_CHILD_DVAL(p) ((p)->pChilds[0].nodeData.dVal)
@@ -182,6 +183,17 @@ int executeCodeGeneration(TreeNode_st *pTreeRoot, FILE* pDestStream)
     PostIncListInit();
     
     generateCode(pTreeRoot);
+
+    //Test If there was a register that was not released  
+    printf("\n");
+    for (size_t i = 0; i < NOF_SCRATCH_REGISTER; ++i)
+    {
+
+        if (regStateList[i].isFree == false)
+        {
+            LOG_ERROR("%s was not released\n", regNameLut[regStateList[i].regName]);
+        }
+    }
 
 
     return 0;
@@ -956,6 +968,8 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
     bool is_postdec= 0;
     bool is_postinc= 0;
 
+   // printf("Scope Location: %d IsPassed by Register: %d paramPos: %d\n", pTreeNode->pChilds[0].pSymbol->scopeLocation, pTreeNode->pChilds[0].pSymbol->isPassedByRegister, pTreeNode->pChilds[0].pSymbol->paramPosition);
+
     //Address where we will store the value of the assign
     leftAddr = L_CHILD_MEM_LOC(pTreeNode);
 
@@ -1123,6 +1137,7 @@ static int parseOperatorNode(TreeNode_st *pTreeNode, reg_et dReg)
         case OP_MULTIPLY_ASSIGN:
         case OP_DIVIDE_ASSIGN:
             generateAssignOperation(opType, pTreeNode, dReg);
+            releaseReg(dReg);
             break;
         case OP_SIZEOF:
             break;
@@ -1151,7 +1166,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
 
     OperatorType_et CurrentNodeOpType = (OperatorType_et) pCurrentNode->nodeData.dVal;
 
-    if (!IS_TERMINAL_NODE(pCurrentNode->nodeType) && NODE_TYPE(pCurrentNode) == NODE_OPERATOR)
+    if (!IS_TERMINAL_NODE(pCurrentNode->nodeType) && NODE_TYPE(pCurrentNode) == NODE_OPERATOR && NODE_OP_TYPE(pCurrentNode) != OP_ASSIGN)
     {
         //If we enter a non terminal node we allocate a new dReg for that operation
         dReg = getNextAvailableReg();
@@ -1284,6 +1299,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 }
 
                 emitMemoryInstruction(INST_ST, rReg, REG_NONE, memAddr, NULL);
+                releaseReg(dReg);
             }
             else if (parentNodeType == NODE_OPERATOR && IS_BOOLEAN_OPERATION(parentOperatorType))
             {
@@ -1371,7 +1387,13 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             parseNode(&L_CHILD(pCurrentNode), NODE_TYPE(pCurrentNode),(OperatorType_et) L_CHILD_DVAL(pCurrentNode), true);
             
             emitAluInstruction(INST_CMP, true, 0, REG_NONE, dRegSave, REG_NONE);
-            emitBranchInstruction(INST_BEQ, IF_FALSE, getLabelCounter(IF_FALSE));
+
+            //If there is no "else", jump to the exit
+            if (pCurrentNode->childNumber > 2)
+                emitBranchInstruction(INST_BEQ, IF_FALSE, getLabelCounter(IF_FALSE));
+            else
+                emitBranchInstruction(INST_BEQ, IF_EXIT, getLabelCounter(IF_EXIT));
+
             if (pCurrentNode->childNumber > 1)
                 generateCode(&pCurrentNode->pChilds[1]);
 
@@ -1388,7 +1410,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             break;
         case NODE_WHILE:
             emitLabelInstruction(WHILE_START, getLabelCounter(WHILE_START), NULL);
-            generateCode(&L_CHILD(pCurrentNode));
+            parseNode(&L_CHILD(pCurrentNode), NODE_TYPE(pCurrentNode),(OperatorType_et) L_CHILD_DVAL(pCurrentNode), true);
             emitAluInstruction(INST_CMP, true, 0, REG_NONE, dRegSave, REG_NONE);
             emitBranchInstruction(INST_BEQ, WHILE_EXIT, getLabelCounter(WHILE_EXIT));
 
@@ -1409,7 +1431,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 generateCode(&R_CHILD(pCurrentNode));
 
             //Generate while condition
-            generateCode(&L_CHILD(pCurrentNode));
+            parseNode(&L_CHILD(pCurrentNode), NODE_TYPE(pCurrentNode),(OperatorType_et) L_CHILD_DVAL(pCurrentNode), true);
             emitAluInstruction(INST_CMP, true, 0, REG_NONE, dRegSave, REG_NONE);
             emitBranchInstruction(INST_BNE, WHILE_START, getPostIncLabelCounter(WHILE_START));
 
@@ -1420,6 +1442,8 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
         
             if(parentNodeType != NODE_DEFAULT)
                 emitBranchInstruction(INST_BRA, CASE_EXIT, getLabelCounter(CASE_EXIT));
+            
+            //releaseReg(dRegSave);
         
             break;
         case NODE_GOTO:
@@ -1436,7 +1460,8 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
 
             int keepCounter = labelCounters[CASE];
 
-            while(pCases->pSibling != NULL ){
+            while(pCases->pSibling != NULL )
+            {
                 reg_et tempreg = getNextAvailableReg(); 
                 emitMemoryInstruction(INST_LDI, tempreg, REG_NONE, pCases->nodeData.dVal, NULL);
             
@@ -1454,6 +1479,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
 
                 pCases = pCases->pSibling;
             }
+            releaseReg(dRegSave);
 
             labelCounters[CASE]= keepCounter;
             
@@ -1464,15 +1490,12 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             break;
         case NODE_CASE:             
             //Emit Label for Case
-            reg_et tempreg = getNextAvailableReg(); 
             emitLabelInstruction(CASE, getPostIncLabelCounter(CASE), NULL);
             //Gen the case Code
             //Code inside case can be empty
             if(&L_CHILD(pCurrentNode) != NULL)
                 generateCode(&L_CHILD(pCurrentNode));
-            
-
-            releaseReg(tempreg);
+                  
             break;
         case NODE_DEFAULT:
             emitLabelInstruction(DEFAULT, getPostIncLabelCounter(DEFAULT), NULL);
@@ -1519,8 +1542,6 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
         case NODE_POINTER:
             break;
         case NODE_POINTER_CONTENT:
-
-            
 
             //If the Identifier is a child of an ALU_OPERATION (+, -, *, /, %, <<, >>)
             if (parentNodeType == NODE_OPERATOR && IS_ALU_OPERATION(parentOperatorType))
@@ -1992,6 +2013,9 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
         case NODE_START_SCOPE:
             break;
     }
+/* 
+    if(IS_CONDITIONAL_NODE(parentNodeType))
+        releaseReg(dReg); */
 
     return 0;
 }

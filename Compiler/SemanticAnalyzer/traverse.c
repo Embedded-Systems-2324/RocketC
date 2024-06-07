@@ -999,6 +999,7 @@ static void buildSymbolTables(TreeNode_st* pNode)
                             //Add symbol point to parameter
                             pParamSym->scopeLocation = ARGUMENT_SCOPE;
                             pParamSym->isPassedByRegister = (i < 8);
+                            pParamSym->paramPosition = i;
                             pArgs->pSymbol = pParamSym;
                             pArgs = pArgs->pSibling;
                         }

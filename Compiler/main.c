@@ -110,6 +110,7 @@ int main(int argc, char *argv[])
 
             executeCodeGeneration(pTreeRoot, stdout);
 
+
             // Free Symbol Table resources
             LOG_MESSAGE_SHORT("\nReleasing Symbol Table resources...\n");
             freeSymbolTable();
