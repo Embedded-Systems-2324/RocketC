@@ -3,18 +3,26 @@ int y;
 int* z;
 int array[6];
 
-/* int foo(int a, int b, int c, int d, int e, int f, int g, int h, int i)   
+int foo(int a, int b)   
 {
-    
-} */
+    int x = 1;
+    return x;
+}
 
 void main()
 {
     int v;
-    int* x;
+    int x;
 
-    v = 4;
-    v = *x + 1 + array[3] + y++;
+    if(foo(v + x + 3, 2) > x)
+    {
+        x = 1;
+    }
+    else 
+    {
+        x = x + 1;
+        x = 4;
+    }
     
 }
 
