@@ -61,13 +61,6 @@ typedef struct
     int value;
 }MnemonicMap;
 
-typedef struct{
-    int originalValue;
-    int oppositeValue;
-    char original[5];  
-    char opposite[5];  
-}BranchMap;
-
 typedef struct codeBlock
 {
     char * label;
