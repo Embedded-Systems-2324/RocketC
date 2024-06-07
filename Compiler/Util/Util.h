@@ -125,6 +125,11 @@ static const char *MiscTokensStrings[] = {
     "["
 };
 
+static const char *ScopeLocationStrings[] = {
+    "Global",
+    "Argument",
+    "Function"
+};
 
 
 int NodeCreate(TreeNode_st** ppNewNode, NodeType_et nodeType);

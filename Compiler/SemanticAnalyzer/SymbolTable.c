@@ -199,7 +199,7 @@ void freeSymbolTable()
 /// @param parameterNumber
 static void printSymbol(char* symbolType, const char *name, int varType, int varSign, int varMod,
                         int varVis, int memoryLocation, uint32_t arraySize, int isImplemented,
-                        int parameterNumber)
+                        int parameterNumber, int scopeLocation, int isPassedByRegister)
 {
     printf("| %10s | %20s | %11s | %10s | %10s | %10s |",
            symbolType,
@@ -227,6 +227,16 @@ static void printSymbol(char* symbolType, const char *name, int varType, int var
     else
         printf(" %10s |", "n/a");
 
+    if(scopeLocation != NOT_APPLICABLE)
+        printf(" %15s |", ScopeLocationStrings[scopeLocation]);
+    else
+        printf(" %15s |", "n/a");
+
+    if(isPassedByRegister != NOT_APPLICABLE)
+        printf(" %15d |", isPassedByRegister);
+    else
+        printf(" %15s |", "n/a");
+
     printf("\n");   // Newline for next symbol
 
 }
@@ -243,11 +253,11 @@ void printSymbolTables()
     {
         CurrTable = allSymbolsTables[j];
 
-        printf("------------------------------------------------------------ SYMBOL TABLE %u ------------------------------------------------------------------\n", counter++);
+        printf("-------------------------------------------------------------------------------- SYMBOL TABLE %u ----------------------------------------------------------------------------------\n", counter++);
 
         printf("\033[38;2;255;197;173m");
-        printf("| %10s | %20s | %11s | %10s | %10s | %10s | %10s | %10s | %10s | %10s |\n", "SYMBOL", "NAME",
-               "TYPE", "SIGN", "MODIFIER", "VISIBILITY", "MEM_LOC", "ARRAY SIZE", "IS_IMPL", "PARAM_NUM");
+        printf("| %10s | %20s | %11s | %10s | %10s | %10s | %10s | %10s | %10s | %10s | %15s | %15s|\n", "SYMBOL", "NAME",
+               "TYPE", "SIGN", "MODIFIER", "VISIBILITY", "MEM_LOC", "ARRAY SIZE", "IS_IMPL", "PARAM_NUM", "SCOPE LOCATION", "IS_PASSED_BY_REG");
         printf("\033[1;0m");
 
         for(int i = 0; i < HASH_TABLE_SIZE; i++)
@@ -269,7 +279,9 @@ void printSymbolTables()
                                     temp->symbolContent_u.memoryLocation,
                                     NOT_APPLICABLE,
                                     NOT_APPLICABLE,
-                                    NOT_APPLICABLE
+                                    NOT_APPLICABLE,
+                                    temp->scopeLocation,
+                                    temp->isPassedByRegister
                         );
                         break;
 
@@ -284,7 +296,9 @@ void printSymbolTables()
                                     NOT_APPLICABLE,
                                     NOT_APPLICABLE,
                                     temp->symbolContent_u.SymbolFunction_s.isImplemented,
-                                    temp->symbolContent_u.SymbolFunction_s.parameterNumber
+                                    temp->symbolContent_u.SymbolFunction_s.parameterNumber,
+                                    NOT_APPLICABLE,
+                                    NOT_APPLICABLE
                         );
 
                         parameter_st* parameterAux;
@@ -322,6 +336,8 @@ void printSymbolTables()
                                     NOT_APPLICABLE,
                                     NOT_APPLICABLE,
                                     NOT_APPLICABLE,
+                                    NOT_APPLICABLE,
+                                    NOT_APPLICABLE,
                                     NOT_APPLICABLE
                         );
                         break;
@@ -335,6 +351,8 @@ void printSymbolTables()
                                     temp->modifier,
                                     temp->visibility,
                                     temp->symbolContent_u.memoryLocation,
+                                    NOT_APPLICABLE,
+                                    NOT_APPLICABLE,
                                     NOT_APPLICABLE,
                                     NOT_APPLICABLE,
                                     NOT_APPLICABLE
@@ -352,6 +370,8 @@ void printSymbolTables()
                                     temp->symbolContent_u.SymbolArray_s.memoryLocation,
                                     temp->symbolContent_u.SymbolArray_s.arraySize,
                                     NOT_APPLICABLE,
+                                    NOT_APPLICABLE,
+                                    NOT_APPLICABLE,
                                     NOT_APPLICABLE
                         );
                         break;
@@ -363,7 +383,7 @@ void printSymbolTables()
                 temp = temp->next;
             }
         }
-        printf("----------------------------------------------------------------------------------------------------------------------------------------------\n\n\n");
+        printf("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------\n\n\n");
     }
 }
 
