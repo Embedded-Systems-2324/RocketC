@@ -3,33 +3,19 @@ int y;
 int* z;
 int array[6];
 
-int foo(int a, int b, int c, int d, int e, int f, int g, int h, int i)   
+/* int foo(int a, int b, int c, int d, int e, int f, int g, int h, int i)   
 {
     
-}
+} */
 
 void main()
 {
     int v;
+    int* x;
 
-    switch (v)
-    {
-    case 2:
-        v = 5 + x;
-    break;
-    case 6:
-        v = 5 + x;
-    break;
-    case 9:
-        v = 5 + x;
-        v = 5 + x;
-    case 7:
-        v = 5 + x;
-    break;
-    default:
-        break;
-    }
-v = v + 5 + v;
+    v = 4;
+    v = *x + 1 + array[3] + y++;
+    
 }
 
 /* static unsigned int y = 0;
