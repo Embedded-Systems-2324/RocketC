@@ -11,7 +11,7 @@
 #define MAX_IMMED_ST    ((1 << 22) - 1)
 #define MAX_IMMED_STX   ((1 << 17) - 1)
 
-#define STACK_START_ADDR 1023
+#define STACK_START_ADDR 1024
 
 #define INSTRUCTION(x) (instructionLut[(x)])
 #define REGISTER(x) (regNameLut[(x)])
@@ -74,6 +74,7 @@ static reg_et dRegSave;
 static reg_et lRegSave;
 static reg_et rRegSave;
 
+static uint8_t stackVarCounter; 
 
 postinc_list_st* postIncList;
 static bool delayPostIncDec = 0;
@@ -100,6 +101,8 @@ static int generateCode(TreeNode_st *pTreeNode);
 static int generateMultiplication();
 
 static int generateDivision();
+
+static int generateInitCode();
 
 static reg_state_st regStateList[] =
 {
@@ -186,6 +189,9 @@ int executeCodeGeneration(TreeNode_st *pTreeRoot, FILE* pDestStream)
 
     PostIncListInit();
 
+    //Emit Iinitialization  Code
+    generateInitCode();
+    
     //Function code used to execute multiplication
     generateMultiplication();
 
@@ -229,16 +235,24 @@ static uint32_t generateMemoryAddress(TreeNode_st* pTreeNode)
 {
     uint32_t outMemory;
 
-    //Provisório
-    return pTreeNode->pSymbol->symbolContent_u.memoryLocation;
-
     if(!IS_TERMINAL_NODE(NODE_TYPE(pTreeNode)) ||  NODE_TYPE(pTreeNode) == NODE_INTEGER)
         return -EINVAL;
 
     if(pTreeNode->pSymbol->scopeLocation == FUNCTION_SCOPE)
     {
 
+        outMemory = STACK_START_ADDR - pTreeNode->pScope->parameterNumber - pTreeNode->pSymbol->symbolContent_u.memoryLocation - 1;
+
     }
+    else if(pTreeNode->pSymbol->scopeLocation == ARGUMENT_SCOPE)
+    {
+        outMemory = STACK_START_ADDR - pTreeNode->pSymbol->paramPosition - 1; 
+    }
+    else
+        outMemory = pTreeNode->pSymbol->symbolContent_u.memoryLocation;
+
+
+    return outMemory;
 
 }
 
@@ -270,21 +284,14 @@ static int emitAluInstruction(asm_instr_et instructionType,
     {
         if (instructionType == INST_CMP)
         {
-            fprintf(pAsmFile, "%s %s,#%d\n",
+            fprintf(pAsmFile, "\t%s %s,#%d\n",
                     INSTRUCTION(instructionType),
                     REGISTER(leftOperand),
                     imedValue);
         }
-        else if (instructionType == INST_MOV)
-        {
-            fprintf(pAsmFile, "%s %s,#%d\n",
-                    INSTRUCTION(instructionType),
-                    REGISTER(resultReg),
-                    imedValue);
-        }
         else
         {
-            fprintf(pAsmFile, "%s %s,%s,#%d\n",
+            fprintf(pAsmFile, "\t%s %s,%s,#%d\n",
                     INSTRUCTION(instructionType),
                     REGISTER(resultReg),
                     REGISTER(leftOperand),
@@ -295,7 +302,7 @@ static int emitAluInstruction(asm_instr_et instructionType,
     {
         if (instructionType == INST_CMP)
         {
-            fprintf(pAsmFile, "%s %s,%s\n",
+            fprintf(pAsmFile, "\t%s %s,%s\n",
                     INSTRUCTION(instructionType),
                     REGISTER(leftOperand),
                     REGISTER(rightOperand));
@@ -304,14 +311,14 @@ static int emitAluInstruction(asm_instr_et instructionType,
         {
             if (rightOperand == REG_NONE)
             {
-                fprintf(pAsmFile, "%s %s,%s\n",
+                fprintf(pAsmFile, "\t%s %s,%s\n",
                         INSTRUCTION(instructionType),
                         REGISTER(resultReg),
                         REGISTER(leftOperand));
             }
             else
             {
-                fprintf(pAsmFile, "%s %s,%s,%s\n",
+                fprintf(pAsmFile, "\t%s %s,%s,%s\n",
                         INSTRUCTION(instructionType),
                         REGISTER(resultReg),
                         REGISTER(leftOperand),
@@ -341,7 +348,7 @@ static int emitMemoryInstruction(asm_instr_et instructionType, reg_et reg, reg_e
 
             if (VALID_LD_IMMED(dVal))
             {
-                fprintf(pAsmFile, "%s %s,#%d\n",
+                fprintf(pAsmFile, "\t%s %s,#%d\n",
                         INSTRUCTION(instructionType),
                         REGISTER(reg),
                         dVal & MAX_IMMED_LD);
@@ -360,14 +367,14 @@ static int emitMemoryInstruction(asm_instr_et instructionType, reg_et reg, reg_e
         case INST_LDI:
 
             if(Label != NULL)
-                fprintf(pAsmFile, "%s %s,:FUNCTION_%s\n",
+                fprintf(pAsmFile, "\t%s %s,:FUNCTION_%s\n",
                         INSTRUCTION(instructionType),
                         REGISTER(reg),
                         Label
                 );
             else if (VALID_LDI_IMMED(dVal))
             {
-                fprintf(pAsmFile, "%s %s,#%d\n",
+                fprintf(pAsmFile, "\t%s %s,#%d\n",
                         INSTRUCTION(instructionType),
                         REGISTER(reg),
                         dVal & MAX_IMMED_LD);
@@ -380,7 +387,7 @@ static int emitMemoryInstruction(asm_instr_et instructionType, reg_et reg, reg_e
 
             if (VALID_ST_IMMED(dVal))
             {
-                fprintf(pAsmFile, "%s %s,#%d\n",
+                fprintf(pAsmFile, "\t%s %s,#%d\n",
                         INSTRUCTION(instructionType),
                         REGISTER(reg),
                         dVal & MAX_IMMED_ST);
@@ -402,7 +409,7 @@ static int emitMemoryInstruction(asm_instr_et instructionType, reg_et reg, reg_e
             if (idx >= REG_NONE)
                 return -EINVAL;
 
-            fprintf(pAsmFile, "%s %s,%s,#%d\n",
+            fprintf(pAsmFile, "\t%s %s,%s,#%d\n",
                     INSTRUCTION(instructionType),
                     REGISTER(reg),
                     REGISTER(idx),
@@ -427,7 +434,7 @@ static int emitLabelInstruction(label_et labelType, uint32_t count, char* nameLa
                 LABEL(labelType),
                 count);
     else
-        fprintf(pAsmFile, "%s%s:\n",
+        fprintf(pAsmFile, "\n\n\n%s%s:\n",
                 LABEL(labelType),
                 nameLabel);
     
@@ -463,7 +470,7 @@ static int emitBranchInstruction(asm_instr_et instructionType, label_et labelTyp
     if(counter < 0)
         return -EINVAL;
 
-    fprintf(pAsmFile, "%s %s%u\n",
+    fprintf(pAsmFile, "\t%s %s%u\n",
             INSTRUCTION(instructionType),
             LABEL(labelType),
             counter);
@@ -477,14 +484,14 @@ static int emitJumpInstruction(asm_instr_et instructionType, reg_et dReg, reg_et
         return -EINVAL;
         
     if(instructionType == INST_JMP)
-        fprintf(pAsmFile, "%s %s,#%u\n",
+        fprintf(pAsmFile, "\t%s %s,#%u\n",
             INSTRUCTION(instructionType),
             REGISTER(dReg),
             dVal
             );
 
     else if (instructionType == INST_JMPL)
-        fprintf(pAsmFile, "%s %s,%s,#%u\n",
+        fprintf(pAsmFile, "\t%s %s,%s,#%u\n",
             INSTRUCTION(instructionType),
             REGISTER(dReg),
             REGISTER(lReg),
@@ -2157,6 +2164,11 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
         case NODE_TYPE:
             break;
         case NODE_VAR_DECLARATION:
+            if(pCurrentNode->pSymbol->scopeLocation == FUNCTION_SCOPE)
+            {
+                emitAluInstruction(INST_SUB, true, 1, REG_R3, REG_R3, REG_NONE);
+                stackVarCounter++;
+            }
             break;
         case NODE_FUNCTION:
             
@@ -2202,24 +2214,27 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
           
             TreeNode_st *pParameter = &pCurrentNode->pChilds[0];
             
+            // Save Register R1 - return address
+            push(REG_R1);
+
             for (size_t i = 0; i < pCurrentNode->pSymbol->symbolContent_u.SymbolFunction_s.parameterNumber; i++)
             {
-
                 if(pParameter)
                 {
                     parseNode(pParameter, NODE_FUNCTION_CALL, OP_NOT_DEFINED, true);
-                    emitAluInstruction(INST_MOV, 0, 0, REG_R4 + i, dRegSave, REG_NONE);
+                    push(dRegSave);
                     pParameter = pParameter->pSibling;
                 }
             }
             
-            // Save Register R1
-            push(REG_R1);
-
+            
             reg_et labelReg = getNextAvailableReg();
             emitMemoryInstruction(INST_LDI, labelReg, REG_NONE, 0, pCurrentNode->nodeData.sVal);
             emitJumpInstruction(INST_JMPL, REG_R1, labelReg, 0);
             releaseReg(labelReg);
+
+            emitAluInstruction(INST_ADD, true, pCurrentNode->pSymbol->symbolContent_u.SymbolFunction_s.parameterNumber, REG_R3, REG_R3, REG_NONE);
+
             // Restore R1
             pop(REG_R1);
 
@@ -2259,6 +2274,9 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 emitAluInstruction(INST_MOV, false, 0, REG_R4, dRegSave, REG_NONE);
             }
             
+            emitAluInstruction(INST_ADD, true, stackVarCounter, REG_R3, REG_R3, REG_NONE);
+
+            stackVarCounter = 0;
             // Instruction to return to program flow before call
             emitJumpInstruction(INST_JMP, REG_R1, REG_NONE, 0);
             break;
@@ -2328,7 +2346,7 @@ static int releaseReg(reg_et reg)
 /// @param reg register to save to stack
 static void push(reg_et reg)
 {
-    emitAluInstruction(INST_SUB, 1, 1, REG_R3, REG_R3, REG_NONE);
+    emitAluInstruction(INST_SUB, true, 1, REG_R3, REG_R3, REG_NONE);
     emitMemoryInstruction(INST_STX, reg, REG_R3, STACK_START_ADDR, NULL);
 }
 
@@ -2339,7 +2357,7 @@ static void push(reg_et reg)
 static void pop(reg_et reg)
 {
     emitMemoryInstruction(INST_LDX, reg, REG_R3, STACK_START_ADDR,NULL);
-    emitAluInstruction(INST_ADD, 1, 1, REG_R3, REG_R3, REG_NONE);
+    emitAluInstruction(INST_ADD, 1, true, REG_R3, REG_R3, REG_NONE);
 }
 
 void codeGenerationTestUnit()
@@ -3259,5 +3277,20 @@ static int generateDivision()
     pop(regRemainder);
     pop(regQuocient);
     
+    return ret;
+}
+
+static int generateInitCode()
+{
+    int ret = 0;
+    
+    fprintf(pAsmFile, ".org 0x00\n");
+    ret |= emitMemoryInstruction(INST_LDI, REG_R1, REG_NONE, 0, "FUNCTION_main");
+    ret |= emitJumpInstruction(INST_JMP, REG_NONE, REG_R1, 0);
+    
+    // colocar INTERRUPTS
+
+    fprintf(pAsmFile, ".org 0x40\n");
+
     return ret;
 }

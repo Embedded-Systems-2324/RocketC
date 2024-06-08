@@ -5,8 +5,14 @@ int array[6];
 
 int foo(int a, int b)   
 {
-    int x = 1;
-    return x;
+    int c = 1;
+    int v = 2;
+
+    a = 4;
+
+    b = a + b + c;
+
+    return c;
 }
 
 void main()

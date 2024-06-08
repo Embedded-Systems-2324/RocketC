@@ -721,21 +721,21 @@ static int setMemoryLocation(int* varLocation, VarType_et varType, int multiplie
             break;
 
         case TYPE_SHORT:
-            *currentLocation += 2*multiplier;
+            *currentLocation += 1*multiplier;
             break;    
   
         case TYPE_LONG:
         case TYPE_INT:
         case TYPE_FLOAT:
-            *currentLocation += 4*multiplier;
+            *currentLocation += 1*multiplier;
             break;
 
         case TYPE_DOUBLE:
-            *currentLocation += 8*multiplier;
+            *currentLocation += 1*multiplier;
             break;   
 
         case TYPE_LONG_DOUBLE:
-            *currentLocation += 16*multiplier;
+            *currentLocation += 1*multiplier;
             break; 
 
         default:
@@ -810,6 +810,7 @@ static void buildSymbolTables(TreeNode_st* pNode)
     */
     static bool tableFunction = false;
     SymbolEntry_st* pNewSymbol;
+    uint8_t parametersNum = 0;
 
     switch (pNode->nodeType)
     {
@@ -960,6 +961,8 @@ static void buildSymbolTables(TreeNode_st* pNode)
                     addFunctionParams(pNewSymbol, &pParam);
 
                     pNodeArgs = pNodeArgs->pSibling;
+
+                    parametersNum++;
                 }
 
                 pNode->pSymbol = pNewSymbol;
@@ -998,7 +1001,6 @@ static void buildSymbolTables(TreeNode_st* pNode)
 
                             //Add symbol point to parameter
                             pParamSym->scopeLocation = ARGUMENT_SCOPE;
-                            pParamSym->isPassedByRegister = (i < 8);
                             pParamSym->paramPosition = i;
                             pArgs->pSymbol = pParamSym;
                             pArgs = pArgs->pSibling;
@@ -1011,6 +1013,8 @@ static void buildSymbolTables(TreeNode_st* pNode)
                 {
                     pNewSymbol->symbolContent_u.SymbolFunction_s.isImplemented = false;
                 }
+
+                pCurrentScope->parameterNumber = parametersNum;
             }
             break;
 
@@ -1164,4 +1168,7 @@ static void buildSymbolTables(TreeNode_st* pNode)
         default:
             break;
     }
+
+
+    pNode->pScope = pCurrentScope;
 }

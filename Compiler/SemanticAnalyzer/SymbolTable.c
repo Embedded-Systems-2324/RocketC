@@ -281,7 +281,7 @@ void printSymbolTables()
                                     NOT_APPLICABLE,
                                     NOT_APPLICABLE,
                                     temp->scopeLocation,
-                                    temp->isPassedByRegister
+                                    NOT_APPLICABLE
                         );
                         break;
 
