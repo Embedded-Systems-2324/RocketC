@@ -3285,10 +3285,10 @@ static int generateInitCode()
     int ret = 0;
     
     fprintf(pAsmFile, ".org 0x00\n");
-    ret |= emitMemoryInstruction(INST_LDI, REG_R1, REG_NONE, 0, "FUNCTION_main");
-    ret |= emitJumpInstruction(INST_JMP, REG_NONE, REG_R1, 0);
+    ret |= emitMemoryInstruction(INST_LDI, REG_R1, REG_NONE, 0, "main");
+    ret |= emitJumpInstruction(INST_JMP, REG_R1, REG_NONE, 0);
     
-    // colocar INTERRUPTS
+    // colocar interrupts
 
     fprintf(pAsmFile, ".org 0x40\n");
 
