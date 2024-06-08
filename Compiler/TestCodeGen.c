@@ -16,11 +16,11 @@ void main()
 
     if(foo(v + x + 3, 2) > x)
     {
-        x = 1;
+        x = array[4] * x * 5;
     }
     else 
     {
-        x = x + 1;
+        x = x / 1 + v;
         x = 4;
     }
     
