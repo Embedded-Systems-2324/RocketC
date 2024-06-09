@@ -86,14 +86,6 @@ typedef struct codeBlock
 int getMnemonicValue(const char *mnemonic);
 
 /**
- * @brief Checks if the given opcode corresponds to a branch instruction.
- *
- * @param opcode The opcode value to check.
- * @return true if the opcode is a branch instruction, false otherwise.
- */
-bool isBranchOpcode(int opcode);
-
-/**
  * @brief Checks if the given opcode corresponds to an ALU operation.
  *
  * @param opcode The opcode value to check.
