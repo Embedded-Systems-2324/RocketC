@@ -11,7 +11,6 @@
 #define MAX_LINE_LENGTH         64
 #define NO_OPCODE               -1
 #define NO_OPERAND              -2
-#define BRANCH_OPPOSITIONS      7
 
 #define OP_NOP          0
 #define OP_ADD          1
