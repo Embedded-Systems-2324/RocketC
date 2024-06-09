@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
             PrintNode(pTreeRoot);
             LOG_WARNING_SHORT("\n\n-----------------OPTIMIZED  AST END-----------------\n\n\n");
 
-            FILE* AsmFile = fopen("out.asm", "w");
+            FILE* AsmFile = fopen("Output/Rocket.asm", "w");
             
             if(!AsmFile)
             {
