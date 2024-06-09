@@ -17,6 +17,12 @@ bool delayPostIncDec = 0;
 
 static reg_state_st regStateList[] =
 {
+    {.regName = REG_R6, .isFree = true},
+    {.regName = REG_R7, .isFree = true},
+    {.regName = REG_R8, .isFree = true},
+    {.regName = REG_R9, .isFree = true},
+    {.regName = REG_R10, .isFree = true},
+    {.regName = REG_R11, .isFree = true},
     {.regName = REG_R12, .isFree = true},
     {.regName = REG_R13, .isFree = true},
     {.regName = REG_R14, .isFree = true},
