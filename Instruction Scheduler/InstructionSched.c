@@ -37,18 +37,6 @@ int getMnemonicValue(const char *mnemonic){
 }
 
 /**
- * @brief Checks if the given opcode corresponds to a branch instruction.
- *
- * This function determines whether the opcode corresponds to a branch instruction.
- *
- * @param opcode The opcode value to check.
- * @return true if the opcode is a branch instruction, false otherwise.
- */
-bool isBranchOpcode(int opcode) {
-    return opcode == OP_BXX;
-}
-
-/**
  * @brief Checks if the given opcode corresponds to an ALU operation.
  *
  * This function determines whether the opcode corresponds to an ALU (Arithmetic Logic Unit) operation.
