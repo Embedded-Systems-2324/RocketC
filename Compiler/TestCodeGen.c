@@ -1,26 +1,21 @@
-int x;
-int y;
-int* z;
-int array[6];
+int x;        //0
+int y;        //1
+int* z;       //2
+int array[6]; //3
 
-int foo(int a, int b)   
-{
-    int c = 1;
-    int v = 2;
-
-    a = 4;
-
-    b = a + b + c;
-
-    return c;
-}
+int foo(int a, int b);
 
 void main()
 {
-    int v;
-    int x;
+    int v;  //1023
+    int x;  //1022
 
-    if(foo(v + x + 3, 2) > x)
+    if(x)
+        return 0;
+
+    int t;
+
+    if(foo(v + y + 3, 2) > x)
     {
         x = array[4] * x * 5;
     }
@@ -30,6 +25,27 @@ void main()
         x = 4;
     }
     
+}
+
+LD REG, #addr
+
+LDX REGDST, REG_R2, #IMMED - 1
+
+//ret addr 1021
+//a 1020
+//b 1019
+int foo(int a, int b)   
+{
+    int c = 1; //
+    int v = 2;
+
+    a = 4;
+
+    int z = 0;
+
+    b = a + b + c;
+
+    return c;
 }
 
 /* static unsigned int y = 0;
