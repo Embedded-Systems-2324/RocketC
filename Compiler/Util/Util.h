@@ -151,19 +151,19 @@ void PrintNode(TreeNode_st* pNode);
 typedef struct 
 {
   bool is_increment;
-  uint32_t Addr;
+  TreeNode_st* treeNode;
 }list_item_st;
 
 typedef struct 
 {
   uint8_t size;
-  list_item_st* savedAddr;
+  list_item_st* savedItem;
 } postinc_list_st;
 
 
 int PostIncListInit();
 
-int PostIncListInsert(postinc_list_st* address_list, bool is_increment, uint32_t Addr);
+int PostIncListInsert(postinc_list_st* address_list, bool is_increment, TreeNode_st* TreeNode);
 
 int PostIncListDelete(postinc_list_st* address_list);
 

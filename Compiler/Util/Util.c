@@ -354,24 +354,24 @@ int PostIncListInit()
         return -EPERM;
     }
     postIncList->size = 0;
-    postIncList->savedAddr = NULL;
+    postIncList->savedItem = NULL;
 }
 
-int PostIncListInsert(postinc_list_st* address_list, bool is_increment, uint32_t Addr) 
+int PostIncListInsert(postinc_list_st* address_list, bool is_increment, TreeNode_st* treeNode) 
 {
     if (address_list->size == 0) 
-    address_list->savedAddr = (list_item_st*)malloc(sizeof(list_item_st));
+    address_list->savedItem = (list_item_st*)malloc(sizeof(list_item_st));
     else 
-    address_list->savedAddr = (list_item_st*)realloc(address_list->savedAddr, sizeof(list_item_st) * (address_list->size + 1));
+    address_list->savedItem = (list_item_st*)realloc(address_list->savedItem, sizeof(list_item_st) * (address_list->size + 1));
 
-    if (address_list->savedAddr == NULL) 
+    if (address_list->savedItem == NULL) 
     {
         return -EPERM;
     }
 
-    list_item_st* new_item = &address_list->savedAddr[address_list->size];
+    list_item_st* new_item = &address_list->savedItem[address_list->size];
     new_item->is_increment = is_increment;
-    new_item->Addr = Addr;
+    new_item->treeNode = treeNode;
     address_list->size++;
 }
 
@@ -387,9 +387,9 @@ int PostIncListDelete(postinc_list_st* address_list)
 
 void PostIncListDestroy(postinc_list_st* address_list) 
 {
-  if (address_list->savedAddr != NULL)
+  if (address_list->savedItem != NULL)
   {
-    free(address_list->savedAddr);
+    free(address_list->savedItem);
   }
   free(address_list);
 }

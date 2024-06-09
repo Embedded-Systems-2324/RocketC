@@ -12,7 +12,7 @@
 #define MAX_IMMED_ST    ((1 << 22) - 1)
 #define MAX_IMMED_STX   ((1 << 17) - 1)
 
-#define STACK_START_ADDR 1024
+#define STACK_START_ADDR 1023
 
 #define INSTRUCTION(x) (instructionLut[(x)])
 #define REGISTER(x) (regNameLut[(x)])
@@ -70,6 +70,8 @@ typedef struct
 * FUNCTION PROTOTYPES
 */
 static int emitMemoryInstruction(asm_instr_et instructionType, reg_et reg, reg_et idx, uint32_t dVal, char* Label);
+
+static int emitAluInstruction(asm_instr_et instructionType, uint8_t isImed, uint32_t imedValue, reg_et resultReg, reg_et leftOperand, reg_et rightOperand);
 
 static int emitJumpInstruction(asm_instr_et instructionType, reg_et dReg, reg_et lReg, uint32_t dVal);
 

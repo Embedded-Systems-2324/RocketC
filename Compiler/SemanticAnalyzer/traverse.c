@@ -810,6 +810,7 @@ static void buildSymbolTables(TreeNode_st* pNode)
     */
     static bool tableFunction = false;
     SymbolEntry_st* pNewSymbol;
+    TreeNode_st* pNodeArgs;
     uint8_t parametersNum = 0;
 
     switch (pNode->nodeType)
@@ -913,16 +914,17 @@ static void buildSymbolTables(TreeNode_st* pNode)
         case NODE_FUNCTION:
             localMemoryLocation = 0;
 
+            //check if exist arguments
+            if(pNode->pChilds[1].nodeType != NODE_NULL)
+                pNodeArgs = &pNode->pChilds[1];
+            else    
+                pNodeArgs = NULL; 
+
             //inserts the new symbol into the table if it doesn't exist
             if(insertSymbol(pCurrentScope, &pNewSymbol, pNode->nodeData.sVal, SYMBOL_FUNCTION) == SYMBOL_ADDED)
             {
                 TreeNode_st* pNodePreamble = &pNode->pChilds[0];
-                TreeNode_st* pNodeArgs;
 
-                if(pNode->pChilds[1].nodeType != NODE_NULL)
-                    pNodeArgs = &pNode->pChilds[1];
-                else    
-                    pNodeArgs = NULL; 
 
                 //sets the return type
                 setVariblesType(pNodePreamble, 
@@ -966,6 +968,16 @@ static void buildSymbolTables(TreeNode_st* pNode)
                 }
 
                 pNode->pSymbol = pNewSymbol;
+            }
+            else 
+            {
+                 //count the function arguments 
+                while (pNodeArgs != NULL)
+                {
+                    pNodeArgs = pNodeArgs->pSibling;
+
+                    parametersNum++;
+                }
             }
 
             if(pNewSymbol->symbolContent_u.SymbolFunction_s.isImplemented == true)
