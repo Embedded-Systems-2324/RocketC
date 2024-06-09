@@ -45,7 +45,7 @@
 #define IS_ALU_OPERATION(x) (((x) == OP_PLUS) || ((x) == OP_MINUS) || ((x) == OP_RIGHT_SHIFT) || ((x) == OP_LEFT_SHIFT) || ((x) == OP_MULTIPLY) || ((x) == OP_DIVIDE) || ((x) == OP_REMAIN) || ((x) == OP_BITWISE_AND) || ((x) == OP_BITWISE_NOT) || ((x) == OP_BITWISE_OR) || ((x) == OP_BITWISE_XOR))
 #define IS_ASSIGN_OPERATION(x) (((x) == OP_ASSIGN) || ((x) == OP_PLUS_ASSIGN) || ((x) == OP_MINUS_ASSIGN) || ((x) == OP_LEFT_SHIFT_ASSIGN) || ((x) == OP_RIGHT_SHIFT_ASSIGN) || ((x) == OP_BITWISE_AND_ASSIGN) || ((x) == OP_BITWISE_OR_ASSIGN) || ((x) == OP_BITWISE_XOR_ASSIGN) || ((x) == OP_MULTIPLY_ASSIGN) || ((x) == OP_DIVIDE_ASSIGN) || ((x) == OP_MODULUS_ASSIGN))
 #define IS_BOOLEAN_OPERATION(x) (((x) == OP_GREATER_THAN) || ((x) == OP_LESS_THAN_OR_EQUAL) || ((x) == OP_GREATER_THAN_OR_EQUAL) || ((x) == OP_LESS_THAN) || ((x) == OP_EQUAL) || ((x) == OP_NOT_EQUAL) || ((x) == OP_LOGICAL_AND) || ((x) == OP_LOGICAL_OR) || ((x) == OP_LOGICAL_NOT))
-#define IS_CONDITIONAL_NODE(x) (((x) == NODE_WHILE) || ((x) == NODE_SWITCH) || ((x) == NODE_CASE) || ((x) == NODE_DO_WHILE) || ((x) == NODE_IF) || ((x) == NODE_RETURN) || ((x) == NODE_FUNCTION_CALL))
+#define IS_CONDITIONAL_NODE(x) (((x) == NODE_WHILE) || ((x) == NODE_CASE) || ((x) == NODE_DO_WHILE) || ((x) == NODE_IF) || ((x) == NODE_RETURN) || ((x) == NODE_FUNCTION_CALL))
 
 #define LABEL(x) (labelLut[x])
 

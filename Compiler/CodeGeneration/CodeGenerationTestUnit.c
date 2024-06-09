@@ -685,7 +685,6 @@ void functionGenerationTestUnit()
 {
     pAsmFile = stdout;
 
-    emitComment("\033[1;33m --> Asm File - Function Test 1 \033[1;37m");
 
     /* Test 1
      * Function Prototypes
@@ -709,7 +708,6 @@ void functionGenerationTestUnit()
         generateCode(&treeRoot);
     }
     
-    emitComment("\033[1;33m --> Asm File - Function Test 2 \033[1;37m");
 
     /** Test 2 
      * Void Function with Implementation
@@ -741,7 +739,7 @@ void functionGenerationTestUnit()
         generateCode(&treeRoot);
     }
 
-    emitComment("\033[1;33m --> Asm File - Function Test 3 \033[1;37m");
+
 
     /** Test 3 
      * Function Call
@@ -776,7 +774,7 @@ void functionGenerationTestUnit()
         generateCode(&treeRoot);
     } */
 
-    emitComment("\033[1;33m --> Asm File - Function Test 4 \033[1;37m");
+
 
     /** Test 4 
      * Returns with Identifier

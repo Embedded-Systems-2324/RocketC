@@ -32,8 +32,7 @@ ELSE
 ID ASSIGN ID ASTERISK ID SEMI  
  
 RETURN ID SEMI  
-RIGHT_BRACE  
-
+RIGHT_BRACE 
 -------------------AST-------------------
 
 

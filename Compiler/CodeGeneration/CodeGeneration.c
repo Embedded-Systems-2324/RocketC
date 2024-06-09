@@ -17,12 +17,6 @@ bool delayPostIncDec = 0;
 
 static reg_state_st regStateList[] =
 {
-    {.regName = REG_R6, .isFree = true},
-    {.regName = REG_R7, .isFree = true},
-    {.regName = REG_R8, .isFree = true},
-    {.regName = REG_R9, .isFree = true},
-    {.regName = REG_R10, .isFree = true},
-    {.regName = REG_R11, .isFree = true},
     {.regName = REG_R12, .isFree = true},
     {.regName = REG_R13, .isFree = true},
     {.regName = REG_R14, .isFree = true},
@@ -215,8 +209,8 @@ static int generateDynamicMemoryInstruction(asm_instr_et instructionType, reg_et
             emitMemoryInstruction(INST_ST, reg, REG_NONE, pTreeNode->pSymbol->symbolContent_u.memoryLocation, NULL);
         }
     }
-    else
-        LOG_ERROR("Un-implemented\n");
+    //else
+        //LOG_ERROR("Un-implemented\n");
     
 }
 
@@ -691,7 +685,7 @@ static int generateImmediateAluOperation(TreeNode_st *pTreeNode, asm_instr_et as
             emitAluInstruction(INST_MOV, false, 0, tempReg, REG_R4, REG_NONE);
             break;
         default:
-            LOG_ERROR("Un-Implemented condition!\n");
+           // LOG_ERROR("Un-Implemented condition!\n");
             break;
     }
 
@@ -824,7 +818,7 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
             emitAluInstruction(INST_MOV, false, 0, lReg, REG_R4, REG_NONE);
             break;
         default:
-            LOG_ERROR("Un-Implemented condition!\n");
+            //LOG_ERROR("Un-Implemented condition!\n");
             break;
     }
 
@@ -877,7 +871,7 @@ static int generateAluOperation(TreeNode_st *pTreeNode, reg_et destReg)
             emitAluInstruction(INST_MOV, false, 0, rReg, REG_R4, REG_NONE);
             break;
         default:
-            LOG_ERROR("Un-Implemented condition!\n");
+            //LOG_ERROR("Un-Implemented condition!\n");
             break;
     }
 
@@ -994,7 +988,7 @@ static int generateBooleanOperation(OperatorType_et operatorType, TreeNode_st *p
             break;
             
             default:
-                LOG_ERROR("Un-Implemented condition!\n");
+                //LOG_ERROR("Un-Implemented condition!\n");
                 break;
         }
 
@@ -1021,7 +1015,7 @@ static int generateBooleanOperation(OperatorType_et operatorType, TreeNode_st *p
             break;
             
             default:
-                LOG_ERROR("Un-Implemented condition!\n");
+                //LOG_ERROR("Un-Implemented condition!\n");
                 break;
         }
     }
@@ -1143,7 +1137,7 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
             emitAluInstruction(INST_MOV, false, 0, tempReg, REG_R4, REG_NONE);
             break;
         default:
-            LOG_ERROR("Un-Implemented condition!\n");
+            //LOG_ERROR("Un-Implemented condition!\n");
             break;
     }
 
@@ -1164,7 +1158,7 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
             handleArrayIndexedExpressions(&L_CHILD(pTreeNode), destReg);
             break;
         default:
-            LOG_ERROR("Un-Implemented condition!\n");
+            //LOG_ERROR("Un-Implemented condition!\n");
             break;
     }
 
@@ -1198,7 +1192,7 @@ static int generateAssignOperation(OperatorType_et operatorType, TreeNode_st *pT
                 emitMemoryInstruction(INST_STX, tempReg, destReg, 0, NULL);
             break;
         default:
-            LOG_ERROR("Un-Implemented condition!\n");
+            //LOG_ERROR("Un-Implemented condition!\n");
             break;
     }
 
@@ -1710,7 +1704,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
                 //If its an assign with an operation (+=, -=), GenCode for the operation
                 if (parentOperatorType != OP_ASSIGN)
                 {
-                    LOG_ERROR("Not implemented because its not suported by the parser");
+                    //LOG_ERROR("Not implemented because its not suported by the parser");
                 }
                 generateDynamicMemoryInstruction(INST_LD, dReg, pCurrentNode);
                 emitMemoryInstruction(INST_STX, rReg, dReg, 0,NULL);
@@ -2283,7 +2277,7 @@ static reg_et getNextAvailableReg()
         }
     }
 
-    LOG_ERROR("No register available!\n");
+    //LOG_ERROR("No register available!\n");
     return REG_NONE;
 }
 
@@ -2299,7 +2293,7 @@ static int releaseReg(reg_et reg)
         {
             if (regStateList[i].isFree)
             {
-                LOG_ERROR("Trying to release already freed register!\n");
+                //LOG_ERROR("Trying to release already freed register!\n");
                 return -EPERM;
             }
 

@@ -26,6 +26,6 @@ run ./RocketC <SrcFile.c> --parse
 - A "Rocket.asm" file is generated in the Output folder
 - Along with the C code provided it always generates the assembly functions that perform Division/Multiplication/Remain operations at the top of the file in case multiplications are used. Those functions implement * / and % using RL and RR instructions.
 - These functions are very large
-- At the console output you can also check the generated AST, the symbol tables created and the semantic errors. 
+- At the console output it can also be checked the generated AST, the symbol tables created and the semantic errors. 
 
 
