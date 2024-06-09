@@ -11,7 +11,6 @@
 #define MAX_LINE_LENGTH         64
 #define NO_OPCODE               -1
 #define NO_OPERAND              -2
-#define BRANCH_OPPOSITIONS      7
 
 #define OP_NOP          0
 #define OP_ADD          1
@@ -84,14 +83,6 @@ typedef struct codeBlock
  * @return The value associated with the mnemonic if found, otherwise NO_OPCODE.
  */
 int getMnemonicValue(const char *mnemonic);
-
-/**
- * @brief Checks if the given opcode corresponds to a branch instruction.
- *
- * @param opcode The opcode value to check.
- * @return true if the opcode is a branch instruction, false otherwise.
- */
-bool isBranchOpcode(int opcode);
 
 /**
  * @brief Checks if the given opcode corresponds to an ALU operation.
