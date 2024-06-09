@@ -80,7 +80,8 @@ void parseInstruction(const char *line, Instruction_st *inst){
         inst->mnemonicValue = getMnemonicValue(mnemonic);
         inst->operands[1] = NO_OPERAND;
         inst->operands[2] = NO_OPERAND;
-        
+        if(inst->mnemonicValue == OP_JMP)
+            inst->type = TYPE_END_BLOCK;
     }
     
     else if(sscanf(line, "%3s R%d, R%d, #%d", mnemonic, &inst->operands[0], &inst->operands[1], &inst->operands[2]) == 4){
@@ -227,7 +228,8 @@ int codeBlockDivision(const char *filename, codeBlock_st **ppCodeBlock_st, int *
             pCurrentBlock->size = 0;
             lineCount = 0;
         }
-        else{
+        else{        if(inst->mnemonicValue == OP_JMP)
+            inst->type = TYPE_END_BLOCK;
             lineCount++;
             pCurrentBlock->size = lineCount;
         }
