@@ -1334,6 +1334,8 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             if (IS_TERMINAL_NODE(L_CHILD_TYPE(pCurrentNode)) && IS_TERMINAL_NODE(R_CHILD_TYPE(pCurrentNode)))
             {
                 //If both childs are terminals, parse the node to generate the ALU operation
+                if(pCurrentNode->nodeData.dVal == OP_ASSIGN)
+                    dReg = getNextAvailableReg();
                 parseOperatorNode(pCurrentNode, dReg);
                 dRegSave = dReg;
             }

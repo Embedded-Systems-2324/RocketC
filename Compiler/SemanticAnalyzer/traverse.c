@@ -182,6 +182,10 @@ int pointerAssignCheck(TreeNode_st* pCurrentNode, VarType_et pLeftVarType, TreeN
             return SEMANTIC_ERROR; 
         }
     }
+    else if (pRightValue->nodeType == NODE_INTEGER)     
+    {
+        return SEMANTIC_OK;
+    }
     else
     {
         semanticError(pCurrentNode, "Incompatible assignemt! \n");
