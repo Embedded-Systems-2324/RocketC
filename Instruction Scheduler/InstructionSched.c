@@ -1,4 +1,4 @@
-#include "optimization.h"
+#include "InstructionSched.h"
 
 MnemonicMap mnemonicTable[] = {
     {"NOP", OP_NOP}, {"ADD", OP_ADD}, {"SUB", OP_SUB},   {"OR", OP_OR},
@@ -37,18 +37,6 @@ int getMnemonicValue(const char *mnemonic){
 }
 
 /**
- * @brief Checks if the given opcode corresponds to a branch instruction.
- *
- * This function determines whether the opcode corresponds to a branch instruction.
- *
- * @param opcode The opcode value to check.
- * @return true if the opcode is a branch instruction, false otherwise.
- */
-bool isBranchOpcode(int opcode) {
-    return opcode == OP_BXX;
-}
-
-/**
  * @brief Checks if the given opcode corresponds to an ALU operation.
  *
  * This function determines whether the opcode corresponds to an ALU (Arithmetic Logic Unit) operation.
@@ -80,7 +68,8 @@ void parseInstruction(const char *line, Instruction_st *inst){
         inst->mnemonicValue = getMnemonicValue(mnemonic);
         inst->operands[1] = NO_OPERAND;
         inst->operands[2] = NO_OPERAND;
-        
+        if(inst->mnemonicValue == OP_JMP)
+            inst->type = TYPE_END_BLOCK;
     }
     
     else if(sscanf(line, "%3s R%d, R%d, #%d", mnemonic, &inst->operands[0], &inst->operands[1], &inst->operands[2]) == 4){
@@ -227,7 +216,7 @@ int codeBlockDivision(const char *filename, codeBlock_st **ppCodeBlock_st, int *
             pCurrentBlock->size = 0;
             lineCount = 0;
         }
-        else{
+        else{        
             lineCount++;
             pCurrentBlock->size = lineCount;
         }
@@ -387,7 +376,7 @@ int checkForReplacePositions(codeBlock_st *pCodeBlock_st){
                                     ope_registers[pCodeBlock_st->Instructions[i].operands[2]] = true; 
 
                                 }else{
-                                    //printf("Line for changing: %d (%d %d)\n",pCodeBlock_st->Instructions[i].lineNum, pCodeBlock_st->Instructions[i].operands[1],pCodeBlock_st->Instructions[i].operands[2]);
+                    
                                     pCodeBlock_st->replacePositions[pCodeBlock_st->replacePositionsNum++] = pCodeBlock_st->Instructions[i].lineNum;
                                     stallAtended = true;
                                 }
@@ -402,7 +391,7 @@ int checkForReplacePositions(codeBlock_st *pCodeBlock_st){
                                     ope_registers[pCodeBlock_st->Instructions[i].operands[1]] = true;
 
                                 }else{
-                                    //printf("Line for changing: %d (%d %d)\n",pCodeBlock_st->Instructions[i].lineNum, pCodeBlock_st->Instructions[i].operands[0],pCodeBlock_st->Instructions[i].operands[1]);
+                                   
                                     pCodeBlock_st->replacePositions[pCodeBlock_st->replacePositionsNum++] = pCodeBlock_st->Instructions[i].lineNum;
                                     stallAtended = true;
                                 }
@@ -416,7 +405,7 @@ int checkForReplacePositions(codeBlock_st *pCodeBlock_st){
                                         dst_registers[pCodeBlock_st->Instructions[i].operands[0]] = true;
                                         
                                 }else{
-                                        //printf("Line for changing: %d (%d %d)\n",pCodeBlock_st->Instructions[i].lineNum, pCodeBlock_st->Instructions[i].operands[0],pCodeBlock_st->Instructions[i].operands[1]);
+                                        
                                         pCodeBlock_st->replacePositions[pCodeBlock_st->replacePositionsNum++] = pCodeBlock_st->Instructions[i].lineNum;
                                         stallAtended = true;
                                 }
@@ -429,7 +418,7 @@ int checkForReplacePositions(codeBlock_st *pCodeBlock_st){
                                     dst_registers[pCodeBlock_st->Instructions[i].operands[0]] = true;
 
                                 }else{
-                                    //printf("Line for changing: %d (%d %d)\n",pCodeBlock_st->Instructions[i].lineNum, pCodeBlock_st->Instructions[i].operands[0],pCodeBlock_st->Instructions[i].operands[1]);
+                                   
                                     pCodeBlock_st->replacePositions[pCodeBlock_st->replacePositionsNum++] = pCodeBlock_st->Instructions[i].lineNum;
                                     stallAtended = true;
                                 }
@@ -516,9 +505,6 @@ int fileGenerator(const char *destinationFilename, codeBlock_st *pCodeBlock_st){
     
     for(int i = 0; i < pCodeBlock_st->size; i++){
             if(pCodeBlock_st->Instructions[i].line != NULL){
-                //printf("%d\n",pCodeBlock_st->stallPositions[index]);
-                //printf("%ld\n",pCodeBlock_st->replacePositionsNum);
-                //printf("%ld\n",pCodeBlock_st->stallPositionsNum);
             // Just place each instruction in order, in case there are no replace positions
                 if(pCodeBlock_st->replacePositionsNum == 0){
                     fputs(pCodeBlock_st->Instructions[i].line, destinationFile);
@@ -627,10 +613,6 @@ int executeStallOptimization(const char *filename, const char *destinationFilena
             printf("Memory allocation failed for replacing positions.\n");
         }
 
-
-        // if(checkForSolvingstalls(&pCodeBlock[i]) == -ENOMEM){
-        //     printf("Memory allocation failed for solving stall positions.\n");
-        // }
         removeExcessStalls(&pCodeBlock[i]);
     }
 
@@ -642,7 +624,7 @@ int executeStallOptimization(const char *filename, const char *destinationFilena
 }
 
 int main(){
-    const char* inputFilename = "asm.txt";        // File for otimization
-    const char* outputFilename = "optimized.txt"; // File otimized
+    const char* inputFilename = "out.asm";        // File for otimization
+    const char* outputFilename = "optimized.asm"; // File otimized
     executeStallOptimization(inputFilename,outputFilename);
 }

@@ -108,7 +108,16 @@ int main(int argc, char *argv[])
             PrintNode(pTreeRoot);
             LOG_WARNING_SHORT("\n\n-----------------OPTIMIZED  AST END-----------------\n\n\n");
 
-            executeCodeGeneration(pTreeRoot, stdout);
+            FILE* AsmFile = fopen("Output/Rocket.asm", "w");
+            
+            if(!AsmFile)
+            {
+                LOG_ERROR("Failed to open output asm file!\n");
+                exit(-1);
+            }
+
+            executeCodeGeneration(pTreeRoot, AsmFile);
+            fclose(AsmFile);
 
             // Free Symbol Table resources
             LOG_MESSAGE_SHORT("\nReleasing Symbol Table resources...\n");

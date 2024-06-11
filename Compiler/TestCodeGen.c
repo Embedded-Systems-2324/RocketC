@@ -1,50 +1,35 @@
-int x;
-int y;
-int z;
-int array[6];
+//ABI Defines that:
+//Frame Pointer(FP) is Register R2 
+//Stack Pointer(SP) is Register R3
 
-int foo(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j)
+int y; //this is placed at 0x00 (global scope)
+
+int foo(int a, int b);
+
+
+int main()
 {
-    a = 3;
+    int result;    //placed in stack(FP - 2)
+    int x = 6;     //placed in stack(FP - 3) 
+    y = 4;
+
+    result = foo(x, y);
+
     return 0;
 }
 
-void main()
+
+int foo(int a, int b)   
 {
-    int v;
+    //arg a placed in stack(FP + 2)
+    //arg b placed in stack(FP + 1)
 
-    //int z = (int) v;
-
-    foo(x, y);
-   
-
-}
-
-/* static unsigned int y = 0;
-int res = 0;
-int *x;
-
-int func()
-{
-    return 1;
-}
-
-
-int CalcDOWhile(int y, int res)
-{
-    /* res =  0 -res + &y;
-
-    int b = 4;
-    int *a = &b;
-
-    1 + ++res;
+    int sum; //placed in stack (FP - 2)
     
-*/
-/* 
-    x = &res;
-    int array[5]; 
+    if(a > 5)
+        sum = a + b;
+    else
+        sum = a + 30;
 
-    y = array[res++ + 1];
-
-} */ 
-
+    return sum;
+}

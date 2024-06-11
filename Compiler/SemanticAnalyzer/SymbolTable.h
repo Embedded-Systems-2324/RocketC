@@ -55,7 +55,7 @@ typedef struct SymbolEntry
     ModQualifier_et modifier;       // Variable modifier
     VisQualifier_et visibility;     // Variable visibility   
     VarScope_et scopeLocation;      // Scope of the variable
-    bool isPassedByRegister;
+    uint8_t paramPosition;          // position of the function parameter
 
     union
     {
@@ -86,6 +86,7 @@ typedef struct SymbolTable
 {
     struct SymbolEntry* table[HASH_TABLE_SIZE]; // Symbol Table
     struct SymbolTable* enclosingScope;         // Pointer to Symbol Table of Enclosing Scope
+    uint8_t parameterNumber;
 } SymbolTable_st;
 
 

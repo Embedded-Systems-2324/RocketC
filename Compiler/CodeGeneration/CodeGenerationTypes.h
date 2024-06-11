@@ -156,18 +156,24 @@ static const char* regNameLut[] =
 
 typedef enum
 {
-    WHILE_START     = 0x00,
-    WHILE_EXIT      = 0x01,
-    TRUE            = 0x02,
-    FALSE           = 0x03,
-    SKIP            = 0x04,
-    CASE            = 0x05,
-    CASE_EXIT       = 0x06,
-    DEFAULT         = 0x07,
-    IF_FALSE        = 0x08,
-    IF_EXIT         = 0x09,
-    FUNCTION_NAME   = 0x0A,
-    LABEL_MAX       = 0x0B,
+    WHILE_START       = 0x00,
+    WHILE_EXIT        = 0x01,
+    TRUE              = 0x02,
+    FALSE             = 0x03,
+    SKIP              = 0x04,
+    CASE              = 0x05,
+    CASE_EXIT         = 0x06,
+    DEFAULT           = 0x07,
+    IF_FALSE          = 0x08,
+    IF_EXIT           = 0x09,
+    FUNCTION_NAME     = 0x0A,
+    FUNCTION_MUL      = 0x0B,
+    FUNCTION_DIV      = 0x0C,
+    SKIP_MUL_ADD_BIT  = 0x0D,
+    SKIP_DIV_BIT,
+
+    LABEL_MAX         
+    
     
 }label_et;
 
@@ -184,7 +190,11 @@ static const char* labelLut[] =
     "IF_FALSE_",
     "IF_EXIT_",
     "FUNCTION_",
-    "LABEL_MAX"
+    "FUNCTION_MUL",
+    "FUNCTION_DIV",
+    "SKIP_MUL_ADD_BIT_",
+    "SKIP_DIV_BIT_",
+    
 };
 
 #endif
