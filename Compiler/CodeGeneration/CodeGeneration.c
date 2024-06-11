@@ -2337,7 +2337,6 @@ static int generateDivision()
 
     reg_et regQuocient = getNextAvailableReg();
     reg_et regRemainder = getNextAvailableReg();
-    reg_et regCondition = getNextAvailableReg();
     reg_et regTemp1 = getNextAvailableReg();
     reg_et regTemp2 = getNextAvailableReg();
 
@@ -2345,7 +2344,6 @@ static int generateDivision()
     
     push(regQuocient);
     push(regRemainder);
-    push(regCondition);
     push(regTemp1);
     push(regTemp2);
 
@@ -2354,17 +2352,17 @@ static int generateDivision()
 
     for (size_t i = 0; i < 32; i++)
     {
-        ret |= emitAluInstruction(INST_RR, 1, (31 - i), regTemp1, REG_R4, REG_NONE);
-        ret |= emitAluInstruction(INST_AND, 1, 1, regTemp1, regTemp1, REG_NONE);
-        ret |= emitAluInstruction(INST_RL, 1, 1, regTemp2, regRemainder, REG_NONE);
-        ret |= emitAluInstruction(INST_OR, 0, 0, regRemainder, regTemp1, regTemp2);
+        ret |= emitAluInstruction(INST_RR, true, (31 - i), regTemp1, REG_R4, REG_NONE);
+        ret |= emitAluInstruction(INST_AND, true, 1, regTemp1, regTemp1, REG_NONE);
+        ret |= emitAluInstruction(INST_RL, true, 1, regTemp2, regRemainder, REG_NONE);
+        ret |= emitAluInstruction(INST_OR, false, 0, regRemainder, regTemp1, regTemp2);
 
-        ret |= emitAluInstruction(INST_SUB, 0, 0, regCondition, regRemainder, REG_R5);
+        ret |= emitAluInstruction(INST_CMP, false, 0, REG_NONE, regRemainder, REG_R5);
         emitBranchInstruction(INST_BGE, SKIP_DIV_BIT, getLabelCounter(SKIP_DIV_BIT));
-        ret |= emitAluInstruction(INST_SUB, 0, 0, regRemainder, regRemainder, REG_R5);
+        ret |= emitAluInstruction(INST_SUB, false, 0, regRemainder, regRemainder, REG_R5);
         ret |= emitMemoryInstruction(INST_LDI, regTemp1, 0, 1, NULL);
-        ret |= emitAluInstruction(INST_RL, 1, (31 - i), regTemp1, regTemp1, REG_NONE);
-        ret |= emitAluInstruction(INST_OR, 0, 0, regQuocient, regQuocient, regTemp1);
+        ret |= emitAluInstruction(INST_RL, true, (31 - i), regTemp1, regTemp1, REG_NONE);
+        ret |= emitAluInstruction(INST_OR, false, 0, regQuocient, regQuocient, regTemp1);
 
         emitLabelInstruction(SKIP_DIV_BIT, getPostIncLabelCounter(SKIP_DIV_BIT), NULL);
 
@@ -2374,18 +2372,18 @@ static int generateDivision()
     ret |=  emitAluInstruction(INST_MOV, false, 0, REG_R4, regQuocient, REG_NONE);
     ret |=  emitAluInstruction(INST_MOV, false, 0, REG_R5, regRemainder, REG_NONE);
 
+    pop(regTemp2);
+    pop(regTemp1);
+    pop(regRemainder);
+    pop(regQuocient);
+
     releaseReg(regQuocient);
     releaseReg(regRemainder);
-    releaseReg(regCondition);
     releaseReg(regTemp1);
     releaseReg(regTemp2);
     
-    pop(regTemp2);
-    pop(regTemp1);
-    pop(regCondition);
-    pop(regRemainder);
-    pop(regQuocient);
-    
+    ret |= emitJumpInstruction(INST_JMP, REG_R1, REG_NONE, 0);
+
     return ret;
 }
 
@@ -2409,27 +2407,27 @@ static int generateMultiplication()
     {
         //Label = SKIP_MUL_ADD_BITi
 
-        ret |= emitAluInstruction(INST_ADD, 1, 1, regCondition, REG_R5, REG_NONE);
-        ret |= emitAluInstruction(INST_CMP, 1, 0, REG_NONE, regCondition, REG_NONE);
+        ret |= emitAluInstruction(INST_ADD, true, 1, regCondition, REG_R5, REG_NONE);
+        ret |= emitAluInstruction(INST_CMP, true, 0, REG_NONE, regCondition, REG_NONE);
         
         emitBranchInstruction(INST_BNE, SKIP_MUL_ADD_BIT, getLabelCounter(SKIP_MUL_ADD_BIT));  
-        ret |= emitAluInstruction(INST_ADD, 0, 0, regResult, regResult, REG_R4);
+        ret |= emitAluInstruction(INST_ADD, false, 0, regResult, regResult, REG_R4);
 
         emitLabelInstruction(SKIP_MUL_ADD_BIT, getPostIncLabelCounter(SKIP_MUL_ADD_BIT), NULL);
 
-        ret |= emitAluInstruction(INST_RL, 1, 1, REG_R4, REG_R4, REG_NONE);
-        ret |= emitAluInstruction(INST_RR, 1, 1, REG_R5, REG_R5, REG_NONE);
+        ret |= emitAluInstruction(INST_RL, true, 1, REG_R4, REG_R4, REG_NONE);
+        ret |= emitAluInstruction(INST_RR, true, 1, REG_R5, REG_R5, REG_NONE);
     }
 
     // Move result to return register
     ret |=  emitAluInstruction(INST_MOV, false, 0, REG_R4, regResult, REG_NONE);
 
-    releaseReg(regResult);
-    releaseReg(regCondition);
-
     pop(regCondition);
     pop(regResult);
-     
+    
+    releaseReg(regResult);
+    releaseReg(regCondition);
+    ret |= emitJumpInstruction(INST_JMP, REG_R1, REG_NONE, 0);
     return ret;
 }
 
