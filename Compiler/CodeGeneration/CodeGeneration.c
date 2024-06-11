@@ -552,8 +552,10 @@ static int handleMulDivNode(OperatorType_et opType, reg_et dReg, reg_et lReg, re
         emitAluInstruction(INST_MOV, false, 0, REG_R4, lReg, REG_NONE);
         emitAluInstruction(INST_MOV, false, 0, REG_R5, rReg, REG_NONE);
         reg_et labelReg = getNextAvailableReg();
+        push(REG_R1);
         emitMemoryInstruction(INST_LDI, labelReg, REG_NONE, 0, "FUNCTION_MUL");
         emitJumpInstruction(INST_JMPL, REG_R1, labelReg, 0);
+        pop(REG_R1);
         emitAluInstruction(INST_MOV, false, 0, dReg, REG_R4, REG_NONE);
         releaseReg(labelReg);
     }
@@ -563,8 +565,10 @@ static int handleMulDivNode(OperatorType_et opType, reg_et dReg, reg_et lReg, re
         emitAluInstruction(INST_MOV, false, 0, REG_R4, lReg, REG_NONE);
         emitAluInstruction(INST_MOV, false, 0, REG_R5, rReg, REG_NONE);
         reg_et labelReg = getNextAvailableReg();
+        push(REG_R1);
         emitMemoryInstruction(INST_LDI, labelReg, REG_NONE, 0, "FUNCTION_DIV");
         emitJumpInstruction(INST_JMPL, REG_R1, labelReg, 0);
+        pop(REG_R1);
         emitAluInstruction(INST_MOV, false, 0, dReg, REG_R4, REG_NONE);
         releaseReg(labelReg);
 
@@ -575,8 +579,10 @@ static int handleMulDivNode(OperatorType_et opType, reg_et dReg, reg_et lReg, re
         emitAluInstruction(INST_MOV, false, 0, REG_R4, lReg, REG_NONE);
         emitAluInstruction(INST_MOV, false, 0, REG_R5, rReg, REG_NONE);
         reg_et labelReg = getNextAvailableReg();
+        push(REG_R1);
         emitMemoryInstruction(INST_LDI, labelReg, REG_NONE, 0, "FUNCTION_DIV");
         emitJumpInstruction(INST_JMPL, REG_R1, labelReg, 0);
+        pop(REG_R1);
         emitAluInstruction(INST_MOV, false, 0, dReg, REG_R5, REG_NONE);
         releaseReg(labelReg);
     }
