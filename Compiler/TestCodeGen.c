@@ -29,7 +29,7 @@ int foo(int a, int b)
     if(a > 5)
         sum = a + b;
     else
-        sum = a * b;
+        sum = a + 30;
 
     return sum;
 }

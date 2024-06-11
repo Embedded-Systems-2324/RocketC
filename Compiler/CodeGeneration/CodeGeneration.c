@@ -14,6 +14,7 @@ static reg_et rRegSave;
 postinc_list_st* postIncList;
 bool delayPostIncDec = 0;
 
+char* lastCalledFunc = "";
 
 static reg_state_st regStateList[] =
 {
@@ -129,13 +130,14 @@ static int generateInitCode()
     
     fprintf(pAsmFile, ".org 0x40\n");
     // Initialize Stack and Frame pointers
+
     ret |= emitMemoryInstruction(INST_LDI, REG_R2, REG_NONE, STACK_START_ADDR, NULL);
     ret |= emitMemoryInstruction(INST_LDI, REG_R3, REG_NONE, STACK_START_ADDR, NULL);
     
     ret |= emitMemoryInstruction(INST_LDI, REG_R1, REG_NONE, 16384, NULL);
     push(REG_R1);
-    ret |= emitMemoryInstruction(INST_LDI, REG_R1, REG_NONE, 0, "main");
-    ret |= emitJumpInstruction(INST_JMP, REG_R1, REG_NONE, 0);
+    ret |= emitMemoryInstruction(INST_LDI, REG_R31, REG_NONE, 0, "main");
+    ret |= emitJumpInstruction(INST_JMP, REG_R31, REG_NONE, 0);
 
     return ret;
 }
@@ -2097,24 +2099,19 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
 
             // Generate Body
             generateCode(pCurrentNode->pChilds + 2);
-          
+            
+
             // Emit Instruction to return for void functions as those won't have return statements
             if(pCurrentNode->pChilds[0].nodeVarType != TYPE_VOID)                     
                  break;  
                                
             //Copy FP to SP
-            emitAluInstruction(INST_MOV, false, 0, REG_R3, REG_R2, REG_NONE);
-
-            // Restore R1
-            emitAluInstruction(INST_SUB, true, 1, REG_R3, REG_R3, REG_NONE);       
-            pop(REG_R1);
-
-            // Restore Frame Pointer
-            pop(REG_R2);
+            emitAluInstruction(INST_MOV, false, 0, REG_R3, REG_R2, REG_NONE);     
 
             // Jump to addr in R1 
             emitJumpInstruction(INST_JMP, REG_R1, REG_NONE, 0);
 
+            
             break;
         case NODE_FUNCTION_CALL:
 
@@ -2154,6 +2151,12 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             emitJumpInstruction(INST_JMPL, REG_R1, labelReg, 0);
             releaseReg(labelReg);
             
+            // Restore R1
+            emitAluInstruction(INST_SUB, true, 1, REG_R3, REG_R3, REG_NONE);       
+            pop(REG_R1);
+
+            // Restore Frame Pointer
+            pop(REG_R2);
 
             //Pop all arguments
             emitAluInstruction(INST_ADD, true, pCurrentNode->pSymbol->symbolContent_u.SymbolFunction_s.parameterNumber, REG_R3, REG_R3, REG_NONE);
@@ -2196,14 +2199,7 @@ static int parseNode(TreeNode_st *pCurrentNode, NodeType_et parentNodeType, Oper
             }
 
             //Copy FP to SP
-            emitAluInstruction(INST_MOV, false, 0, REG_R3, REG_R2, REG_NONE);
-
-            // Restore R1
-            emitAluInstruction(INST_SUB, true, 1, REG_R3, REG_R3, REG_NONE);       
-            pop(REG_R1);
-
-            // Restore Frame Pointer
-            pop(REG_R2);            
+            emitAluInstruction(INST_MOV, false, 0, REG_R3, REG_R2, REG_NONE);           
 
             // Instruction to return to program flow before call
             emitJumpInstruction(INST_JMP, REG_R1, REG_NONE, 0);
