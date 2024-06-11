@@ -18,8 +18,9 @@ typedef enum
     OP_LDX  = 0b01100,
     OP_ST   = 0b01101,
     OP_STX  = 0b01110,
-    OP_HALT = 0b11111
+    OP_RR   = 0b01111,
+    OP_RL   = 0b10000,
+    OP_HALT = 0b11111,
 }opcode_et;
-
 
 #endif

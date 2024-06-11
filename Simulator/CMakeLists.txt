@@ -3,4 +3,4 @@ project(RocketSim C)
 
 set(CMAKE_C_STANDARD 23)
 
-add_executable(RocketSim Log/Logger.c main.c)
+add_executable(RocketSim Log/Logger.c fsm.c main.c)
